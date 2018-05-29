@@ -1,7 +1,13 @@
 bilibili直播间功能增强
 =======================
 
-**请仔细读完说明**
+[脚本发布页](https://greasyfork.org/zh-CN/scripts/368635)
+
+[主站功能增强脚本](https://greasyfork.org/zh-CN/scripts/368446)
+
+[问题反馈到这里](https://github.com/indefined/UserScript-for-Bilibili/issues)
+
+**提交问题前请仔细读完说明和使用须知**
 
 -------------------------
 ## 功能
@@ -17,11 +23,12 @@ bilibili直播间功能增强
 -------------------------
 ## 功能预览
 
-切换功能鼠标悬停各元素上会显示更多有用的提示信息
-![图片预览](./blivePlus.medal.png)
-![图片预览](./blivePlus.title.png)
-![图片预览](./blivePlus.fullWin.png)
-![图片预览](./blivePlus.videoTitle.png)
+鼠标悬停各元素上会显示更多有用的提示信息
+
+![图片预览](https://greasyfork.org/system/screenshots/screenshots/000/011/233/original/blivePlus.medal.png)
+![图片预览](https://greasyfork.org/system/screenshots/screenshots/000/011/234/original/blivePlus.title.png)
+![图片预览](https://greasyfork.org/system/screenshots/screenshots/000/011/235/original/blivePlus.fullWin.jpg)
+![图片预览](https://greasyfork.org/system/screenshots/screenshots/000/011/236/original/blivePlus.videoTitle.png)
 
 -------------------------
 ## 兼容性

@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         bilibiliÍøÒ³¶ËÌí¼ÓAPPÊ×Ò³ÍÆ¼ö
+// @name         bilibiliç½‘é¡µç«¯æ·»åŠ APPé¦–é¡µæ¨è
 // @namespace    indefined
 // @version      0.2.1.1
-// @description  ÎªBÕ¾ÍøÒ³¶ËÊ×Ò³Ìí¼ÓAPPÊ×Ò³ÍÆ¼öÄÚÈİ£¬Ìá¹©Ìí¼Ó/³·ÏúÉÔºóÔÙ¿´¡¢²»Ï²»¶/³·Ïú²»Ï²»¶¹¦ÄÜ£¬Í¬Ê±Ìá¹©È«Õ¾ÅÅĞĞ°ñ
+// @description  ä¸ºBç«™ç½‘é¡µç«¯é¦–é¡µæ·»åŠ APPé¦–é¡µæ¨èå†…å®¹ï¼Œæä¾›æ·»åŠ /æ’¤é”€ç¨åå†çœ‹ã€ä¸å–œæ¬¢/æ’¤é”€ä¸å–œæ¬¢åŠŸèƒ½ï¼ŒåŒæ—¶æä¾›å…¨ç«™æ’è¡Œæ¦œ
 // @author       indefined
 // @match        *://www.bilibili.com/
 // @license      MIT
@@ -89,8 +89,8 @@ function CreateCss(){
 function InitRecommend () {
     recommend.id = 'recommend';
     recommend.querySelector('div.zone-title').innerHTML = `<div class="headline clearfix ">
-		<i class="icon icon_t icon-douga"></i><span class="name">²ÂÄãÏ²»¶</span>
-		<div class="read-push"><i class="icon icon_read"></i><span class="info">»»Ò»Åú</span></div></div>`;
+		<i class="icon icon_t icon-douga"></i><span class="name">çŒœä½ å–œæ¬¢</span>
+		<div class="read-push"><i class="icon icon_read"></i><span class="info">æ¢ä¸€æ‰¹</span></div></div>`;
     const popular = document.querySelector('#home_popularize');
     const listBox = recommend.querySelector('div.storey-box.clearfix');
     popular.parentElement.insertBefore(recommend,popular.nextSibling);
@@ -107,8 +107,8 @@ function InitRecommend () {
                 try {
                     const rep = JSON.parse(res.response);
                     if (rep.code!=0){
-                        status.firstChild.innerText = `ÇëÇóappÊ×Ò³Ê§°Ü code ${rep.code} msg ${rep.message} ÇëÖØÊÔ»ò´ò¿ªµ÷ÊÔÖÕ¶Ë²é¿´¸ü¶àĞÅÏ¢`;
-                        return console.log('ÇëÇóappÊ×Ò³Ê§°Ü',rep);
+                        status.firstChild.innerText = `è¯·æ±‚appé¦–é¡µå¤±è´¥ code ${rep.code} msg ${rep.message} è¯·é‡è¯•æˆ–æ‰“å¼€è°ƒè¯•ç»ˆç«¯æŸ¥çœ‹æ›´å¤šä¿¡æ¯`;
+                        return console.log('è¯·æ±‚appé¦–é¡µå¤±è´¥',rep);
                     }
                     listBox.removeChild(status);
                     rep.data.forEach(data=>{
@@ -116,7 +116,7 @@ function InitRecommend () {
                         listBox.appendChild(item);
                     });
                 } catch (e){
-                    status.firstChild.innerText = `ÇëÇóappÊ×Ò³·¢Éú´íÎó ${e} ÇëÖØÊÔ»ò´ò¿ªµ÷ÊÔÖÕ¶Ë²é¿´¸ü¶àĞÅÏ¢`;
+                    status.firstChild.innerText = `è¯·æ±‚appé¦–é¡µå‘ç”Ÿé”™è¯¯ ${e} è¯·é‡è¯•æˆ–æ‰“å¼€è°ƒè¯•ç»ˆç«¯æŸ¥çœ‹æ›´å¤šä¿¡æ¯`;
                     console.error(e);
                 }
             }
@@ -130,10 +130,10 @@ function InitRecommend () {
 		  <a href="/video/av${data.param}/" target="_blank" data-tag_id="${data.tag?data.tag.tag_id:''}" data-id="${data.param}" data-goto="${data.goto}" data-mid="${data.mid}" data-rid="${data.tid}">
 		  <div class="pic">
 		  <div class="lazy-img"><img alt="${data.title}" src="${data.cover}@144w_90h.webp" /></div>
-		  <span title="·ÖÇø£º${data.tname}" class="tname">${data.tname}</span>
+		  <span title="åˆ†åŒºï¼š${data.tname}" class="tname">${data.tname}</span>
 		  <span class="dur">${formatNumber(data.duration,'time')}</span>
-		  <div data-aid=${data.param} title="ÉÔºóÔÙ¿´" class="watch-later-trigger w-later"></div>
-		  <div class="dislike-botton">£Ø<div class="dislike-list"></div></div></div>
+		  <div data-aid=${data.param} title="ç¨åå†çœ‹" class="watch-later-trigger w-later"></div>
+		  <div class="dislike-botton">ï¼¸<div class="dislike-list"></div></div></div>
 		  <p title="${data.title}" class="t">${data.title}</p>
 		  <p class="num"><span class="play">
 		  <i class="icon"></i>${formatNumber(data.play)}</span>
@@ -146,7 +146,7 @@ function InitRecommend () {
                 const dislikeItem = document.createElement('div');
                 dislikeItem.dataset.reason_id = reason.reason_id;
                 dislikeItem.innerText = reason.reason_name;
-                dislikeItem.title = `±ê¼ÇÒòÎª¡¾${reason.reason_name}¡¿²»Ï²»¶`;
+                dislikeItem.title = `æ ‡è®°å› ä¸ºã€${reason.reason_name}ã€‘ä¸å–œæ¬¢`;
                 dislikeItem.onclick = DisLike;
                 dislikeList.appendChild(dislikeItem);
             }
@@ -166,7 +166,7 @@ function InitRecommend () {
                 parent=target.parentNode;
             }
             if (parent.nodeName!='A'){
-                showError('ÕÒ²»µ½¸¸½Úµã');
+                showError('æ‰¾ä¸åˆ°çˆ¶èŠ‚ç‚¹');
                 return false;
             }
             url += `/cancel`;
@@ -181,7 +181,7 @@ function InitRecommend () {
                 const cover = document.createElement('div');
                 cover.className = 'dislike-cover';
                 cover.dataset.reason_id = target.dataset.reason_id;
-                cover.innerHTML = `<div class="lazy-img"><br><br>Ìá½»³É¹¦£¬µ«Ô¸·şÎñÆ÷ÒÔºóÉÙ¸øµãÕâÖÖ¶«Î÷¡£<br><br><b>µã»÷³·Ïú²Ù×÷</b></div>`;
+                cover.innerHTML = `<div class="lazy-img"><br><br>æäº¤æˆåŠŸï¼Œä½†æ„¿æœåŠ¡å™¨ä»¥åå°‘ç»™ç‚¹è¿™ç§ä¸œè¥¿ã€‚<br><br><b>ç‚¹å‡»æ’¤é”€æ“ä½œ</b></div>`;
                 cover.onclick = DisLike;
                 parent.appendChild(cover);
             }
@@ -194,14 +194,14 @@ function InitRecommend () {
                 try {
                     const par = JSON.parse(res.response);
                     if (par.code!=0){
-                        showError(`ÇëÇó²»Ï²»¶´íÎó code ${par.code} msg ${par.message} ÇëÖØÊÔ»ò´ò¿ªµ÷ÊÔÖÕ¶Ë²é¿´¸ü¶àĞÅÏ¢`);
-                        console.log('ÇëÇó²»Ï²»¶·¢Éú´íÎó',par,url,'ÇëÁªÏµ×÷Õß²¢Ìá¹©ÏêÏ¸ĞÅÏ¢');
+                        showError(`è¯·æ±‚ä¸å–œæ¬¢é”™è¯¯ code ${par.code} msg ${par.message} è¯·é‡è¯•æˆ–æ‰“å¼€è°ƒè¯•ç»ˆç«¯æŸ¥çœ‹æ›´å¤šä¿¡æ¯`);
+                        console.log('è¯·æ±‚ä¸å–œæ¬¢å‘ç”Ÿé”™è¯¯',par,url,'è¯·è”ç³»ä½œè€…å¹¶æä¾›è¯¦ç»†ä¿¡æ¯');
                     }else{
                         handleCover();
                     }
                 } catch (e){
-                    showError(`ÇëÇó²»Ï²»¶·¢Éú´íÎó£¬ÇëÖØÊÔ»ò´ò¿ªµ÷ÊÔÖÕ¶Ë²é¿´¸ü¶àĞÅÏ¢`);
-                    console.error(e,'ÇëÁªÏµ×÷Õß²¢Ìá¹©ÏêÏ¸ĞÅÏ¢');
+                    showError(`è¯·æ±‚ä¸å–œæ¬¢å‘ç”Ÿé”™è¯¯ï¼Œè¯·é‡è¯•æˆ–æ‰“å¼€è°ƒè¯•ç»ˆç«¯æŸ¥çœ‹æ›´å¤šä¿¡æ¯`);
+                    console.error(e,'è¯·è”ç³»ä½œè€…å¹¶æä¾›è¯¦ç»†ä¿¡æ¯');
                 }
             }
         });
@@ -214,7 +214,7 @@ function InitRanking(){
     const rankingAll = recommend.querySelector('#ranking_douga');
     rankingAll.id = 'ranking-all';
     const rankingHead = rankingAll.querySelector('.rank-head');
-    rankingHead.firstChild.innerText = 'È«Õ¾ÅÅĞĞ';
+    rankingHead.firstChild.innerText = 'å…¨ç«™æ’è¡Œ';
     const tab = rankingHead.querySelector('.bili-tab.rank-tab');
     const dropDown = rankingHead.querySelector('.bili-dropdown.rank-dropdown');
     const warp = rankingAll.querySelector('.rank-list-wrap');
@@ -230,13 +230,13 @@ function InitRanking(){
             item.className = 'rank-item';
             if (i<3) item.classList.add('highlight');
             item.innerHTML = `<i class="ri-num">${i+1}</i>
-				<a href="/video/av${itemData.aid}/" target="_blank" title="${itemData.title} ²¥·Å:${itemData.play} ${itemData.duration}" class="ri-info-wrap clearfix">
-				<div class="ri-detail"><p class="ri-title">${itemData.title}</p><p class="ri-point">×ÛºÏÆÀ·Ö£º${formatNumber(itemData.pts)}</p></div></a>`;
+				<a href="/video/av${itemData.aid}/" target="_blank" title="${itemData.title} æ’­æ”¾:${itemData.play} ${itemData.duration}" class="ri-info-wrap clearfix">
+				<div class="ri-detail"><p class="ri-title">${itemData.title}</p><p class="ri-point">ç»¼åˆè¯„åˆ†ï¼š${formatNumber(itemData.pts)}</p></div></a>`;
             if (i==0){
                 item.className = 'rank-item show-detail first highlight';
                 const a = item.querySelector('a');
                 a.innerHTML = `<div class="lazy-img ri-preview"><img alt="${itemData.title}" src="${itemData.pic.split(':')[1]}@72w_45h.webp"></div><div class="ri-detail"><p class="ri-title">${itemData.title}</p>
-				<p class="ri-point">×ÛºÏÆÀ·Ö£º${formatNumber(itemData.pts)}</p></div><div data-aid="${itemData.aid}" title="Ìí¼Óµ½ÉÔºóÔÙ¿´" class="watch-later-trigger w-later"></div>`;
+				<p class="ri-point">ç»¼åˆè¯„åˆ†ï¼š${formatNumber(itemData.pts)}</p></div><div data-aid="${itemData.aid}" title="æ·»åŠ åˆ°ç¨åå†çœ‹" class="watch-later-trigger w-later"></div>`;
                 a.lastChild.onclick = WatchLater;
             }
             target.appendChild(item);
@@ -245,7 +245,7 @@ function InitRanking(){
     const UpdateRanking = ()=>{
         const target = type==1?warp.firstChild:warp.lastChild;
         while(target.firstChild) target.removeChild(target.firstChild);
-        status.firstChild.innerText = 'ÕıÔÚ¼ÓÔØ...';
+        status.firstChild.innerText = 'æ­£åœ¨åŠ è½½...';
         target.appendChild(status);
         rankingAll.lastChild.href = `/ranking/${type==1?'all':'origin'}/0/1/${day}/`;
         if (!data[type][day]){
@@ -256,14 +256,14 @@ function InitRanking(){
                     try {
                         const rep = JSON.parse(res.response);
                         if (rep.code!=0){
-                            status.firstChild.innerText = `ÇëÇóÅÅĞĞ°ñÊ§°Ü code ${rep.code} msg ${rep.message} ÇëÖØÊÔ»ò´ò¿ªµ÷ÊÔÖÕ¶Ë²é¿´¸ü¶àĞÅÏ¢`;
-                            return console.log('ÇëÇóappÊ×Ò³Ê§°Ü£¬ÇëÁªÏµ×÷Õß²¢Ìá¹©ÏêÏ¸ĞÅÏ¢',rep);
+                            status.firstChild.innerText = `è¯·æ±‚æ’è¡Œæ¦œå¤±è´¥ code ${rep.code} msg ${rep.message} è¯·é‡è¯•æˆ–æ‰“å¼€è°ƒè¯•ç»ˆç«¯æŸ¥çœ‹æ›´å¤šä¿¡æ¯`;
+                            return console.log('è¯·æ±‚appé¦–é¡µå¤±è´¥ï¼Œè¯·è”ç³»ä½œè€…å¹¶æä¾›è¯¦ç»†ä¿¡æ¯',rep);
                         }
                         data[type][day] = rep.data.list;
                         UpdateItems(target);
                     } catch (e){
-                        status.firstChild.innerText = `ÇëÇóÅÅĞĞ°ñ·¢Éú´íÎó ${e} ÇëÖØÊÔ»ò´ò¿ªµ÷ÊÔÖÕ¶Ë²é¿´¸ü¶àĞÅÏ¢`;
-                        console.error(e,'ÇëÁªÏµ×÷Õß²¢Ìá¹©ÏêÏ¸ĞÅÏ¢');
+                        status.firstChild.innerText = `è¯·æ±‚æ’è¡Œæ¦œå‘ç”Ÿé”™è¯¯ ${e} è¯·é‡è¯•æˆ–æ‰“å¼€è°ƒè¯•ç»ˆç«¯æŸ¥çœ‹æ›´å¤šä¿¡æ¯`;
+                        console.error(e,'è¯·è”ç³»ä½œè€…å¹¶æä¾›è¯¦ç»†ä¿¡æ¯');
                     }
                 }
             });
@@ -273,14 +273,14 @@ function InitRanking(){
         if (ev.target.className =='dropdown-item'){
             dropDown.firstChild.innerText = ev.target.innerText;
             dropDown.lastChild.childNodes.forEach(c=>c.style.display=c.style.display=='none'?'unset':'none');
-            day = ev.target.innerText=='ÈıÈÕ'?3:7;
+            day = ev.target.innerText=='ä¸‰æ—¥'?3:7;
         }else{
             tab.childNodes.forEach(c=>{
                 if (c==ev.target) c.removeEventListener('mouseover',UpdateStatus);
                 else c.addEventListener('mouseover',UpdateStatus);
                 c.classList.toggle('on');
             });
-            type = ev.target.innerText=='È«²¿'?1:2;
+            type = ev.target.innerText=='å…¨éƒ¨'?1:2;
             warp.classList.toggle('show-origin');
         }
         UpdateRanking();
@@ -301,15 +301,15 @@ function WatchLater (ev){
         try{
             var list = JSON.parse(res.target.response);
             if (list.code!=0){
-                showError(`ÇëÇóÉÔºóÔÙ¿´´íÎó code ${list.code} msg ${list.message} ÇëÖØÊÔ»ò´ò¿ªµ÷ÊÔÖÕ¶Ë²é¿´¸ü¶àĞÅÏ¢`);
-                console.log('ÇëÇóÉÔºóÔÙ¿´·¢Éú´íÎó',list,target,'ÇëÁªÏµ×÷Õß²¢Ìá¹©ÏêÏ¸ĞÅÏ¢');
+                showError(`è¯·æ±‚ç¨åå†çœ‹é”™è¯¯ code ${list.code} msg ${list.message} è¯·é‡è¯•æˆ–æ‰“å¼€è°ƒè¯•ç»ˆç«¯æŸ¥çœ‹æ›´å¤šä¿¡æ¯`);
+                console.log('è¯·æ±‚ç¨åå†çœ‹å‘ç”Ÿé”™è¯¯',list,target,'è¯·è”ç³»ä½œè€…å¹¶æä¾›è¯¦ç»†ä¿¡æ¯');
                 return;
             }
             target.classList.toggle('added');
-            target.title = target.classList.contains('added')?'ÒÆ³ıÉÔºóÔÙ¿´':'ÉÔºóÔÙ¿´';
+            target.title = target.classList.contains('added')?'ç§»é™¤ç¨åå†çœ‹':'ç¨åå†çœ‹';
         }catch(e){
-            showError(`ÇëÇóÉÔºóÔÙ¿´·¢Éú´íÎó£¬ÇëÖØÊÔ»ò´ò¿ªµ÷ÊÔÖÕ¶Ë²é¿´¸ü¶àĞÅÏ¢`);
-            console.error(e,'ÇëÁªÏµ×÷Õß²¢Ìá¹©ÏêÏ¸ĞÅÏ¢');
+            showError(`è¯·æ±‚ç¨åå†çœ‹å‘ç”Ÿé”™è¯¯ï¼Œè¯·é‡è¯•æˆ–æ‰“å¼€è°ƒè¯•ç»ˆç«¯æŸ¥çœ‹æ›´å¤šä¿¡æ¯`);
+            console.error(e,'è¯·è”ç³»ä½œè€…å¹¶æä¾›è¯¦ç»†ä¿¡æ¯');
         }
     };
     req.send(`aid=${target.dataset.aid}&csrf=${token}`);
@@ -329,14 +329,14 @@ function formatNumber (input,format='number'){
         if (minute<10) minute='0'+minute;
         return hour?`${hour}:${minute}:${second}`:`${minute}:${second}`;
     }else{
-        return input>9999?`${(input/10000).toFixed(1)}Íò`:input||0;
+        return input>9999?`${(input/10000).toFixed(1)}ä¸‡`:input||0;
     }
 }
 
 function getLoadingDiv(){
     const loading = document.createElement('div');
     loading.className = 'load-state';
-    loading.innerHTML = '<span class="loading">ÕıÔÚ¼ÓÔØ...</span>';
+    loading.innerHTML = '<span class="loading">æ­£åœ¨åŠ è½½...</span>';
     return loading;
 }
 

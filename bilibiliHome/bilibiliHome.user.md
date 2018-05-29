@@ -1,6 +1,14 @@
 B站网页端添加APP首页推荐
 =========================
 
+[脚本发布页](https://greasyfork.org/zh-CN/scripts/368446)
+
+[直播间功能增强脚本](https://greasyfork.org/zh-CN/scripts/368635)
+
+[问题反馈到这里](https://github.com/indefined/UserScript-for-Bilibili/issues)
+
+**提交问题前请仔细读完说明和使用须知**
+
 -------------------------
 ## 功能
 
@@ -9,7 +17,7 @@ B站网页端添加APP首页推荐
 - 不喜欢/撤销不喜欢
 - 全站排行榜
 
-![图片预览](https://greasyfork.org/system/screenshots/screenshots/000/011/183/original/QQ截图20180524035005.jpg)
+![图片预览](https://greasyfork.org/system/screenshots/screenshots/000/011/238/original/bilibiliHome.user.jpg)
 
 -------------------------
 ## 兼容性
@@ -19,7 +27,6 @@ B站网页端添加APP首页推荐
 
 -------------------------
 ## 使用须知
-
 
 - 功能依赖cookie，如果未登录脚本会在第一行FC
 - 添加内容依赖首页的动画模块，如果该模块不存在，脚本会在第二行FC
