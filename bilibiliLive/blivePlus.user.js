@@ -1,9 +1,10 @@
 // ==UserScript==
 // @name        bilibili直播间功能增强
 // @namespace   indefined
-// @version     0.1.7
+// @version     0.1.8
 // @author      indefined
-// @description 直播间切换勋章/头衔、直接购买勋章、礼物包裹替换为大图标，全屏可用礼物包裹/全屏发送弹幕(仅限HTML5)，轮播显示链接(仅限HTML5)
+// @description 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、礼物包裹替换为大图标，全屏可用礼物包裹/全屏发送弹幕(仅限HTML5)，轮播显示链接(仅限HTML5)
+// @supportURL  https://github.com/indefined/UserScript-for-Bilibili/issues
 // @include     /^https?:\/\/live\.bilibili\.com\/\d/
 // @license     MIT
 // @run-at      document-idle
@@ -167,7 +168,7 @@ function FeaturesPlus(){
                 }finally{
                     let toast = document.createElement('div');
                     toast.innerHTML = `<div class="link-toast fixed success" style="left: 40%;top: 50%;"><span class="toast-text">${text} ${msg}</span></div>`;
-                    document.body.append(toast);
+                    document.body.appendChild(toast);
                     setTimeout(()=>document.body.removeChild(toast),3000);
                 }
             };

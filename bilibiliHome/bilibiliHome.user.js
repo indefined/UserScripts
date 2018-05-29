@@ -1,9 +1,10 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.2.1.1
+// @version      0.2.2
 // @description  为B站网页端首页添加APP首页推荐内容，提供添加/撤销稍后再看、不喜欢/撤销不喜欢功能，同时提供全站排行榜
 // @author       indefined
+// @supportURL   https://github.com/indefined/UserScript-for-Bilibili/issues
 // @match        *://www.bilibili.com/
 // @license      MIT
 // @connect      app.bilibili.com
@@ -12,7 +13,7 @@
 // @run-at       document-idle
 // ==/UserScript==
 
-const token = document.cookie.match(/bili_jct=(.{32});/)[1];
+const token = document.cookie.match(/bili_jct=([0-9a-fA-F]{32})/)[1];
 const recommend = document.querySelector('#bili_douga').cloneNode(true);
 CreateCss();
 InitRecommend();
@@ -343,7 +344,7 @@ function getLoadingDiv(){
 function showError(msg){
     const toast = document.createElement('div');
     toast.innerHTML = `<div class="toast"><span >${msg}</span></div>`;
-    document.body.append(toast);
+    document.body.appendChild(toast);
     setTimeout(()=>document.body.removeChild(toast),4000);
     return false;
 }

@@ -33,7 +33,9 @@ bilibili直播间功能增强
 -------------------------
 ## 兼容性
 
-- chrome 66 in Tampermonkey4.5测试通过，其它浏览器和脚本管理器未知
+- chrome 66 in Tampermonkey4.6 测试通过
+- EDGE in Tampermonkey4.6 测试通过
+- 其它浏览器和脚本管理器未知
 
 -------------------------
 ## 使用须知
