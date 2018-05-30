@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        bilibili直播间功能增强
 // @namespace   indefined
-// @version     0.1.8
+// @version     0.1.9
 // @author      indefined
 // @description 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、礼物包裹替换为大图标，全屏可用礼物包裹/全屏发送弹幕(仅限HTML5)，轮播显示链接(仅限HTML5)
 // @supportURL  https://github.com/indefined/UserScript-for-Bilibili/issues
@@ -62,9 +62,9 @@ function FeaturesPlus(){
             }
             if (newValue=='fullscreen'){
                 sendButton.className = 'dp-i-block v-center';
-                sendButton.style = 'margin-left: 5px;';
                 inputBox.className = 'dp-i-block v-bottom';
-                inputBox.style = 'width:300px;margin-left: 5px;height: 45px;';
+                inputBox.style = 'width:300px;margin-right: 5px;';
+                inputBox.firstChild.style = 'height: 45px;padding-top: 4px;';
                 inputBox.lastChild.style = 'right: 110px;';
                 screenPanel.insertBefore(sendButton,screenPanel.fristChild);
                 screenPanel.insertBefore(inputBox,sendButton);
@@ -73,6 +73,7 @@ function FeaturesPlus(){
                 inputBox.className = '';
                 inputBox.style = '';
                 inputBox.lastChild.style = '';
+                inputBox.firstChild.style = '';
                 inputPanel.appendChild(inputBox);
                 bottomPanel.appendChild(sendButton);
             }
