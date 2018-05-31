@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.2.2
+// @version      0.2.3
 // @description  为B站网页端首页添加APP首页推荐内容，提供添加/撤销稍后再看、不喜欢/撤销不喜欢功能，同时提供全站排行榜
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScript-for-Bilibili/issues
@@ -13,11 +13,34 @@
 // @run-at       document-idle
 // ==/UserScript==
 
-const token = document.cookie.match(/bili_jct=([0-9a-fA-F]{32})/)[1];
-const recommend = document.querySelector('#bili_douga').cloneNode(true);
-CreateCss();
-InitRecommend();
-InitRanking();
+const token = (()=>{
+    try{
+        return document.cookie.match(/bili_jct=([0-9a-fA-F]{32})/)[1];
+    }catch(e){
+        console.error('添加APP首页推荐找不到token，请检查是否登录');
+        return undefined;
+    }
+})();
+const recommend = (()=>{
+    try{
+        return document.querySelector('#bili_douga').cloneNode(true);
+    }catch(e){
+        console.error('添加APP首页推荐找不到动画版块，可能是网页加载延迟或者b站改版了，请重试或等待更新');
+        return undefined;
+    }
+})();
+const imgType = (()=>{
+    try{
+        return 0==document.createElement('canvas').toDataURL("image/webp").indexOf("data:image/webp")?'webp':'jpg';
+    }catch(e){
+        return 'jpg';
+    }
+})();
+if (token&&recommend){
+    CreateCss();
+    InitRecommend();
+    InitRanking();
+}
 
 function CreateCss(){
 	const css = document.createElement('style');
@@ -108,7 +131,7 @@ function InitRecommend () {
                 try {
                     const rep = JSON.parse(res.response);
                     if (rep.code!=0){
-                        status.firstChild.innerText = `请求app首页失败 code ${rep.code} msg ${rep.message} 请重试或打开调试终端查看更多信息`;
+                        status.firstChild.innerText = `请求app首页失败 code ${rep.code} msg ${rep.message} 请检查问题重试或打开调试终端查看更多信息`;
                         return console.log('请求app首页失败',rep);
                     }
                     listBox.removeChild(status);
@@ -117,8 +140,8 @@ function InitRecommend () {
                         listBox.appendChild(item);
                     });
                 } catch (e){
-                    status.firstChild.innerText = `请求app首页发生错误 ${e} 请重试或打开调试终端查看更多信息`;
-                    console.error(e);
+                    status.firstChild.innerText = `请求app首页发生错误 ${e} 请检查问题重试或打开调试终端查看更多信息`;
+                    console.error(e,请求app首页发生错误);
                 }
             }
         });
@@ -130,7 +153,7 @@ function InitRecommend () {
         item.innerHTML = `
 		  <a href="/video/av${data.param}/" target="_blank" data-tag_id="${data.tag?data.tag.tag_id:''}" data-id="${data.param}" data-goto="${data.goto}" data-mid="${data.mid}" data-rid="${data.tid}">
 		  <div class="pic">
-		  <div class="lazy-img"><img alt="${data.title}" src="${data.cover}@144w_90h.webp" /></div>
+		  <div class="lazy-img"><img alt="${data.title}" src="${data.cover}@160w_100h.${imgType}" /></div>
 		  <span title="分区：${data.tname}" class="tname">${data.tname}</span>
 		  <span class="dur">${formatNumber(data.duration,'time')}</span>
 		  <div data-aid=${data.param} title="稍后再看" class="watch-later-trigger w-later"></div>
@@ -167,12 +190,13 @@ function InitRecommend () {
                 parent=target.parentNode;
             }
             if (parent.nodeName!='A'){
-                showError('找不到父节点');
+                showError('请求撤销稍后再看失败：找不到父节点，查看调试终端获取更多信息');
+                console.log('请求撤销稍后再看找不到父节点',ev);
                 return false;
             }
             url += `/cancel`;
         }else{
-            parent = ev.path[4];
+            parent = parent.parentNode.parentNode.parentNode;
         }
         url += `?goto=${parent.dataset.goto}&id=${parent.dataset.id}&mid=${parent.dataset.mid}&reason_id=${target.dataset.reason_id}&rid=${parent.dataset.rid}&tag_id=${parent.dataset.tag_id}`;
         const handleCover = ()=>{
@@ -195,14 +219,14 @@ function InitRecommend () {
                 try {
                     const par = JSON.parse(res.response);
                     if (par.code!=0){
-                        showError(`请求不喜欢错误 code ${par.code} msg ${par.message} 请重试或打开调试终端查看更多信息`);
-                        console.log('请求不喜欢发生错误',par,url,'请联系作者并提供详细信息');
+                        showError(`请求不喜欢错误 code ${par.code} msg ${par.message} 请检查问题重试或打开调试终端查看更多信息`);
+                        console.log('请求不喜欢发生错误',par,url);
                     }else{
                         handleCover();
                     }
                 } catch (e){
-                    showError(`请求不喜欢发生错误，请重试或打开调试终端查看更多信息`);
-                    console.error(e,'请联系作者并提供详细信息');
+                    showError(`请求不喜欢发生错误，请检查问题重试或打开调试终端查看更多信息`);
+                    console.error(e,'请求不喜欢发生错误');
                 }
             }
         });
@@ -236,7 +260,7 @@ function InitRanking(){
             if (i==0){
                 item.className = 'rank-item show-detail first highlight';
                 const a = item.querySelector('a');
-                a.innerHTML = `<div class="lazy-img ri-preview"><img alt="${itemData.title}" src="${itemData.pic.split(':')[1]}@72w_45h.webp"></div><div class="ri-detail"><p class="ri-title">${itemData.title}</p>
+                a.innerHTML = `<div class="lazy-img ri-preview"><img alt="${itemData.title}" src="${itemData.pic.split(':')[1]}@72w_45h.${imgType}"></div><div class="ri-detail"><p class="ri-title">${itemData.title}</p>
 				<p class="ri-point">综合评分：${formatNumber(itemData.pts)}</p></div><div data-aid="${itemData.aid}" title="添加到稍后再看" class="watch-later-trigger w-later"></div>`;
                 a.lastChild.onclick = WatchLater;
             }
@@ -257,14 +281,14 @@ function InitRanking(){
                     try {
                         const rep = JSON.parse(res.response);
                         if (rep.code!=0){
-                            status.firstChild.innerText = `请求排行榜失败 code ${rep.code} msg ${rep.message} 请重试或打开调试终端查看更多信息`;
-                            return console.log('请求app首页失败，请联系作者并提供详细信息',rep);
+                            status.firstChild.innerText = `请求排行榜失败 code ${rep.code} msg ${rep.message} 请检查问题重试或打开调试终端查看更多信息`;
+                            return console.log('请求app首页失败',rep);
                         }
                         data[type][day] = rep.data.list;
                         UpdateItems(target);
                     } catch (e){
-                        status.firstChild.innerText = `请求排行榜发生错误 ${e} 请重试或打开调试终端查看更多信息`;
-                        console.error(e,'请联系作者并提供详细信息');
+                        status.firstChild.innerText = `请求排行榜发生错误 ${e} 请检查问题重试或打开调试终端查看更多信息`;
+                        console.error(e,'请求排行榜发生错误');
                     }
                 }
             });
@@ -273,10 +297,10 @@ function InitRanking(){
     const UpdateStatus = ev=>{
         if (ev.target.className =='dropdown-item'){
             dropDown.firstChild.innerText = ev.target.innerText;
-            dropDown.lastChild.childNodes.forEach(c=>c.style.display=c.style.display=='none'?'unset':'none');
+            [].forEach.call(dropDown.lastChild.childNodes,c=>c.style.display=c.style.display=='none'?'unset':'none');
             day = ev.target.innerText=='三日'?3:7;
         }else{
-            tab.childNodes.forEach(c=>{
+            [].forEach.call(tab.childNodes,c=>{
                 if (c==ev.target) c.removeEventListener('mouseover',UpdateStatus);
                 else c.addEventListener('mouseover',UpdateStatus);
                 c.classList.toggle('on');
@@ -286,7 +310,7 @@ function InitRanking(){
         }
         UpdateRanking();
     };
-    dropDown.lastChild.childNodes.forEach(c=>c.onclick = UpdateStatus);
+    [].forEach.call(dropDown.lastChild.childNodes,c=>c.onclick = UpdateStatus);
     tab.lastChild.addEventListener('mouseover',UpdateStatus);
     UpdateRanking();
 }
@@ -302,15 +326,15 @@ function WatchLater (ev){
         try{
             var list = JSON.parse(res.target.response);
             if (list.code!=0){
-                showError(`请求稍后再看错误 code ${list.code} msg ${list.message} 请重试或打开调试终端查看更多信息`);
-                console.log('请求稍后再看发生错误',list,target,'请联系作者并提供详细信息');
+                showError(`请求稍后再看错误 code ${list.code} msg ${list.message} 请检查问题重试或打开调试终端查看更多信息`);
+                console.log('请求稍后再看发生错误',list,target);
                 return;
             }
             target.classList.toggle('added');
             target.title = target.classList.contains('added')?'移除稍后再看':'稍后再看';
         }catch(e){
-            showError(`请求稍后再看发生错误，请重试或打开调试终端查看更多信息`);
-            console.error(e,'请联系作者并提供详细信息');
+            showError(`请求稍后再看发生错误，请检查问题重试或打开调试终端查看更多信息`);
+            console.error(e,'请求稍后再看发生错误');
         }
     };
     req.send(`aid=${target.dataset.aid}&csrf=${token}`);
