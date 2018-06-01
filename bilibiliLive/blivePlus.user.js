@@ -1,14 +1,15 @@
 // ==UserScript==
 // @name        bilibili直播间功能增强
 // @namespace   indefined
-// @version     0.1.9
+// @version     0.2.0
 // @author      indefined
-// @description 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、礼物包裹替换为大图标，全屏可用礼物包裹/全屏发送弹幕(仅限HTML5)，轮播显示链接(仅限HTML5)
+// @description 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、新版礼物（测试）、礼物包裹替换为大图标、全屏可用礼物包裹/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @supportURL  https://github.com/indefined/UserScript-for-Bilibili/issues
 // @include     /^https?:\/\/live\.bilibili\.com\/\d/
 // @license     MIT
 // @run-at      document-idle
 // ==/UserScript==
+const showNewGift = true;
 try{
     document.querySelector('.aside-area.p-absolute.border-box.z-aside-area')
         .addEventListener('DOMNodeInserted',function (e){
@@ -270,4 +271,132 @@ function FeaturesPlus(){
             }
         };
     })();
+    if (showNewGift){
+        const token = (()=>{
+            try{
+                return document.cookie.match(/bili_jct=([0-9a-fA-F]{32})/)[1];
+            }catch(e){
+                return undefined;
+            }
+        })();
+        const imgType = (()=>{
+            try{
+                return 0==document.createElement('canvas').toDataURL("image/webp").indexOf("data:image/webp")?'webp':'gif';
+            }catch(e){
+                return 'gif';
+            }
+        })();
+        let room,gifts;
+        const newGift = (()=>{
+            const appendDiv = document.createElement('div');
+            appendDiv.className = 'dp-i-block';
+            appendDiv.innerHTML = `<div class="dp-i-block v-center pointer bg-cover" title="新版礼物" style="background-image: url(&quot;//i0.hdslb.com/bfs/live/b26ec493cb03891a03efe117a434e58f9cb89366.png&quot;);width: 45px;height: 45px;margin-right: 10px;"></div>`;
+            giftPanel.insertBefore(appendDiv,giftPackage);
+            return appendDiv.firstElementChild;
+        })();
+        const sendGift = ev =>{
+            newGift.firstChild.classList.add('dp-none');
+            const target = gifts[ev.target.dataset.index];
+            const sendPanel = document.createElement('div');
+            sendPanel.className = 'bilibili-live-player-gfs-give-float';
+            sendPanel.style="position:fixed;";
+            let type = 'gold';
+            let num = 1;
+            sendPanel.innerHTML = `
+	<div class="bilibili-live-player-gfs-give-wrap">
+		<div class="bilibili-live-player-gfs-give-close"></div>
+		<h2>赠送礼物</h2>
+		<div class="clearfix">
+			<div class="bilibili-live-player-gfs-give-gif" style="background-image: url(${target[imgType]})"></div>
+			<div class="bilibili-live-player-gfs-give-info">
+				<div class="bilibili-live-player-gfs-give-name">${target.name}</div>
+				<div class="bilibili-live-player-gfs-give-cost">
+					<div class="bilibili-live-player-gfs-give-cost-gold">
+					<i></i><span>${target.price}</span></div></div>
+			</div>
+		</div>
+		<p class="gift-info-desc" data-v-33a72392="">${target.desc}</p>
+		<div>
+			<span>选择：</span>
+			<div class="bilibili-live-player-gfs-give-type">
+				<label class="bilibili-live-player-gfs-give-type-silver">
+					<input name="send_gift_type" type="radio" value="gold" checked>金瓜子
+					<input name="send_gift_type" type="radio" value="silver">银瓜子
+				</label></div>
+		</div>
+		<div>
+			<input class="bilibili-live-player-gfs-give-counter" type="text" value="${num}" placeholder="赠送数量">
+			<button class="bilibili-live-player-gfs-give-confirm">赠送</button>
+		</div>
+	</div>`;
+            sendPanel.querySelector('input[value="silver"]').onchange = ()=>type='silver';
+            sendPanel.querySelector('input[value="gold"]').onchange = ()=>type='gold';
+            sendPanel.querySelector('.bilibili-live-player-gfs-give-counter').onchange = (ev)=>num=ev.target.value;
+            sendPanel.querySelector('.bilibili-live-player-gfs-give-close').onclick = ()=>document.body.removeChild(sendPanel);
+            sendPanel.querySelector('.bilibili-live-player-gfs-give-confirm').onclick = ()=>{
+                document.body.removeChild(sendPanel);
+                const req = new XMLHttpRequest();
+                req.open('POST','//api.live.bilibili.com/gift/v2/gift/send');
+                req.withCredentials = true;
+                req.setRequestHeader('Content-Type','application/x-www-form-urlencoded; charset=UTF-8');
+                req.onload = res=>{
+                    let msg = '赠送礼物';
+                    try{
+                        var data = JSON.parse(res.target.response);
+                        if (data.code == 0){
+                            msg += '成功';
+                        }else{
+                            msg += `失败 code ${data.code} ${data.message}`;
+                        }
+                    }catch(e){
+                        msg += `出错${e}`;
+                        console.error(e);
+                    }finally{
+                        let toast = document.createElement('div');
+                        toast.innerHTML = `<div class="link-toast fixed success" style="left: 40%;top: 50%;"><span class="toast-text">${msg}</span></div>`;
+                        document.body.appendChild(toast);
+                        setTimeout(()=>document.body.removeChild(toast),3000);
+                    }
+                };
+                req.send(`gift_id=${target.id}&ruid=${room.uid}&gift_num=${num}&coin_type=${type}&biz_id=${room.room_id}&csrf_token=${token}`);
+                return false;
+            };
+            document.body.appendChild(sendPanel);
+        };
+        const showGift = ev=>{
+            if (!newGift.contains(ev.target)){
+                if (newGift.firstChild) newGift.firstChild.classList.add('dp-none');
+            }
+            else if (!gifts||!room){
+                let xhr = new XMLHttpRequest();
+                xhr.open('GET','//api.live.bilibili.com/gift/v3/live/gift_config');
+                xhr.withCredentials = true;
+                const list = document.createElement('div');
+                list.className = 'common-popup-wrap t-left';
+                list.style = 'height: 270px;position: absolute;width: 276px;bottom: 50px;right: 0;overflow: auto;cursor: auto;animation: r .4s;';
+                list.innerHTML = `<header data-v-460dfc36="">新版礼物</header>`;
+                newGift.appendChild(list);
+                xhr.onload = res=>{
+                    gifts = JSON.parse(res.target.response).data;
+                    const items = document.createElement('div');
+                    for (let i=0;i<gifts.length;i++){
+                        const g = gifts[i];
+                        items.innerHTML += `<div data-index="${i}" style="background-image: url(${g.img_basic});width: 45px;height: 45px;" class="bg-cover dp-i-block pointer" title="${g.name}"></div>`;
+                    }
+                    [].forEach.call(items.childNodes,c=>c.onclick = sendGift);
+                    list.appendChild(items);
+                };
+                xhr.send(null);
+                xhr = new XMLHttpRequest();
+                xhr.open('GET',`//api.live.bilibili.com/room/v1/Room/room_init?id=${window.location.pathname.slice(1)}`);
+                xhr.onload = res=>{
+                    room = JSON.parse(res.target.response).data;
+                };
+                xhr.send(null);
+            }else if (ev.target==newGift){
+                newGift.firstChild.classList.toggle('dp-none');
+            }
+        };
+        document.body.addEventListener('click',showGift);
+    }
 }
