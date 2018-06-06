@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        bilibili直播间功能增强
 // @namespace   indefined
-// @version     0.2.0
+// @version     0.2.1
 // @author      indefined
 // @description 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、新版礼物（测试）、礼物包裹替换为大图标、全屏可用礼物包裹/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @supportURL  https://github.com/indefined/UserScript-for-Bilibili/issues
@@ -10,7 +10,8 @@
 // @run-at      document-idle
 // ==/UserScript==
 const showNewGift = true;
-try{
+if (document.querySelector('.gift-package')) FeaturesPlus();
+else try{
     document.querySelector('.aside-area.p-absolute.border-box.z-aside-area')
         .addEventListener('DOMNodeInserted',function (e){
         if (e.target.id == 'chat-control-panel-vm'){
@@ -18,8 +19,7 @@ try{
             FeaturesPlus();
         }
     });
-}
-catch (e){console.error('bilibili直播间功能增强脚本执行错误',e);}
+} catch (e){console.error('bilibili直播间功能增强脚本执行错误',e);}
 
 function FeaturesPlus(){
     const giftPanel = document.querySelector('div.gift-presets.p-relative.t-right');
