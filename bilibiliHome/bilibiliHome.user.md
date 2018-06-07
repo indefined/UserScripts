@@ -24,6 +24,8 @@ B站网页端添加APP首页推荐
 
 - chrome 66 in Tampermonkey4.6 测试通过
 - EDGE in Tampermonkey4.6 测试通过
+- 火狐 in Tampermonkey4.6 测试通过
+- GreaseMonkey不兼容（不支持GM_xmlhttpRequest函数，不支持调用页面中js文件，单独require一个jquery对本脚本太繁重不打算支持）
 - 其它浏览器和脚本管理器未知
 - 由于使用了GM_xmlhttpRequest函数，该脚本无法直接当作扩展安装 ~~跨域真TM麻烦~~
 

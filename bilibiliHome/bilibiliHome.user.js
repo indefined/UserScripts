@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.2.3
+// @version      0.2.4
 // @description  为B站网页端首页添加APP首页推荐内容，提供添加/撤销稍后再看、不喜欢/撤销不喜欢功能，同时提供全站排行榜
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScript-for-Bilibili/issues
@@ -87,7 +87,7 @@ function CreateCss(){
 		width: 100%;
 		height: 100%;
 		background:hsla(0,0%,100%,.9);
-		text-align: -webkit-center;
+		text-align: center;
 		font-size: 15px;
 		z-index: 2;
 		}
@@ -126,7 +126,7 @@ function InitRecommend () {
         listBox.appendChild(status);
         GM_xmlhttpRequest({
             method: 'GET',
-            url: `${document.location.protocol}//app.bilibili.com/x/feed/index?build=1&mobi_app=android`,
+            url: `${document.location.protocol}//app.bilibili.com/x/feed/index?build=1&mobi_app=android&idx=${(Date.now()/1000).toFixed(0)}`,
             onload: res=>{
                 try {
                     const rep = JSON.parse(res.response);
@@ -141,7 +141,7 @@ function InitRecommend () {
                     });
                 } catch (e){
                     status.firstChild.innerText = `请求app首页发生错误 ${e} 请检查问题重试或打开调试终端查看更多信息`;
-                    console.error(e,请求app首页发生错误);
+                    console.error(e,'请求app首页发生错误');
                 }
             }
         });
@@ -181,7 +181,7 @@ function InitRecommend () {
     function DisLike (ev) {
         let target=ev.target,parent=target.parentNode;
         let cancel;
-        let url =  `${document.location.protocol}//app.bilibili.com/x/feed/dislike`;
+        let url = `${document.location.protocol}//app.bilibili.com/x/feed/dislike`;
         if (parent.className!='dislike-list'){
             cancel = true;
             let deep = 1;
@@ -272,7 +272,7 @@ function InitRanking(){
         while(target.firstChild) target.removeChild(target.firstChild);
         status.firstChild.innerText = '正在加载...';
         target.appendChild(status);
-        rankingAll.lastChild.href = `/ranking/${type==1?'all':'origin'}/0/1/${day}/`;
+        rankingAll.lastChild.href = `/ranking/${type==1?'all':'origin'}/0/0/${day}/`;
         if (!data[type][day]){
             GM_xmlhttpRequest({
                 method: 'GET',
@@ -297,7 +297,7 @@ function InitRanking(){
     const UpdateStatus = ev=>{
         if (ev.target.className =='dropdown-item'){
             dropDown.firstChild.innerText = ev.target.innerText;
-            [].forEach.call(dropDown.lastChild.childNodes,c=>c.style.display=c.style.display=='none'?'unset':'none');
+            [].forEach.call(dropDown.lastChild.childNodes,c => {c.style.display=c.style.display=='none'?'unset':'none';});
             day = ev.target.innerText=='三日'?3:7;
         }else{
             [].forEach.call(tab.childNodes,c=>{
@@ -310,7 +310,7 @@ function InitRanking(){
         }
         UpdateRanking();
     };
-    [].forEach.call(dropDown.lastChild.childNodes,c=>c.onclick = UpdateStatus);
+    [].forEach.call(dropDown.lastChild.childNodes,c => {c.onclick = UpdateStatus;});
     tab.lastChild.addEventListener('mouseover',UpdateStatus);
     UpdateRanking();
 }
