@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name        bilibili直播间功能增强
 // @namespace   indefined
-// @version     0.2.2
+// @version     0.3.0
 // @author      indefined
-// @description 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、新版礼物（测试）、礼物包裹替换为大图标、全屏可用礼物包裹/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
+// @description 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、其它礼物（测试）、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @supportURL  https://github.com/indefined/UserScript-for-Bilibili/issues
 // @include     /^https?:\/\/live\.bilibili\.com\/\d/
 // @license     MIT
@@ -11,6 +11,7 @@
 // ==/UserScript==
 const showNewGift = true;
 try{
+	AddStyle();
 	if (document.querySelector('.gift-package')) FeaturesPlus();
 	else document.querySelector('.aside-area.p-absolute.border-box.z-aside-area')
         .addEventListener('DOMNodeInserted',function listener(e){
@@ -21,7 +22,75 @@ try{
     });
 } catch (e){console.error('bilibili直播间功能增强脚本执行错误',e);}
 
+function AddStyle(){
+    const style = document.createElement('style');
+    style.type = 'text/css';
+    style.innerHTML = `
+.gift .expires {
+    margin-left: -29px!important;
+    border-radius: 15px!important;
+}
+
+.common-popup-wrap.arrow-bottom.popup {
+    min-width: 274px!important;
+}
+
+.wrap[data-v-13293d9e] {
+    bottom: 50px!important;
+}
+
+.bilibili-live-player-video-controller #gift-control-vm {
+    background: rgba(0, 0, 0, 0.7)!important;
+    position: relative!important;
+    width: 100%!important;
+    border: none!important;
+    height: unset!important;
+}
+
+body.fullscreen-fix div#gift-control-vm {
+    display: block!important;
+}
+
+.bilibili-live-player-video-controller .gift-control-panel .right-part .gift-presets[data-v-fbe31e02] {
+    height: unset!important;
+    margin: 0!important;
+}
+
+.bilibili-live-player-video-controller .gift-control-panel[data-v-fbe31e02] {
+    height: unset!important;
+}
+
+.p-relative.ts-dot-2.z-gift-sender-panel {
+    z-index: 99999999;
+}
+
+.bilibili-live-player-video-controller .supporting-info {
+    display: none!important;
+}
+
+.bilibili-live-player-video-controller .gift-panel-box {
+    background: none!important;
+    border: none!important;
+}
+
+.bilibili-live-player-video-controller .gift-control-panel .gift-left-part[data-v-fbe31e02] {
+    padding-top: 0px!important;
+}
+
+.bilibili-live-player-video-controller .count-down[data-v-cf847d96] {
+    margin-top: -10px!important;
+}
+
+.player-section.p-relative.border-box.none-select.z-player-section {
+    height: 100%!important;
+}
+`;
+    document.head.appendChild(style);
+}
+
 function FeaturesPlus(){
+    const leftContainer = document.querySelector('.left-container');
+    const toolBar = document.querySelector('#gift-control-vm');
     const giftPanel = document.querySelector('div.gift-presets.p-relative.t-right');
     const giftPackage = document.querySelector('.gift-package');
     const playerPanel = document.querySelector('.bilibili-live-player.relative');
@@ -37,10 +106,9 @@ function FeaturesPlus(){
         giftPackage.title = '道具包裹';
         while (giftPackage.firstElementChild) giftPackage.removeChild(giftPackage.firstElementChild);
         if (guardIcon) giftPanel.removeChild(guardIcon);
-        giftPackage.addEventListener('DOMNodeInserted',()=>{giftPackage.lastChild.style+=';bottom:50px';});
         giftPanel.appendChild(giftPackage);
     }
-    if (giftPackage&&giftPanel&&playerPanel){
+    if (giftPackage&&toolBar&&playerPanel){
         const appendTitle = target=>{
             const title = document.querySelector('div.normal-mode');
             if (!title) return;
@@ -55,26 +123,24 @@ function FeaturesPlus(){
             title.appendChild(link);
         };
         const handleFullScreenPanel = (newValue,oldValue)=>{//value='web-fullscreen'||'normal'||'fullscreen'
-            const screenPanel = document.querySelector('div.bilibili-live-player-gfs-staple.no-select');
+            const screenPanel = document.querySelector('.bilibili-live-player-video-controller');
             if (newValue=='normal'){
-                giftPanel.appendChild(giftPackage);
+                leftContainer.appendChild(toolBar);
             }else{
-                screenPanel.appendChild(giftPackage);
+                screenPanel.appendChild(toolBar);
             }
             if (newValue=='fullscreen'){
-                sendButton.className = 'dp-i-block v-center';
+                sendButton.className = 'dp-i-block v-middle';
                 inputBox.className = 'dp-i-block v-bottom';
                 inputBox.style = 'width:300px;margin-right: 5px;';
-                inputBox.firstChild.style = 'height: 45px;padding-top: 4px;';
-                inputBox.lastChild.style = 'right: 110px;';
-                screenPanel.insertBefore(sendButton,screenPanel.fristChild);
-                screenPanel.insertBefore(inputBox,sendButton);
+                inputBox.lastChild.style = 'right: 90px;';
+                giftPanel.appendChild(inputBox);
+                giftPanel.appendChild(sendButton);
             }else if(oldValue=='fullscreen'){
                 sendButton.className = 'right-action p-absolute';
                 inputBox.className = '';
                 inputBox.style = '';
                 inputBox.lastChild.style = '';
-                inputBox.firstChild.style = '';
                 inputPanel.appendChild(inputBox);
                 bottomPanel.appendChild(sendButton);
             }
@@ -285,8 +351,8 @@ function FeaturesPlus(){
         let room,gifts;
         const newGift = (()=>{
             const appendDiv = document.createElement('div');
-            appendDiv.className = 'dp-i-block';
-            appendDiv.innerHTML = `<div class="dp-i-block v-center pointer bg-cover" title="新版礼物" style="background-image: url(&quot;//i0.hdslb.com/bfs/live/b26ec493cb03891a03efe117a434e58f9cb89366.png&quot;);width: 45px;height: 45px;margin-right: 10px;"></div>`;
+            appendDiv.className = 'dp-i-block v-middle';
+            appendDiv.innerHTML = `<div class="dp-i-block v-middle pointer p-relative bg-cover" title="其它礼物" style="background-image: url(//s1.hdslb.com/bfs/live/592e81002d20699c7e4dae4480ada79ab3253eae.png);width: 48px;height: 48px;margin-right: 10px;"></div>`;
             giftPanel.insertBefore(appendDiv,giftPackage);
             return appendDiv.firstElementChild;
         })();
@@ -369,8 +435,8 @@ function FeaturesPlus(){
                 xhr.withCredentials = true;
                 const list = document.createElement('div');
                 list.className = 'common-popup-wrap t-left';
-                list.style = 'height: 270px;position: absolute;width: 276px;bottom: 50px;right: 0;overflow: auto;cursor: auto;animation: r .4s;';
-                list.innerHTML = `<header data-v-460dfc36="">新版礼物</header>`;
+                list.style = 'height: 270px;position: absolute;width: 276px;bottom: 50px;right: -22px;overflow: auto;cursor: auto;animation: r .4s;';
+                list.innerHTML = `<header data-v-460dfc36="">其它礼物</header>`;
                 newGift.appendChild(list);
                 xhr.onload = res=>{
                     gifts = JSON.parse(res.target.response).data;
