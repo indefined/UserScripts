@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        bilibili直播间功能增强
 // @namespace   indefined
-// @version     0.2.1
+// @version     0.2.2
 // @author      indefined
 // @description 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、新版礼物（测试）、礼物包裹替换为大图标、全屏可用礼物包裹/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @supportURL  https://github.com/indefined/UserScript-for-Bilibili/issues
@@ -10,12 +10,12 @@
 // @run-at      document-idle
 // ==/UserScript==
 const showNewGift = true;
-if (document.querySelector('.gift-package')) FeaturesPlus();
-else try{
-    document.querySelector('.aside-area.p-absolute.border-box.z-aside-area')
-        .addEventListener('DOMNodeInserted',function (e){
+try{
+	if (document.querySelector('.gift-package')) FeaturesPlus();
+	else document.querySelector('.aside-area.p-absolute.border-box.z-aside-area')
+        .addEventListener('DOMNodeInserted',function listener(e){
         if (e.target.id == 'chat-control-panel-vm'){
-            e.relatedNode.removeEventListener('DOMNodeInserted',arguments.callee);
+            e.relatedNode.removeEventListener('DOMNodeInserted',listener);
             FeaturesPlus();
         }
     });
@@ -91,8 +91,7 @@ function FeaturesPlus(){
     (function strengthSwitcher(){
         const cover = document.querySelector('.room-cover.dp-i-block.p-relative.bg-cover');
         let owner;
-        if (cover&&cover.href)
-            owner = cover.href.match(/\d+/)[0];
+        if (cover&&cover.href) owner = cover.href.match(/\d+/)[0];
         const medalButton = bottomPanel.querySelector('.action-item.medal');
         const titleButton = bottomPanel.querySelector('.action-item.title');
         const dialog = document.querySelector('.dialog-ctnr.common-popup-wrap.p-absolute.border-box.z-chat-control-panel-dialog').cloneNode();
@@ -107,8 +106,7 @@ function FeaturesPlus(){
         function handleDialog(ev){
             const target = ev.target;
             if (dialog.contains(ev.target)) return;
-            if (dialog.dataset.name==target.dataset.name||(target!=m&&target!=t))
-                return closeDialog();
+            if (dialog.dataset.name==target.dataset.name||(target!=m&&target!=t)) return closeDialog();
             dialog.dataset.name = target.dataset.name;
             if (target==m){
                 dialog.innerHTML = `
@@ -127,13 +125,12 @@ function FeaturesPlus(){
                 dialog.style = 'transform-origin: 56px bottom 0px;';
             }else if (ev.target===t){
                 dialog.innerHTML = `
-<div data-v-0ebe36b2="" class="arrow p-absolute" style="left: 78px;"></div>
-<div id="title-list" style="max-height: 410px;overflow: auto;"><h1 data-v-6cf0c8b2="" class="title">我的头衔</h1>
-  <style type="text/css">#title-list::-webkit-scrollbar{width: 6px;}::-webkit-scrollbar-thumb{border-radius: 10px;background-color: #ccc;}</style--></style>
+<div data-v-0ebe36b2="" class="arrow p-absolute" style="left: 78px;"></div><h1 data-v-6cf0c8b2="" class="title">我的头衔</h1>
+<div id="title-list" style="max-height: 410px;overflow: auto;">
   <div data-v-460dfc36="" class="tv"><div data-v-551093aa="" data-v-460dfc36="" role="progress" class="link-progress-tv"></div></div>
-  <a data-v-6cf0c8b2="" href="//link.bilibili.com/p/center/index#/user-center/wearing-center/library" target="_blank" class="bili-link bottom-link dp-block">
-   <span data-v-6cf0c8b2="" title="前往头衔管理页面" class="v-middle">管理我的头衔</span><i data-v-6cf0c8b2="" class="icon-font icon-arrow-right v-middle"></i></a>
-</div>`;
+</div>
+<a data-v-6cf0c8b2="" href="//link.bilibili.com/p/center/index#/user-center/wearing-center/library" target="_blank" class="bili-link bottom-link dp-block">
+  <span data-v-6cf0c8b2="" title="前往头衔管理页面" class="v-middle">管理我的头衔</span><i data-v-6cf0c8b2="" class="icon-font icon-arrow-right v-middle"></i></a>`;
                 const xhr = new XMLHttpRequest();
                 xhr.open('GET','//api.live.bilibili.com/i/api/ajaxTitleInfo?had=1&page=1&pageSize=300');
                 xhr.withCredentials = true;
@@ -147,7 +144,7 @@ function FeaturesPlus(){
             if (dialog.classList.contains('v-enter')){
                 dialog.dataset.name = '';
                 dialog.className = 'dialog-ctnr common-popup-wrap p-absolute border-box z-chat-control-panel-dialog bottom v-leave a-scale-out';
-                setTimeout(()=>dialog.style='display:none;',300);
+                setTimeout(()=>{dialog.style='display:none;';},300);
             }
         };
         const doRequire = (url,text) => {
@@ -177,8 +174,7 @@ function FeaturesPlus(){
             adj.send(null);
         };
         const listTitle =res=>{
-            const listPanel = dialog.lastElementChild;
-            const point = listPanel.lastElementChild;
+            const listPanel = dialog.querySelector('#title-list');
             const loadingDiv = dialog.querySelector('.tv');
             try{
                 const data = JSON.parse(res.target.response);
@@ -199,7 +195,7 @@ function FeaturesPlus(){
                     /*item.innerHTML+= `<span data-v-0c0ef647="" title="升级进度：${0}/3500000000 升级还差：${0}" class="intimacy-bar dp-i-block v-center over-hidden p-relative">
                     <span data-v-0c0ef647="" class="dp-i-block v-top h-100" style="width: ${0}%;"></span></span><span title="头衔经验" class="intimacy-text">${0}/${3500000000}</span>`;*/
                     item.firstElementChild.addEventListener('click',()=>doRequire(`//api.live.bilibili.com/i/${v.wear?`ajaxCancelWearTitle`:`ajaxWearTitle?id=${v.id}&cid=${v.cid}`}`,`${v.wear?'取消佩戴':'切换'}头衔`));
-                    listPanel.insertBefore(item,point);
+                    listPanel.appendChild(item);
                 });
             }catch (e){
                 loadingDiv.innerHTML = `<p class="des">解析返回错误${e}～</p>`;
@@ -232,7 +228,7 @@ function FeaturesPlus(){
                 }
                 listPanel.removeChild(loadingDiv);
                 data.data.fansMedalList.forEach((v)=>{
-                    if (owner==v.target_id)  hasMedal = true;
+                    if (owner==v.target_id) hasMedal = true;
                     const item = document.createElement('div');
                     item.className = 'medal-intimacy';
                     item.dataset['v-0c0ef647'] = "";
@@ -329,9 +325,9 @@ function FeaturesPlus(){
 			<button class="bilibili-live-player-gfs-give-confirm">赠送</button>
 		</div>
 	</div>`;
-            sendPanel.querySelector('input[value="silver"]').onchange = ()=>type='silver';
-            sendPanel.querySelector('input[value="gold"]').onchange = ()=>type='gold';
-            sendPanel.querySelector('.bilibili-live-player-gfs-give-counter').onchange = (ev)=>num=ev.target.value;
+            sendPanel.querySelector('input[value="silver"]').onchange = ()=>{type='silver';};
+            sendPanel.querySelector('input[value="gold"]').onchange = ()=>{type='gold';};
+            sendPanel.querySelector('.bilibili-live-player-gfs-give-counter').onchange = (ev)=>{num=ev.target.value;};
             sendPanel.querySelector('.bilibili-live-player-gfs-give-close').onclick = ()=>document.body.removeChild(sendPanel);
             sendPanel.querySelector('.bilibili-live-player-gfs-give-confirm').onclick = ()=>{
                 document.body.removeChild(sendPanel);
@@ -383,7 +379,7 @@ function FeaturesPlus(){
                         const g = gifts[i];
                         items.innerHTML += `<div data-index="${i}" style="background-image: url(${g.img_basic});width: 45px;height: 45px;" class="bg-cover dp-i-block pointer" title="${g.name}"></div>`;
                     }
-                    [].forEach.call(items.childNodes,c=>c.onclick = sendGift);
+                    [].forEach.call(items.childNodes,c=>{c.onclick = sendGift;});
                     list.appendChild(items);
                 };
                 xhr.send(null);
