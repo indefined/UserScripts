@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        bilibili直播间功能增强
 // @namespace   indefined
-// @version     0.3.0
+// @version     0.3.1
 // @author      indefined
 // @description 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、其它礼物（测试）、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @supportURL  https://github.com/indefined/UserScript-for-Bilibili/issues
@@ -44,7 +44,9 @@ function AddStyle(){
     position: relative!important;
     width: 100%!important;
     border: none!important;
+    border-radius: 0!important;
     height: unset!important;
+    display: block!important;
 }
 
 body.fullscreen-fix div#gift-control-vm {
@@ -66,6 +68,10 @@ body.fullscreen-fix div#gift-control-vm {
 
 .bilibili-live-player-video-controller .supporting-info {
     display: none!important;
+}
+
+.bilibili-live-player-video-controller .gift-section.gift-list{
+    vertical-align: middle!important;
 }
 
 .bilibili-live-player-video-controller .gift-panel-box {
