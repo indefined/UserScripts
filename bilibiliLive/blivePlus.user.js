@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name        bilibili直播间功能增强
 // @namespace   indefined
-// @version     0.3.1
+// @version     0.3.2
 // @author      indefined
-// @description 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、其它礼物（测试）、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
+// @description 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)、亿元等其它礼物（测试）
 // @supportURL  https://github.com/indefined/UserScript-for-Bilibili/issues
 // @include     /^https?:\/\/live\.bilibili\.com\/\d/
 // @license     MIT
@@ -105,10 +105,9 @@ function FeaturesPlus(){
     const bottomPanel = inputPanel.nextSibling;
     const sendButton = bottomPanel.lastChild;
     if (giftPackage&&giftPanel){
+        giftPackage.className = "dp-i-block v-middle pointer p-relative bg-cover";
+        giftPackage.style = "background-image: url(//s1.hdslb.com/bfs/live/d57afb7c5596359970eb430655c6aef501a268ab.png);width: 48px;height: 48px;margin-right: 10px;background-position-y: -1px;";
         const guardIcon = document.querySelector('div.m-guard-ent.gift-section.guard-ent');
-        giftPackage.className = 'p-relative pointer dp-i-block v-bottom bg-cover box-icon open';
-        giftPackage.setAttribute('data-v-cf847d96','');
-        giftPackage.style = "background-position: 0 -3px;";
         giftPackage.title = '道具包裹';
         while (giftPackage.firstElementChild) giftPackage.removeChild(giftPackage.firstElementChild);
         if (guardIcon) giftPanel.removeChild(guardIcon);
