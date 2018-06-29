@@ -1,10 +1,15 @@
 // ==UserScript==
 // @name        bilibili直播间功能增强
 // @namespace   indefined
-// @version     0.3.2
+// @supportURL  https://github.com/indefined/UserScript-for-Bilibili/issues
+// @version     0.3.3
 // @author      indefined
 // @description 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)、亿元等其它礼物（测试）
-// @supportURL  https://github.com/indefined/UserScript-for-Bilibili/issues
+
+// @compatible  chrome Chrome 66.0.3359.181 in TamperMonkey v4.6
+// @compatible  firefox Firefox 60.0.1 (64 位) in GreaseMonkey 4.40 & Tampermonkey v4.7.5788 测试通过
+// @compatible  EDGE 脚本0.3.2 in TamperMonkey v4.6测试通过
+// @compatible  others 未测试
 // @include     /^https?:\/\/live\.bilibili\.com\/\d/
 // @license     MIT
 // @run-at      document-idle
@@ -26,9 +31,17 @@ function AddStyle(){
     const style = document.createElement('style');
     style.type = 'text/css';
     style.innerHTML = `
-.gift .expires {
-    margin-left: -29px!important;
+.gift-item-wrap .expiration[data-v-460dfc36] {
+    padding: 1px 5px!important;
     border-radius: 15px!important;
+    width: 58%!important;
+    text-align: center!important;
+    right: 5px!important;
+    word-break: keep-all!important;
+}
+
+.gift-item-wrap[data-v-460dfc36] {
+    margin: 15px 0px 0px 5px!important;
 }
 
 .common-popup-wrap.arrow-bottom.popup {
