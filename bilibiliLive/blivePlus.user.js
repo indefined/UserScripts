@@ -2,7 +2,7 @@
 // @name        bilibili直播间功能增强
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScript-for-Bilibili/issues
-// @version     0.3.3.1
+// @version     0.3.3.3
 // @author      indefined
 // @description 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)、亿元等其它礼物（测试）
 
@@ -31,21 +31,93 @@ function AddStyle(){
     const style = document.createElement('style');
     style.type = 'text/css';
     style.innerHTML = `
-.gift-item-wrap .expiration[data-v-460dfc36] {
+.title[data-v-6cf0c8b2] ,
+.title[data-v-0c0ef647] ,
+header[data-v-460dfc36] {
+    font-weight: 400;
+    font-size: 18px;
+    margin: 0;
+    color: #23ade5
+}
+
+.bottom-link[data-v-6cf0c8b2] ,
+.bottom-link[data-v-0c0ef647] {
+    margin-top: 16px;
+    text-align: center;
+    font-size: 12px;
+    letter-spacing: 0
+}
+
+.bottom-link .icon-font[data-v-6cf0c8b2] ,
+.bottom-link .icon-font[data-v-0c0ef647] {
+    font-size: 12px;
+    margin-left: 4px
+}
+
+.intimacy-bar[data-v-0c0ef647] {
+    height: 8px;
+    width: 64px;
+    margin: 0 8px;
+    border-radius: 2px;
+    background-color: #e3e8ec
+}
+
+.intimacy-bar>span[data-v-0c0ef647] {
+    background-color: #23ade5
+}
+
+.live-title-icon[data-v-7765e5b3] {
+    display: inline-block;
+    vertical-align: middle;
+    height: 20px
+}
+
+.intimacy-text[data-v-0c0ef647] {
+    font-size: 12px;
+    color: #999;
+    line-height: 16px
+}.medal-intimacy ,
+.title-badge-ctnr{
+    margin-top: 8px;
+}
+
+.arrow[data-v-0ebe36b2] {
+    top: 100%;
+    left: 13px;
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 8px solid #fff
+}
+
+.aside-area-toggle-btn.dp-none.p-absolute {
+    height: 25%;
+}
+
+.gift-item-wrap .expiration {
     padding: 1px 5px!important;
     border-radius: 15px!important;
     text-align: center!important;
     right: 50%!important;
-    line-height: 1.35;
     transform: translate(50%);
+    line-height: 1.35;
     word-break: keep-all!important;
 }
 
-.gift-item-wrap[data-v-460dfc36] {
+.gift-item-wrap {
     margin: 10px 0px 0px 5px!important;
 }
 
-.gift-item-wrap[data-v-460dfc36]:nth-of-type(-n+5) {
+.bilibili-live-player.relative {
+    overflow: visible;
+}
+
+.player-ctnr.left-container.p-relative.z-player-ctnr {
+    z-index: 1001;
+}
+
+.gift-item-wrap:nth-of-type(-n+5) {
     margin-top: 5px!important;
 }
 
@@ -53,7 +125,7 @@ function AddStyle(){
     min-width: 274px!important;
 }
 
-.wrap[data-v-13293d9e] {
+.gift-presets >div .wrap {
     bottom: 50px!important;
 }
 
@@ -71,12 +143,12 @@ body.fullscreen-fix div#gift-control-vm {
     display: block!important;
 }
 
-.bilibili-live-player-video-controller .gift-control-panel .right-part .gift-presets[data-v-fbe31e02] {
+.bilibili-live-player-video-controller .gift-control-panel .right-part .gift-presets {
     height: unset!important;
     margin: 0!important;
 }
 
-.bilibili-live-player-video-controller .gift-control-panel[data-v-fbe31e02] {
+.bilibili-live-player-video-controller .gift-control-panel {
     height: unset!important;
 }
 
@@ -97,11 +169,11 @@ body.fullscreen-fix div#gift-control-vm {
     border: none!important;
 }
 
-.bilibili-live-player-video-controller .gift-control-panel .gift-left-part[data-v-fbe31e02] {
+.bilibili-live-player-video-controller .gift-control-panel .gift-left-part {
     padding-top: 0px!important;
 }
 
-.bilibili-live-player-video-controller .count-down[data-v-cf847d96] {
+.bilibili-live-player-video-controller .count-down {
     margin-top: -10px!important;
 }
 
