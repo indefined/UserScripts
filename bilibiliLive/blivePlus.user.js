@@ -2,7 +2,7 @@
 // @name        bilibili直播间功能增强
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScript-for-Bilibili/issues
-// @version     0.3.4
+// @version     0.3.5
 // @author      indefined
 // @description 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)、亿元等其它礼物（测试）
 
@@ -107,6 +107,7 @@ header[data-v-460dfc36] {
 
 .gift-item-wrap {
     margin: 10px 0px 0px 5px!important;
+    width: unset!important;
 }
 
 .bilibili-live-player.relative {
@@ -123,6 +124,10 @@ header[data-v-460dfc36] {
 
 .common-popup-wrap.arrow-bottom.popup {
     min-width: 274px!important;
+}
+
+.item-box {
+    width: 245px!important;
 }
 
 .gift-presets >div .wrap {
@@ -401,7 +406,10 @@ function FeaturesPlus(){
   <span data-v-0c0ef647="" class="dp-i-block v-top h-100" style="width: ${v.intimacy/v.next_intimacy*100}%;"></span>
 </span>
 <a data-v-0c0ef647="" href="/${v.roomid}" target="_blank"  title="今日亲密度剩余${v.dayLimit-v.todayFeed}\r\n点击前往主播房间" class="intimacy-text">${v.todayFeed}/${v.dayLimit}</a>`;
-                    item.querySelector('.fans-medal-item').addEventListener('click', ()=>doRequire(`//api.live.bilibili.com/i/${v.status?`ajaxCancelWear`:`ajaxWearFansMedal?medal_id=${v.medal_id}`}`,v.status?'取消佩戴勋章':'切换勋章'));
+                    item.querySelector('.fans-medal-item').addEventListener('click', ()=>{
+                        doRequire(`//api.live.bilibili.com/i/${v.status?`ajaxCancelWear`:`ajaxWearFansMedal?medal_id=${v.medal_id}`}`,v.status?'取消佩戴勋章':'切换勋章');
+                        medalButton.click()&medalButton.click();
+                    });
                     listPanel.insertBefore(item,point);
                 });
             }catch (e){
