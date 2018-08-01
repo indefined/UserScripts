@@ -3,9 +3,9 @@ B站网页端添加APP首页推荐
 
 [脚本发布页](https://greasyfork.org/zh-CN/scripts/368446)
 
-[直播间功能增强脚本](https://greasyfork.org/zh-CN/scripts/368635)
+[个人脚本仓库](https://github.com/indefined/UserScripts)
 
-[问题反馈到这里](https://github.com/indefined/UserScript-for-Bilibili/issues)
+[问题反馈到这里](https://github.com/indefined/UserScripts/issues)
 
 **提交问题前请仔细读完说明和使用须知**
 

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        bilibili直播间功能增强
 // @namespace   indefined
-// @supportURL  https://github.com/indefined/UserScript-for-Bilibili/issues
+// @supportURL  https://github.com/indefined/UserScripts/issues
 // @version     0.3.5
 // @author      indefined
 // @description 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)、亿元等其它礼物（测试）

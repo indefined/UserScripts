@@ -4,7 +4,7 @@
 // @version      0.2.4
 // @description  为B站网页端首页添加APP首页推荐内容，提供添加/撤销稍后再看、不喜欢/撤销不喜欢功能，同时提供全站排行榜
 // @author       indefined
-// @supportURL   https://github.com/indefined/UserScript-for-Bilibili/issues
+// @supportURL   https://github.com/indefined/UserScripts
 // @match        *://www.bilibili.com/
 // @license      MIT
 // @connect      app.bilibili.com
