@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.2.4
-// @description  为B站网页端首页添加APP首页推荐内容，提供添加/撤销稍后再看、不喜欢/撤销不喜欢功能，同时提供全站排行榜
+// @version      0.2.5
+// @description  因B站鉴权提升，削减功能，API公开
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts
 // @match        *://www.bilibili.com/
@@ -13,6 +13,7 @@
 // @run-at       document-idle
 // ==/UserScript==
 
+const displayDislike = false;
 const token = (()=>{
     try{
         return document.cookie.match(/bili_jct=([0-9a-fA-F]{32})/)[1];
@@ -113,7 +114,7 @@ function CreateCss(){
 function InitRecommend () {
     recommend.id = 'recommend';
     recommend.querySelector('div.zone-title').innerHTML = `<div class="headline clearfix ">
-		<i class="icon icon_t icon-douga"></i><span class="name">猜你喜欢</span>
+		<i class="icon icon_t icon-douga"></i><span class="name">推荐</span>
 		<div class="read-push"><i class="icon icon_read"></i><span class="info">换一批</span></div></div>`;
     const popular = document.querySelector('#home_popularize');
     const listBox = recommend.querySelector('div.storey-box.clearfix');
@@ -164,7 +165,7 @@ function InitRecommend () {
 		  <span class="danmu"><i class="icon"></i>${formatNumber(data.danmaku)}</span>
 		  </p></a>`;
         item.querySelector('.watch-later-trigger').onclick = WatchLater;
-        if (data.dislike_reasons){
+        if (data.dislike_reasons&&displayDislike){
             const dislikeList = item.querySelector('.dislike-list');
             for (const reason of data.dislike_reasons){
                 const dislikeItem = document.createElement('div');
