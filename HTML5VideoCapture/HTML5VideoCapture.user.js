@@ -1,12 +1,14 @@
 // ==UserScript==
 // @name         HTML5视频截图器
 // @namespace    indefined
+// @supportURL   https://github.com/indefined/UserScripts/issues
 // @version      0.2
 // @description  基于HTML5的原生javascript视频截图器
 // @author       indefined
 // @include      *://*
 // @run-at       document-idle
 // @grant        GM_registerMenuCommand
+// @license      MIT
 // ==/UserScript==
 
 function init(){
@@ -113,6 +115,6 @@ function init(){
     detechVideo();
 }
 if ('function'==typeof(GM_registerMenuCommand)){
-    if (top!=window) return; //todo:解决子窗口中的视频处理并不覆盖父窗口
-    GM_registerMenuCommand('启用HTML5视频截图器',init);
+    if (top==window) GM_registerMenuCommand('启用HTML5视频截图器',init);
+    //todo:解决子窗口中的视频处理并不覆盖父窗口
 }else init();
