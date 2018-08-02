@@ -8,8 +8,11 @@ Bilibili App首页API
 -------------------------
 ## 获取首页内容
 Host: app.bilibili.com
+
 Methor: GET
+
 Path: /x/feed/index
+
 Cookie: 20180727后使用网页端登录cookie鉴权似乎不再被服务器接受，cookie非必要
 
 #### QueryString
@@ -46,8 +49,11 @@ Cookie: 20180727后使用网页端登录cookie鉴权似乎不再被服务器接�
 -------------------------
 ## 提交不喜欢
 Host: app.bilibili.com
+
 Methor: GET
+
 Path: /x/feed/dislike
+
 Cookie: 20180727后使用网页端登录cookie鉴权似乎不再被服务器接受，cookie非必要
 
 #### QueryString
@@ -82,8 +88,11 @@ Cookie: 20180727后使用网页端登录cookie鉴权似乎不再被服务器接�
 -------------------------
 ## 撤销不喜欢
 Host: app.bilibili.com
+
 Methor: GET
+
 Path: /x/feed/index/cancel
+
 Cookie: 20180727后使用网页端登录cookie鉴权似乎不再被服务器接受，cookie非必要
 
 #### QueryString

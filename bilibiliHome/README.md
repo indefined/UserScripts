@@ -16,7 +16,7 @@ B站网页端添加APP首页推荐
 
 同时不喜欢功能也因为失效移除显示，功能保留，如需显示可将第16行`const displayDislike = false;`改为`const displayDislike = true;`，但在缺少登录鉴权前提下该功能会返回未登录错误。
 
-由于提升的鉴权要求对网页端实现不友好，且在网页端保存鉴权存在一定安全隐患，故本决定暂停本脚本更新。如有意自行实现该接口可[查看完整API](https://github.com/indefined/UserScripts/blob/master/bilibiliHome/bilibiliHome.API.md)。
+由于提升的鉴权要求对网页端实现不友好，且在网页端保存鉴权存在一定安全隐患，故决定暂停本脚本更新。如有意自行实现该接口可[查看完整API](https://github.com/indefined/UserScripts/blob/master/bilibiliHome/bilibiliHome.API.md)。
 
 如果有迹象该接口恢复以前的可用状态（`const displayDislike = true;`启用后可正常提交不喜欢）或者有新的可行接口方案请到[这里反馈](https://github.com/indefined/UserScripts/issues/3)，我会视情况决定是否重启此脚本开发。
 
