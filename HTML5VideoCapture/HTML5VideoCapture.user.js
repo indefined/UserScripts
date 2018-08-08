@@ -14,7 +14,7 @@
 function init(){
     'use strict';
     if (document.querySelector('#HTML5VideoCapture')) return;
-    let videos,video;
+    let videos,video,selectId;
     function videoShot(down){
         if (!video) return postMsg('shot',down);
         const canvas = document.createElement("canvas");
@@ -40,15 +40,7 @@ function init(){
     function videoPlay(id){
         if (!video) return postMsg('play');
         video.paused?video.play():video.pause();
-        if (window==top) play.value = video.paused?'暂停':'播放';
-        else{
-            top.postMessage({
-                action:'captureReport',
-                about:'videoStatus',
-                value:video.paused,
-                id:window.captureId
-            },'*');
-        }
+        videoStatusUpdate();
     }
 
     function videoStep(action){
@@ -73,19 +65,44 @@ function init(){
         }else{
             appendSelector(videos);
             setTimeout(()=>{
-                if (selector.childNodes.length) return videoSelect();
+                if (selector.childNodes.length) return videoSelect(selector.value);
                 video = undefined;
                 const toast = document.createElement('div');
                 toast.style = `position: fixed;top: 50%;left: 50%;z-index: 999999;padding: 10px;background: darkcyan;transform: translate(-50%);color: #fff;border-radius: 6px;`
                 toast.innerText = '当前页面没有检测到HTML5视频';
                 document.body.appendChild(toast);
                 setTimeout(()=>toast.remove(),2000);
-            },200);
+            },100);
         }
         if (window.frames.length){
-            [].forEach.call(window.frames,(w,i)=>w.postMessage({action:'captureDetech',id:i},'*'));
+            [].forEach.call(window.frames,(w,i)=>w.postMessage({
+                action:'captureDetech',
+                id:window.captureId==undefined?i:window.captureId+'-'+i
+            },'*'));
         }
         console.log(videos);
+    }
+    function videoSelect(id){
+        selectId = id;
+        if (videos[id]){
+            video = videos[id];
+            video.scrollIntoView();
+            videoStatusUpdate();
+        }
+        else {
+            postMsg('select');
+        }
+    }
+    function videoStatusUpdate(){
+        if (window==top) play.value = video.paused?"播放":"暂停";
+        else{
+            top.postMessage({
+                action:'captureReport',
+                about:'videoStatus',
+                value:video.paused,
+                id:window.captureId
+            },'*');
+        }
     }
     window.addEventListener('message', function(ev) {
         //console.info(ev.data);
@@ -97,7 +114,7 @@ function init(){
                 videoDetech();
                 break;
             case 'captureControl':
-                if (ev.source!=top||ev.data.target!=window.captureId) return;
+                if (ev.source!=window.parent||ev.data.target!=window.captureId) return;
                 switch (ev.data.todo){
                     case 'play':
                         videoPlay(ev.data.value);
@@ -109,13 +126,7 @@ function init(){
                         videoStep(ev.data.value);
                         break;
                     case 'select':
-                        video = videos[ev.data.id];
-                        top.postMessage({
-                            action:'captureReport',
-                            about:'videoStatus',
-                            value:video.paused,
-                            id:window.captureId
-                        },'*');
+                        videoSelect(ev.data.id);
                         break;
                     default:
                         break;
@@ -129,20 +140,22 @@ function init(){
                 break;
         }
     });
-    if (window!=top) return;
     function postMsg(type,data){
-        if (selector.value=='') return;
-        const s = selector.value.split('-');
-        if (s.length>1&&window.frames[s[0]]){
-            window.frames[s[0]].postMessage({
+        if (selectId==undefined||selectId=='') return;
+        const ids = selectId.split('-');
+        if (ids.length>1){
+            const target = ids.shift();
+            if (!window.frames[target]) return;
+            window.frames[target].postMessage({
                 action:'captureControl',
-                target:s[0],
+                target:window.captureId==undefined?target:window.captureId+'-'+target,
                 todo:type,
-                id:s[1],
+                id:ids.join('-'),
                 value:data
             },'*');
         }
     }
+    if (window!=top) return;
     function appendSelector(v){
         if (v&&v.length){
             for (let i=0;i<v.length;i++){
@@ -151,16 +164,6 @@ function init(){
                 item.innerText = v.id!=undefined?v.id+'-'+i:i;
                 selector.appendChild(item);
             }
-        }
-    }
-    function videoSelect(){
-        video = videos[selector.value]||video;
-        if (video){
-            video.scrollIntoView();
-            play.value = video.paused?"播放":"暂停";
-        }
-        else {
-            postMsg('select');
         }
     }
     function dialogMove(ev){
@@ -188,7 +191,7 @@ function init(){
     const {0:title,1:detech,2:selector,3:play,4:preFrame,5:capture,6:captureDown,7:nextFrame,8:close} = panel.childNodes;
     title.onmousedown = dialogMove;
     title.onmouseup = dialogMove;
-    selector.onchange = videoSelect;
+    selector.onchange = ()=>videoSelect(selector.value);
     detech.onclick = videoDetech;
     play.onclick = videoPlay;
     preFrame.onclick = ()=>videoStep('pre');
