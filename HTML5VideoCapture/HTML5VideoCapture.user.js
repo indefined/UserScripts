@@ -2,7 +2,7 @@
 // @name         HTML5视频截图器
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.2
+// @version      0.3.0
 // @description  基于HTML5的原生javascript视频截图器
 // @author       indefined
 // @include      *://*
@@ -14,8 +14,9 @@
 function init(){
     'use strict';
     if (document.querySelector('#HTML5VideoCapture')) return;
-    function shot(){
-        if (!video) return;
+    let videos,video;
+    function videoShot(down){
+        if (!video) return postMsg('shot',down);
         const canvas = document.createElement("canvas");
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
@@ -23,7 +24,7 @@ function init(){
         canvas.getContext('2d')
             .drawImage(video, 0, 0, canvas.width, canvas.height);
         try{
-            if (captureDown!=this) throw `i don't want to do it.`;
+            if (!down) throw `i don't want to do it.`;
             const a = document.createElement('a');
             a.href = canvas.toDataURL('image/jpeg', 0.95);
             a.download = 'capture.jpg';
@@ -35,19 +36,132 @@ function init(){
             imgWin.document.body.appendChild(canvas);
         }
     }
-    function videoPlay(){
-        if (!video) return;
-        this.value = video.paused?'暂停':'播放';
+
+    function videoPlay(id){
+        if (!video) return postMsg('play');
         video.paused?video.play():video.pause();
-    }
-    function videoStep(){
-        if (!video) return;
-        if (!video.paused){
-            video.pause();
-            play.value='播放';
+        if (window==top) play.value = video.paused?'暂停':'播放';
+        else{
+            top.postMessage({
+                action:'captureReport',
+                about:'videoStatus',
+                value:video.paused,
+                id:window.captureId
+            },'*');
         }
-        if (preFrame==this) video.currentTime -= 1/30;
+    }
+
+    function videoStep(action){
+        if (!video) return postMsg('step',action);
+        if (!video.paused) videoPlay();
+        if (action=='pre') video.currentTime -= 1/30;
         else video.currentTime += 1/30;
+    }
+
+    function videoDetech(){
+        if (window==top){
+            while(selector.firstChild) selector.removeChild(selector.firstChild);
+        }
+        videos = document.querySelectorAll('video');
+        if (window!=top){
+            top.postMessage({
+                action:'captureReport',
+                about:'videoNums',
+                length:videos.length,
+                id:window.captureId
+            },'*');
+        }else{
+            appendSelector(videos);
+            setTimeout(()=>{
+                if (selector.childNodes.length) return videoSelect();
+                video = undefined;
+                const toast = document.createElement('div');
+                toast.style = `position: fixed;top: 50%;left: 50%;z-index: 999999;padding: 10px;background: darkcyan;transform: translate(-50%);color: #fff;border-radius: 6px;`
+                toast.innerText = '当前页面没有检测到HTML5视频';
+                document.body.appendChild(toast);
+                setTimeout(()=>toast.remove(),2000);
+            },200);
+        }
+        if (window.frames.length){
+            [].forEach.call(window.frames,(w,i)=>w.postMessage({action:'captureDetech',id:i},'*'));
+        }
+        console.log(videos);
+    }
+    window.addEventListener('message', function(ev) {
+        //console.info(ev.data);
+        if (!ev.data.action) return;
+        switch (ev.data.action){
+            case 'captureDetech':
+                if (ev.source!=window.parent) return;
+                window.captureId = ev.data.id;
+                videoDetech();
+                break;
+            case 'captureControl':
+                if (ev.source!=top||ev.data.target!=window.captureId) return;
+                switch (ev.data.todo){
+                    case 'play':
+                        videoPlay(ev.data.value);
+                        break;
+                    case 'shot':
+                        videoShot(ev.data.value);
+                        break;
+                    case 'step':
+                        videoStep(ev.data.value);
+                        break;
+                    case 'select':
+                        video = videos[ev.data.id];
+                        top.postMessage({
+                            action:'captureReport',
+                            about:'videoStatus',
+                            value:video.paused,
+                            id:window.captureId
+                        },'*');
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            case 'captureReport':
+                if (ev.data.about=='videoNums') appendSelector(ev.data);
+                else if (ev.data.about=='videoStatus'&&selector.value.startsWith(ev.data.id)){
+                    play.value = ev.data.value?"播放":"暂停";;
+                }
+                break;
+        }
+    });
+    if (window!=top) return;
+    function postMsg(type,data){
+        if (selector.value=='') return;
+        const s = selector.value.split('-');
+        if (s.length>1&&window.frames[s[0]]){
+            window.frames[s[0]].postMessage({
+                action:'captureControl',
+                target:s[0],
+                todo:type,
+                id:s[1],
+                value:data
+            },'*');
+        }
+    }
+    function appendSelector(v){
+        if (v&&v.length){
+            for (let i=0;i<v.length;i++){
+                const item = document.createElement('option');
+                item.value = v.id!=undefined?v.id+'-'+i:i;
+                item.innerText = v.id!=undefined?v.id+'-'+i:i;
+                selector.appendChild(item);
+            }
+        }
+    }
+    function videoSelect(){
+        video = videos[selector.value]||video;
+        if (video){
+            video.scrollIntoView();
+            play.value = video.paused?"播放":"暂停";
+        }
+        else {
+            postMsg('select');
+        }
     }
     function dialogMove(ev){
         if (ev.type=='mousedown'){
@@ -63,31 +177,6 @@ function init(){
             panel.style.left = ev.pageX-panel.l+'px';
         }
     }
-
-    function detechVideo(){
-        while(selector.firstChild) selector.removeChild(selector.firstChild);
-        videos = document.querySelectorAll('video');
-        if (videos.length){
-            for (let i=0;i<videos.length;i++){
-                const item = document.createElement('option');
-                item.value = i;
-                item.innerText = i;
-                selector.appendChild(item);
-            }
-            video = videos[0];
-            play.value = video.paused?"播放":"暂停";
-        }
-        else{
-            video = undefined;
-            const toast = document.createElement('div');
-            toast.style = `position: fixed;top: 50%;left: 50%;z-index: 999999;padding: 10px;background: darkcyan;transform: translate(-50%);color: #fff;border-radius: 6px;`
-            toast.innerText = '当前页面没有检测到HTML5视频';
-            document.body.appendChild(toast);
-            setTimeout(()=>toast.remove(),2000);
-        }
-        console.log(videos);
-    }
-    let videos,video;
     const panel = document.createElement('div');
     panel.id = "HTML5VideoCapture";
     panel.style = `position: fixed;top: 50px;left: 20px;z-index: 999999;padding: 10px;background: darkcyan;`
@@ -99,22 +188,17 @@ function init(){
     const {0:title,1:detech,2:selector,3:play,4:preFrame,5:capture,6:captureDown,7:nextFrame,8:close} = panel.childNodes;
     title.onmousedown = dialogMove;
     title.onmouseup = dialogMove;
-    selector.onchange = function(){
-        video = videos[this.value]||video;
-        play.value = video.paused?"播放":"暂停";
-        video.scrollIntoView()
-    };
-    detech.onclick = detechVideo;
+    selector.onchange = videoSelect;
+    detech.onclick = videoDetech;
     play.onclick = videoPlay;
-    preFrame.onclick = videoStep;
-    nextFrame.onclick = videoStep;
-    capture.onclick = shot;
-    captureDown.onclick = shot;
+    preFrame.onclick = ()=>videoStep('pre');
+    nextFrame.onclick = ()=>videoStep('next');
+    capture.onclick = ()=>videoShot();
+    captureDown.onclick = ()=>videoShot(true);
     close.onclick = ()=>panel.remove();
     document.body.appendChild(panel);
-    detechVideo();
+    videoDetech();
 }
-if ('function'==typeof(GM_registerMenuCommand)){
-    if (top==window) GM_registerMenuCommand('启用HTML5视频截图器',init);
-    //todo:解决子窗口中的视频处理并不覆盖父窗口
+if ('function'==typeof(GM_registerMenuCommand) && window==top){
+    GM_registerMenuCommand('启用HTML5视频截图器',init);
 }else init();
