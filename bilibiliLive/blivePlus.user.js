@@ -2,9 +2,9 @@
 // @name        bilibili直播间功能增强
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.3.5
+// @version     0.3.6
 // @author      indefined
-// @description 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)、亿元等其它礼物（测试）
+// @description 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 
 // @compatible  chrome Chrome 66.0.3359.181 in TamperMonkey v4.6 测试通过
 // @compatible  firefox Firefox 60.0.1 (64 位) in GreaseMonkey 4.40 & Tampermonkey v4.7.5788 测试通过
@@ -14,7 +14,7 @@
 // @license     MIT
 // @run-at      document-idle
 // ==/UserScript==
-const showNewGift = true;
+const showNewGift = false;
 try{
 	AddStyle();
 	if (document.querySelector('.gift-package')) FeaturesPlus();
@@ -144,6 +144,25 @@ header[data-v-460dfc36] {
     display: block!important;
 }
 
+#giftPackage {
+    bottom:0px;
+    background-image: url(//s1.hdslb.com/bfs/live/d57afb7c5596359970eb430655c6aef501a268ab.png);
+    width: 48px;
+    height: 48px;
+    margin-right: 10px;
+    background-position-y: -1px;
+}
+
+#giftPackage:after {
+    content: '道具包裹';
+    position: relative;
+    bottom: -55px;
+}
+
+.bilibili-live-player-video-controller #giftPackage {
+    bottom:11px;
+}
+
 body.fullscreen-fix div#gift-control-vm {
     display: block!important;
 }
@@ -174,10 +193,6 @@ body.fullscreen-fix div#gift-control-vm {
     border: none!important;
 }
 
-.bilibili-live-player-video-controller .gift-control-panel .gift-left-part {
-    padding-top: 0px!important;
-}
-
 .bilibili-live-player-video-controller .count-down {
     margin-top: -10px!important;
 }
@@ -201,11 +216,10 @@ function FeaturesPlus(){
     const sendButton = bottomPanel.lastChild;
     if (giftPackage&&giftPanel){
         giftPackage.className = "dp-i-block v-middle pointer p-relative bg-cover";
-        giftPackage.style = "background-image: url(//s1.hdslb.com/bfs/live/d57afb7c5596359970eb430655c6aef501a268ab.png);width: 48px;height: 48px;margin-right: 10px;background-position-y: -1px;";
+        giftPackage.id = "giftPackage";
         const guardIcon = document.querySelector('div.m-guard-ent.gift-section.guard-ent');
-        giftPackage.title = '道具包裹';
         while (giftPackage.firstElementChild) giftPackage.removeChild(giftPackage.firstElementChild);
-        if (guardIcon) giftPanel.removeChild(guardIcon);
+        if (guardIcon) guardIcon.parentNode.removeChild(guardIcon);
         giftPanel.appendChild(giftPackage);
     }
     if (giftPackage&&toolBar&&playerPanel){
@@ -456,7 +470,7 @@ function FeaturesPlus(){
             const appendDiv = document.createElement('div');
             appendDiv.className = 'dp-i-block v-middle';
             appendDiv.innerHTML = `<div class="dp-i-block v-middle pointer p-relative bg-cover" title="其它礼物" style="background-image: url(//s1.hdslb.com/bfs/live/592e81002d20699c7e4dae4480ada79ab3253eae.png);width: 48px;height: 48px;margin-right: 10px;"></div>`;
-            giftPanel.insertBefore(appendDiv,giftPackage);
+            giftPanel.appendChild(appendDiv);
             return appendDiv.firstElementChild;
         })();
         const sendGift = ev =>{
