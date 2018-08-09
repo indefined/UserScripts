@@ -2,7 +2,7 @@
 // @name        bilibili直播间功能增强
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.3.6
+// @version     0.3.6.1
 // @author      indefined
 // @description 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 
@@ -76,9 +76,6 @@ header[data-v-460dfc36] {
     font-size: 12px;
     color: #999;
     line-height: 16px
-}.medal-intimacy ,
-.title-badge-ctnr{
-    margin-top: 8px;
 }
 
 .arrow[data-v-0ebe36b2] {
@@ -134,6 +131,10 @@ header[data-v-460dfc36] {
     bottom: 50px!important;
 }
 
+.gift-item .info .label {
+    color: unset!important;
+}
+
 .bilibili-live-player-video-controller #gift-control-vm {
     background: rgba(0, 0, 0, 0.7)!important;
     position: relative!important;
@@ -157,10 +158,11 @@ header[data-v-460dfc36] {
     content: '道具包裹';
     position: relative;
     bottom: -55px;
+    left: 4px;
 }
 
 .bilibili-live-player-video-controller #giftPackage {
-    bottom:11px;
+    bottom:13px;
 }
 
 body.fullscreen-fix div#gift-control-vm {
@@ -170,6 +172,7 @@ body.fullscreen-fix div#gift-control-vm {
 .bilibili-live-player-video-controller .gift-control-panel .right-part .gift-presets {
     height: unset!important;
     margin: 0!important;
+    bottom: -5px;
 }
 
 .bilibili-live-player-video-controller .gift-control-panel {
@@ -245,7 +248,7 @@ function FeaturesPlus(){
             }
             if (newValue=='fullscreen'){
                 sendButton.className = 'dp-i-block v-middle';
-                inputBox.className = 'dp-i-block v-bottom';
+                inputBox.className = 'dp-i-block v-middle';
                 inputBox.style = 'width:300px;margin-right: 5px;';
                 inputBox.lastChild.style = 'right: 90px;';
                 giftPanel.appendChild(inputBox);
@@ -369,8 +372,7 @@ function FeaturesPlus(){
                 listPanel.removeChild(loadingDiv);
                 data.data.list.forEach((v)=>{
                     const item = document.createElement('div');
-                    item.dataset['v-6cf0c8b2'] = '';
-                    item.className = 'title-badge-ctnr';
+                    item.style = 'margin-top: 12px';
                     item.innerHTML = `<img data-v-7765e5b3="" title="${v.name} ${v.source}\r\n${v.wear?'当前佩戴头衔，点击取消佩戴':'点击佩戴'}" data-v-6cf0c8b2="" src="//s1.hdslb.com/bfs/static/blive/live-assets/title/${v.id}-${v.cid}.png" class="live-title-icon pointer">`;
                     /*item.innerHTML+= `<span data-v-0c0ef647="" title="升级进度：${0}/3500000000 升级还差：${0}" class="intimacy-bar dp-i-block v-center over-hidden p-relative">
                     <span data-v-0c0ef647="" class="dp-i-block v-top h-100" style="width: ${0}%;"></span></span><span title="头衔经验" class="intimacy-text">${0}/${3500000000}</span>`;*/
@@ -410,8 +412,7 @@ function FeaturesPlus(){
                 data.data.fansMedalList.forEach((v)=>{
                     if (owner==v.target_id) hasMedal = true;
                     const item = document.createElement('div');
-                    item.className = 'medal-intimacy';
-                    item.dataset['v-0c0ef647'] = "";
+                    item.style = 'margin-top: 8px';
                     item.innerHTML = `
 <div data-v-0c0ef647="" title="主播:${v.uname}\r\n点击${v.status?'取消佩戴':'切换'}勋章" class="fans-medal-item v-middle pointer level-${v.level} ${v.status?' special-medal':''}">
   <div class="label">${v.status?`<i class="medal-deco union"></i>`:''}<span class="content">${v.medalName}</span></div><span class="level">${v.level}</span>
