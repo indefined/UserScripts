@@ -2,7 +2,7 @@
 // @name         HTML5视频截图器
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.3.0
+// @version      0.3.1
 // @description  基于HTML5的原生javascript视频截图器
 // @author       indefined
 // @include      *://*
@@ -14,6 +14,7 @@
 function init(){
     'use strict';
     if (document.querySelector('#HTML5VideoCapture')) return;
+    const childs = "undefined"==typeof(unsafeWindow)?window.frames:unsafeWindow.frames;
     let videos,video,selectId;
     function videoShot(down){
         if (!video) return postMsg('shot',down);
@@ -74,8 +75,8 @@ function init(){
                 setTimeout(()=>toast.remove(),2000);
             },100);
         }
-        if (window.frames.length){
-            [].forEach.call(window.frames,(w,i)=>w.postMessage({
+        if (childs.length){
+            [].forEach.call(childs,(w,i)=>w.postMessage({
                 action:'captureDetech',
                 id:window.captureId==undefined?i:window.captureId+'-'+i
             },'*'));
@@ -145,8 +146,8 @@ function init(){
         const ids = selectId.split('-');
         if (ids.length>1){
             const target = ids.shift();
-            if (!window.frames[target]) return;
-            window.frames[target].postMessage({
+            if (!childs[target]) return;
+            childs[target].postMessage({
                 action:'captureControl',
                 target:window.captureId==undefined?target:window.captureId+'-'+target,
                 todo:type,
