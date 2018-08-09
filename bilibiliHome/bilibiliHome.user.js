@@ -4,14 +4,20 @@
 // @version      0.2.5
 // @description  因B站鉴权提升，削减功能，API公开
 // @author       indefined
-// @supportURL   https://github.com/indefined/UserScripts
+// @supportURL   https://github.com/indefined/UserScripts/issues
 // @match        *://www.bilibili.com/
 // @license      MIT
 // @connect      app.bilibili.com
 // @connect      api.bilibili.com
 // @grant        GM_xmlhttpRequest
+// @grant        GM.xmlHttpRequest
 // @run-at       document-idle
 // ==/UserScript==
+
+if (typeof GM_xmlhttpRequest === 'undefined' &&
+    typeof GM === 'object' && typeof GM.xmlHttpRequest === 'function') {
+    GM_xmlhttpRequest = GM.xmlHttpRequest;
+}
 
 const displayDislike = false;
 const token = (()=>{
@@ -37,7 +43,7 @@ const imgType = (()=>{
         return 'jpg';
     }
 })();
-if (token&&recommend){
+if (recommend){
     CreateCss();
     InitRecommend();
     InitRanking();
