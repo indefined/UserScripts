@@ -15,8 +15,8 @@ HTML5视频截图器
 - 检测网页中的HTML5视频
 - 自动将所选中视频滚动到视野中
 - HTML5视频控制(暂停/播放/步进)
-- 基于canvas的视频内容截取
-- 基于dataUrl的视频截取内容自动下载(适用性不强)
+- 视频截图(png格式原始视频画面)
+- jpg截图压缩并自动下载(适用于部分视频和浏览器)
 
 ![功能界面](https://greasyfork.org/system/screenshots/screenshots/000/011/874/original/HTML5VideoCapture.capture.jpg)
 
