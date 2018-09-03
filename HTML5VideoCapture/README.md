@@ -49,6 +49,7 @@ HTML5视频截图器
 
 - chrome 67 in Tampermonkey4.6 、书签测试通过
 - 火狐 in Tampermonkey4.7 、Violentmonkey 、书签测试通过
+- 不兼容Greasemonkey4，因为GM4取消了菜单注册，使用GM4安装脚本会在所有网页自动弹出截图工具栏
 - 使用书签打开工具栏只对没有在嵌入框体中的视频有效
 - 其它浏览器和脚本管理器未知
 
