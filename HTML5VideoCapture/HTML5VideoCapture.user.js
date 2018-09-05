@@ -2,7 +2,7 @@
 // @name         HTML5视频截图器
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.3.1
+// @version      0.3.2
 // @description  基于HTML5的原生javascript视频截图器
 // @author       indefined
 // @include      *://*
@@ -21,19 +21,19 @@ function init(){
         const canvas = document.createElement("canvas");
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
-        canvas.style = "max-width:100%";
         canvas.getContext('2d')
             .drawImage(video, 0, 0, canvas.width, canvas.height);
         try{
             if (!down) throw `i don't want to do it.`;
             const a = document.createElement('a');
             a.href = canvas.toDataURL('image/jpeg', 0.95);
-            a.download = 'capture.jpg';
+            a.download = `${document.title}_${Math.floor(video.currentTime/60)}'${(video.currentTime%60).toFixed(3)}''.jpg`;
             document.head.appendChild(a);
             a.click();
             a.remove();
         }catch(e){
             const imgWin = open("",'_blank');
+            canvas.style = "max-width:100%";
             imgWin.document.body.appendChild(canvas);
         }
     }

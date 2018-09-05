@@ -1,4 +1,4 @@
-用于网页上的一些用户脚本，大多是Tampermonkey用的
+基于Chrome下的Tampermonkey写的一些网页端用户脚本
 
 [bilibili网页端首页增加APP首页推荐](./bilibiliHome/)
 
