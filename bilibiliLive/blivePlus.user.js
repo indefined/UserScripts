@@ -2,7 +2,7 @@
 // @name        bilibili直播间功能增强
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.3.6.1
+// @version     0.3.7
 // @author      indefined
 // @description 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 
@@ -273,7 +273,7 @@ function FeaturesPlus(){
 
     (function strengthSwitcher(){
         const cover = document.querySelector('.room-cover.dp-i-block.p-relative.bg-cover');
-        let owner;
+        let owner,titleInfos;
         if (cover&&cover.href) owner = cover.href.match(/\d+/)[0];
         const medalButton = bottomPanel.querySelector('.action-item.medal');
         const titleButton = bottomPanel.querySelector('.action-item.title');
@@ -356,7 +356,7 @@ function FeaturesPlus(){
             };
             adj.send(null);
         };
-        const listTitle =res=>{
+        const listTitle =async res=>{
             const listPanel = dialog.querySelector('#title-list');
             const loadingDiv = dialog.querySelector('.tv');
             try{
@@ -370,10 +370,28 @@ function FeaturesPlus(){
                     return;
                 }
                 listPanel.removeChild(loadingDiv);
+                if (!titleInfos){
+                    await new Promise((resolve, reject) => {
+                        const xhr = new XMLHttpRequest();
+                        xhr.open("GET", '//api.live.bilibili.com/rc/v1/Title/webTitles');
+                        xhr.responseType = "json";
+                        xhr.onload = titles => {
+                            const {data,code} = titles.target.response;
+                            if (code!=0||!(data instanceof Array)) resolve();
+                            titleInfos = {};
+                            data.forEach(title=>{
+                                titleInfos[title.identification] = title.web_pic_url;
+                            });
+                            resolve();
+                        }
+                        xhr.onerror = () => reject();
+                        xhr.send();
+                    });
+                }
                 data.data.list.forEach((v)=>{
                     const item = document.createElement('div');
                     item.style = 'margin-top: 12px';
-                    item.innerHTML = `<img data-v-7765e5b3="" title="${v.name} ${v.source}\r\n${v.wear?'当前佩戴头衔，点击取消佩戴':'点击佩戴'}" data-v-6cf0c8b2="" src="//s1.hdslb.com/bfs/static/blive/live-assets/title/${v.id}-${v.cid}.png" class="live-title-icon pointer">`;
+                    item.innerHTML = `<img alt="${v.name}" title="${v.name} ${v.source}\r\n${v.wear?'当前佩戴头衔，点击取消佩戴':'点击佩戴'}" src="${titleInfos[v.css]}" class="live-title-icon pointer">`;
                     /*item.innerHTML+= `<span data-v-0c0ef647="" title="升级进度：${0}/3500000000 升级还差：${0}" class="intimacy-bar dp-i-block v-center over-hidden p-relative">
                     <span data-v-0c0ef647="" class="dp-i-block v-top h-100" style="width: ${0}%;"></span></span><span title="头衔经验" class="intimacy-text">${0}/${3500000000}</span>`;*/
                     item.firstElementChild.addEventListener('click',()=>doRequire(`//api.live.bilibili.com/i/${v.wear?`ajaxCancelWearTitle`:`ajaxWearTitle?id=${v.id}&cid=${v.cid}`}`,`${v.wear?'取消佩戴':'切换'}头衔`));
