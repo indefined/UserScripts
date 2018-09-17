@@ -2,7 +2,7 @@
 // @name        bilibili直播间功能增强
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.3.7
+// @version     0.3.7.1
 // @author      indefined
 // @description 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 
@@ -369,7 +369,6 @@ function FeaturesPlus(){
                     loadingDiv.innerHTML = `<p class="des">没有头衔哦～</p>`;
                     return;
                 }
-                listPanel.removeChild(loadingDiv);
                 if (!titleInfos){
                     await new Promise((resolve, reject) => {
                         const xhr = new XMLHttpRequest();
@@ -384,10 +383,11 @@ function FeaturesPlus(){
                             });
                             resolve();
                         }
-                        xhr.onerror = () => reject();
+                        xhr.onerror = () => resolve();
                         xhr.send();
                     });
                 }
+                listPanel.removeChild(loadingDiv);
                 data.data.list.forEach((v)=>{
                     const item = document.createElement('div');
                     item.style = 'margin-top: 12px';
