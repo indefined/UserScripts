@@ -2,7 +2,7 @@
 // @name        bilibili直播间功能增强
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.3.7.1
+// @version     0.3.7.2
 // @author      indefined
 // @description 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 
@@ -296,7 +296,7 @@ function FeaturesPlus(){
 <div data-v-0ebe36b2="" class="arrow p-absolute" style="left: 56px;"></div>
   <div data-v-0c0ef647="" data-v-0ebe36b2="" class="medal-ctnr">
    <h1 class="title" data-v-0c0ef647="">我的勋章</h1>
-  <div data-v-460dfc36="" class="tv"><div data-v-551093aa="" data-v-460dfc36="" role="progress" class="link-progress-tv"></div></div>
+  <div data-v-ec1c3b2e="" class="tv"><div data-v-4df82965="" data-v-ec1c3b2e="" role="progress" class="link-progress-tv"></div></div>
   <a data-v-0c0ef647="" href="//link.bilibili.com/p/center/index#/user-center/wearing-center/my-medal" target="_blank" class="bili-link bottom-link dp-block">
    <span data-v-0c0ef647="" title="前往勋章管理页面" class="v-middle">管理我的勋章</span><i data-v-0c0ef647="" class="icon-font icon-arrow-right v-middle"></i></a>
 </div>`;
@@ -310,7 +310,7 @@ function FeaturesPlus(){
                 dialog.innerHTML = `
 <div data-v-0ebe36b2="" class="arrow p-absolute" style="left: 78px;"></div><h1 data-v-6cf0c8b2="" class="title">我的头衔</h1>
 <div id="title-list" style="max-height: 410px;overflow: auto;">
-  <div data-v-460dfc36="" class="tv"><div data-v-551093aa="" data-v-460dfc36="" role="progress" class="link-progress-tv"></div></div>
+  <div data-v-ec1c3b2e="" class="tv"><div data-v-4df82965="" data-v-ec1c3b2e="" role="progress" class="link-progress-tv"></div></div>
 </div>
 <a data-v-6cf0c8b2="" href="//link.bilibili.com/p/center/index#/user-center/wearing-center/library" target="_blank" class="bili-link bottom-link dp-block">
   <span data-v-6cf0c8b2="" title="前往头衔管理页面" class="v-middle">管理我的头衔</span><i data-v-6cf0c8b2="" class="icon-font icon-arrow-right v-middle"></i></a>`;
