@@ -2,7 +2,7 @@
 // @name        bilibili直播间功能增强
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.3.7.3
+// @version     0.3.8
 // @author      indefined
 // @description 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 
@@ -227,6 +227,7 @@ function FeaturesPlus(){
     }
     if (giftPackage&&toolBar&&playerPanel){
         const appendTitle = target=>{
+            if (!target) return;
             const title = document.querySelector('div.normal-mode');
             if (!title) return;
             const match = target.innerText.match(/av\d+/);
@@ -264,11 +265,12 @@ function FeaturesPlus(){
         };
         const handleMutation = mutation=>{
             for (const addedNode of mutation.addedNodes) if (addedNode.className==="bilibili-live-player-video-round-title") appendTitle(addedNode);
-            if (mutation.target.className==="bilibili-live-player-video-round-title")appendTitle(mutation.target);
+            if (mutation.target.className==="bilibili-live-player-video-round-title") appendTitle(mutation.target);
             if (mutation.attributeName=='data-player-state') handleFullScreenPanel(playerPanel.getAttribute('data-player-state'),mutation.oldValue);
         };
         const observer = new MutationObserver(mutations => mutations.forEach(handleMutation));
         observer.observe(playerPanel, { attributes: true, attributeOldValue: true ,childList: true, subtree: true, attributeFilter: ['data-player-state']});
+        appendTitle(document.querySelector('.bilibili-live-player-video-round-title'));
     }
 
     (function strengthSwitcher(){
