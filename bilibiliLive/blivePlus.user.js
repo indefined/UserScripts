@@ -2,7 +2,7 @@
 // @name        bilibili直播间功能增强
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.3.8
+// @version     0.3.9
 // @author      indefined
 // @description 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 
@@ -109,10 +109,6 @@ header[data-v-460dfc36] {
 
 .bilibili-live-player.relative {
     overflow: visible;
-}
-
-.player-ctnr.left-container.p-relative.z-player-ctnr {
-    z-index: 1001;
 }
 
 .gift-item-wrap:nth-of-type(-n+5) {
@@ -279,7 +275,7 @@ function FeaturesPlus(){
         if (cover&&cover.href) owner = cover.href.match(/\d+/)[0];
         const medalButton = bottomPanel.querySelector('.action-item.medal');
         const titleButton = bottomPanel.querySelector('.action-item.title');
-        const dialog = document.querySelector('.dialog-ctnr.common-popup-wrap.p-absolute.border-box.z-chat-control-panel-dialog').cloneNode();
+        const dialog = document.querySelector('.z-chat-control-panel-dialog').cloneNode();
         bottomPanel.parentNode.appendChild(dialog);
         const m = medalButton.cloneNode(true);
         m.dataset.name = 'medal';
