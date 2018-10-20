@@ -2,7 +2,7 @@
 // @name        bilibili直播间功能增强
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.3.11
+// @version     0.3.11.1
 // @author      indefined
 // @description 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 
@@ -568,7 +568,7 @@ function FeaturesPlus(){
         };
         const showGift = ev=>{
             if (!newGift.contains(ev.target)){
-                newGift.lastChild.style.display = 'none';
+                if (newGift.lastChild.style) newGift.lastChild.style.display = 'none';
             }
             else if (!gifts||!room){
                 let xhr = new XMLHttpRequest();
