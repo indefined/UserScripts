@@ -2,7 +2,7 @@
 // @name        bilibili直播间功能增强
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.3.11.2
+// @version     0.3.12
 // @author      indefined
 // @description 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 
@@ -171,6 +171,24 @@ body.fullscreen-fix div#gift-control-vm {
     display: block!important;
 }
 
+.bilibili-live-player-video-controller .gift-control-panel .chat-input-ctnr{
+    display: inline-block!important;
+    vertical-align: middle!important;
+    width:300px;
+    margin-right: 5px;
+    margin-top: 0px;
+}
+
+.bilibili-live-player-video-controller .gift-control-panel .right-action.p-absolute{
+    position: relative!important;
+    display: inline-block!important;
+    vertical-align: middle!important;
+}
+
+.bilibili-live-player-video-controller .gift-control-panel .chat-input.border-box>span{
+    right: 90px;
+}
+
 .bilibili-live-player-video-controller .gift-control-panel .right-part .gift-presets {
     height: unset!important;
     margin: 0!important;
@@ -217,7 +235,7 @@ function FeaturesPlus(){
     const giftPackage = document.querySelector('.gift-package');
     const playerPanel = document.querySelector('.bilibili-live-player.relative');
     const inputPanel = document.querySelector('div.chat-input-ctnr.p-relative');
-    const inputBox = inputPanel.lastChild;
+    const controlPanel = inputPanel.parentNode;
     const bottomPanel = inputPanel.nextSibling;
     const sendButton = bottomPanel.lastChild;
     if (giftPackage&&giftPanel){
@@ -251,18 +269,10 @@ function FeaturesPlus(){
                 screenPanel.appendChild(toolBar);
             }
             if (newValue=='fullscreen'){
-                sendButton.className = 'dp-i-block v-middle';
-                inputBox.className = 'dp-i-block v-middle';
-                inputBox.style = 'width:300px;margin-right: 5px;';
-                inputBox.lastChild.style = 'right: 90px;';
-                giftPanel.appendChild(inputBox);
+                giftPanel.appendChild(inputPanel);
                 giftPanel.appendChild(sendButton);
             }else if(oldValue=='fullscreen'){
-                sendButton.className = 'right-action p-absolute';
-                inputBox.className = '';
-                inputBox.style = '';
-                inputBox.lastChild.style = '';
-                inputPanel.appendChild(inputBox);
+                controlPanel.insertBefore(inputPanel,bottomPanel);
                 bottomPanel.appendChild(sendButton);
             }
         };
