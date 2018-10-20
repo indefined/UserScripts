@@ -2,7 +2,7 @@
 // @name        bilibili直播间功能增强
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.3.11.1
+// @version     0.3.11.2
 // @author      indefined
 // @description 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 
@@ -569,26 +569,33 @@ function FeaturesPlus(){
         const showGift = ev=>{
             if (!newGift.contains(ev.target)){
                 if (newGift.lastChild.style) newGift.lastChild.style.display = 'none';
-            }
-            else if (!gifts||!room){
+            }else if (ev.target==newGift){
+                if (newGift.lastChild.style&&newGift.lastChild.style.display!='none') {
+                    return (newGift.lastChild.style.display = 'none');
+                }
+                else if (gifts&&room) {
+                    return (newGift.lastChild.style.display = 'unset');
+                }
                 let xhr = new XMLHttpRequest();
                 xhr.open('GET','//api.live.bilibili.com/gift/v3/live/gift_config');
                 xhr.withCredentials = true;
                 const list = document.createElement('div');
+                const items = document.createElement('div');
+                items.innerHTML = '<div data-v-ec1c3b2e="" class="tv"><div data-v-4df82965="" data-v-ec1c3b2e="" role="progress" class="link-progress-tv"></div></div>';
                 list.className = 'common-popup-wrap t-left';
                 list.style = 'position: absolute;width: 276px;bottom: 30px;left: 0px;cursor: auto;animation:scale-in-ease 0.4s;transform-origin: 90px bottom 0px;';
                 list.innerHTML = `<div data-v-0ebe36b2="" class="arrow p-absolute" style="left: 90px;"></div><header data-v-460dfc36="">其它礼物</header>`;
+                list.appendChild(items);
                 newGift.appendChild(list);
                 xhr.onload = res=>{
                     gifts = JSON.parse(res.target.response).data;
-                    const items = document.createElement('div');
+                    items.innerHTML = '';
                     items.style = 'height:233px;overflow: auto;'
                     for (let i=0;i<gifts.length;i++){
                         const g = gifts[i];
                         items.innerHTML += `<div data-index="${i}" style="background-image: url(${g.img_basic});width: 45px;height: 45px;" class="bg-cover dp-i-block pointer" title="${g.name}"></div>`;
                     }
                     [].forEach.call(items.childNodes,c=>{c.onclick = sendGift;});
-                    list.appendChild(items);
                 };
                 xhr.send(null);
                 xhr = new XMLHttpRequest();
@@ -597,8 +604,6 @@ function FeaturesPlus(){
                     room = JSON.parse(res.target.response).data;
                 };
                 xhr.send(null);
-            }else if (ev.target==newGift){
-                newGift.lastChild.style.display = newGift.lastChild.style.display=='none'?'unset':'none';
             }
         };
         document.body.addEventListener('click',showGift);
