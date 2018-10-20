@@ -2,7 +2,7 @@
 // @name        bilibili直播间功能增强
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.3.9
+// @version     0.3.10
 // @author      indefined
 // @description 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 
@@ -10,7 +10,7 @@
 // @compatible  firefox Firefox 60.0.1 (64 位) in GreaseMonkey 4.40 & Tampermonkey v4.7.5788 测试通过
 // @compatible  EDGE 脚本0.3.2 in TamperMonkey v4.6测试通过
 // @compatible  others 未测试
-// @include     /^https?:\/\/live\.bilibili\.com\/\d/
+// @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
 // @license     MIT
 // @run-at      document-idle
 // ==/UserScript==
@@ -18,13 +18,16 @@ const showNewGift = false;
 try{
 	AddStyle();
 	if (document.querySelector('.gift-package')) FeaturesPlus();
-	else document.querySelector('.aside-area.p-absolute.border-box.z-aside-area')
-        .addEventListener('DOMNodeInserted',function listener(e){
-        if (e.target.id == 'chat-control-panel-vm'){
-            e.relatedNode.removeEventListener('DOMNodeInserted',listener);
-            FeaturesPlus();
-        }
-    });
+	else{
+        const rightArea = document.querySelector('.aside-area.p-absolute.border-box.z-aside-area')
+        if (!rightArea) return;
+        rightArea.addEventListener('DOMNodeInserted',function listener(e){
+            if (e.target.id == 'chat-control-panel-vm'){
+                e.relatedNode.removeEventListener('DOMNodeInserted',listener);
+                FeaturesPlus();
+            }
+        });
+    }
 } catch (e){console.error('bilibili直播间功能增强脚本执行错误',e);}
 
 function AddStyle(){
@@ -64,6 +67,10 @@ header[data-v-460dfc36] {
 
 .intimacy-bar>span[data-v-0c0ef647] {
     background-color: #23ade5
+}
+
+.lpl-drawer-ctnr[data-v-fd126f5a] {
+    padding-right: 0!important;
 }
 
 .live-title-icon[data-v-7765e5b3] {
@@ -147,7 +154,6 @@ header[data-v-460dfc36] {
     width: 48px;
     height: 48px;
     margin-right: 10px;
-    background-position-y: -1px;
 }
 
 #giftPackage:after {
@@ -187,7 +193,8 @@ body.fullscreen-fix div#gift-control-vm {
     vertical-align: middle!important;
 }
 
-.bilibili-live-player-video-controller .gift-panel-box {
+.bilibili-live-player-video-controller .gift-panel-box ,
+.bilibili-live-player-video-controller .outer-drawer[data-v-fd126f5a]{
     background: none!important;
     border: none!important;
 }
