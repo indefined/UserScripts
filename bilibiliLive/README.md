@@ -21,18 +21,22 @@ bilibili直播间功能增强
 - 网页全屏/全屏下将礼物栏放入播放器中并在鼠标移开时自动隐藏(仅限HTML5播放器)
 - 全屏可用发送弹幕(仅限HTML5播放器)
 - 轮播视频时在标题添加视频转跳连接(仅限HTML5播放器)
-- ~~亿元等其它礼物（[已移除](#关于其它礼物的特别说明)）~~
+- 亿元等其它礼物（[摆设](#关于其它礼物的特别说明)）
 
 -------------------------
 ## 功能预览
 
-鼠标悬停各元素上会显示更多有用的提示信息
 
-![图片预览](https://greasyfork.org/system/screenshots/screenshots/000/011/233/original/blivePlus.medal.png)
-![图片预览](https://greasyfork.org/system/screenshots/screenshots/000/011/234/original/blivePlus.title.png)
-![图片预览](https://greasyfork.org/system/screenshots/screenshots/000/011/399/original/blivePlus.giftPackage.jpg)
-![图片预览](https://greasyfork.org/system/screenshots/screenshots/000/011/400/original/blivePlus.otherGift.jpg)
-![图片预览](https://greasyfork.org/system/screenshots/screenshots/000/011/236/original/blivePlus.videoTitle.png)
+![礼物包裹](https://greasyfork.org/system/screenshots/screenshots/000/012/707/original/blivePlus.normal.jpg)
+
+![勋章](https://greasyfork.org/system/screenshots/screenshots/000/012/708/original/blivePlus.medal.jpg)
+![头衔](https://greasyfork.org/system/screenshots/screenshots/000/011/234/original/blivePlus.title.png)
+
+鼠标悬停勋章头衔列表各部分上会显示更多提示信息
+
+![全屏](https://greasyfork.org/system/screenshots/screenshots/000/012/709/original/blivePlus.fullScreen.jpg)
+
+![视频标题](https://greasyfork.org/system/screenshots/screenshots/000/011/236/original/blivePlus.videoTitle.png)
 
 -------------------------
 ## 兼容性
@@ -56,15 +60,6 @@ bilibili直播间功能增强
 -------------------------
 ## 关于其它礼物的特别说明
 
-该功能属于测试功能，因功能有限，且b站ui更新导致低分辨率可能一行放不下图标，目前已移除，如需显示自行将第17行的`false`改为`true`就可以了
-
-关于该功能的特别说明如下：
-
-- 除了辣条都没有实际购买赠送过，因为我没钱
-- 如果里面的东西官方有赠送的地方请使用外面官方的赠送
-- 新版的礼物如果外面没有一般是限区赠送的所以里面的也送不出去
-- 里面有一些礼物重复，因为官方有些礼物有重复的id，是不是能用我也不知道
-- 节奏风暴务必不要使用里面的接口，因为我不知道会发生什么
-- 其它旧版礼物请自行决定是否使用并自行承担风险
-- b站可能还会更改这个礼物接口，所以如果你点开图标发现没有东西刷新也无效就不用试了
-- 礼物接口返回的瓜子类型很多是错的，所以脚本直接让你自己选金银瓜子了，但是该用金瓜子买的东西你选了银瓜子也是购买失败的
+- 里面的东西都是官方接口直接列出来的，有什么东西能不能用我也不知道
+- 除了辣条都没有实际购买赠送过，自行决定是否使用并承担风险
+- 基本属于查看礼物用的摆设，如不想看见图标自行将第17行的`true`改为`false`就可以了

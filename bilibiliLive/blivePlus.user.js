@@ -2,7 +2,7 @@
 // @name        bilibili直播间功能增强
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.3.10
+// @version     0.3.11
 // @author      indefined
 // @description 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 
@@ -14,7 +14,7 @@
 // @license     MIT
 // @run-at      document-idle
 // ==/UserScript==
-const showNewGift = false;
+const showNewGift = true;
 try{
 	AddStyle();
 	if (document.querySelector('.gift-package')) FeaturesPlus();
@@ -491,14 +491,14 @@ function FeaturesPlus(){
         })();
         let room,gifts;
         const newGift = (()=>{
-            const appendDiv = document.createElement('div');
-            appendDiv.className = 'dp-i-block v-middle';
-            appendDiv.innerHTML = `<div class="dp-i-block v-middle pointer p-relative bg-cover" title="其它礼物" style="background-image: url(//s1.hdslb.com/bfs/live/592e81002d20699c7e4dae4480ada79ab3253eae.png);width: 48px;height: 48px;margin-right: 10px;"></div>`;
-            giftPanel.appendChild(appendDiv);
-            return appendDiv.firstElementChild;
+            const appendDiv = bottomPanel.querySelector('.action-item.title').cloneNode();
+            appendDiv.innerText = '旧';
+            appendDiv.title = '其它礼物';
+            bottomPanel.firstElementChild.appendChild(appendDiv);
+            return appendDiv;
         })();
         const sendGift = ev =>{
-            newGift.firstChild.classList.add('dp-none');
+            newGift.lastChild.style.display = 'none';
             const target = gifts[ev.target.dataset.index];
             const sendPanel = document.createElement('div');
             sendPanel.className = 'bilibili-live-player-gfs-give-float';
@@ -568,7 +568,7 @@ function FeaturesPlus(){
         };
         const showGift = ev=>{
             if (!newGift.contains(ev.target)){
-                if (newGift.firstChild) newGift.firstChild.classList.add('dp-none');
+                newGift.lastChild.style.display = 'none';
             }
             else if (!gifts||!room){
                 let xhr = new XMLHttpRequest();
@@ -576,12 +576,13 @@ function FeaturesPlus(){
                 xhr.withCredentials = true;
                 const list = document.createElement('div');
                 list.className = 'common-popup-wrap t-left';
-                list.style = 'height: 270px;position: absolute;width: 276px;bottom: 50px;right: -22px;overflow: auto;cursor: auto;animation: r .4s;';
-                list.innerHTML = `<header data-v-460dfc36="">其它礼物</header>`;
+                list.style = 'position: absolute;width: 276px;bottom: 30px;left: 0px;cursor: auto;animation:scale-in-ease 0.4s;transform-origin: 90px bottom 0px;';
+                list.innerHTML = `<div data-v-0ebe36b2="" class="arrow p-absolute" style="left: 90px;"></div><header data-v-460dfc36="">其它礼物</header>`;
                 newGift.appendChild(list);
                 xhr.onload = res=>{
                     gifts = JSON.parse(res.target.response).data;
                     const items = document.createElement('div');
+                    items.style = 'height:233px;overflow: auto;'
                     for (let i=0;i<gifts.length;i++){
                         const g = gifts[i];
                         items.innerHTML += `<div data-index="${i}" style="background-image: url(${g.img_basic});width: 45px;height: 45px;" class="bg-cover dp-i-block pointer" title="${g.name}"></div>`;
@@ -597,7 +598,7 @@ function FeaturesPlus(){
                 };
                 xhr.send(null);
             }else if (ev.target==newGift){
-                newGift.firstChild.classList.toggle('dp-none');
+                newGift.lastChild.style.display = newGift.lastChild.style.display=='none'?'unset':'none';
             }
         };
         document.body.addEventListener('click',showGift);
