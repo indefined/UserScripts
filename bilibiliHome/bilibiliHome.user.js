@@ -1,25 +1,26 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.2.5
-// @description  因B站鉴权提升，削减功能，API公开
+// @version      0.3.0
+// @description  添加APP首页数据、可选通过鉴权提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
 // @match        *://www.bilibili.com/
 // @license      MIT
 // @connect      app.bilibili.com
 // @connect      api.bilibili.com
+// @connect      passport.bilibili.com
+// @connect      link.acg.tv
 // @grant        GM_xmlhttpRequest
-// @grant        GM.xmlHttpRequest
+// @grant        GM_getValue
+// @grant        GM_setValue
+// @grant        GM_deleteValue
 // @run-at       document-idle
 // ==/UserScript==
 
-if (typeof GM_xmlhttpRequest === 'undefined' &&
-    typeof GM === 'object' && typeof GM.xmlHttpRequest === 'function') {
-    GM_xmlhttpRequest = GM.xmlHttpRequest;
-}
+let accessKey = GM_getValue('biliAppHomeKey');
+const storageAccessKey = key => key?GM_setValue('biliAppHomeKey',key):GM_deleteValue('biliAppHomeKey');
 
-const displayDislike = false;
 const token = (()=>{
     try{
         return document.cookie.match(/bili_jct=([0-9a-fA-F]{32})/)[1];
@@ -120,8 +121,9 @@ function CreateCss(){
 function InitRecommend () {
     recommend.id = 'recommend';
     recommend.querySelector('div.zone-title').innerHTML = `<div class="headline clearfix ">
-		<i class="icon icon_t icon-douga"></i><span class="name">推荐</span>
-		<div class="read-push"><i class="icon icon_read"></i><span class="info">换一批</span></div></div>`;
+<i class="icon icon_t icon-douga"></i><span class="name">猜你喜欢</span>
+<div class="link-more"><span>设置  </span><i class="icon"></i></div>
+<div class="read-push"><i class="icon icon_read"></i><span class="info">换一批</span></div></div>`;
     const popular = document.querySelector('#home_popularize');
     const listBox = recommend.querySelector('div.storey-box.clearfix');
     popular.parentElement.insertBefore(recommend,popular.nextSibling);
@@ -133,7 +135,7 @@ function InitRecommend () {
         listBox.appendChild(status);
         GM_xmlhttpRequest({
             method: 'GET',
-            url: `${document.location.protocol}//app.bilibili.com/x/feed/index?build=1&mobi_app=android&idx=${(Date.now()/1000).toFixed(0)}`,
+            url: `https://app.bilibili.com/x/feed/index?build=1&mobi_app=android&idx=${(Date.now()/1000).toFixed(0)}${accessKey?'&access_key='+accessKey:''}`,
             onload: res=>{
                 try {
                     const rep = JSON.parse(res.response);
@@ -154,6 +156,83 @@ function InitRecommend () {
         });
     }
 
+    recommend.querySelector('div.link-more').onclick = function () {
+        const settingDiv = document.createElement('div');
+        settingDiv.id = 'biliAppHomeSetting';
+        settingDiv.style = 'position: fixed;top: 0;bottom: 0;left: 0;right: 0;background: rgba(0,0,0,0.4);z-index: 10000;';
+        settingDiv.innerHTML = `
+<div style="width: 450px;right: 0;left: 0;position: absolute;padding: 20px;background: white;border-radius: 8px;margin: auto;transform: translate(0,50%);">
+<h2 style="font-size: 20px;color: #4fc1e9;font-weight: 400;margin-bottom: 20px;">APP首页推荐设置</h2>
+<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" style="position: absolute;right: 10px;top: 10px;cursor: pointer;" \
+onclick="javascript:document.body.removeChild(document.getElementById('biliAppHomeSetting'))">
+ <g>
+  <line y2="20" x2="20" y1="0" x1="0" stroke-width="1.5" stroke="#2d64b3"></line>
+  <line y2="0" x2="20" y1="20" x1="0" stroke-width="1.5" stroke="#2d64b3"></line>
+ </g>
+</svg>
+目前获取根据个人观看喜好的APP首页数据和提交定制不喜欢的视频需要获取授权key。
+<br><br>点击获取授权将登录bilibili用户反馈论坛从官方授权接口获取一个授权key，获取的key保存在脚本管理器内。
+<br><br>如果不想使用反馈论坛可不用获取授权，脚本仍然能从官方接口获取随机推荐视频，但内容可能不再根据个人喜好且无法提交不喜欢内容。
+<br><br>点击删除授权可从脚本管理器中删除已获取授权key，脚本将按照没有获取授权的情况执行。
+<br><br>
+<div style="text-align: right;line-height: 30px;">
+<button id="biliAppKeyAction" style="padding:0 20px;height:30px;background:#4fc1e9;color:white;border-radius:5px;border:none;cursor:pointer;left:20px;position:absolute;">获取授权</button>
+<a href="https://greasyfork.org/scripts/368446" target="_blank" style="padding-left: 20px;">脚本发布页</a>
+<a href="https://github.com/indefined/UserScripts/issues" target="_blank" style="padding-left: 20px;">github问题反馈</a>
+<span style="padding-left: 20px;margin-right: 10px;">当前版本：${GM_info.script.version}</span></div></div>`;
+        const actionButton = settingDiv.querySelector('#biliAppKeyAction');
+        document.body.appendChild(settingDiv);
+        if (accessKey) {
+            actionButton.innerText = '删除授权';
+        }
+        actionButton.onclick = ()=>{
+            if (actionButton.innerText === '删除授权') {
+                storageAccessKey(accessKey = undefined);
+                actionButton.innerText = '获取授权';
+                return;
+            }
+            else {
+                const timeout = setTimeout(()=>showError('获取授权超时'),2000);
+                const getKey = url => GM_xmlhttpRequest({
+                    method: 'GET',
+                    url,
+                    onload: res=> {
+                        clearTimeout(timeout);
+                        const key = res.finalUrl.match(/access_key=([0-9a-z]{32})/);
+                        if (key) {
+                            storageAccessKey(accessKey = key[1]);
+                            actionButton.innerText = '删除授权';
+                        }
+                    },
+                    onerror: error=> {
+                        clearTimeout(timeout);
+                        showError('获取授权失败',error);
+                        console.error(error);
+                    }
+                });
+                GM_xmlhttpRequest({
+                    method: 'GET',
+                    url:`https://passport.bilibili.com/login/app/third?appkey=27eb53fc9058f8c3&api=http%3A%2F%2Flink.acg.tv%2Fsearch.php%3Fmod%3Dforum&sign=3c7f7018a38a3e674a8a778c97d44e67`,
+                    onload: res=> {
+                        try {
+                            const data = JSON.parse(res.response);
+                            getKey(data.data.confirm_uri);
+                        }catch(error){
+                            clearTimeout(timeout);
+                            showError('获取授权失败',error);
+                            console.error(error);
+                        }
+                    },
+                    onerror: error=> {
+                        clearTimeout(timeout);
+                        showError('获取授权失败',error);
+                        console.error(error);
+                    }
+                });
+            }
+        }
+    }
+
     function CreateItem (data){
         const item = document.createElement('div');
         item.className = 'spread-module';
@@ -171,7 +250,7 @@ function InitRecommend () {
 		  <span class="danmu"><i class="icon"></i>${formatNumber(data.danmaku)}</span>
 		  </p></a>`;
         item.querySelector('.watch-later-trigger').onclick = WatchLater;
-        if (data.dislike_reasons&&displayDislike){
+        if (data.dislike_reasons&&accessKey){
             const dislikeList = item.querySelector('.dislike-list');
             for (const reason of data.dislike_reasons){
                 const dislikeItem = document.createElement('div');
@@ -181,6 +260,8 @@ function InitRecommend () {
                 dislikeItem.onclick = DisLike;
                 dislikeList.appendChild(dislikeItem);
             }
+        }else {
+            item.querySelector('.dislike-botton').style = 'display:none';
         }
         return item;
     }
@@ -206,6 +287,7 @@ function InitRecommend () {
             parent = parent.parentNode.parentNode.parentNode;
         }
         url += `?goto=${parent.dataset.goto}&id=${parent.dataset.id}&mid=${parent.dataset.mid}&reason_id=${target.dataset.reason_id}&rid=${parent.dataset.rid}&tag_id=${parent.dataset.tag_id}`;
+        if (accessKey) url += '&access_key='+accessKey;
         const handleCover = ()=>{
             if (cancel){
                 parent.removeChild(target);
