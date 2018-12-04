@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.3.0
+// @version      0.3.0.1
 // @description  添加APP首页数据、可选通过鉴权提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -189,10 +189,11 @@ onclick="javascript:document.body.removeChild(document.getElementById('biliAppHo
             if (actionButton.innerText === '删除授权') {
                 storageAccessKey(accessKey = undefined);
                 actionButton.innerText = '获取授权';
+                Toast('删除授权成功');
                 return;
             }
             else {
-                const timeout = setTimeout(()=>showError('获取授权超时'),2000);
+                const timeout = setTimeout(()=>Toast('获取授权超时'),5000);
                 const getKey = url => GM_xmlhttpRequest({
                     method: 'GET',
                     url,
@@ -201,12 +202,13 @@ onclick="javascript:document.body.removeChild(document.getElementById('biliAppHo
                         const key = res.finalUrl.match(/access_key=([0-9a-z]{32})/);
                         if (key) {
                             storageAccessKey(accessKey = key[1]);
+                            Toast('获取授权成功');
                             actionButton.innerText = '删除授权';
                         }
                     },
                     onerror: error=> {
                         clearTimeout(timeout);
-                        showError('获取授权失败',error);
+                        Toast('获取授权失败'+error);
                         console.error(error);
                     }
                 });
@@ -219,13 +221,13 @@ onclick="javascript:document.body.removeChild(document.getElementById('biliAppHo
                             getKey(data.data.confirm_uri);
                         }catch(error){
                             clearTimeout(timeout);
-                            showError('获取授权失败',error);
+                            Toast('获取授权失败'+error);
                             console.error(error);
                         }
                     },
                     onerror: error=> {
                         clearTimeout(timeout);
-                        showError('获取授权失败',error);
+                        Toast('获取授权失败'+error);
                         console.error(error);
                     }
                 });
@@ -278,7 +280,7 @@ onclick="javascript:document.body.removeChild(document.getElementById('biliAppHo
                 parent=target.parentNode;
             }
             if (parent.nodeName!='A'){
-                showError('请求撤销稍后再看失败：找不到父节点，查看调试终端获取更多信息');
+                Toast('请求撤销稍后再看失败：找不到父节点，查看调试终端获取更多信息');
                 console.log('请求撤销稍后再看找不到父节点',ev);
                 return false;
             }
@@ -308,13 +310,13 @@ onclick="javascript:document.body.removeChild(document.getElementById('biliAppHo
                 try {
                     const par = JSON.parse(res.response);
                     if (par.code!=0){
-                        showError(`请求不喜欢错误 code ${par.code} msg ${par.message} 请检查问题重试或打开调试终端查看更多信息`);
+                        Toast(`请求不喜欢错误 code ${par.code} msg ${par.message} 请检查问题重试或打开调试终端查看更多信息`);
                         console.log('请求不喜欢发生错误',par,url);
                     }else{
                         handleCover();
                     }
                 } catch (e){
-                    showError(`请求不喜欢发生错误，请检查问题重试或打开调试终端查看更多信息`);
+                    Toast(`请求不喜欢发生错误，请检查问题重试或打开调试终端查看更多信息`);
                     console.error(e,'请求不喜欢发生错误');
                 }
             }
@@ -415,14 +417,14 @@ function WatchLater (ev){
         try{
             var list = JSON.parse(res.target.response);
             if (list.code!=0){
-                showError(`请求稍后再看错误 code ${list.code} msg ${list.message} 请检查问题重试或打开调试终端查看更多信息`);
+                Toast(`请求稍后再看错误 code ${list.code} msg ${list.message} 请检查问题重试或打开调试终端查看更多信息`);
                 console.log('请求稍后再看发生错误',list,target);
                 return;
             }
             target.classList.toggle('added');
             target.title = target.classList.contains('added')?'移除稍后再看':'稍后再看';
         }catch(e){
-            showError(`请求稍后再看发生错误，请检查问题重试或打开调试终端查看更多信息`);
+            Toast(`请求稍后再看发生错误，请检查问题重试或打开调试终端查看更多信息`);
             console.error(e,'请求稍后再看发生错误');
         }
     };
@@ -454,7 +456,7 @@ function getLoadingDiv(){
     return loading;
 }
 
-function showError(msg){
+function Toast(msg){
     const toast = document.createElement('div');
     toast.innerHTML = `<div class="toast"><span >${msg}</span></div>`;
     document.body.appendChild(toast);
