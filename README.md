@@ -5,3 +5,5 @@
 [bilibili直播间功能增强](./bilibiliLive/)
 
 [HTML5视频截图器](./HTML5VideoCapture/)
+
+[贴吧回复修正](./tiebaPostAdjustment/)
