@@ -1,7 +1,7 @@
 贴吧回复修正
 =========================
 
-[脚本发布页](https://greasyfork.org/zh-CN/scripts/368446)
+[脚本发布页](https://greasyfork.org/zh-CN/scripts/375218)
 
 [个人脚本仓库](https://github.com/indefined/UserScripts)
 
