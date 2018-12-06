@@ -8,6 +8,14 @@
 [问题反馈到这里](https://github.com/indefined/UserScripts/issues)
 
 -------------------------
+## 功能预览
+
+
+![展开折叠](https://github.com/indefined/UserScripts/raw/master/tiebaPostAdjustment/autoUnfold.jpg)
+
+![图片修正](https://github.com/indefined/UserScripts/raw/master/tiebaPostAdjustment/bubbleImage.jpg)
+
+-------------------------
 ## 兼容性
 
 - chrome 70 in Tampermonkey4.7 测试通过
