@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.3.0.1
+// @version      0.3.1
 // @description  添加APP首页数据、可选通过鉴权提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -309,7 +309,11 @@ onclick="javascript:document.body.removeChild(document.getElementById('biliAppHo
             onload: res=>{
                 try {
                     const par = JSON.parse(res.response);
-                    if (par.code!=0){
+                    if (par.code==-101 && par.message=='账号未登录'){
+                        storageAccessKey(accessKey = undefined);
+                        Toast(`未获取授权或者授权失效，请点击设置重新获取授权`);
+                    }
+                    else if (par.code!=0){
                         Toast(`请求不喜欢错误 code ${par.code} msg ${par.message} 请检查问题重试或打开调试终端查看更多信息`);
                         console.log('请求不喜欢发生错误',par,url);
                     }else{
