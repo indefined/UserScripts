@@ -1,8 +1,9 @@
 allow YouTube videos in twitter to fullscreen
+=========================
 允许推特YouTube视频全屏
 =========================
 
-[脚本发布页/ReleasePage](https://greasyfork.org/zh-CN/scripts/375464)
+[脚本发布页/ReleasePage](https://greasyfork.org/scripts/375464)
 
 [个人脚本仓库/Repositories](https://github.com/indefined/UserScripts)
 
