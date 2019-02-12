@@ -2,7 +2,7 @@
 // @name        bilibili直播间功能增强
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.3.12
+// @version     0.3.13
 // @author      indefined
 // @description 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 
@@ -418,10 +418,7 @@ function FeaturesPlus(){
             }
         };
         const buyMedal = type=>{
-            if (!confirm('购买勋章使用的消费不计入亲密度，确认购买本房间勋章吗？')){
-                return;
-            }
-            if (!confirm(`再次确认是否使用${type=='silver'?'9900银瓜子':'20硬币'}购买本房间勋章？`)){
+            if (!confirm(`是否确认使用${type=='silver'?'9900银瓜子':'20硬币'}购买本房间勋章？`)){
                 return;
             }
             doRequire(`//api.vc.bilibili.com/link_group/v1/member/buy_medal?coin_type=${type}&master_uid=${owner}&platform=android`,'购买勋章');
