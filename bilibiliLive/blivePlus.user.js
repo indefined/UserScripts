@@ -2,7 +2,7 @@
 // @name        bilibili直播间功能增强
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.3.13
+// @version     0.3.14
 // @author      indefined
 // @description 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 
@@ -148,23 +148,28 @@ header[data-v-460dfc36] {
     display: block!important;
 }
 
-#giftPackage {
-    bottom:0px;
-    background-image: url(//s1.hdslb.com/bfs/live/d57afb7c5596359970eb430655c6aef501a268ab.png);
-    width: 48px;
-    height: 48px;
-    margin-right: 10px;
+.gift-package.live-skin-highlight-bg {
+    bottom:0px!important;
+    background: url(//s1.hdslb.com/bfs/live/d57afb7c5596359970eb430655c6aef501a268ab.png)!important;
+    width: 48px!important;
+    height: 48px!important;
+    background-size: cover!important;
+    margin-right: 10px!important;
 }
 
-#giftPackage:after {
+.gift-package.live-skin-highlight-bg>*{
+    display:none!important;
+}
+
+.gift-package.live-skin-highlight-bg:after {
     content: '道具包裹';
     position: relative;
     bottom: -55px;
     left: 4px;
 }
 
-.bilibili-live-player-video-controller #giftPackage {
-    bottom:13px;
+.bilibili-live-player-video-controller .gift-package.live-skin-highlight-bg {
+    bottom:13px!important;
 }
 
 body.fullscreen-fix div#gift-control-vm {
@@ -232,7 +237,7 @@ function FeaturesPlus(){
     const leftContainer = document.querySelector('.left-container');
     const toolBar = document.querySelector('#gift-control-vm');
     const giftPanel = document.querySelector('div.gift-presets.p-relative.t-right');
-    const giftPackage = document.querySelector('.gift-package');
+    const giftPackage = document.querySelector('.item.z-gift-package');
     const playerPanel = document.querySelector('.bilibili-live-player.relative');
     const inputPanel = document.querySelector('div.chat-input-ctnr.p-relative');
     const controlPanel = inputPanel.parentNode;
@@ -242,7 +247,6 @@ function FeaturesPlus(){
         giftPackage.className = "dp-i-block v-middle pointer p-relative bg-cover";
         giftPackage.id = "giftPackage";
         const guardIcon = document.querySelector('div.m-guard-ent.gift-section.guard-ent');
-        while (giftPackage.firstElementChild) giftPackage.removeChild(giftPackage.firstElementChild);
         if (guardIcon) guardIcon.parentNode.removeChild(guardIcon);
         giftPanel.appendChild(giftPackage);
     }
