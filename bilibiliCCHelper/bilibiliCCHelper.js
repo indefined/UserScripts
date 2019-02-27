@@ -1,10 +1,12 @@
 // ==UserScript==
 // @name         Bilibili CC字幕助手
 // @namespace    indefined
-// @version      0.1
-// @description  旧版播放器可用CC字幕，SRT/LRC/ASS格式字幕下载
+// @version      0.2
+// @description  旧版播放器可用CC字幕，ASS/SRT/LRC格式字幕下载，本地ASS/SRT/LRC格式字幕加载
 // @author       indefined
+// @supportURL   https://github.com/indefined/UserScripts/issues
 // @include      https://www.bilibili.com/video/av*
+// @license      MIT
 // @grant        none
 // ==/UserScript==
 
@@ -48,7 +50,7 @@
         <div>字幕</div><select style="width: 50%;" id="subtitle-language">
         <option value="close">关闭</option></select>
         <button id="subtitle-download">下载字幕</button>
-        <button id="subtitle-upload" style="margin-right: 13px;">上传字幕</button>
+        <button id="subtitle-upload" style="margin-right: 13px;">添加字幕</button>
     </div><div>
         <div>字体大小</div>
         <input style="width: 70%;" type="range" id="subtitle-font-size" step="25">
@@ -102,14 +104,16 @@
 0.938l-2.48,-2.48a1,1 0 0 0 -0.287,-1.958l-1.672,0l-1.328,-1.328l0,-0.672a1,1 0 0 1 1,-1l2,0a1,1 0 0 0 0,-2l-3,\
 0a2,2 0 0 0 -1.977,1.695l-5.195,-5.195z"/></svg>
 `,
-        newEnableIcon:``,
-        newDisableIcon:``,
         downloadPanel:`
 <div style="left: 50%;top: 50%;position: absolute;padding: 20px;background:\
 white;border-radius: 8px;margin: auto;transform: translate(-50%,-50%);">
 <h2 style="font-size: 20px;color: #4fc1e9;font-weight: 400;margin-bottom: 10px;">字幕下载</h2>
-<textarea id="subtitle-download-area" style="width:320px;height: 300px;" readonly></textarea>
+<a href="https://github.com/indefined/UserScripts" target="_blank" style="position: absolute;\
+right: 20px;top:30px">当前版本：${GM_info&&GM_info.script.version||'unknow'}</a>
+<textarea id="subtitle-download-area" style="width:350px;height: 320px;rsize:both;" readonly></textarea>
 <div style="line-height: 30px;">
+<input id="subtitle-download-ASS" type="radio" name="subtitle-type" value="ASS" style="cursor:pointer">
+<label for="subtitle-download-ASS" style="cursor:pointer">ASS</label>
 <input id="subtitle-download-SRT" type="radio" name="subtitle-type" value="SRT" style="cursor:pointer">
 <label for="subtitle-download-SRT" style="cursor:pointer">SRT</label>
 <input id="subtitle-download-LRC" type="radio" name="subtitle-type" value="LRC" style="cursor:pointer">
@@ -117,16 +121,38 @@ white;border-radius: 8px;margin: auto;transform: translate(-50%,-50%);">
 <a id="subtitle-download-action" style="padding: 5px 10px;background:#4fc1e9;color:white;border-radius:5px;\
 margin-left: 10px;">下载</a>
 <a id="subtitle-download-close" style="padding: 5px 10px;background:#4fc1e9;color:white;border-radius:5px;\
-cursor:pointer;margin-left: 10px;">关闭</a>
-<a href="https://greasyfork.org/scripts/368446" target="_blank" style="position: absolute;right: 20px;">\
-当前版本：0.1</a></div></div>`,
+cursor:pointer;margin-left: 10px;">关闭</a></div></div>`,
         shadowStyle:{
             "0":'',
             "1":`text-shadow: rgb(0, 0, 0) 1px 0px 1px, rgb(0, 0, 0) 0px 1px 1px, rgb(0, 0, 0)0px -1px 1px,\
  rgb(0, 0, 0) -1px 0px 1px;`,
             "2":`text-shadow: rgb(0, 0, 0) 0px 0px 1px, rgb(0, 0, 0) 0px 0px 1px, rgb(0, 0, 0) 0px 0px 1px;`,
             "3":`text-shadow: rgb(0, 0, 0) 1px 1px 2px, rgb(0, 0, 0) 0px 0px 1px;`
-        }
+        },
+        assHead:`\
+[Script Info]
+Title: ${document.title}
+ScriptType: v4.00+
+Collisions: Reverse
+PlayResX: 1280
+PlayResY: 720
+WrapStyle: 3
+ScaledBorderAndShadow: yes
+; ----------------------
+; 本字幕由CC字幕助手自动转换
+; 字幕来源${document.location}
+; 脚本地址https://github.com/indefined/UserScripts
+; 设置了字幕过长自动换行，但若字幕中没有空格换行将无效
+; 字体大小依据720p 48号字体等比缩放
+; 如显示不正常请尝试使用SRT格式
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,Segoe UI,48,&H00FFFFFF,&HF0000000,&H00000000,&HF0000000,1,0,0,0,100,100,0,0.00,1,1,3,2,30,30,20,1
+
+[Events]
+Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
+`
     };
     class Encoder{
         constructor(data){
@@ -139,7 +165,7 @@ cursor:pointer;margin-left: 10px;">关闭</a>
         }
         showDialog(){
             const settingDiv = document.createElement('div');
-            settingDiv.style = 'position: fixed;top: 0;bottom: 0;left: 0;right: 0;background: rgba(0,0,0,0.4);z-index: 10000;';
+            settingDiv.style = 'position: fixed;top: 0;bottom: 0;left: 0;right: 0;background: rgba(0,0,0,0.4);z-index: 1048576;';
             settingDiv.innerHTML = elements.downloadPanel;
             this.actionButton = settingDiv.querySelector('#subtitle-download-action');
             this.textArea = settingDiv.querySelector('#subtitle-download-area');
@@ -152,23 +178,31 @@ cursor:pointer;margin-left: 10px;">关闭</a>
             settingDiv.querySelector('#subtitle-download-LRC').onchange = ()=>{
                 this.encodeToLRC();
             };
+            settingDiv.querySelector('#subtitle-download-ASS').onchange = ()=>{
+                this.encodeToASS();
+            };
             document.body.appendChild(settingDiv);
         }
-        encodeToLRC(){
-            const result = this.data.map(({from,to,content})=>{
-                return `${this.encodeTime(from,'LRC')} ${content.replace('\n','\\N')}`;
-            }).join('\r\n');
+        updateDownload(result,type){
             this.textArea.value = result;
+            URL.revokeObjectURL(this.actionButton.href);
             this.actionButton.href = URL.createObjectURL(new Blob([result]));
-            this.actionButton.download = `${document.title}.lrc`;
+            this.actionButton.download = `${document.title}.${type}`;
+        }
+        encodeToLRC(){
+            this.updateDownload(this.data.map(({from,to,content})=>{
+                return `${this.encodeTime(from,'LRC')} ${content.replace(/\n/g,' ')}`;
+            }).join('\r\n'),'lrc');
         }
         encodeToSRT(){
-            const result = this.data.reduce((accumulator,{from,to,content},index)=>{
+            this.updateDownload(this.data.reduce((accumulator,{from,to,content},index)=>{
                 return `${accumulator}${index+1}\r\n${this.encodeTime(from)} --> ${this.encodeTime(to)}\r\n${content}\r\n\r\n`;
-            },'');
-            this.textArea.value = result;
-            this.actionButton.href = URL.createObjectURL(new Blob([result]));
-            this.actionButton.download = `${document.title}.srt`;
+            },''),'srt');
+        }
+        encodeToASS(){
+            this.updateDownload(elements.assHead + this.data.map(({from,to,content})=>{
+                return `Dialogue: 0,${this.encodeTime(from,'ASS')},${this.encodeTime(to,'ASS')},*Default,NTP,0000,0000,0000,,${content.replace(/\n/g,'\\N')}`;
+            }).join('\r\n'),'ass');
         }
         encodeTime(input,format='SRT'){
             let time = new Date(input*1000),
@@ -177,14 +211,21 @@ cursor:pointer;margin-left: 10px;">关闭</a>
                 minute = time.getMinutes(),
                 hour = Math.floor(input/60/60);
             if (format=='SRT'){
-                if (hour<10) hour = '00'+hour;
-                else if (hour<100) hour = '0'+hour;
+                if (hour<10) hour = '0'+hour;
                 if (minute<10) minute = '0'+minute;
                 if (second<10) second = '0'+second;
                 if (ms<10) ms = '00'+ms;
                 else if (ms<100) ms = '0'+ms;
                 return `${hour}:${minute}:${second},${ms}`;
-            }else{
+            }
+            else if(format=='ASS'){
+                ms = (ms/10).toFixed(0);
+                if (minute<10) minute = '0'+minute;
+                if (second<10) second = '0'+second;
+                if (ms<10) ms = '0'+ms;
+                return `${hour}:${minute}:${second}.${ms}`;
+            }
+            else{
                 ms = (ms/10).toFixed(0);
                 minute += hour*60;
                 if (minute<10) minute = '0'+minute;
@@ -193,7 +234,7 @@ cursor:pointer;margin-left: 10px;">关闭</a>
                 return `[${minute}:${second}.${ms}]`;
             }
         }
-    }
+    };
     const bilibiliCCHelper = {
         isNew:undefined,
         setting:undefined,
@@ -206,6 +247,91 @@ cursor:pointer;margin-left: 10px;">关闭</a>
         datas:{
             close:{
                 body:[]
+            }
+        },
+        decoder:{
+            srtReg:/(?<fh>\d+):(?<fm>\d{1,2}):(?<fs>\d{1,2}),(?<fss>\d{1,3})\s*-->\s*(?<th>\d+):(?<tm>\d{1,2}):(?<ts>\d{1,2}),(?<tss>\d{1,3})\r?\n(?<content>[.\s\S]+)/,
+            assReg:/Dialogue:.*,(?<fh>\d+):(?<fm>\d{1,2}):(?<fs>\d{1,2}\.*\d*),\s*(?<th>\d+):(?<tm>\d{1,2}):(?<ts>\d{1,2}\.*\d*).*,.*,.*,.*,.*,.*,.*,(?<content>.+)/,
+            selectFile(){
+                const fileSelector = document.createElement('input')
+                fileSelector.type = 'file';
+                fileSelector.accept = '.lrc,.ass,.srt';
+                fileSelector.oninput = ()=>{
+                    this.readFile(fileSelector.files&&fileSelector.files[0]);
+                };
+                fileSelector.click();
+            },
+            readFile(file){
+                if(!file) return;
+                const reader = new FileReader();
+                reader.onload = ()=> {
+                    let data;
+                    if(file.name.endsWith('.lrc')) data = this.decodeFromLRC(reader.result);
+                    else if(file.name.endsWith('.ass')) data = this.decodeFromASS(reader.result);
+                    else if(file.name.endsWith('.srt')) data = this.decodeFromSRT(reader.result);
+                    console.log(data);
+                    player.updateSubtitle(data);
+                };
+                reader.readAsText(file);
+            },
+            decodeFromLRC(input){
+                if(!input) return;
+                const data = [];
+                input.split('\n').forEach(line=>{
+                    const match = line.match(/((\[(?<minute>\d+):(?<second>\d{1,2}(\.\d+)?)\])+)(?<content>.*)/);
+                    if (!match){
+                        console.log('跳过无法识别行',line);
+                        return;
+                    }
+                    data.push({
+                        time:match.groups.minute*60+(+match.groups.second),
+                        content:match.groups.content
+                    });
+                });
+                return {body:data.map(({time,content},index)=>{
+                    return {
+                        from:time,
+                        to:index==data.length-1?time+5:data[index+1].time,
+                        content:content
+                    }
+                })};
+            },
+            decodeFromSRT(input){
+                if(!input) return;
+                const data = [];
+                let split = input.split('\n\n');
+                if(split.length==1) split = input.split('\r\n\r\n');
+                split.forEach(item=>{
+                    const match = item.match(this.srtReg);
+                    if (!match){
+                        console.log('跳过无法识别行',item);
+                        return;
+                    }
+                    data.push({
+                        from:match.groups.fh*60*60+match.groups.fm*60+(+match.groups.fs)+(match.groups.fss/1000),
+                        to:match.groups.th*60*60+match.groups.tm*60+(+match.groups.ts)+(match.groups.tss/1000),
+                        content:match.groups.content.trim().replace(/{\\.+?}/g,'').replace(/\\N/g,'\n')
+                    });
+                });
+                return {body:data};
+            },
+            decodeFromASS(input){
+                if(!input) return;
+                const data = [];
+                let split = input.split('\n');
+                split.forEach(line=>{
+                    const match = line.match(this.assReg);
+                    if (!match){
+                        console.log('跳过无法识别行',line);
+                        return;
+                    }
+                    data.push({
+                        from:match.groups.fh*60*60+match.groups.fm*60+(+match.groups.fs),
+                        to:match.groups.th*60*60+match.groups.tm*60+(+match.groups.ts),
+                        content:match.groups.content.trim().replace(/{\\.+?}/g,'').replace(/\\N/g,'\n')
+                    });
+                });
+                return {body:data};
             }
         },
         get(id,name){
@@ -267,15 +393,17 @@ span.subtitle-item {
         loadSubtitle(data){
             if(!data) return;
             player.updateSubtitle(data);
-            this.setting.isclosed = false;
-            this.elements.download.disabled = false;
-            this.elements.icon.innerHTML = elements.oldEnableIcon;
+            if(!this.isNew){
+                this.setting.isclosed = false;
+                this.elements.download.disabled = false;
+                this.elements.icon.innerHTML = elements.oldEnableIcon;
+            }
         },
         changeSubtitle(index=0){
             if(index>this.languagesCount){
                 throw('下标异常');
             }
-            else if(index==this.languagesCount){
+            else if(index>=this.languagesCount-1){
                 if(!this.setting.isclosed&&this.subtitle.subtitles&&this.subtitle.subtitles.length){
                     //只有在有字幕的前提下才使用空字幕关闭字幕，否则不需要操作
                     player.updateSubtitle(this.datas.close);
@@ -284,6 +412,7 @@ span.subtitle-item {
                 this.elements.download.disabled = true;
                 this.elements.languages[index].selected = true;
                 this.elements.icon.innerHTML = elements.oldDisableIcon;
+                if(index==this.languagesCount-1) this.decoder.selectFile();
             }
             else{
                 const item = this.subtitle.subtitles[index];
@@ -311,7 +440,6 @@ span.subtitle-item {
             }
         },
         initSubtitle(){
-            this.languagesCount = this.subtitle.subtitles.length;
             if(this.setting.isclosed) {
                 this.changeSubtitle(this.languagesCount);
             }
@@ -324,9 +452,8 @@ span.subtitle-item {
             }
         },
         initOldUI(){
-            if(!this.setting) {
-                throw('没有读取到配置');
-            }
+            this.setting = JSON.parse(localStorage.bilibili_player_settings).subtitle;
+            if(!this.setting) throw('获取设置失败');
             const preBtn = this.get('.bilibili-player-video-btn-quality');
             if(!preBtn) {
                 throw('没有找到视频清晰度按钮');
@@ -357,11 +484,13 @@ span.subtitle-item {
                 if(!this.elements.panel.contains(e.target)) this.toggleSubtitle();
             });
             //字幕语言
-            languages.length = this.subtitle.subtitles.length+1;
-            for(let i=0;i<languages.length-1;i++){
+            languages.length = this.languagesCount+1;
+            for(let i=0;i<languages.length-2;i++){
                 languages[i].text = this.subtitle.subtitles[i].lan_doc;
                 languages[i].value = this.subtitle.subtitles[i].lan;
             }
+            languages[languages.length-2].text = '本地字幕';
+            languages[languages.length-2].value = 'close';
             languages[languages.length-1].text = '关闭';
             languages[languages.length-1].value = 'close';
             languageSelector.addEventListener('change',(e)=>{
@@ -372,9 +501,15 @@ span.subtitle-item {
                 new Encoder(this.currentData);
             });
             //上传字幕
-            this.subtitle.allow_submit && upload.addEventListener('click',()=>{
-                open(`https://member.bilibili.com/v2#/zimu/my-zimu/zimu-editor?aid=${window.aid}&cid=${window.cid}`,'blank');
-            })||(upload.disabled = true);
+            if( this.subtitle.allow_submit){
+                upload.addEventListener('click',()=>{
+                    open(`https://member.bilibili.com/v2#/zimu/my-zimu/zimu-editor?aid=${window.aid}&cid=${window.cid}`,'blank');
+                });
+            }
+            else{
+                upload.title = '本视频无法添加字幕，可能原因是:\r\n·UP主未允许观众投稿字幕\r\n·您未达到UP主设置的投稿字幕条件';
+                upload.disabled = true;
+            }
             //字体大小
             fontsize.value = this.setting.fontsize==0.6?
                 0:this.setting.fontsize==0.8?
@@ -424,25 +559,101 @@ span.subtitle-item {
             });
             //初始化字幕
             this.initSubtitle();
+            console.log('init cc helper button done');
+        },
+        updateDownloadBtn(value){
+            if(!value||value=='close'){
+                this.elements.downloadBtn.disabled = true;
+                this.elements.downloadBtn.classList.add('bui-button-disabled');
+                this.currentIndex = -1;
+            }
+            else{
+                this.elements.downloadBtn.disabled = false;
+                this.elements.downloadBtn.classList.remove('bui-button-disabled');
+                this.currentIndex = this.subtitle.subtitles.findIndex(item=>item.lan==value);
+            }
         },
         initNewUI(){
-            console.log('init cc helper new ui NotImplemented');
+            const downloadBtn = this.elements.downloadBtn = this.elements.panel.nextElementSibling.cloneNode(),
+                  selector = this.elements.panel.querySelector('ul'),
+                  nowSelect = selector.querySelector('li.bui-select-item.bui-select-item-active'),
+                  localSelect = nowSelect.cloneNode();
+            downloadBtn.style = 'min-width:unset!important'
+            downloadBtn.innerText = '下载';
+            downloadBtn.addEventListener('click',()=>{
+                if(this.currentIndex===undefined||this.currentIndex==-1) return;
+                const item = this.subtitle.subtitles[this.currentIndex];
+                if(!item) return;
+                if(this.datas[item.lan]){
+                    new Encoder(this.datas[item.lan]);
+                }
+                else{
+                    this.getSubtitle(item).then(data=>{
+                        new Encoder(data);
+                    });
+                }
+            });
+            this.updateDownloadBtn(nowSelect&&nowSelect.dataset.value);
+            this.elements.panel.insertAdjacentElement('afterend',downloadBtn);
+            //本地字幕
+            localSelect.dataset.value = 'close';
+            localSelect.innerText = '本地字幕';
+            localSelect.addEventListener('click',()=>{
+                this.decoder.selectFile();
+            });
+            selector.appendChild(localSelect);
+            new MutationObserver((mutations,observer)=>{
+                mutations.forEach(mutation=>{
+                    if(!mutation.target||mutation.type!='attributes') return;
+                    if(mutation.target.classList.contains('bui-select-item-active')&&mutation.target.dataset.value){
+                        this.updateDownloadBtn(mutation.target.dataset.value);
+                    }
+                });
+            }).observe(selector,{
+                subtree: true,
+                attributes: true,
+                attributeOldValue: true ,
+                attributeFilter: ['class']
+            });
+            console.log('Bilibili CC Helper init newUI success.');
+        },
+        tryInitNewUI(){
+            const btn = this.get('.bilibili-player-video-btn-subtitle','btn'),
+                  panel = this.get('.bilibili-player-video-subtitle-setting-lan','panel');
+            if(panel){
+                this.initNewUI();
+            }
+            else if(btn){
+                new MutationObserver((mutations,observer)=>{
+                    mutations.forEach(mutation=>{
+                        if(!mutation.target) return;
+                        if(mutation.target.classList.contains('bilibili-player-video-subtitle-setting-lan')){
+                            observer.disconnect();
+                            this.elements.panel = mutation.target;
+                            this.initNewUI();
+                        }
+                    });
+                }).observe(btn,{
+                    childList: true,
+                    subtree: true
+                });
+            }
+            else{
+                throw('找不到新播放器按钮');
+            }
         },
         setupData(data){
             try{
-                if(this.isNew) throw('init cc helper new ui NotImplemented');
-                this.setting = JSON.parse(localStorage.bilibili_player_settings).subtitle;
-                if(!this.setting) throw('获取设置失败');
                 fetch(`//api.bilibili.com/x/player.so?id=cid:${window.cid}&aid=${window.aid}`)
                     .then(res=>res.text()).then(data=>{
                     const subtitle = data.match(/(?:<subtitle>)(.+)(?:<\/subtitle>)/);
                     if (subtitle) this.subtitle = JSON.parse(subtitle[1]);
-                    if(this.subtitle.allow_submit||(this.subtitle.subtitles&&this.subtitle.subtitles.length)){
+                    this.languagesCount = this.subtitle.subtitles&&this.subtitle.subtitles.length+1;
+                    if(this.subtitle.allow_submit||this.languagesCount){
                         if(this.isNew){
-                            this.initNewUI();
+                            this.tryInitNewUI();
                         }else{
                             this.initOldUI();
-                            console.log('init cc helper button done');
                         }
                     }
                 });
@@ -450,8 +661,21 @@ span.subtitle-item {
                 console.error(e,'CC字幕助手配置失败');
             }
         },
+        observerNew(){
+            new MutationObserver((mutations, observer)=>{
+                mutations.forEach(mutation=>{
+                    if(!mutation.target) return;
+                    if(mutation.target.getAttribute('stage')==1){
+                        this.setupData();
+                    }
+                });
+            }).observe(this.get('#bofqi'),{
+                childList: true,
+                subtree: true,
+            });
+        },
         tryInit(){
-            if(this.get('.bilibili-player-video-btn-danmaku')){
+            if(this.get('#entryNew')){
                 this.isNew = false;
                 this.setupData();
                 return true;
@@ -459,6 +683,7 @@ span.subtitle-item {
             else if(this.get('.bilibili-player-video-danmaku-setting')){
                 this.isNew = true;
                 this.setupData();
+                this.observerNew();
                 return true;
             }
         },
@@ -472,14 +697,9 @@ span.subtitle-item {
                 }
                 mutations.forEach(mutation=>{
                     if(!mutation.target) return;
-                    if(mutation.target.classList.contains('bilibili-player-video-btn-danmaku')){
-                        this.isNew = false;
+                    if(mutation.target.getAttribute('stage')==1){
                         observer.disconnect();
-                        this.setupData();
-                    }else if(mutation.target.classList.contains('bilibili-player-video-danmaku-setting')){
-                        this.isNew = true;
-                        observer.disconnect();
-                        this.setupData();
+                        this.tryInit();
                     }
                 });
             }).observe(document.body,{
