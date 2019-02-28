@@ -1,6 +1,8 @@
 bilibili CC字幕助手
 =======================
 
+[脚本发布页](https://greasyfork.org/scripts/378513)
+
 [个人脚本仓库](https://github.com/indefined/UserScripts)
 
 [问题反馈到这里](https://github.com/indefined/UserScripts/issues)
@@ -19,11 +21,11 @@ bilibili CC字幕助手
 -------------------------
 ## 功能预览
 
-![旧版](./oldPlayer.jpg)
+![新版](https://greasyfork.org/system/screenshots/screenshots/000/014/323/original/newPlayer.jpg)
 
-![新版](./newPlayer.jpg)
+![旧版](https://greasyfork.org/system/screenshots/screenshots/000/014/324/original/oldPlayer.jpg)
 
-![下载](./download.jpg)
+![下载](https://greasyfork.org/system/screenshots/screenshots/000/014/325/original/download.jpg)
 
 -------------------------
 ## 兼容性

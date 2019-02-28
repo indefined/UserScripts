@@ -108,7 +108,7 @@
 <div style="left: 50%;top: 50%;position: absolute;padding: 20px;background:\
 white;border-radius: 8px;margin: auto;transform: translate(-50%,-50%);">
 <h2 style="font-size: 20px;color: #4fc1e9;font-weight: 400;margin-bottom: 10px;">字幕下载</h2>
-<a href="https://github.com/indefined/UserScripts" target="_blank" style="position: absolute;\
+<a href="https://greasyfork.org/scripts/378513" target="_blank" style="position: absolute;\
 right: 20px;top:30px">当前版本：${GM_info&&GM_info.script.version||'unknow'}</a>
 <textarea id="subtitle-download-area" style="width:350px;height: 320px;rsize:both;" readonly></textarea>
 <div style="line-height: 30px;">
@@ -141,7 +141,7 @@ ScaledBorderAndShadow: yes
 ; ----------------------
 ; 本字幕由CC字幕助手自动转换
 ; 字幕来源${document.location}
-; 脚本地址https://github.com/indefined/UserScripts
+; 脚本地址https://greasyfork.org/scripts/378513
 ; 设置了字幕过长自动换行，但若字幕中没有空格换行将无效
 ; 字体大小依据720p 48号字体等比缩放
 ; 如显示不正常请尝试使用SRT格式
