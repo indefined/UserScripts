@@ -2,10 +2,12 @@
 // @name        bilibili直播间助手
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.4.0
+// @version     0.5.0
 // @author      indefined
-// @description 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
+// @description 可配置 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
+// @grant       GM_getValue
+// @grant       GM_setValue
 // @license     MIT
 // @run-at      document-idle
 // ==/UserScript==
@@ -56,35 +58,28 @@ const helper = {
 };
 
 const LiveHelper = {
+    settingInfos:{
+        fullScreenPanel:{
+            name:'全屏礼物栏/全屏弹幕发送框',
+            group:'elementAdjuster'
+        },
+        showVideoLink:{
+            name:'轮播显示链接',
+            group:'elementAdjuster'
+        },
+        replaceMedalTitle:{
+            name:'勋章/头衔扩展',
+            group:'advancedSwitcher'
+        },
+        showOtherGift:{
+            name:'显示其它礼物',
+            group:'otherGift'
+        },
+    },
     //页面元素调整
     elementAdjuster:{
-        initValues(){
-            this.leftContainer = helper.get('.left-container');
-            this.toolBar = helper.get('#gift-control-vm');
-            this.giftPanel = helper.get('div.gift-presets.p-relative.t-right');
-            this.giftPackage = helper.get('.item.z-gift-package');
-            this.playerPanel = helper.get('.bilibili-live-player.relative');
-            this.screenPanel = helper.get('.bilibili-live-player-video-controller');
-            this.inputPanel = helper.get('div.chat-input-ctnr.p-relative');
-            this.controlPanel = this.inputPanel.parentNode;
-            this.bottomPanel = this.inputPanel.nextSibling;
-            this.sendButton = this.bottomPanel.lastChild;
-            this.observer = new MutationObserver(mutations => {
-                mutations.forEach((mutation)=>{
-                    if (mutation.attributeName=='data-player-state') {
-                        this.handleFullScreenPanel(this.playerPanel.getAttribute('data-player-state'),mutation.oldValue);
-                    }
-                    else if (mutation.target.className==="bilibili-live-player-video-round-title") {
-                        this.appendTitle(mutation.target);
-                    }
-                    for (const addedNode of mutation.addedNodes) {
-                        if (addedNode.className==="bilibili-live-player-video-round-title") {
-                            this.appendTitle(addedNode);
-                        }
-                    }
-                });
-            });
-            this.style = helper.create('style',{
+        initStyle(){
+            helper.create('style',{
                 type:'text/css',
                 innerHTML:`
 /*礼物包裹图标*/
@@ -148,6 +143,7 @@ const LiveHelper = {
 .gift-item .info .label {
     color: unset!important;
 }
+
 /*全屏礼物栏样式*/
 body.fullscreen-fix div#gift-control-vm {
     display: block!important;
@@ -214,24 +210,69 @@ body.fullscreen-fix div#gift-control-vm {
 }`
             },document.head);
         },
-        //轮播链接
-        appendTitle(target){
-            if (!target) return;
-            const title = helper.get('div.normal-mode');
-            if (!title) return;
-            const match = target.innerText.match(/av\d+/);
-            if (!match) return;
-            helper.set(helper.get('.info-section.dp-i-block.v-middle.title-link')||helper.create('a'),{
-                innerText:match[0],
-                href:'//www.bilibili.com/video/'+match[0],
+        initValues(){
+            this.leftContainer = helper.get('.left-container');
+            this.toolBar = helper.get('#gift-control-vm');
+            this.giftPanel = helper.get('div.gift-presets.p-relative.t-right');
+            this.giftPackage = helper.get('.item.z-gift-package');
+            this.playerPanel = helper.get('.bilibili-live-player.relative');
+            this.screenPanel = helper.get('.bilibili-live-player-video-controller');
+            this.inputPanel = helper.get('div.chat-input-ctnr.p-relative');
+            this.titlePanel = helper.get('div.normal-mode');
+            this.controlPanel = this.inputPanel.parentNode;
+            this.bottomPanel = this.inputPanel.nextSibling;
+            this.sendButton = this.bottomPanel.lastChild;
+            this.title = helper.create('a',{
                 target:'_blank',
                 className:'info-section dp-i-block v-middle title-link',
                 style:'margin-left:16px;font-size:16px'
-            },title);
+            });
+            this.observer = new MutationObserver(mutations => {
+                mutations.forEach((mutation)=>{
+                    if (mutation.attributeName=='data-player-state') {
+                        this.handleFullScreenPanel(this.playerPanel.getAttribute('data-player-state'),mutation.oldValue);
+                    }
+                    else if (mutation.target.className==="bilibili-live-player-video-round-title") {
+                        this.updateVideoLink();
+                    }
+                    for (const addedNode of mutation.addedNodes) {
+                        if (addedNode.className==="bilibili-live-player-video-round-title") {
+                            this.updateVideoLink();
+                        }
+                    }
+                });
+            });
         },
-        //全屏面板调整
-        handleFullScreenPanel(newValue,oldValue){//value='web-fullscreen'||'normal'||'fullscreen'
-            const screenPanel = helper.get('.bilibili-live-player-video-controller');
+        //礼物包裹
+        initGiftPackage(){
+            if (this.giftPackage&&this.giftPanel){
+                helper.set(this.giftPackage,{
+                    className:"dp-i-block v-top pointer p-relative bg-cover",
+                    id:"giftPackage"
+                },this.giftPanel);
+                const guardIcon = helper.get('div.m-guard-ent.gift-section.guard-ent');
+                if (guardIcon) guardIcon.parentNode.removeChild(guardIcon);
+            }
+        },
+        //轮播链接
+        updateVideoLink(){
+            if(!this.settings.showVideoLink) {
+                if(this.title&&this.titlePanel.contains(this.title)){
+                    this.titlePanel.removeChild(this.title);
+                }
+            }
+            else{
+                const target = helper.get('.bilibili-live-player-video-round-title'),
+                      match = target&&target.innerText.match(/(av\d+).+(P(\d))+?/);
+                match&&helper.set(this.title,{
+                    innerText:match[1],
+                    href:`//www.bilibili.com/video/${match[1]}${match[3]&&`?p=${match[3]}`}`
+                },this.titlePanel);
+            }
+        },
+        //全屏礼物面板调整
+        //value='web-fullscreen'|'normal'|'fullscreen'
+        handleFullScreenPanel(newValue,oldValue){
             if (newValue=='normal'){
                 this.leftContainer.appendChild(this.toolBar);
             }else{
@@ -245,32 +286,45 @@ body.fullscreen-fix div#gift-control-vm {
                 this.bottomPanel.appendChild(this.sendButton);
             }
         },
-        init(){
+        update(item,value){
+            if(item=='showVideoLink') {
+                this.updateVideoLink();
+            }
+            else if(item=='fullScreenPanel') {
+                if(value==false) {
+                    this.handleFullScreenPanel('normal','fullscreen');
+                }
+                else{
+                    const nowValue = this.playerPanel.getAttribute('data-player-state')||'normal',
+                          oldValue = nowValue=='normal'?'fullscreen':'normal';
+                    this.handleFullScreenPanel(nowValue,oldValue);
+                }
+            }
+            this.observer.disconnect();
+            if(!this.settings.showVideoTitle&&!this.settings.fullScreenPanel) return;
+            const config = {subtree:true};
+            if(this.settings.showVideoLink) {
+                config.childList = true;
+            }
+            if(this.settings.fullScreenPanel){
+                config.attributes = true;
+                config.attributeOldValue = true;
+                config.attributeFilter = ['data-player-state'];
+            }
+            this.observer.observe(this.playerPanel, config);
+        },
+        init(settings){
+            this.settings = settings;
+            this.initStyle();
             this.initValues();
-            if (this.giftPackage&&this.toolBar&&this.playerPanel){
-                this.appendTitle(helper.get('.bilibili-live-player-video-round-title'));
-            }
-            //礼物包裹
-            if (this.giftPackage&&this.giftPanel){
-                helper.set(this.giftPackage,{
-                    className:"dp-i-block v-top pointer p-relative bg-cover",
-                    id:"giftPackage"
-                },this.giftPanel);
-                const guardIcon = helper.get('div.m-guard-ent.gift-section.guard-ent');
-                if (guardIcon) guardIcon.parentNode.removeChild(guardIcon);
-            }
-            this.observer.observe(this.playerPanel, {
-                subtree: true,
-                childList: true,
-                attributes: true,
-                attributeOldValue: true,
-                attributeFilter: ['data-player-state']
-            });
+            this.initGiftPackage();
+            this.update();
+            this.updateVideoLink();
         }
     },
 
     //勋章/头衔扩展
-    strengthSwitcher:{
+    advancedSwitcher:{
         room:unsafeWindow?unsafeWindow.BilibiliLive:window.BilibiliLive,
         titleInfos:undefined,
         oldMedalButton:undefined,
@@ -376,7 +430,15 @@ header[data-v-460dfc36] {
     border-top: 8px solid #fff
 }`},document.head);
         },
-        init(){
+        update(item,value){
+            if(value==true){
+                this.replaceToNew();
+            }
+            else{
+                this.replaceToOld();
+            }
+        },
+        init(setting){
             this.initStyle();
             const bottomPanel = helper.get('#chat-control-panel-vm .bottom-actions');
             this.oldMedalButton = bottomPanel.querySelector('.action-item.medal');
@@ -386,17 +448,19 @@ header[data-v-460dfc36] {
             this.titleButton = this.oldTitleButton.cloneNode(true);
             this.titleButton.dataset.name = 'title';
             this.dialog = helper.get('.z-chat-control-panel-dialog').cloneNode();
+            this.handler = (e)=>this.handleDialog(e.target);
             bottomPanel.parentNode.appendChild(this.dialog);
-            document.body.addEventListener('click', (e)=>this.handleDialog(e.target));
-            this.replaceToNew();
+            if(setting.replaceMedalTitle) this.replaceToNew();
         },
         replaceToNew(){
             helper.replace(this.oldMedalButton,this.medalButton);
             helper.replace(this.oldTitleButton,this.titleButton);
+            document.body.addEventListener('click', this.handler);
         },
         replaceToOld(){
             helper.replace(this.medalButton,this.oldMedalButton);
             helper.replace(this.titleButton,this.oldTitleButton);
+            document.body.removeEventListener('click', this.handler);
         },
         handleDialog(target){
             if (this.dialog.contains(target)) return;
@@ -529,13 +593,30 @@ header[data-v-460dfc36] {
     },
 
     otherGift:{
-        init (){
+        init (settings){
             const bottomPanel = helper.get('#chat-control-panel-vm .bottom-actions');
+            this.panel = bottomPanel.firstElementChild;
             this.newGift = helper.set(bottomPanel.querySelector('.action-item.title').cloneNode(),{
-                innerText:'旧',
+                innerText:'礼',
                 title:'其它礼物'
-            },bottomPanel.firstElementChild);
-            document.body.addEventListener('click',(ev)=>this.showGift(ev.target));
+            });
+            this.handler = (ev)=>this.showGift(ev.target);
+            if(settings.showOtherGift) this.append();
+        },
+        append(){
+            this.panel.appendChild(this.newGift);
+            document.body.addEventListener('click',this.handler);
+        },
+        remove(){
+            document.body.removeEventListener('click',this.handler);
+            this.panel.removeChild(this.newGift);
+        },
+        update(item,value){
+            if(value){
+                this.append();
+            }else{
+                this.remove();
+            }
         },
         token:(()=>{
             try{
@@ -647,13 +728,51 @@ header[data-v-460dfc36] {
         }
     },
 
+    changeSetting(target){
+        try{
+            this.settings[target.id] = target.checked;
+            GM_setValue('BilibiliLiveHelper',JSON.stringify(this.settings));
+            this[this.settingInfos[target.id].group].update(target.id,target.checked);
+        }
+        catch(e){
+            console.error(e);
+        }
+    },
+    initSetting(){
+        this.settings = JSON.parse(GM_getValue('BilibiliLiveHelper','{}'));
+        const button = helper.get('.bilibili-live-player-video-controller-block-btn'),
+              settingPanel = helper.create('div',{
+                  className:"bilibili-live-player-video-controller-hide-danmaku-container t-left",
+                  innerHTML:`<div>直播间助手设置</div>`,
+              },button);
+        helper.create('style',{
+            innerHTML:`.bilibili-live-player-video-controller-block-btn:hover .bilibili-live-player-video-controller-hide-danmaku-container\
+                  {padding: 10px 15px;overflow: visible;height: auto;"}</style>`
+        },settingPanel);
+        for(const key in this.settingInfos){
+            if(this.settings[key]==undefined) this.settings[key] = true;
+            const item = helper.create('div',{className:'blpui-checkbox-container'},settingPanel);
+            helper.create('input',{
+                type:'checkbox',
+                className:'blpui-checkbox',
+                id:key,
+                checked:this.settings[key],
+                onchange:({target})=>this.changeSetting(target)
+            },item);
+            helper.create('label',{
+                className:'blpui-checkbox-span no-select',
+                innerText:this.settingInfos[key].name
+            },item).setAttribute('for',key);
+        }
+    },
+
     doInit(){
         try{
             if(!helper.get('.gift-package')) return false;
-            this.elementAdjuster.init();
-            this.strengthSwitcher.init();
-            this.otherGift.init();
-            window.BilibiliLive
+            this.initSetting();
+            this.elementAdjuster.init(this.settings);
+            this.advancedSwitcher.init(this.settings);
+            this.otherGift.init(this.settings);
         } catch (e){
             console.error('bilibili直播间助手执行错误',e);
         }
@@ -677,4 +796,3 @@ header[data-v-460dfc36] {
     }
 };
 LiveHelper.init();
-
