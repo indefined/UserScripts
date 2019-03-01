@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕助手
 // @namespace    indefined
-// @version      0.2
+// @version      0.2.1
 // @description  旧版播放器可用CC字幕，ASS/SRT/LRC格式字幕下载，本地ASS/SRT/LRC格式字幕加载
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -250,8 +250,8 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
             }
         },
         decoder:{
-            srtReg:/(?<fh>\d+):(?<fm>\d{1,2}):(?<fs>\d{1,2}),(?<fss>\d{1,3})\s*-->\s*(?<th>\d+):(?<tm>\d{1,2}):(?<ts>\d{1,2}),(?<tss>\d{1,3})\r?\n(?<content>[.\s\S]+)/,
-            assReg:/Dialogue:.*,(?<fh>\d+):(?<fm>\d{1,2}):(?<fs>\d{1,2}\.*\d*),\s*(?<th>\d+):(?<tm>\d{1,2}):(?<ts>\d{1,2}\.*\d*).*,.*,.*,.*,.*,.*,.*,(?<content>.+)/,
+            srtReg:/(\d+):(\d{1,2}):(\d{1,2}),(\d{1,3})\s*-->\s*(\d+):(\d{1,2}):(\d{1,2}),(\d{1,3})\r?\n([.\s\S]+)/,
+            assReg:/Dialogue:.*,(\d+):(\d{1,2}):(\d{1,2}\.?\d*),\s*?(\d+):(\d{1,2}):(\d{1,2}\.?\d*).*?,.*?,.*?,.*?,.*?,.*?,.*?,(.+)/,
             selectFile(){
                 const fileSelector = document.createElement('input')
                 fileSelector.type = 'file';
@@ -278,17 +278,22 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
                 if(!input) return;
                 const data = [];
                 input.split('\n').forEach(line=>{
-                    const match = line.match(/((\[(?<minute>\d+):(?<second>\d{1,2}(\.\d+)?)\])+)(?<content>.*)/);
-                    if (!match){
-                        console.log('跳过无法识别行',line);
+                    const match = line.match(/((\[\d+:\d+\.?\d*\])+)(.*)/);
+                    if (!match||match[3].trim().replace('\r','')=='') {
+                        //console.log('跳过非正文行',line);
                         return;
                     }
-                    data.push({
-                        time:match.groups.minute*60+(+match.groups.second),
-                        content:match.groups.content
+                    const times = match[1].match(/\d+:\d+\.?\d*/g);
+                    times.forEach(time=>{
+                        const t = time.split(':');
+                        data.push({
+                            time:t[0]*60 + (+t[1]),
+                            content:match[3]
+                        });
                     });
                 });
-                return {body:data.map(({time,content},index)=>{
+                return {
+                    body:data.map(({time,content},index)=>{
                     return {
                         from:time,
                         to:index==data.length-1?time+5:data[index+1].time,
@@ -304,13 +309,13 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
                 split.forEach(item=>{
                     const match = item.match(this.srtReg);
                     if (!match){
-                        console.log('跳过无法识别行',item);
+                        //console.log('跳过非正文行',item);
                         return;
                     }
                     data.push({
-                        from:match.groups.fh*60*60+match.groups.fm*60+(+match.groups.fs)+(match.groups.fss/1000),
-                        to:match.groups.th*60*60+match.groups.tm*60+(+match.groups.ts)+(match.groups.tss/1000),
-                        content:match.groups.content.trim().replace(/{\\.+?}/g,'').replace(/\\N/g,'\n')
+                        from:match[1]*60*60 + match[2]*60 + (+match[3]) + (match[4]/1000),
+                        to:match[5]*60*60 + match[5]*60 + (+match[7]) + (match[8]/1000),
+                        content:match[9].trim().replace(/{\\.+?}/g,'').replace(/\\N/g,'\n')
                     });
                 });
                 return {body:data};
@@ -322,13 +327,13 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
                 split.forEach(line=>{
                     const match = line.match(this.assReg);
                     if (!match){
-                        console.log('跳过无法识别行',line);
+                       //console.log('跳过非正文行',line);
                         return;
                     }
                     data.push({
-                        from:match.groups.fh*60*60+match.groups.fm*60+(+match.groups.fs),
-                        to:match.groups.th*60*60+match.groups.tm*60+(+match.groups.ts),
-                        content:match.groups.content.trim().replace(/{\\.+?}/g,'').replace(/\\N/g,'\n')
+                        from:match[1]*60*60 + match[2]*60 + (+match[3]),
+                        to:match[4]*60*60 + match[5]*60 + (+match[6]),
+                        content:match[7].trim().replace(/{\\.+?}/g,'').replace(/\\N/g,'\n')
                     });
                 });
                 return {body:data};
@@ -624,6 +629,8 @@ span.subtitle-item {
                 this.initNewUI();
             }
             else if(btn){
+                //强制显示新版播放器CC字幕按钮，不管视频有没有字幕，反正可以选择本地字幕
+                btn.style = 'display:block';
                 new MutationObserver((mutations,observer)=>{
                     mutations.forEach(mutation=>{
                         if(!mutation.target) return;
@@ -650,8 +657,6 @@ span.subtitle-item {
                     if (subtitle) this.subtitle = JSON.parse(subtitle[1]);
                     this.languagesCount = this.subtitle.subtitles&&this.subtitle.subtitles.length+1;
                     if(this.isNew){
-                        //todo:新版不允许上传且没有字幕时的页面处理，其实当前旧版页面在这种情况下也会异常
-                        if(!this.subtitle.allow_submit&&!this.languagesCount>1) return;
                         this.tryInitNewUI();
                     }else{
                         this.initOldUI();
