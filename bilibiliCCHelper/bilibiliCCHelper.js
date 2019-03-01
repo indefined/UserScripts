@@ -425,7 +425,10 @@ span.subtitle-item {
                     this.decoder.selectFile();
                 }
                 else{
-                    this.setting.isclosed = true;
+                    if(this.languagesCount>1||this.currentIndex==this.languagesCount) {
+                        //已经有字幕前提下关闭才更改设置项
+                        this.setting.isclosed = true;
+                    }
                     this.elements.download.disabled = true;
                     this.elements.languages[this.languagesCount-1].selected = true;
                     this.elements.icon.innerHTML = elements.oldDisableIcon;
@@ -463,10 +466,8 @@ span.subtitle-item {
             else{
                 this.changeSubtitle();
             }
-            if(this.languagesCount){
-                this.changeStyle();
-                this.changeResize();
-            }
+            this.changeStyle();
+            this.changeResize();
         },
         initOldUI(){
             this.setting = JSON.parse(localStorage.bilibili_player_settings).subtitle;
