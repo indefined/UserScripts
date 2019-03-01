@@ -2,7 +2,7 @@
 // @name        bilibili直播间助手
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.0
+// @version     0.5.1
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -287,6 +287,7 @@ body.fullscreen-fix div#gift-control-vm {
             }
         },
         update(item,value){
+            if(!this.playerPanel) return;
             if(item=='showVideoLink') {
                 this.updateVideoLink();
             }
@@ -334,101 +335,17 @@ body.fullscreen-fix div#gift-control-vm {
         dialog:undefined,
         strings:{
             medal:{
-                header:`
-                    <div data-v-0ebe36b2="" class="arrow p-absolute" style="left: 56px;"></div>
-                    <div data-v-0c0ef647="" data-v-0ebe36b2="" class="medal-ctnr">
-                      <h1 class="title" data-v-0c0ef647="">我的勋章</h1>
-                      <div data-v-ec1c3b2e="" class="tv">
-                        <div data-v-4df82965="" data-v-ec1c3b2e="" role="progress" class="link-progress-tv"></div>
-                      </div>
-                      <a data-v-0c0ef647="" href="//link.bilibili.com/p/center/index#/user-center/wearing-center/my-medal" target="_blank"
-                      class="bili-link bottom-link dp-block">
-                        <span data-v-0c0ef647="" title="前往勋章管理页面" class="v-middle">管理我的勋章</span>
-                      </a>
-                    </div>`,
-                style:'transform-origin: 56px bottom 0px;',
-                url:'//api.live.bilibili.com/i/api/medal?page=1&pageSize=25'
+                name:'勋章',
+                arrawPosition:'48px',
+                link:'//link.bilibili.com/p/center/index#/user-center/wearing-center/my-medal',
+                dataUrl:'//api.live.bilibili.com/i/api/medal?page=1&pageSize=25'
             },
             title:{
-                header:`
-                    <div data-v-0ebe36b2="" class="arrow p-absolute" style="left: 78px;"></div>
-                    <h1 data-v-6cf0c8b2="" class="title">我的头衔</h1>
-                    <div id="title-list" style="max-height: 410px;overflow: auto;">
-                      <div data-v-ec1c3b2e="" class="tv">
-                        <div data-v-4df82965="" data-v-ec1c3b2e="" role="progress" class="link-progress-tv"></div>
-                      </div>
-                    </div>
-                    <a data-v-6cf0c8b2="" href="//link.bilibili.com/p/center/index#/user-center/wearing-center/library" target="_blank"
-                    class="bili-link bottom-link dp-block">
-                      <span data-v-6cf0c8b2="" title="前往头衔管理页面" class="v-middle">管理我的头衔</span>
-                    </a>`,
-                style:'transform-origin: 78px bottom 0px;',
-                url:'//api.live.bilibili.com/i/api/ajaxTitleInfo?had=1&page=1&pageSize=300'
+                name:'头衔',
+                arrawPosition:'69px',
+                link:'//link.bilibili.com/p/center/index#/user-center/wearing-center/library',
+                dataUrl:'//api.live.bilibili.com/i/api/ajaxTitleInfo?had=1&page=1&pageSize=300'
             }
-        },
-        initStyle(){
-            helper.create('style',{
-                innerHTML:`
-.title[data-v-6cf0c8b2] ,
-.title[data-v-0c0ef647] ,
-header[data-v-460dfc36] {
-    font-weight: 400;
-    font-size: 18px;
-    margin: 0;
-    color: #23ade5
-}
-
-.bottom-link[data-v-6cf0c8b2] ,
-.bottom-link[data-v-0c0ef647] {
-    margin-top: 16px;
-    text-align: center;
-    font-size: 12px;
-    letter-spacing: 0
-}
-
-.bottom-link .icon-font[data-v-6cf0c8b2] ,
-.bottom-link .icon-font[data-v-0c0ef647] {
-    font-size: 12px;
-    margin-left: 4px
-}
-
-.intimacy-bar[data-v-0c0ef647] {
-    height: 8px;
-    width: 64px;
-    margin: 0 8px;
-    border-radius: 2px;
-    background-color: #e3e8ec
-}
-
-.intimacy-bar>span[data-v-0c0ef647] {
-    background-color: #23ade5
-}
-
-.lpl-drawer-ctnr[data-v-fd126f5a] {
-    padding-right: 0!important;
-}
-
-.live-title-icon[data-v-7765e5b3] {
-    display: inline-block;
-    vertical-align: middle;
-    height: 20px
-}
-
-.intimacy-text[data-v-0c0ef647] {
-    font-size: 12px;
-    color: #999;
-    line-height: 16px
-}
-
-.arrow[data-v-0ebe36b2] {
-    top: 100%;
-    left: 13px;
-    width: 0;
-    height: 0;
-    border-left: 4px solid transparent;
-    border-right: 4px solid transparent;
-    border-top: 8px solid #fff
-}`},document.head);
         },
         update(item,value){
             if(value==true){
@@ -436,10 +353,11 @@ header[data-v-460dfc36] {
             }
             else{
                 this.replaceToOld();
+                this.closeDialog();
             }
         },
         init(setting){
-            this.initStyle();
+            //各种按钮
             const bottomPanel = helper.get('#chat-control-panel-vm .bottom-actions');
             this.oldMedalButton = bottomPanel.querySelector('.action-item.medal');
             this.oldTitleButton = bottomPanel.querySelector('.action-item.title');
@@ -447,9 +365,27 @@ header[data-v-460dfc36] {
             this.medalButton.dataset.name = 'medal';
             this.titleButton = this.oldTitleButton.cloneNode(true);
             this.titleButton.dataset.name = 'title';
-            this.dialog = helper.get('.z-chat-control-panel-dialog').cloneNode();
+            //对话框点击事件处理句柄
             this.handler = (e)=>this.handleDialog(e.target);
-            bottomPanel.parentNode.appendChild(this.dialog);
+            //创建对话框
+            this.dialog = helper.create('div',{
+                id:'title-medal-dialog',
+                style:'display:none;bottom:50px',
+                //innerHTML:`<style>#title-medal-dialog a{color: #23ade5;}</style>`
+            },bottomPanel.parentNode);
+            //对话框箭头
+            this.dialogArraw = helper.create('div',{
+                className:"p-absolute",
+                style:"top: 100%;border-left: 4px solid transparent;border-right: 4px solid transparent;border-top: 8px solid #fff;"
+            },this.dialog);
+            //对话框标题
+            this.dialogTitle = helper.create('div',{style:"font-weight: 400;font-size: 18px;"},this.dialog);
+            //对话框内容本体
+            this.dialogPanel = helper.create('div',{style:'max-height: 400px;overflow: auto;'},this.dialog);
+            //对话框正在载入面板
+            this.loadingDiv = helper.create('div',{className:"tv"},this.dialog);
+            //对话框底部面板
+            this.dialogBottom = helper.create('div',{style:"margin-top: 10px;text-align: center;"},this.dialog);
             if(setting.replaceMedalTitle) this.replaceToNew();
         },
         replaceToNew(){
@@ -469,16 +405,31 @@ header[data-v-460dfc36] {
                 (target!=this.medalButton&&target!=this.titleButton)) {
                 return this.closeDialog();
             }
+            const name = this.strings[targetName].name
+            //保存当前对话框目标
             this.dialog.dataset.name = targetName;
-            helper.set(this.dialog,{
-                innerHTML:this.strings[targetName].header,
-                style:this.strings[targetName].style
-            });
-            helper.xhr(this.strings[targetName].url).then(data=>{
+            this.dialog.style = `transform-origin: ${
+                this.strings[targetName].arrawPosition} bottom 0px;position:absolute;bottom:50px;color: #23ade5;`;
+            //设置对话框箭头位置
+            this.dialogArraw.style.left = this.strings[targetName].arrawPosition;
+            this.dialogTitle.innerText = '我的'+name;
+            //显示正在加载面板
+            helper.set(this.loadingDiv,{
+                style:"height:100px",
+                innerHTML:`<div data-v-ec1c3b2e="" role="progress" class="link-progress-tv" data-v-4df82965=""></div>`
+            })
+            //清空对话框本体
+            this.dialogPanel.innerHTML = '';
+            //底部面板初始化为目标链接
+            this.dialogBottom.innerHTML = `<a href="${this.strings[targetName].link}" target="_blank" title="前往${
+                name}管理页面" style="color: #23ade5;">管理我的${name}</a>`;
+            helper.xhr(this.strings[targetName].dataUrl).then(async data=>{
                 if(targetName=='medal') this.listMedal(data);
-                else if(targetName=='title') this.listTitle(data);
+                else if(targetName=='title') await this.listTitle(data);
+            }).then(()=>{
+                this.loadingDiv.style = 'display:none';
             }).catch (e=>{
-                //this.loadingDiv.innerHTML = `<p class="des">解析返回错误${e}～</p>`;
+                this.loadingDiv.innerHTML = `<p class="des">解析返回错误${e}～</p>`;
                 console.error(e);
             });
             this.dialog.className = 'dialog-ctnr common-popup-wrap p-absolute border-box z-chat-control-panel-dialog bottom v-enter a-scale-in-ease v-enter-to';
@@ -504,68 +455,58 @@ header[data-v-460dfc36] {
             this.doRequire(`//api.vc.bilibili.com/link_group/v1/member/buy_medal?coin_type=${type}&master_uid=${this.room.ANCHOR_UID}&platform=android`,'购买勋章');
         },
         listMedal(data){
-            const listPanel = this.dialog.lastChild;
-            const point = listPanel.querySelector('.bili-link.bottom-link.dp-block');
-            const loadingDiv = this.dialog.querySelector('.tv');
             let hasMedal = false;
-            if (data.code!=0||!data.data||!data.data.fansMedalList){
-                loadingDiv.innerHTML = `<p class="des">查询勋章失败 code:${data.code}\r\n${data.message}</p>`;
-                return;
-            }
-            if (data.data.fansMedalList.length==0){
-                loadingDiv.innerHTML = `<p class="des">还没有勋章哦～</p>`;
-                return;
-            }
-            listPanel.removeChild(loadingDiv);
+            if (data.code!=0||!data.data||!data.data.fansMedalList) throw(`查询勋章失败 code:${data.code}\r\n${data.message}`);
+            if (data.data.fansMedalList.length==0) throw('还没有勋章哦～');
             data.data.fansMedalList.forEach((v)=>{
                 if (this.room.ANCHOR_UID==v.target_id) hasMedal = true;
+                const itemDiv = helper.create('div',{style:'margin-top: 8px'},this.dialogPanel);
                 helper.create('div',{
-                    style:'margin-top: 8px',
-                    innerHTML:`
-                        <div data-v-0c0ef647="" title="主播:${v.uname}\r\n点击${v.status?'取消佩戴':'切换'}勋章" class="fans-medal-item v-middle pointer level-${v.level} ${v.status?' special-medal':''}">
-                        <div class="label">${v.status?`<i class="medal-deco union"></i>`:''}<span class="content">${v.medalName}</span></div><span class="level">${v.level}</span>
-                        </div>
-                        <span data-v-0c0ef647="" title="升级进度：${v.intimacy}/${v.next_intimacy}\r\n升级还差：${v.next_intimacy-v.intimacy}" class="intimacy-bar dp-i-block v-center over-hidden p-relative">
-                        <span data-v-0c0ef647="" class="dp-i-block v-top h-100" style="width: ${v.intimacy/v.next_intimacy*100}%;"></span>
-                        </span>
-                        <a data-v-0c0ef647="" href="/${v.roomid}" target="_blank"  title="今日亲密度剩余${v.dayLimit-v.todayFeed}\r\n点击前往主播房间" class="intimacy-text">${v.todayFeed}/${v.dayLimit}</a>`
-                },listPanel).querySelector('.fans-medal-item').addEventListener('click', ()=>{
-                    this.doRequire(`//api.live.bilibili.com/i/${v.status?`ajaxCancelWear`:`ajaxWearFansMedal?medal_id=${v.medal_id}`}`,v.status?'取消佩戴勋章':'切换勋章');
-                    this.oldMedalButton.click()&this.oldMedalButton.click();
-                    this.closeDialog();
-                });
+                    title:`主播:${v.uname}\r\n点击${v.status?'取消佩戴':'切换'}勋章`,
+                    innerHTML:`<div class="label">${v.status?`<i class="medal-deco union"></i>`:''}\
+                      <span class="content">${v.medalName}</span></div><span class="level">${v.level}</span>`,
+                    className:`fans-medal-item v-middle pointer level-${v.level} ${v.status?' special-medal':''}`,
+                    onclick:()=>{
+                        this.doRequire(`//api.live.bilibili.com/i/${
+                                       v.status?`ajaxCancelWear`:`ajaxWearFansMedal?medal_id=${v.medal_id}`}`,v.status?'取消佩戴勋章':'切换勋章');
+                        this.oldMedalButton.click()&this.oldMedalButton.click();
+                        this.closeDialog();
+                    }
+                },itemDiv);
+                helper.create('span',{
+                    title:`升级进度：${v.intimacy}/${v.next_intimacy}\r\n升级还差：${v.next_intimacy-v.intimacy}`,
+                    className:"dp-i-block v-center over-hidden",
+                    style:"height: 8px;width: 64px;margin: 0 8px;border-radius: 3px;background-color: #e3e8ec;",
+                    innerHTML:`<span class="dp-i-block h-100 v-top" style="width: ${v.intimacy/v.next_intimacy*100}%;background-color: #23ade5;"></span>`
+                },itemDiv);
+                helper.create('a',{
+                    style:'color:#999',
+                    href:`/${v.roomid}`,target:"_blank",className:"intimacy-text",
+                    title:`今日亲密度剩余${v.dayLimit-v.todayFeed}\r\n点击前往主播房间`,
+                    innerText:`${v.todayFeed}/${v.dayLimit}`
+                },itemDiv);
             });
             if (this.room.ANCHOR_UID&&!hasMedal){
-                const buy = helper.create('div',{
-                    style:'display: inline-block;margin-right: 10px;',
-                    innerHTML : `
-                        <div title="使用20硬币购买本房间勋章" class="dp-i-block pointer">
-                        <a style="border: 1.8px solid #c8c8c8;border-radius: 50%;border-color: #23ade5;">硬</a>
-                        <span>20</span>
-                        </div>
-                        <span title="使用9900银瓜子购买本房间勋章" class="pointer dp-i-block">
-                        <i class="svg-icon silver-seed" style="font-size: 15px;"></i>
-                        <span>9900</span>
-                        </span>`,
-                    onclick : e=>false
-                });
-                buy.firstElementChild.addEventListener('click',()=>this.buyMedal('metal'));
-                buy.lastChild.addEventListener('click',()=>this.buyMedal('silver'));
-                point.insertBefore(buy,point.firstElementChild);
+                const buyDiv = helper.create('div',{style:'display: inline-block;'},this.dialogBottom);
+                helper.create('div',{
+                    title:"使用20硬币购买本房间勋章",
+                    style:"margin-left: 10px;",
+                    className:"dp-i-block pointer",
+                    onclick:()=>this.buyMedal('metal'),
+                    innerHTML:`<span style="border: 1.8px solid #c8c8c8;border-radius: 50%;border-color: #23ade5;">硬</span><span>20</span>`
+                },buyDiv);
+                helper.create('div',{
+                    title:"使用9900银瓜子购买本房间勋章",
+                    style:"margin-left: 10px;",
+                    className:"dp-i-block pointer",
+                    onclick:()=>this.buyMedal('silver'),
+                    innerHTML:`<span class="svg-icon silver-seed" style="font-size: 15px;"></span><span>9900</span>`
+                },buyDiv);
             }
-            listPanel.appendChild(point);
         },
         async listTitle(data){
-            const listPanel = this.dialog.querySelector('#title-list');
-            const loadingDiv = this.dialog.querySelector('.tv');
-            if (data.code!=0||!data.data||!data.data.list){
-                loadingDiv.innerHTML = `<p class="des">查询头衔失败 code:${data.code}\r\n${data.message}</p>`;
-                return;
-            }
-            if (data.data.list.length==0){
-                loadingDiv.innerHTML = `<p class="des">没有头衔哦～</p>`;
-                return;
-            }
+            if (data.code!=0||!data.data||!data.data.list) throw(`查询头衔失败 code:${data.code}\r\n${data.message}`);
+            if (data.data.list.length==0) throw('没有头衔哦～');
             if (!this.titleInfos){
                 await helper.xhr('//api.live.bilibili.com/rc/v1/Title/webTitles').then(data => {
                     if (data.code!=0||!(data.data instanceof Array)) throw(`code:${data.code}\r\n${data.message}`);
@@ -577,17 +518,20 @@ header[data-v-460dfc36] {
                     console.error(e);
                 });
             }
-            listPanel.removeChild(loadingDiv);
             data.data.list.forEach((v)=>{
                 helper.create('div',{
                     style : 'margin-top: 12px',
+                    onclick: ()=>{
+                        this.doRequire(`//api.live.bilibili.com/i/${
+                                       v.wear?`ajaxCancelWearTitle`:`ajaxWearTitle?id=${v.id}&cid=${v.cid}`}`,`${v.wear?'取消佩戴':'切换'}头衔`);
+                        this.closeDialog();
+                    },
                     innerHTML : `<img alt="${v.name}" title="${v.name} ${v.source}\r\n${v.wear?'当前佩戴头衔，点击取消佩戴':'点击佩戴'}"
                         src="${this.titleInfos&&this.titleInfos[v.css]}" class="live-title-icon pointer">`
                         /*<span title="升级进度：${0}/3500000000 升级还差：${0}" class="intimacy-bar dp-i-block v-center over-hidden p-relative">
-                        <span class="dp-i-block v-top h-100" style="width: ${0}%;"></span></span><span title="头衔经验" class="intimacy-text">${0}/${3500000000}</span>`;*/
-                },listPanel).firstElementChild.addEventListener('click',()=>{
-                    this.doRequire(`//api.live.bilibili.com/i/${v.wear?`ajaxCancelWearTitle`:`ajaxWearTitle?id=${v.id}&cid=${v.cid}`}`,`${v.wear?'取消佩戴':'切换'}头衔`);
-                });
+                          <span class="dp-i-block v-top h-100" style="width: ${0}%;"></span></span>
+                        <span title="头衔经验" class="intimacy-text">${0}/${3500000000}</span>`;*/
+                },this.dialogPanel);
             });
         }
     },
@@ -709,7 +653,8 @@ header[data-v-460dfc36] {
                 items.innerHTML = '<div data-v-ec1c3b2e="" class="tv"><div data-v-4df82965="" data-v-ec1c3b2e="" role="progress" class="link-progress-tv"></div></div>';
                 list.className = 'common-popup-wrap t-left';
                 list.style = 'position: absolute;width: 276px;bottom: 30px;left: 0px;cursor: auto;animation:scale-in-ease 0.4s;transform-origin: 90px bottom 0px;';
-                list.innerHTML = `<div data-v-0ebe36b2="" class="arrow p-absolute" style="left: 90px;"></div><header data-v-460dfc36="">其它礼物</header>`;
+                list.innerHTML = `<div style="position: absolute;left: 90px;top: 100%;width: 0;height: 0;border-left: 4px solid transparent;
+                    border-right: 4px solid transparent;border-top: 8px solid #fff;"></div><header data-v-460dfc36="">其它礼物</header>`;
                 list.appendChild(items);
                 this.newGift.appendChild(list);
                 helper.xhr('//api.live.bilibili.com/gift/v3/live/gift_config').then(data=>{
@@ -718,7 +663,8 @@ header[data-v-460dfc36] {
                     items.style = 'height:233px;overflow: auto;'
                     for (let i=0;i<this.gifts.length;i++){
                         const g = this.gifts[i];
-                        items.innerHTML += `<div data-index="${i}" style="background-image: url(${g.img_basic});width: 45px;height: 45px;" class="bg-cover dp-i-block pointer" title="${g.name}"></div>`;
+                        items.innerHTML += `<div data-index="${i}" style="background-image: url(${g.img_basic});width: 45px;height: 45px;"
+                            class="bg-cover dp-i-block pointer" title="${g.name}"></div>`;
                     }
                     [].forEach.call(items.childNodes,c=>{
                         c.onclick = (ev) => this.sendGift(ev.target.dataset.index);
@@ -739,7 +685,13 @@ header[data-v-460dfc36] {
         }
     },
     initSetting(){
-        this.settings = JSON.parse(GM_getValue('BilibiliLiveHelper','{}'));
+        this.settings = (()=>{
+            try{
+                return JSON.parse(GM_getValue('BilibiliLiveHelper','{}'));
+            }catch(e){
+                return {};
+            }
+        })();
         const button = helper.get('.bilibili-live-player-video-controller-block-btn'),
               settingPanel = helper.create('div',{
                   className:"bilibili-live-player-video-controller-hide-danmaku-container t-left",
