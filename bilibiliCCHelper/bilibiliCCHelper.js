@@ -45,7 +45,7 @@
 }
 </style>
 <div id="subtitle-setting-panel" style="position: absolute;bottom: 28px;right: 30px;background: white;\
-    border-radius: 4px;text-align: left;padding: 13px;display: none;cursor:default;">
+    border-radius: 4px;text-align: left;padding: 13px;display: none;cursor:default;width:220px">
     <div>
         <div>字幕</div><select style="width: 50%;" id="subtitle-language">
         <option value="close">关闭</option></select>
@@ -649,12 +649,12 @@ span.subtitle-item {
                     const subtitle = data.match(/(?:<subtitle>)(.+)(?:<\/subtitle>)/);
                     if (subtitle) this.subtitle = JSON.parse(subtitle[1]);
                     this.languagesCount = this.subtitle.subtitles&&this.subtitle.subtitles.length+1;
-                    if(this.subtitle.allow_submit||this.languagesCount){
-                        if(this.isNew){
-                            this.tryInitNewUI();
-                        }else{
-                            this.initOldUI();
-                        }
+                    if(this.isNew){
+                        //todo:新版不允许上传且没有字幕时的页面处理，其实当前旧版页面在这种情况下也会异常
+                        if(!this.subtitle.allow_submit&&!this.languagesCount>1) return;
+                        this.tryInitNewUI();
+                    }else{
+                        this.initOldUI();
                     }
                 });
             }catch(e){
