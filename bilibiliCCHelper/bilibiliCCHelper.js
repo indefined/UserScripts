@@ -409,15 +409,27 @@ span.subtitle-item {
                 throw('下标异常');
             }
             else if(index>=this.languagesCount-1){
-                if(!this.setting.isclosed&&this.subtitle.subtitles&&this.subtitle.subtitles.length){
-                    //只有在有字幕的前提下才使用空字幕关闭字幕，否则不需要操作
+                //倒数第二个是关闭选项
+                if(this.currentIndex!=undefined){
+                    //选择过字幕才使用空字幕关闭
                     player.updateSubtitle(this.datas.close);
                 }
-                this.setting.isclosed = true;
-                this.elements.download.disabled = true;
-                this.elements.languages[index].selected = true;
-                this.elements.icon.innerHTML = elements.oldDisableIcon;
-                if(index==this.languagesCount-1) this.decoder.selectFile();
+                if(index==this.languagesCount&&
+                   (this.currentIndex!=index||this.setting.isclosed)) {
+                    //选中本地字幕,如果当前不是本地字幕或者字幕已关闭则开启本地字幕
+                    this.setting.isclosed = false;
+                    this.elements.download.disabled = true;
+                    this.elements.languages[index].selected = true;
+                    this.elements.icon.innerHTML = elements.oldEnableIcon;
+                    this.currentIndex = index;
+                    this.decoder.selectFile();
+                }
+                else{
+                    this.setting.isclosed = true;
+                    this.elements.download.disabled = true;
+                    this.elements.languages[this.languagesCount-1].selected = true;
+                    this.elements.icon.innerHTML = elements.oldDisableIcon;
+                }
             }
             else{
                 const item = this.subtitle.subtitles[index];
@@ -439,14 +451,14 @@ span.subtitle-item {
         },
         toggleSubtitle(){
             if(!this.setting.isclosed){
-                this.changeSubtitle(this.languagesCount);
+                this.changeSubtitle(this.languagesCount-1);
             }else{
                 this.changeSubtitle(this.currentIndex);
             }
         },
         initSubtitle(){
             if(this.setting.isclosed) {
-                this.changeSubtitle(this.languagesCount);
+                this.changeSubtitle(this.languagesCount-1);
             }
             else{
                 this.changeSubtitle();
@@ -494,10 +506,10 @@ span.subtitle-item {
                 languages[i].text = this.subtitle.subtitles[i].lan_doc;
                 languages[i].value = this.subtitle.subtitles[i].lan;
             }
-            languages[languages.length-2].text = '本地字幕';
-            languages[languages.length-2].value = 'close';
-            languages[languages.length-1].text = '关闭';
+            languages[languages.length-1].text = '本地字幕';
             languages[languages.length-1].value = 'close';
+            languages[languages.length-2].text = '关闭';
+            languages[languages.length-2].value = 'close';
             languageSelector.addEventListener('change',(e)=>{
                 this.changeSubtitle(e.target.selectedIndex);
             });
@@ -582,11 +594,12 @@ span.subtitle-item {
             const downloadBtn = this.elements.downloadBtn = this.elements.panel.nextElementSibling.cloneNode(),
                   selector = this.elements.panel.querySelector('ul'),
                   nowSelect = selector.querySelector('li.bui-select-item.bui-select-item-active'),
-                  localSelect = nowSelect.cloneNode();
+                  closeItem = selector.querySelector('li.bui-select-item.bui-select-item-active'),
+                  localSelect = closeItem.cloneNode();
             downloadBtn.style = 'min-width:unset!important'
             downloadBtn.innerText = '下载';
             downloadBtn.addEventListener('click',()=>{
-                if(this.currentIndex===undefined||this.currentIndex==-1) return;
+                if(this.currentIndex===undefined||this.currentIndex<0) return;
                 const item = this.subtitle.subtitles[this.currentIndex];
                 if(!item) return;
                 if(this.datas[item.lan]){
@@ -601,12 +614,20 @@ span.subtitle-item {
             this.updateDownloadBtn(nowSelect&&nowSelect.dataset.value);
             this.elements.panel.insertAdjacentElement('afterend',downloadBtn);
             //本地字幕
-            localSelect.dataset.value = 'close';
             localSelect.innerText = '本地字幕';
             localSelect.addEventListener('click',()=>{
+                this.currentIndex = -2;
                 this.decoder.selectFile();
             });
             selector.appendChild(localSelect);
+            closeItem.addEventListener('click',()=>{
+                if(this.currentIndex == -2) {
+                    //启用了本地字幕的前提下点击新版关闭按钮使用空字幕关闭
+                    player.updateSubtitle(this.datas.close);;
+                    //关闭后置为普通关闭值
+                    this.currentIndex = -1;
+                }
+            });
             new MutationObserver((mutations,observer)=>{
                 mutations.forEach(mutation=>{
                     if(!mutation.target||mutation.type!='attributes') return;
