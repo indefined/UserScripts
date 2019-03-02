@@ -2,7 +2,7 @@
 // @name        bilibili直播间助手
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.2
+// @version     0.5.3
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -83,8 +83,8 @@ const LiveHelper = {
                 type:'text/css',
                 innerHTML:`
 /*礼物包裹图标*/
-.gift-package.live-skin-highlight-bg {
-    bottom:0px!important;
+.gift-package {
+    bottom:-2px!important;
     background: url(//s1.hdslb.com/bfs/live/d57afb7c5596359970eb430655c6aef501a268ab.png)!important;
     width: 48px!important;
     height: 48px!important;
@@ -92,11 +92,11 @@ const LiveHelper = {
     margin-right: 10px!important;
 }
 
-.gift-package.live-skin-highlight-bg>*{
+.gift-package>*{
     display:none!important;
 }
 
-.gift-package.live-skin-highlight-bg:after {
+.gift-package:after {
     content: '道具包裹';
     position: relative;
     bottom: -55px;
@@ -140,13 +140,14 @@ const LiveHelper = {
     right: -10px!important;
 }
 
-.gift-item .info .label {
-    color: unset!important;
-}
-
 /*全屏礼物栏样式*/
 body.fullscreen-fix div#gift-control-vm {
     display: block!important;
+}
+
+.bilibili-live-player-video-controller .gift-item .info .label,
+.bilibili-live-player-video-controller #gift-control-vm .gift-package {
+    color: unset!important;
 }
 
 .bilibili-live-player-video-controller #gift-control-vm {
@@ -250,6 +251,7 @@ body.fullscreen-fix div#gift-control-vm {
                     className:"dp-i-block v-top pointer p-relative bg-cover",
                     id:"giftPackage"
                 },this.giftPanel);
+                helper.get('.gift-package').className = 'gift-package live-skin-main-text';
                 const guardIcon = helper.get('div.m-guard-ent.gift-section.guard-ent');
                 if (guardIcon) guardIcon.parentNode.removeChild(guardIcon);
             }
