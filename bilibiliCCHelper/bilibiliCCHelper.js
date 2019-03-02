@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕助手
 // @namespace    indefined
-// @version      0.3.1
+// @version      0.3.2
 // @description  旧版播放器可用CC字幕，ASS/SRT/LRC格式字幕下载，本地ASS/SRT/LRC格式字幕加载
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -124,10 +124,9 @@ margin-left: 10px;">下载</a>
 cursor:pointer;margin-left: 10px;">关闭</a></div></div>`,
         shadowStyle:{
             "0":'',
-            "1":`text-shadow: rgb(0, 0, 0) 1px 0px 1px, rgb(0, 0, 0) 0px 1px 1px, rgb(0, 0, 0)0px -1px 1px,\
- rgb(0, 0, 0) -1px 0px 1px;`,
-            "2":`text-shadow: rgb(0, 0, 0) 0px 0px 1px, rgb(0, 0, 0) 0px 0px 1px, rgb(0, 0, 0) 0px 0px 1px;`,
-            "3":`text-shadow: rgb(0, 0, 0) 1px 1px 2px, rgb(0, 0, 0) 0px 0px 1px;`
+            "1":`text-shadow: #000 1px 0px 1px, #000 0px 1px 1px, #000 0px -1px 1px,#000 -1px 0px 1px;`,
+            "2":`text-shadow: #000 0px 0px 1px, #000 0px 0px 1px, #000 0px 0px 1px;`,
+            "3":`text-shadow: #000 1px 1px 2px, #000 0px 0px 1px;`
         },
         assHead:`\
 [Script Info]
@@ -147,7 +146,8 @@ ScaledBorderAndShadow: yes
 ; 如显示不正常请尝试使用SRT格式
 
 [V4+ Styles]
-Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, \
+StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
 Style: Default,Segoe UI,48,&H00FFFFFF,&HF0000000,&H00000000,&HF0000000,1,0,0,0,100,100,0,0.00,1,1,3,2,30,30,20,1
 
 [Events]
@@ -573,12 +573,12 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
         updateDownloadBtn(value='closed'){
             this.selectedLan = value;
             if(value=='close'){
-                this.downloadBtn.disabled = true;
+                this.downloadBtn.style['pointer-events'] = 'none';
                 this.downloadBtn.classList.add('bui-button-disabled');
             }
             else{
                 this.selectedLocal = false;
-                this.downloadBtn.disabled = false;
+                this.downloadBtn.style['pointer-events'] = 'all';
                 this.downloadBtn.classList.remove('bui-button-disabled');
             }
         },
@@ -591,7 +591,7 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
             downloadBtn.style = 'min-width:unset!important'
             downloadBtn.innerText = '下载';
             downloadBtn.addEventListener('click',()=>{
-                if(this.selectedLan=='closed') return;
+                if(this.selectedLan=='close') return;
                 bilibiliCCHelper.getSubtitle(this.selectedLan).then(data=>{
                     new Encoder(data);
                 });
