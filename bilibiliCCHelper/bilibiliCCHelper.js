@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕助手
 // @namespace    indefined
-// @version      0.3.2
+// @version      0.3.3
 // @description  旧版播放器可用CC字幕，ASS/SRT/LRC格式字幕下载，本地ASS/SRT/LRC格式字幕加载
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -109,7 +109,7 @@
 white;border-radius: 8px;margin: auto;transform: translate(-50%,-50%);">
 <h2 style="font-size: 20px;color: #4fc1e9;font-weight: 400;margin-bottom: 10px;">字幕下载</h2>
 <a href="https://greasyfork.org/scripts/378513" target="_blank" style="position: absolute;\
-right: 20px;top:30px">当前版本：${GM_info&&GM_info.script.version||'unknow'}</a>
+right: 20px;top:30px">当前版本：${typeof(GM_info)!="undefined"&&GM_info.script.version||'unknow'}</a>
 <textarea id="subtitle-download-area" style="width:350px;height: 320px;rsize:both;" readonly></textarea>
 <div style="line-height: 30px;">
 <input id="subtitle-download-ASS" type="radio" name="subtitle-type" value="ASS" style="cursor:pointer">

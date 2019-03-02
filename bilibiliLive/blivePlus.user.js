@@ -2,7 +2,7 @@
 // @name        bilibili直播间助手
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.3
+// @version     0.5.4
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -12,6 +12,7 @@
 // @run-at      document-idle
 // ==/UserScript==
 
+(function(){
 'use strict';
 const helper = {
     create(nodeType,config,appendTo){
@@ -328,7 +329,7 @@ body.fullscreen-fix div#gift-control-vm {
 
     //勋章/头衔扩展
     advancedSwitcher:{
-        room:unsafeWindow?unsafeWindow.BilibiliLive:window.BilibiliLive,
+        room:typeof(unsafeWindow)!="undefined"?unsafeWindow.BilibiliLive:window.BilibiliLive,
         titleInfos:undefined,
         oldMedalButton:undefined,
         oldTitleButton:undefined,
@@ -580,7 +581,7 @@ body.fullscreen-fix div#gift-control-vm {
         })(),
         newGift:undefined,
         gift:[],
-        room:unsafeWindow?unsafeWindow.BilibiliLive:window.BilibiliLive,
+        room:typeof(unsafeWindow)!="undefined"?unsafeWindow.BilibiliLive:window.BilibiliLive,
         sendGift(index){
             let type = 'gold';
             let num = 1;
@@ -679,8 +680,9 @@ body.fullscreen-fix div#gift-control-vm {
     changeSetting(target){
         try{
             this.settings[target.id] = target.checked;
-            GM_setValue('BilibiliLiveHelper',JSON.stringify(this.settings));
             this[this.settingInfos[target.id].group].update(target.id,target.checked);
+            typeof(GM_setValue)!='undefined'?GM_setValue('BilibiliLiveHelper',JSON.stringify(this.settings))
+            :localStorage.BilibiliLiveHelper = JSON.stringify(this.settings);
         }
         catch(e){
             console.error(e);
@@ -689,7 +691,9 @@ body.fullscreen-fix div#gift-control-vm {
     initSetting(){
         this.settings = (()=>{
             try{
-                return JSON.parse(GM_getValue('BilibiliLiveHelper','{}'));
+                const str = typeof(GM_setValue)!='undefined'?
+                      GM_getValue('BilibiliLiveHelper','{}'):localStorage.BilibiliLiveHelper;
+                return JSON.parse(str);
             }catch(e){
                 return {};
             }
@@ -753,3 +757,4 @@ body.fullscreen-fix div#gift-control-vm {
     }
 };
 LiveHelper.init();
+})();
