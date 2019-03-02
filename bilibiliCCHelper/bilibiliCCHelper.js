@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕助手
 // @namespace    indefined
-// @version      0.3.0
+// @version      0.3.1
 // @description  旧版播放器可用CC字幕，ASS/SRT/LRC格式字幕下载，本地ASS/SRT/LRC格式字幕加载
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -671,10 +671,12 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
         subtitle:undefined,
         datas:undefined,
         isOldPlayer:undefined,
-        get(ids){
+        get(selectors){
             //数组递归，可一次查询一个列表页面元素
-            if(ids instanceof Array) return ids.map(id=>this.get(id));
-            return document.body.querySelector(ids);
+            if(selectors instanceof Array) {
+                return selectors.map(selector=>this.get(selector));
+            }
+            return document.body.querySelector(selectors);
         },
         toast(msg){
             //todo
@@ -698,25 +700,23 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
             });
         },
         setupData(data){
-            try{
-                this.datas = {
-                    close:{
-                        body:[]
-                    }
-                };
-                fetch(`//api.bilibili.com/x/player.so?id=cid:${window.cid}&aid=${window.aid}`)
-                    .then(res=>res.text()).then(data=>{
-                    const match = data.match(/(?:<subtitle>)(.+)(?:<\/subtitle>)/);
-                    this.subtitle = match&&JSON.parse(match[1]);
-                    if(this.isOldPlayer){
-                        oldPlayerHelper.init(this.subtitle);
-                    }else{
-                        newPlayerHelper.init(this.subtitle);
-                    }
-                });
-            }catch(e){
+            this.datas = {
+                close:{
+                    body:[]
+                }
+            };
+            fetch(`//api.bilibili.com/x/player.so?id=cid:${window.cid}&aid=${window.aid}`)
+                .then(res=>res.text()).then(data=>{
+                const match = data.match(/(?:<subtitle>)(.+)(?:<\/subtitle>)/);
+                this.subtitle = match&&JSON.parse(match[1]);
+                if(this.isOldPlayer){
+                    oldPlayerHelper.init(this.subtitle);
+                }else{
+                    newPlayerHelper.init(this.subtitle);
+                }
+            }).catch(e=>{
                 console.error(e,'CC字幕助手配置失败');
-            }
+            });
         },
         observerNew(){
             new MutationObserver((mutations, observer)=>{
