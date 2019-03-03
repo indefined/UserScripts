@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕助手
 // @namespace    indefined
-// @version      0.3.4
+// @version      0.3.5
 // @description  旧版播放器可用CC字幕，ASS/SRT/LRC格式字幕下载，本地ASS/SRT/LRC格式字幕加载
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -255,12 +255,18 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
             if(!file) return;
             const reader = new FileReader();
             reader.onload = ()=> {
-                let data,name = file.name.toLowerCase();
-                if(name.endsWith('.lrc')) data = this.decodeFromLRC(reader.result);
-                else if(name.endsWith('.ass')) data = this.decodeFromASS(reader.result);
-                else if(name.endsWith('.srt')) data = this.decodeFromSRT(reader.result);
-                console.log(data);
-                player.updateSubtitle(data);
+                try{
+                    let data,name = file.name.toLowerCase();
+                    if(name.endsWith('.lrc')) data = this.decodeFromLRC(reader.result);
+                    else if(name.endsWith('.ass')) data = this.decodeFromASS(reader.result);
+                    else if(name.endsWith('.srt')) data = this.decodeFromSRT(reader.result);
+                    console.log(data);
+                    player.updateSubtitle(data);
+                    bilibiliCCHelper.toast(`载入本地字幕${name}`);
+                }
+                catch(e){
+                    bilibiliCCHelper.toast('载入字幕失败',e);
+                };
             };
             reader.readAsText(file);
         },
@@ -342,7 +348,7 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
                 playerSetting.subtitle = this.setting;
                 localStorage.bilibili_player_settings = JSON.stringify(playerSetting);
             }catch(e){
-                console.log('加载字幕设置错误');
+                bilibiliCCHelper.toast('保存字幕设置错误',e);
             }
         },
         changeStyle(){
@@ -489,6 +495,8 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
                 if(this.selectedLan=='closed') return;
                 bilibiliCCHelper.getSubtitle(this.selectedLan).then(data=>{
                     new Encoder(data);
+                }).catch(e=>{
+                    bilibiliCCHelper.toast('获取字幕失败',e);
                 });
             });
             //上传字幕
@@ -593,6 +601,8 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
                 if(this.selectedLan=='close') return;
                 bilibiliCCHelper.getSubtitle(this.selectedLan).then(data=>{
                     new Encoder(data);
+                }).catch(e=>{
+                    bilibiliCCHelper.toast('获取字幕失败',e);
                 });
             });
             this.updateDownloadBtn(nowSelect&&nowSelect.dataset.value);
@@ -677,26 +687,35 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
             }
             return document.body.querySelector(selectors);
         },
-        toast(msg){
-            //todo
+        toast(msg,error){
+            if(!this.toastDiv){
+                this.toastDiv = document.createElement('div');
+                this.toastDiv.className = 'bilibili-player-video-toast-item';
+            }
+            const panel = this.get('.bilibili-player-video-toast-top');
+            if(!panel) return;
+            this.toastDiv.innerText = msg + (error||'');
+            if(error) console.error(error);
+            panel.appendChild(this.toastDiv);
+            setTimeout(()=>panel.removeChild(this.toastDiv),3000);
         },
         loadSubtitle(lan){
             this.getSubtitle(lan).then(data=>{
                 player.updateSubtitle(data);
+                this.toast(lan=='close'?
+                           '字幕已关闭':
+                           `载入字幕${this.subtitle.subtitles.find(item=>item.lan==lan).lan_doc}`);
             }).catch(e=>{
-                console.error('载入字幕失败'+e);
+                this.toast('载入字幕失败',e);
             });
         },
         async getSubtitle(lan){
             if(this.datas[lan]) return this.datas[lan];
             const item = this.subtitle.subtitles.find(item=>item.lan==lan);
-            if(!item) throw('语言输入异常',lan);
+            if(!item) throw('找不到所选语言字幕',lan);
             return fetch(item.subtitle_url)
                 .then(res=>res.json())
-                .then(data=>(this.datas[lan] = data))
-                .catch(e=>{
-                console.error('cc字幕助手下载字幕失败'+e);
-            });
+                .then(data=>(this.datas[lan] = data));
         },
         setupData(data){
             this.datas = {
@@ -714,7 +733,7 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
                     newPlayerHelper.init(this.subtitle);
                 }
             }).catch(e=>{
-                console.error(e,'CC字幕助手配置失败');
+                this.toast('CC字幕助手配置失败',e);
             });
         },
         observerNew(){
@@ -749,7 +768,9 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
             new MutationObserver((mutations, observer)=>{
                 if(i++>200) {
                     observer.disconnect();
-                    if(!this.tryInit()) console.log('CC字幕助手似乎没有初始化成功，页面定义可能更改了，取消初始化');
+                    if(!this.tryInit()) {
+                        this.toast('CC字幕助手似乎没有初始化成功，页面定义可能更改了，取消初始化');
+                    }
                 }
                 mutations.forEach(mutation=>{
                     if(!mutation.target) return;
