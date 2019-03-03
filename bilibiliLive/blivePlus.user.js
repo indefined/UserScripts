@@ -2,7 +2,7 @@
 // @name        bilibili直播间助手
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.4
+// @version     0.5.5
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -102,6 +102,11 @@ const LiveHelper = {
     position: relative;
     bottom: -55px;
     left: 4px;
+}
+
+/*礼物包裹放到礼物栏上后辣条购买悬浮面板需要提高*/
+.z-gift-sender-panel {
+    z-index: 1048576;
 }
 
 /*礼物包裹内样式*/
