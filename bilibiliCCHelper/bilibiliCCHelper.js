@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕助手
 // @namespace    indefined
-// @version      0.3.5.2
+// @version      0.3.5.3
 // @description  旧版播放器可用CC字幕，ASS/SRT/LRC格式字幕下载，本地ASS/SRT/LRC格式字幕加载
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -265,7 +265,7 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
                     else if(name.endsWith('.srt')) data = this.decodeFromSRT(reader.result);
                     console.log(data);
                     player.updateSubtitle(data);
-                    bilibiliCCHelper.toast(`载入本地字幕${file.name}`);
+                    bilibiliCCHelper.toast(`载入本地字幕:${file.name}`);
                 }
                 catch(e){
                     bilibiliCCHelper.toast('载入字幕失败',e);
@@ -702,7 +702,7 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
             const panel = this.get('.bilibili-player-video-toast-top');
             if(!panel) return;
             clearTimeout(this.removeTimmer);
-            this.toastDiv.innerText = msg + (error||'');
+            this.toastDiv.innerText = msg + (error?`:${error}`:'');
             panel.appendChild(this.toastDiv);
             this.removeTimmer = setTimeout(()=>panel.removeChild(this.toastDiv),3000);
         },
@@ -711,7 +711,7 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
                 player.updateSubtitle(data);
                 this.toast(lan=='close'?
                            '字幕已关闭':
-                           `载入字幕${this.subtitle.subtitles.find(item=>item.lan==lan).lan_doc}`);
+                           `载入字幕:${this.subtitle.subtitles.find(item=>item.lan==lan).lan_doc}`);
             }).catch(e=>{
                 this.toast('载入字幕失败',e);
             });
@@ -719,7 +719,7 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
         async getSubtitle(lan){
             if(this.datas[lan]) return this.datas[lan];
             const item = this.subtitle.subtitles.find(item=>item.lan==lan);
-            if(!item) throw('找不到所选语言字幕',lan);
+            if(!item) throw('找不到所选语言字幕'+lan);
             return fetch(item.subtitle_url)
                 .then(res=>res.json())
                 .then(data=>(this.datas[lan] = data));
