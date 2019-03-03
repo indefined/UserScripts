@@ -1,11 +1,14 @@
 // ==UserScript==
 // @name         Bilibili CC字幕助手
 // @namespace    indefined
-// @version      0.3.5.3
+// @version      0.3.6
 // @description  旧版播放器可用CC字幕，ASS/SRT/LRC格式字幕下载，本地ASS/SRT/LRC格式字幕加载
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @include      https://www.bilibili.com/video/av*
+// @include      http*://www.bilibili.com/video/av*
+// @include      http*://www.bilibili.com/bangumi/play/ss*
+// @include      http*://www.bilibili.com/bangumi/play/ep*
+// @include      http*://www.bilibili.com/watchlater/
 // @license      MIT
 // @grant        none
 // ==/UserScript==
@@ -43,14 +46,37 @@
   border-radius: 15px;
   border: 1px solid;
 }
+#subtitle-setting-panel input[type="checkbox"]{display:none;}
+#subtitle-setting-panel label {cursor:pointer;}
+#subtitle-setting-panel input:checked ~ label:before {content: '\\2714';}
+#subtitle-setting-panel label:before{
+  width: 12px;
+  height:12px;
+  line-height: 14px;
+  vertical-align: text-bottom;
+  border-radius: 3px;
+  border:1px solid #d3d3d3;
+  display: inline-block;
+  content: ' ';
+}
+.subtitle-button-disabled{pointer-events:none;}
+#subtitle-setting-panel .subtitle-button.subtitle-button-disabled{background:darkgray;}
+#subtitle-setting-panel .subtitle-button{
+  vertical-align: middle;
+  padding:4px 10px;
+  background:#4fc1e9;
+  cursor:pointer;
+  color:white;
+  border-radius:5px;
+}
 </style>
 <div id="subtitle-setting-panel" style="position: absolute;bottom: 28px;right: 30px;background: white;\
-    border-radius: 4px;text-align: left;padding: 13px;display: none;cursor:default;width:220px">
+    border-radius: 4px;text-align: left;padding: 13px;display: none;cursor:default;">
     <div>
-        <div>字幕</div><select style="width: 50%;" id="subtitle-language">
+        <div>字幕</div><select style="width: 100px;vertical-align: middle;" id="subtitle-language">
         <option value="close">关闭</option></select>
-        <button id="subtitle-download">下载字幕</button>
-        <button id="subtitle-upload" style="margin-right: 13px;">添加字幕</button>
+        <span id="subtitle-download" class="subtitle-button">下载</span>
+        <a id="subtitle-upload" class="subtitle-button">添加字幕</a>
     </div><div>
         <div>字体大小</div>
         <input style="width: 70%;" type="range" id="subtitle-font-size" step="25">
@@ -396,7 +422,7 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
                     bilibiliCCHelper.loadSubtitle('close');
                     this.setting.isclosed = true;
                 }
-                this.downloadBtn.disabled = true;
+                this.downloadBtn.classList.add('subtitle-button-disabled');
                 this.languages[this.languagesCount-1].selected = true;
                 this.icon.innerHTML = elements.oldDisableIcon;
             }
@@ -408,11 +434,11 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
                 this.selectedLan = value;
                 if(value=='local') {
                     decoder.selectFile();
-                    this.downloadBtn.disabled = true;
+                    this.downloadBtn.classList.add('subtitle-button-disabled');
                 }
                 else {
                     bilibiliCCHelper.loadSubtitle(value);
-                    this.downloadBtn.disabled = false;
+                    this.downloadBtn.classList.remove('subtitle-button-disabled');
                 }
             }
         },
@@ -507,13 +533,12 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
             });
             //上传字幕
             if( this.subtitle.allow_submit){
-                upload.addEventListener('click',()=>{
-                    open(`https://member.bilibili.com/v2#/zimu/my-zimu/zimu-editor?aid=${window.aid}&cid=${window.cid}`,'blank');
-                });
+                upload.href = `https://member.bilibili.com/v2#/zimu/my-zimu/zimu-editor?aid=${window.aid}&cid=${window.cid}`;
+                upload.target = '_blank';
             }
             else{
+                upload.style = 'background:darkgrey;cursor:default;';
                 upload.title = '本视频无法添加字幕，可能原因是:\r\n·UP主未允许观众投稿字幕\r\n·您未达到UP主设置的投稿字幕条件';
-                upload.disabled = true;
             }
             //字体大小
             fontsize.value = this.setting.fontsize==0.6?
@@ -568,6 +593,7 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
         },
         init(subtitle){
             this.subtitle = subtitle;
+            this.selectedLan = undefined;
             this.languagesCount = subtitle.subtitles&&subtitle.subtitles.length+1;
             this.setting = JSON.parse(localStorage.bilibili_player_settings).subtitle;
             if(!this.setting) throw('获取设置失败');
@@ -586,13 +612,11 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
         updateDownloadBtn(value='closed'){
             this.selectedLan = value;
             if(value=='close'){
-                this.downloadBtn.style['pointer-events'] = 'none';
-                this.downloadBtn.classList.add('bui-button-disabled');
+                this.downloadBtn.classList.add('bui-button-disabled','subtitle-button-disabled');
             }
             else{
                 this.selectedLocal = false;
-                this.downloadBtn.style['pointer-events'] = 'all';
-                this.downloadBtn.classList.remove('bui-button-disabled');
+                this.downloadBtn.classList.remove('bui-button-disabled','subtitle-button-disabled');
             }
         },
         initUI(){
@@ -657,10 +681,14 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
             [this.iconBtn,this.panel] = bilibiliCCHelper.get(['.bilibili-player-video-btn-subtitle','.bilibili-player-video-subtitle-setting-lan']);
             if(this.panel){
                 this.initUI();
+                //设置ID标记视频为已注入，防止二次初始化
+                this.iconBtn.id = 'bilibili-player-subtitle-btn';
             }
             else if(this.iconBtn){
                 //强制显示新版播放器CC字幕按钮，不管视频有没有字幕，反正可以选择本地字幕
                 this.iconBtn.style = 'display:block';
+                //设置ID标记视频为已注入，防止二次初始化
+                this.iconBtn.id = 'bilibili-player-subtitle-btn';
                 new MutationObserver((mutations,observer)=>{
                     mutations.forEach(mutation=>{
                         if(!mutation.target) return;
@@ -725,6 +753,10 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
                 .then(data=>(this.datas[lan] = data));
         },
         setupData(data){
+            if(this.get('#bilibili-player-subtitle-btn')) {
+                console.log('CC助手已初始化');
+                return;
+            }
             this.datas = {
                 close:{
                     body:[]
@@ -743,46 +775,22 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
                 this.toast('CC字幕助手配置失败',e);
             });
         },
-        observerNew(){
-            new MutationObserver((mutations, observer)=>{
-                mutations.forEach(mutation=>{
-                    if(!mutation.target) return;
-                    if(mutation.target.getAttribute('stage')==1){
-                        this.setupData();
-                    }
-                });
-            }).observe(this.get('#bofqi'),{
-                childList: true,
-                subtree: true,
-            });
-        },
         tryInit(){
-            if(this.get('#entryNew')){
+            if(this.get('.bilibili-player-video-btn-color')){
                 this.isOldPlayer = true;
                 this.setupData();
-                return true;
             }
             else if(this.get('.bilibili-player-video-danmaku-setting')){
                 this.isOldPlayer = false;
                 this.setupData();
-                this.observerNew();
-                return true;
             }
         },
         init(){
-            if(this.tryInit()) return;
-            let i=0;
+            this.tryInit();
             new MutationObserver((mutations, observer)=>{
-                if(i++>200) {
-                    observer.disconnect();
-                    if(!this.tryInit()) {
-                        this.toast('CC字幕助手似乎没有初始化成功，页面定义可能更改了，取消初始化');
-                    }
-                }
                 mutations.forEach(mutation=>{
                     if(!mutation.target) return;
-                    if(mutation.target.getAttribute('stage')==1){
-                        observer.disconnect();
+                    if(mutation.target.getAttribute('stage')==0){
                         this.tryInit();
                     }
                 });
