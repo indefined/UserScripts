@@ -241,7 +241,7 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
     //解码器，用于读取常见格式字幕并将其转换为B站可以读取BCC格式字幕
     const decoder = {
         srtReg:/(\d+):(\d{1,2}):(\d{1,2}),(\d{1,3})\s*-->\s*(\d+):(\d{1,2}):(\d{1,2}),(\d{1,3})\r?\n([.\s\S]+)/,
-        assReg:/Dialogue:.*,(\d+):(\d{1,2}):(\d{1,2}\.?\d*),\s*?(\d+):(\d{1,2}):(\d{1,2}\.?\d*).*?,.*?,.*?,.*?,.*?,.*?,.*?,(.+)/,
+        assReg:/Dialogue:.*,(\d+):(\d{1,2}):(\d{1,2}\.?\d*),\s*?(\d+):(\d{1,2}):(\d{1,2}\.?\d*)(?:.*?,){7}(.+)/,
         selectFile(){
             const fileSelector = document.createElement('input')
             fileSelector.type = 'file';
@@ -283,11 +283,11 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
                 });
             });
             return {
-                body:data.map(({time,content},index)=>({
+                body:data.sort((a,b)=>a.time-b.time).map(({time,content},index)=>({
                     from:time,
                     to:index==data.length-1?time+20:data[index+1].time,
                     content:content
-                })).sort((a,b)=>a.from-b.from)
+                }))
             };
         },
         decodeFromSRT(input){
