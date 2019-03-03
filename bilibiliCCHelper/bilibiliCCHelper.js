@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕助手
 // @namespace    indefined
-// @version      0.3.7
+// @version      0.3.8
 // @description  旧版播放器可用CC字幕，ASS/SRT/LRC格式字幕下载，本地ASS/SRT/LRC格式字幕加载
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -420,14 +420,14 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
             if(value=='close'){
                 if(this.selectedLan&&this.selectedLan!='close') {
                     bilibiliCCHelper.loadSubtitle('close');
-                    this.setting.isclosed = true;
+                    //更换本地字幕不切换设置中的字幕开关状态
+                    if(this.selectedLan!='local') this.setting.isclosed = true;
                 }
                 this.downloadBtn.classList.add('subtitle-button-disabled');
                 this.languages[this.languagesCount-1].selected = true;
                 this.icon.innerHTML = elements.oldDisableIcon;
             }
             else{
-                this.setting.isclosed = false;
                 [].find.call(this.languages,(item=>item.value==value))
                     .selected = true;
                 this.icon.innerHTML = elements.oldEnableIcon;
@@ -437,16 +437,19 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
                     this.downloadBtn.classList.add('subtitle-button-disabled');
                 }
                 else {
+                    //更换本地字幕不切换设置中的字幕开关状态
+                    this.setting.isclosed = false;
                     bilibiliCCHelper.loadSubtitle(value);
                     this.downloadBtn.classList.remove('subtitle-button-disabled');
                 }
             }
         },
         toggleSubtitle(){
-            if(!this.setting.isclosed){
-                this.changeSubtitle('close');
-            }else{
+            if(this.languagesSelector.value=='close') {
                 this.changeSubtitle(this.selectedLan);
+            }
+            else{
+                this.changeSubtitle('close');
             }
         },
         initSubtitle(){
@@ -454,8 +457,10 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
                 this.changeSubtitle('close');
             }
             else{
-                this.changeSubtitle(this.selectedLan);
+                this.changeSubtitle(this.languages[0].value);
             }
+            //没有字幕时设置下一次切换字幕行为为本地字幕
+            if(this.languagesCount==1) this.selectedLan = 'local';
             this.changeStyle();
             this.changeResize();
         },
@@ -494,6 +499,7 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
                 '#subtitle-background-opacity'
             ]);
             const languages = this.languages = languageSelector.options;
+            this.languagesSelector = languageSelector;
             this.subtitleContainer = subtitleContainer;
             this.icon = icon;
             this.panel = panel;
