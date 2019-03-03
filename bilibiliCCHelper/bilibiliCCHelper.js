@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕助手
 // @namespace    indefined
-// @version      0.3.6
+// @version      0.3.7
 // @description  旧版播放器可用CC字幕，ASS/SRT/LRC格式字幕下载，本地ASS/SRT/LRC格式字幕加载
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -711,9 +711,9 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
 
     //启动器
     const bilibiliCCHelper = {
+        cid:undefined,
         subtitle:undefined,
         datas:undefined,
-        isOldPlayer:undefined,
         get(selectors){
             //数组递归，可一次查询一个列表页面元素
             if(selectors instanceof Array) {
@@ -722,7 +722,7 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
             return document.body.querySelector(selectors);
         },
         toast(msg,error){
-            if(error) console.error(error);
+            if(error) console.error(msg,error);
             if(!this.toastDiv){
                 this.toastDiv = document.createElement('div');
                 this.toastDiv.className = 'bilibili-player-video-toast-item';
@@ -752,38 +752,31 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
                 .then(res=>res.json())
                 .then(data=>(this.datas[lan] = data));
         },
-        setupData(data){
-            if(this.get('#bilibili-player-subtitle-btn')) {
-                console.log('CC助手已初始化');
-                return;
-            }
-            this.datas = {
-                close:{
-                    body:[]
+        async setupData(){
+            if(this.cid==window.cid && this.subtitle) return this.subtitle;
+            this.cid = window.cid;
+            this.subtitle = undefined;
+            this.datas = {close:{body:[]}};
+            return this.cid&&fetch(`//api.bilibili.com/x/player.so?id=cid:${window.cid}&aid=${window.aid}`)
+                .then(res=>res.text())
+                .then(data=>data.match(/(?:<subtitle>)(.+)(?:<\/subtitle>)/))
+                .then(match=>(this.subtitle = match&&JSON.parse(match[1])));
+        },
+        tryInit(){
+            this.setupData().then(subtitle=>{
+                if(!subtitle) return;
+                if(this.get('#bilibili-player-subtitle-btn')) {
+                    console.log('CC助手已初始化');
                 }
-            };
-            fetch(`//api.bilibili.com/x/player.so?id=cid:${window.cid}&aid=${window.aid}`)
-                .then(res=>res.text()).then(data=>{
-                const match = data.match(/(?:<subtitle>)(.+)(?:<\/subtitle>)/);
-                this.subtitle = match&&JSON.parse(match[1]);
-                if(this.isOldPlayer){
-                    oldPlayerHelper.init(this.subtitle);
-                }else{
-                    newPlayerHelper.init(this.subtitle);
+                else if(this.get('.bilibili-player-video-btn-color')){
+                    oldPlayerHelper.init(subtitle);
+                }
+                else if(this.get('.bilibili-player-video-danmaku-setting')){
+                    newPlayerHelper.init(subtitle);
                 }
             }).catch(e=>{
                 this.toast('CC字幕助手配置失败',e);
             });
-        },
-        tryInit(){
-            if(this.get('.bilibili-player-video-btn-color')){
-                this.isOldPlayer = true;
-                this.setupData();
-            }
-            else if(this.get('.bilibili-player-video-danmaku-setting')){
-                this.isOldPlayer = false;
-                this.setupData();
-            }
         },
         init(){
             this.tryInit();
