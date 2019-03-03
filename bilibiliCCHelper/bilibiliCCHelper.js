@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕助手
 // @namespace    indefined
-// @version      0.3.3
+// @version      0.3.4
 // @description  旧版播放器可用CC字幕，ASS/SRT/LRC格式字幕下载，本地ASS/SRT/LRC格式字幕加载
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -255,10 +255,10 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
             if(!file) return;
             const reader = new FileReader();
             reader.onload = ()=> {
-                let data;
-                if(file.name.endsWith('.lrc')) data = this.decodeFromLRC(reader.result);
-                else if(file.name.endsWith('.ass')) data = this.decodeFromASS(reader.result);
-                else if(file.name.endsWith('.srt')) data = this.decodeFromSRT(reader.result);
+                let data,name = file.name.toLowerCase();
+                if(name.endsWith('.lrc')) data = this.decodeFromLRC(reader.result);
+                else if(name.endsWith('.ass')) data = this.decodeFromASS(reader.result);
+                else if(name.endsWith('.srt')) data = this.decodeFromSRT(reader.result);
                 console.log(data);
                 player.updateSubtitle(data);
             };
@@ -283,13 +283,12 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
                 });
             });
             return {
-                body:data.map(({time,content},index)=>{
-                    return {
-                        from:time,
-                        to:index==data.length-1?time+20:data[index+1].time,
-                        content:content
-                    }
-                })};
+                body:data.map(({time,content},index)=>({
+                    from:time,
+                    to:index==data.length-1?time+20:data[index+1].time,
+                    content:content
+                })).sort((a,b)=>a.from-b.from)
+            };
         },
         decodeFromSRT(input){
             if(!input) return;
@@ -305,10 +304,10 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
                 data.push({
                     from:match[1]*60*60 + match[2]*60 + (+match[3]) + (match[4]/1000),
                     to:match[5]*60*60 + match[5]*60 + (+match[7]) + (match[8]/1000),
-                    content:match[9].trim().replace(/{\\.+?}/g,'').replace(/\\N/gi,'\n')
+                    content:match[9].trim().replace(/{\\.+?}/g,'').replace(/\\N/gi,'\n').replace(/\\h/g,' ')
                 });
             });
-            return {body:data};
+            return {body:data.sort((a,b)=>a.from-b.from)};
         },
         decodeFromASS(input){
             if(!input) return;
@@ -323,10 +322,10 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
                 data.push({
                     from:match[1]*60*60 + match[2]*60 + (+match[3]),
                     to:match[4]*60*60 + match[5]*60 + (+match[6]),
-                    content:match[7].trim().replace(/{\\.+?}/g,'').replace(/\\N/gi,'\n')
+                    content:match[7].trim().replace(/{\\.+?}/g,'').replace(/\\N/gi,'\n').replace(/\\h/g,' ')
                 });
             });
-            return {body:data};
+            return {body:data.sort((a,b)=>a.from-b.from)};
         }
     };
 
