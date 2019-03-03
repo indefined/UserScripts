@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕助手
 // @namespace    indefined
-// @version      0.3.5.1
+// @version      0.3.5.2
 // @description  旧版播放器可用CC字幕，ASS/SRT/LRC格式字幕下载，本地ASS/SRT/LRC格式字幕加载
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -252,9 +252,12 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
             fileSelector.click();
         },
         readFile(file){
-            if(!file) return;
+            if(!file) {
+                bilibiliCCHelper.toast('文件获取失败');
+                return;
+            }
             const reader = new FileReader();
-            reader.onload = ()=> {
+            reader.onloadend = ()=> {
                 try{
                     let data,name = file.name.toLowerCase();
                     if(name.endsWith('.lrc')) data = this.decodeFromLRC(reader.result);
@@ -268,6 +271,9 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
                     bilibiliCCHelper.toast('载入字幕失败',e);
                 };
             };
+            reader.onerror = e=>{
+                bilibiliCCHelper.toast('载入字幕失败',e);
+            }
             reader.readAsText(file);
         },
         decodeFromLRC(input){
@@ -695,9 +701,10 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
             }
             const panel = this.get('.bilibili-player-video-toast-top');
             if(!panel) return;
+            clearTimeout(this.removeTimmer);
             this.toastDiv.innerText = msg + (error||'');
             panel.appendChild(this.toastDiv);
-            setTimeout(()=>panel.removeChild(this.toastDiv),3000);
+            this.removeTimmer = setTimeout(()=>panel.removeChild(this.toastDiv),3000);
         },
         loadSubtitle(lan){
             this.getSubtitle(lan).then(data=>{
