@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕助手
 // @namespace    indefined
-// @version      0.4.0
+// @version      0.4.1
 // @description  ASS/SRT/LRC格式字幕下载，本地ASS/SRT/LRC格式字幕加载，旧版播放器可用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -74,49 +74,6 @@
 0.938l-2.48,-2.48a1,1 0 0 0 -0.287,-1.958l-1.672,0l-1.328,-1.328l0,-0.672a1,1 0 0 1 1,-1l2,0a1,1 0 0 0 0,-2l-3,\
 0a2,2 0 0 0 -1.977,1.695l-5.195,-5.195z"/></svg>
 `,
-        downloadPanel:`
-<div style="left: 50%;top: 50%;position: absolute;padding: 20px;background:\
-white;border-radius: 8px;margin: auto;transform: translate(-50%,-50%);">
-<h2 style="font-size: 20px;color: #4fc1e9;font-weight: 400;margin-bottom: 10px;">字幕下载</h2>
-<a href="https://greasyfork.org/scripts/378513" target="_blank" style="position: absolute;\
-right: 20px;top:30px">当前版本：${typeof(GM_info)!="undefined"&&GM_info.script.version||'unknow'}</a>
-<textarea id="subtitle-download-area" style="width:350px;height: 320px;rsize:both;" readonly></textarea>
-<div style="line-height: 30px;">
-<input id="subtitle-download-ASS" type="radio" name="subtitle-type" value="ASS" style="cursor:pointer">
-<label for="subtitle-download-ASS" style="cursor:pointer">ASS</label>
-<input id="subtitle-download-SRT" type="radio" name="subtitle-type" value="SRT" style="cursor:pointer">
-<label for="subtitle-download-SRT" style="cursor:pointer">SRT</label>
-<input id="subtitle-download-LRC" type="radio" name="subtitle-type" value="LRC" style="cursor:pointer">
-<label for="subtitle-download-LRC" style="cursor:pointer">LRC</label>
-<a id="subtitle-download-action" style="padding: 5px 10px;background:#4fc1e9;color:white;border-radius:5px;\
-margin-left: 10px;">下载</a>
-<a id="subtitle-download-close" style="padding: 5px 10px;background:#4fc1e9;color:white;border-radius:5px;\
-cursor:pointer;margin-left: 10px;">关闭</a></div></div>`,
-        assHead:`\
-[Script Info]
-Title: ${document.title}
-ScriptType: v4.00+
-Collisions: Reverse
-PlayResX: 1280
-PlayResY: 720
-WrapStyle: 3
-ScaledBorderAndShadow: yes
-; ----------------------
-; 本字幕由CC字幕助手自动转换
-; 字幕来源${document.location}
-; 脚本地址https://greasyfork.org/scripts/378513
-; 设置了字幕过长自动换行，但若字幕中没有空格换行将无效
-; 字体大小依据720p 48号字体等比缩放
-; 如显示不正常请尝试使用SRT格式
-
-[V4+ Styles]
-Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, \
-StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,Segoe UI,48,&H00FFFFFF,&HF0000000,&H00000000,&HF0000000,1,0,0,0,100,100,0,0.00,1,1,3,2,30,30,20,1
-
-[Events]
-Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
-`,
         createAs(nodeType,config,appendTo){
             const element = document.createElement(nodeType);
             config&&this.setAs(element,config);
@@ -166,7 +123,42 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
             });
             return selector;
         },
+        createRadio(config,appendTo){
+            this.createAs('input',{
+                ...config,type: "radio",style:"cursor:pointer;5px;vertical-align: middle;"
+            },appendTo);
+            this.createAs('label',{
+                style:"margin-right: 5px;cursor:pointer;vertical-align: middle;",
+                innerText:config.value
+            },appendTo).setAttribute('for',config.id);
+        }
     };
+    //内嵌ASS格式样式头
+    const assHead = `\
+[Script Info]
+Title: ${document.title}
+ScriptType: v4.00+
+Collisions: Reverse
+PlayResX: 1280
+PlayResY: 720
+WrapStyle: 3
+ScaledBorderAndShadow: yes
+; ----------------------
+; 本字幕由CC字幕助手自动转换
+; 字幕来源${document.location}
+; 脚本地址https://greasyfork.org/scripts/378513
+; 设置了字幕过长自动换行，但若字幕中没有空格换行将无效
+; 字体大小依据720p 48号字体等比缩放
+; 如显示不正常请尝试使用SRT格式
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, \
+StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,Segoe UI,48,&H00FFFFFF,&HF0000000,&H00000000,&HF0000000,1,0,0,0,100,100,0,0.00,1,1,3,2,30,30,20,1
+
+[Events]
+Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
+`;
 
     //编码器，用于将B站BCC字幕编码为常见字幕格式下载
     class Encoder{
@@ -179,28 +171,48 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
             this.showDialog();
         }
         showDialog(){
-            const settingDiv = document.createElement('div');
-            settingDiv.style = 'position: fixed;top: 0;bottom: 0;left: 0;right: 0;background: rgba(0,0,0,0.4);z-index: 1048576;';
-            settingDiv.innerHTML = elements.downloadPanel;
-            this.actionButton = settingDiv.querySelector('#subtitle-download-action');
-            this.textArea = settingDiv.querySelector('#subtitle-download-area');
-            settingDiv.querySelector('#subtitle-download-close').onclick = ()=>{
-                document.body.removeChild(settingDiv);
-            };
-            settingDiv.querySelector('#subtitle-download-SRT').onchange = ()=>{
-                this.encodeToSRT();
-            };
-            settingDiv.querySelector('#subtitle-download-LRC').onchange = ()=>{
-                this.encodeToLRC();
-            };
-            settingDiv.querySelector('#subtitle-download-ASS').onchange = ()=>{
-                this.encodeToASS();
-            };
-            document.body.appendChild(settingDiv);
+            const settingDiv = elements.createAs('div',{
+                style :'position: fixed;top: 0;bottom: 0;left: 0;right: 0;background: rgba(0,0,0,0.4);z-index: 1048576;'
+            },document.body),
+                  panel = elements.createAs('div',{
+                      style:'left: 50%;top: 50%;position: absolute;padding: 20px;background:white;'
+                      + 'border-radius: 8px;margin: auto;transform: translate(-50%,-50%);',
+                      innerHTML: '<h2 style="font-size: 20px;color: #4fc1e9;font-weight: 400;margin-bottom: 10px;">字幕下载</h2>'
+                      + '<a href="https://greasyfork.org/scripts/378513" target="_blank" style="position:absolute;right:20px;top:30px">'
+                      + `当前版本：${typeof(GM_info)!="undefined"&&GM_info.script.version||'unknow'}</a>`
+                  },settingDiv),
+                  textArea = this.textArea = elements.createAs('textarea',{
+                      style: 'width:350px;height: 320px;rsize:both;',readonly: true
+                  },panel),
+                  bottomPanel = elements.createAs('div',{
+                  },panel);
+            elements.createRadio({
+                id:'subtitle-download-ass',name: "subtitle-type",value:"ASS",
+                onchange: ()=>this.encodeToASS()
+            },bottomPanel);
+            elements.createRadio({
+                id:'subtitle-download-srt',name: "subtitle-type",value:"SRT",
+                onchange: ()=>this.encodeToSRT()
+            },bottomPanel);
+            elements.createRadio({
+                id:'subtitle-download-lrc',name: "subtitle-type",value:"LRC",
+                onchange: ()=>this.encodeToLRC()
+            },bottomPanel);
+            //下载
+            this.actionButton = elements.createAs('a',{
+                className: 'bpui-button bpui-state-disabled',
+                innerText: "下载",style: 'height: 24px;margin-right: 5px;'
+            },bottomPanel);
+            //关闭
+            elements.createAs('button',{
+                innerText: "关闭",className: "bpui-button",
+                onclick: ()=>document.body.removeChild(settingDiv)
+            },bottomPanel);
         }
         updateDownload(result,type){
             this.textArea.value = result;
             URL.revokeObjectURL(this.actionButton.href);
+            this.actionButton.classList.remove('bpui-state-disabled');
             this.actionButton.href = URL.createObjectURL(new Blob([result]));
             this.actionButton.download = `${document.title}.${type}`;
         }
@@ -352,7 +364,7 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
             });
             return {body:data.sort((a,b)=>a.from-b.from)};
         }
-    };
+    };//decoder END
 
     //旧版播放器CC字幕助手，需要维护整个设置面板和字幕逻辑
     const oldPlayerHelper = {
