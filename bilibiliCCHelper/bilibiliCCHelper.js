@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Bilibili CC字幕助手
 // @namespace    indefined
-// @version      0.3.8
-// @description  旧版播放器可用CC字幕，ASS/SRT/LRC格式字幕下载，本地ASS/SRT/LRC格式字幕加载
+// @version      0.4.0
+// @description  ASS/SRT/LRC格式字幕下载，本地ASS/SRT/LRC格式字幕加载，旧版播放器可用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
 // @include      http*://www.bilibili.com/video/av*
@@ -16,22 +16,12 @@
 (function() {
     'use strict';
     const elements = {
-        oldUIElement:`
-<div class="bilibili-player-video-btn" id="bilibili-player-subtitle-btn" style="display: block;">
-    <span id="subtitle-icon"></span>
-    <style type="text/css" id="subtitle-font-setting-style"></style>
-    <style type="text/css">
-#bilibili-player-subtitle-btn:hover>#subtitle-setting-panel {
-  display: block!important;
-}
-.subtitle-color-select-item {
-  width: 15px;
-  height: 15px;
-  float: left;
-  cursor: pointer;
-  border: 1px solid rgba(0,0,0,.3);
-  margin-right: 10px;
-}
+        subtitleStyle:`
+<style type="text/css">
+/*对齐，悬停按钮显示菜单*/
+#subtitle-setting-panel>div>* {margin-right: 5px;}
+#bilibili-player-subtitle-btn:hover>#subtitle-setting-panel {display: block!important;}
+/*滑动选择样式*/
 #subtitle-setting-panel input[type="range"] {
   background-color: #ebeff4;
   -webkit-appearance: none;
@@ -46,10 +36,11 @@
   border-radius: 15px;
   border: 1px solid;
 }
+/*复选框和其对应标签样式*/
 #subtitle-setting-panel input[type="checkbox"]{display:none;}
-#subtitle-setting-panel label {cursor:pointer;}
+#subtitle-setting-panel input ~ label {cursor:pointer;}
 #subtitle-setting-panel input:checked ~ label:before {content: '\\2714';}
-#subtitle-setting-panel label:before{
+#subtitle-setting-panel input ~ label:before{
   width: 12px;
   height:12px;
   line-height: 14px;
@@ -57,63 +48,16 @@
   border-radius: 3px;
   border:1px solid #d3d3d3;
   display: inline-block;
+  text-align: center;
   content: ' ';
 }
-.subtitle-button-disabled{pointer-events:none;}
-#subtitle-setting-panel .subtitle-button.subtitle-button-disabled{background:darkgray;}
-#subtitle-setting-panel .subtitle-button{
-  vertical-align: middle;
-  padding:4px 10px;
-  background:#4fc1e9;
-  cursor:pointer;
-  color:white;
-  border-radius:5px;
-}
+/*悬停显示下拉框样式*/
+#subtitle-language-div:hover .bpui-selectmenu-list.bpui-selectmenu-list-left{display:block;}
+/*滚动条样式*/
+#subtitle-setting-panel ::-webkit-scrollbar{width: 7px;}
+#subtitle-setting-panel ::-webkit-scrollbar-track{border-radius: 4px;background-color: #EEE;}
+#subtitle-setting-panel ::-webkit-scrollbar-thumb{border-radius: 4px;background-color: #999;}
 </style>
-<div id="subtitle-setting-panel" style="position: absolute;bottom: 28px;right: 30px;background: white;\
-    border-radius: 4px;text-align: left;padding: 13px;display: none;cursor:default;">
-    <div>
-        <div>字幕</div><select style="width: 100px;vertical-align: middle;" id="subtitle-language">
-        <option value="close">关闭</option></select>
-        <span id="subtitle-download" class="subtitle-button">下载</span>
-        <a id="subtitle-upload" class="subtitle-button">添加字幕</a>
-    </div><div>
-        <div>字体大小</div>
-        <input style="width: 70%;" type="range" id="subtitle-font-size" step="25">
-        <input type="checkbox" id="subtitle-auto-resize">
-        <label for="subtitle-auto-resize" style="cursor:pointer">自动缩放</label>
-    </div><div>
-        <div>字幕颜色</div><div>
-        <ul id="subtitle-color" style="list-style: none;white-space: normal;">
-        <li class="subtitle-color-select-item" data-value="16777215" style="background: #ffffff;" title="白色"></li>
-        <li class="subtitle-color-select-item" data-value="16007990" style="background: #F44336;" title="红色"></li>
-        <li class="subtitle-color-select-item" data-value="10233776" style="background: #9C27B0;" title="紫色"></li>
-        <li class="subtitle-color-select-item" data-value="6765239" style="background: #673AB7;" title="深紫色"></li>
-        <li class="subtitle-color-select-item" data-value="4149685" style="background: #3F51B5;" title="靛青色"></li>
-        <li class="subtitle-color-select-item" data-value="2201331" style="background: #2196F3;" title="蓝色"></li>
-        <li class="subtitle-color-select-item" data-value="240116" style="background: #03A9F4;" title="亮蓝色"></li>
-        </ul><br></div>
-    <div><span>位置</span>
-        <select id="subtitle-position" style="width: 35%;">
-        <option value="bl">左下角</option>
-        <option value="bc">底部居中</option>
-        <option value="br">右下角</option>
-        <option value="tl">左上角</option>
-        <option value="tc">顶部居中</option>
-        <option value="tr">右上角</option></select>
-        <span>描边</span>
-        <select id="subtitle-shadow" style="width: 35%;">
-        <option value="0">无描边</option>
-        <option value="1">重墨</option>
-        <option value="2">描边</option>
-        <option value="3">45°投影</option>
-        </select>
-    </div>
-    </div><div>
-        <div>背景不透明度</div>
-        <input style="width: 100%;" type="range" id="subtitle-background-opacity">
-    </div>
-</div></div>
 `,
         oldEnableIcon:`
 <svg width="22" height="28" viewbox="0 0 22 30" xmlns="http://www.w3.org/2000/svg">
@@ -148,12 +92,6 @@ right: 20px;top:30px">当前版本：${typeof(GM_info)!="undefined"&&GM_info.scr
 margin-left: 10px;">下载</a>
 <a id="subtitle-download-close" style="padding: 5px 10px;background:#4fc1e9;color:white;border-radius:5px;\
 cursor:pointer;margin-left: 10px;">关闭</a></div></div>`,
-        shadowStyle:{
-            "0":'',
-            "1":`text-shadow: #000 1px 0px 1px, #000 0px 1px 1px, #000 0px -1px 1px,#000 -1px 0px 1px;`,
-            "2":`text-shadow: #000 0px 0px 1px, #000 0px 0px 1px, #000 0px 0px 1px;`,
-            "3":`text-shadow: #000 1px 1px 2px, #000 0px 0px 1px;`
-        },
         assHead:`\
 [Script Info]
 Title: ${document.title}
@@ -178,7 +116,56 @@ Style: Default,Segoe UI,48,&H00FFFFFF,&HF0000000,&H00000000,&HF0000000,1,0,0,0,1
 
 [Events]
 Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
-`
+`,
+        createAs(nodeType,config,appendTo){
+            const element = document.createElement(nodeType);
+            config&&this.setAs(element,config);
+            appendTo&&appendTo.appendChild(element);
+            return element;
+        },
+        setAs(element,config,appendTo){
+            config&&Object.entries(config).forEach(([key, value])=>{
+                element[key] = value;
+            });
+            appendTo&&appendTo.appendChild(element);
+            return element;
+        },
+        getAs(selector,config,appendTo){
+            if(selector instanceof Array) {
+                return selector.map(item=>this.getAs(item));
+            }
+            const element = document.body.querySelector(selector);
+            element&&config&&this.setAs(element,config);
+            element&&appendTo&&appendTo.appendChild(element);
+            return element;
+        },
+        createSelector(config,appendTo){
+            const selector = this.createAs('div',{
+                id:'subtitle-language-div',
+                className:"bilibili-player-block-string-type bpui-component bpui-selectmenu selectmenu-mode-absolute",
+                style:"width:"+config.width
+            },appendTo),
+                  label = this.createAs('div',{className:'bpui-selectmenu-txt'},selector),
+                  selected = config.datas.find(item=>item.value==config.initValue);
+            selected&&(label.innerHTML=selected.content)||(label.innerText=config.initValue);
+            this.createAs('div',{className:'bpui-selectmenu-arrow bpui-icon bpui-icon-arrow-down'},selector);
+            const list = this.createAs('ul',{
+                className:'bpui-selectmenu-list bpui-selectmenu-list-left',
+                style:`max-height:${config.height||'100px'};overflow:hidden auto;white-space:nowrap;`
+            },selector);
+            config.datas.forEach(item=>{
+                this.createAs('li',{
+                    className:'bpui-selectmenu-list-row',
+                    innerHTML:item.content,
+                    onclick:e=>{
+                        label.dataset.value = e.target.dataset.value;
+                        label.innerHTML = e.target.innerHTML;
+                        item.handler(e);
+                    }
+                },list).dataset.value = item.value;
+            });
+            return selector;
+        },
     };
 
     //编码器，用于将B站BCC字幕编码为常见字幕格式下载
@@ -372,8 +359,33 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
         setting:undefined,
         subtitle:undefined,
         selectedLan:undefined,
+        isclosed:true,
         resizeRate: 100,
-        languagesCount:0,
+        configs:{
+            color:[
+                {value:'16777215',content:'<b style="color:#FFF;text-shadow: #000 0px 0px 1px, #000 0px 0px 1px, #000 0px 0px 1px;">白色</b>'},
+                {value:'16007990',content:'<b style="color:#F44336;text-shadow: #000 0px 0px 1px, #000 0px 0px 1px, #000 0px 0px 1px;">红色</b>'},
+                {value:'10233776',content:'<b style="color:#9C27B0;text-shadow: #000 0px 0px 1px, #000 0px 0px 1px, #000 0px 0px 1px;">紫色</b>'},
+                {value:'6765239',content:'<b style="color:#673AB7;text-shadow: #000 0px 0px 1px, #000 0px 0px 1px, #000 0px 0px 1px;">深紫色</b>'},
+                {value:'4149685',content:'<b style="color:#3F51B5;text-shadow: #000 0px 0px 1px, #000 0px 0px 1px, #000 0px 0px 1px;">靛青色</b>'},
+                {value:'2201331',content:'<b style="color:#2196F3;text-shadow: #000 0px 0px 1px, #000 0px 0px 1px, #000 0px 0px 1px;">蓝色</b>'},
+                {value:'240116',content:'<b style="color:#03A9F4;text-shadow: #000 0px 0px 1px, #000 0px 0px 1px, #000 0px 0px 1px;">亮蓝色</b>'}
+            ],
+            position:[
+                {value:'bl',content:'左下角'},
+                {value:'bc',content:'底部居中'},
+                {value:'br',content:'右下角'},
+                {value:'tl',content:'左上角'},
+                {value:'tc',content:'顶部居中'},
+                {value:'tr',content:'右上角'}
+            ],
+            shadow:[
+                {value:'0',content:'无描边',style:''},
+                {value:'1',content:'重墨',style:`text-shadow: #000 1px 0px 1px, #000 0px 1px 1px, #000 0px -1px 1px,#000 -1px 0px 1px;`},
+                {value:'2',content:'描边',style:`text-shadow: #000 0px 0px 1px, #000 0px 0px 1px, #000 0px 0px 1px;`},
+                {value:'3',content:'45°投影',style:`text-shadow: #000 1px 1px 2px, #000 0px 0px 1px;`}
+            ]
+        },
         saveSetting(){
             try{
                 const playerSetting = JSON.parse(localStorage.bilibili_player_settings);
@@ -394,7 +406,7 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
                 span.subtitle-item {
                     font-size: ${this.setting.fontsize*this.resizeRate}%;
                     line-height: ${this.setting.fontsize*this.resizeRate*1.1}%;
-                    ${elements.shadowStyle[this.setting.shadow]}
+                    ${this.configs.shadow[this.setting.shadow].style}
                 }`;
         },
         changePosition(){
@@ -416,36 +428,36 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
                 this.changeStyle();
             }
         },
-        changeSubtitle(value = this.languages[0].value){
+        changeSubtitle(value=this.subtitle.subtitles[0].lan){
+            this.selectedLanguage.innerText = bilibiliCCHelper.getSubtitleInfo(value).lan_doc;
             if(value=='close'){
-                if(this.selectedLan&&this.selectedLan!='close') {
-                    bilibiliCCHelper.loadSubtitle('close');
+                if(!this.isclosed) {
+                    this.isclosed = true;
+                    bilibiliCCHelper.loadSubtitle(value);
                     //更换本地字幕不切换设置中的字幕开关状态
                     if(this.selectedLan!='local') this.setting.isclosed = true;
                 }
-                this.downloadBtn.classList.add('subtitle-button-disabled');
-                this.languages[this.languagesCount-1].selected = true;
+                this.downloadBtn.classList.add('bpui-state-disabled','bpui-button-icon');
                 this.icon.innerHTML = elements.oldDisableIcon;
             }
             else{
-                [].find.call(this.languages,(item=>item.value==value))
-                    .selected = true;
-                this.icon.innerHTML = elements.oldEnableIcon;
+                this.isclosed = false;
                 this.selectedLan = value;
+                this.icon.innerHTML = elements.oldEnableIcon;
                 if(value=='local') {
                     decoder.selectFile();
-                    this.downloadBtn.classList.add('subtitle-button-disabled');
+                    this.downloadBtn.classList.add('bpui-state-disabled','bpui-button-icon');
                 }
                 else {
                     //更换本地字幕不切换设置中的字幕开关状态
                     this.setting.isclosed = false;
                     bilibiliCCHelper.loadSubtitle(value);
-                    this.downloadBtn.classList.remove('subtitle-button-disabled');
+                    this.downloadBtn.classList.remove('bpui-state-disabled','bpui-button-icon');
                 }
             }
         },
         toggleSubtitle(){
-            if(this.languagesSelector.value=='close') {
+            if(this.isclosed) {
                 this.changeSubtitle(this.selectedLan);
             }
             else{
@@ -457,134 +469,138 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
                 this.changeSubtitle('close');
             }
             else{
-                this.changeSubtitle(this.languages[0].value);
+                this.changeSubtitle();
             }
             //没有字幕时设置下一次切换字幕行为为本地字幕
-            if(this.languagesCount==1) this.selectedLan = 'local';
+            if(!this.subtitle.count) this.selectedLan = 'local';
             this.changeStyle();
             this.changeResize();
         },
         initUI(){
-            const preBtn = bilibiliCCHelper.get('.bilibili-player-video-btn-quality');
+            const preBtn = elements.getAs('.bilibili-player-video-btn-quality');
             if(!preBtn) throw('没有找到视频清晰度按钮');
-            preBtn.insertAdjacentHTML('afterEnd',elements.oldUIElement);
-            const [
-                subtitleContainer,
-                icon,
-                panel,
-                fontStyle,
-                languageSelector,
-                btn,
-                fontsize,
-                scale,
-                upload,
-                downloadBtn,
-                color,
-                shadow,
-                position,
-                opacity] = bilibiliCCHelper.get([
-                '.bilibili-player-video-subtitle>div',
-                '#subtitle-icon',
-                '#subtitle-setting-panel',
-                '#subtitle-font-setting-style',
-                '#subtitle-language',
-                '#bilibili-player-subtitle-btn',
-                '#subtitle-font-size',
-                '#subtitle-auto-resize',
-                '#subtitle-upload',
-                '#subtitle-download',
-                '#subtitle-color',
-                '#subtitle-shadow',
-                '#subtitle-position',
-                '#subtitle-background-opacity'
-            ]);
-            const languages = this.languages = languageSelector.options;
-            this.languagesSelector = languageSelector;
-            this.subtitleContainer = subtitleContainer;
-            this.icon = icon;
-            this.panel = panel;
-            this.fontStyle = fontStyle;
-            this.languageSelector = languageSelector;
-            this.downloadBtn = downloadBtn;
+            this.subtitleContainer = elements.getAs('.bilibili-player-video-subtitle>div');
+            const btn = preBtn.insertAdjacentElement('afterEnd',elements.createAs('div',{
+                className:"bilibili-player-video-btn",
+                id:'bilibili-player-subtitle-btn',
+                style:"display: block;",
+                innerHTML:elements.subtitleStyle,
+                onclick:(e)=>{
+                    if(!this.panel.contains(e.target)) this.toggleSubtitle();
+                }
+            }));
             //按钮
-            if(this.setting.isclosed){
-                icon.innerHTML = elements.oldDisableIcon;
-            }else{
-                icon.innerHTML = elements.oldEnableIcon;
-            }
-            btn.addEventListener('click',(e)=>{
-                if(!this.panel.contains(e.target)) this.toggleSubtitle();
-            });
-            //字幕语言
-            languages.length = this.languagesCount+1;
-            for(let i=0;i<languages.length-2;i++){
-                languages[i].text = this.subtitle.subtitles[i].lan_doc;
-                languages[i].value = this.subtitle.subtitles[i].lan;
-            }
-            languages[languages.length-1].text = '本地字幕';
-            languages[languages.length-1].value = 'local';
-            languages[languages.length-2].text = '关闭';
-            languages[languages.length-2].value = 'close';
-            languageSelector.addEventListener('change',(e)=>{
-                this.changeSubtitle(e.target.value);
-            });
+            this.icon = elements.createAs('span',{
+                innerHTML: this.setting.isclosed?elements.oldDisableIcon:elements.oldEnableIcon
+            },btn);
+            //字幕样式表
+            this.fontStyle = elements.createAs('style',{
+                type:"text/css",
+                innerHTML: this.setting.isclosed?elements.oldDisableIcon:elements.oldEnableIcon
+            },btn);
+            const panel = this.panel = elements.createAs('div',{
+                id:'subtitle-setting-panel',
+                style:'position: absolute;bottom: 28px;right: 30px;background: white;border-radius: 4px;'
+                +'text-align: left;padding: 13px;display: none;cursor:default;'
+            },btn),
+                  languageDiv = elements.createAs('div',{innerHTML:'<div>字幕</div>'},panel),
+                  sizeDiv = elements.createAs('div',{innerHTML:'<div>字体大小</div>'},panel),
+                  colorDiv = elements.createAs('div',{innerHTML:'<span>字幕颜色</span>'},panel),
+                  shadowDiv = elements.createAs('div',{innerHTML:'<span>字幕描边</span>'},panel),
+                  positionDiv = elements.createAs('div',{innerHTML:'<span>字幕位置</span>'},panel),
+                  opacityDiv = elements.createAs('div',{innerHTML:'<div>背景不透明度</div>'},panel);
+            //选择字幕
+            this.selectedLanguage = elements.createSelector({
+                width:'100px',height:'180px',
+                initValue:'关闭',
+                datas:this.subtitle.subtitles.map(({lan,lan_doc})=>({
+                    content:lan_doc,
+                    value:lan,
+                    handler:({target})=>this.changeSubtitle(target.dataset.value)
+                }))
+            },languageDiv).firstElementChild;
             //下载字幕
-            downloadBtn.addEventListener('click',()=>{
-                if(this.selectedLan=='closed') return;
-                bilibiliCCHelper.getSubtitle(this.selectedLan).then(data=>{
-                    new Encoder(data);
-                }).catch(e=>{
-                    bilibiliCCHelper.toast('获取字幕失败',e);
-                });
-            });
+            this.downloadBtn = elements.createAs('button',{
+                className: "bpui-button",style: 'padding:0 8px;',
+                innerText: "下载",
+                onclick: ()=>{
+                    if(this.selectedLan=='close') return;
+                    bilibiliCCHelper.getSubtitle(this.selectedLan).then(data=>{
+                        new Encoder(data);
+                    }).catch(e=>{
+                        bilibiliCCHelper.toast('获取字幕失败',e);
+                    });
+                }
+            },languageDiv);
             //上传字幕
-            if( this.subtitle.allow_submit){
-                upload.href = `https://member.bilibili.com/v2#/zimu/my-zimu/zimu-editor?aid=${window.aid}&cid=${window.cid}`;
-                upload.target = '_blank';
-            }
-            else{
-                upload.style = 'background:darkgrey;cursor:default;';
-                upload.title = '本视频无法添加字幕，可能原因是:\r\n·UP主未允许观众投稿字幕\r\n·您未达到UP主设置的投稿字幕条件';
-            }
+            elements.createAs('a',{
+                className: this.subtitle.allow_submit?'bpui-button':'bpui-button bpui-state-disabled',
+                innerText: '添加字幕',
+                href: this.subtitle.allow_submit?`https://member.bilibili.com/v2#/zimu/my-zimu/zimu-editor?aid=${window.aid}&cid=${window.cid}`:'javascript:',
+                target: '_blank',
+                style: 'margin-right: 0px;height: 24px;padding:0 6px;',
+                title: this.subtitle.allow_submit?'':'本视频无法添加字幕，可能原因是:\r\n·UP主未允许观众投稿字幕\r\n·您未达到UP主设置的投稿字幕条件',
+            },languageDiv);
             //字体大小
-            fontsize.value = this.setting.fontsize==0.6?
-                0:this.setting.fontsize==0.8?
-                25:this.setting.fontsize==1.3?
-                75:this.setting.fontsize==1.6?
-                100:50;
-            fontsize.addEventListener('input',(e)=>{
-                const v = e.target.value/25;
-                this.setting.fontsize = v>2?(v-2)*0.3+1:v*0.2+0.6;
-                this.changeStyle();
-            });
+            elements.createAs('input',{
+                style:"width: 70%;",type:"range",step:"25",
+                value: (this.setting.fontsize==0.6?0
+                        :this.setting.fontsize==0.8?25
+                        :this.setting.fontsize==1.3?75
+                        :this.setting.fontsize==1.6?100:50),
+                oninput:(e)=>{
+                    const v = e.target.value/25;
+                    this.setting.fontsize = v>2?(v-2)*0.3+1:v*0.2+0.6;
+                    this.changeStyle();
+                }
+            },sizeDiv);
             //自动缩放
-            scale.checked = true;
-            scale.addEventListener('change',(e)=>{
-                this.changeResizeStatus(this.setting.scale = e.target.checked);
-            });
+            elements.createAs('input',{
+                id:'subtitle-auto-resize',
+                type:"checkbox",
+                checked:this.setting.scale,
+                onchange:(e)=>this.changeResizeStatus(this.setting.scale = e.target.checked)
+            },sizeDiv);
+            elements.createAs('label',{
+                style:"cursor:pointer",
+                innerText:'自动缩放'
+            },sizeDiv).setAttribute('for','subtitle-auto-resize');
             //字幕颜色
-            color.addEventListener('click',(e)=>{
-                this.changeStyle(this.setting.color = parseInt(e.target.dataset.value));
-            });
+            elements.createSelector({
+                width:'74%',height:'120px',
+                initValue:this.setting.color,
+                datas:this.configs.color.map(({content,value})=>({
+                    content,value,
+                    handler:(e)=>this.changeStyle(this.setting.color = parseInt(e.target.dataset.value))
+                }))
+            },colorDiv);
             //字幕阴影
-            [].forEach.call(shadow.options,item=>{
-                if(item.value==this.setting.shadow) item.selected = true;
-            });
-            shadow.addEventListener('change',(e)=>{
-                this.changeStyle(this.setting.shadow = e.target.value);
-            });
+            elements.createSelector({
+                width:'74%',height:'120px',
+                initValue:this.setting.shadow,
+                datas:this.configs.shadow.map(({content,value})=>({
+                    content,value,
+                    handler:(e)=>this.changeStyle(this.setting.shadow = e.target.dataset.value)
+                }))
+            },shadowDiv);
             //字幕位置
-            [].forEach.call(position.options,item=>{
-                if(item.value==this.setting.position) item.selected = true;
-            });
-            position.addEventListener('change',(e)=>{
-                this.changePosition(this.setting.position = e.target.value);
-            });
+            elements.createSelector({
+                width:'74%',
+                initValue:this.setting.position,
+                datas:this.configs.position.map(({content,value})=>({
+                    content,value,
+                    handler:(e)=>this.changePosition(this.setting.position = e.target.dataset.value)
+                }))
+            },positionDiv);
             //背景透明度
-            opacity.value = this.setting.backgroundopacity*100;
-            opacity.addEventListener('input',(e)=>{
-                this.changeStyle(this.setting.backgroundopacity = e.target.value/100);
-            });
+            elements.createAs('input',{
+                style:"width: 100%;",
+                type:"range",
+                value: this.setting.backgroundopacity*100,
+                oninput:(e)=>{
+                    this.changeStyle(this.setting.backgroundopacity = e.target.value/100);
+                }
+            },opacityDiv);
             //播放器缩放
             player.addEventListener('video_resize', (event) => {
                 this.changeResize(event);
@@ -600,7 +616,6 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
         init(subtitle){
             this.subtitle = subtitle;
             this.selectedLan = undefined;
-            this.languagesCount = subtitle.subtitles&&subtitle.subtitles.length+1;
             this.setting = JSON.parse(localStorage.bilibili_player_settings).subtitle;
             if(!this.setting) throw('获取设置失败');
             this.initUI();
@@ -615,14 +630,14 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
         selectedLan:undefined,
         selectedLocal:false,
         hasSubtitles:false,
-        updateDownloadBtn(value='closed'){
+        updateDownloadBtn(value='close'){
             this.selectedLan = value;
             if(value=='close'){
-                this.downloadBtn.classList.add('bui-button-disabled','subtitle-button-disabled');
+                this.downloadBtn.classList.add('bui-button-disabled','bpui-button-icon');
             }
             else{
                 this.selectedLocal = false;
-                this.downloadBtn.classList.remove('bui-button-disabled','subtitle-button-disabled');
+                this.downloadBtn.classList.remove('bui-button-disabled','bpui-button-icon');
             }
         },
         initUI(){
@@ -684,7 +699,7 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
             this.hasSubtitles = subtitle.subtitles && subtitle.subtitles.length;
             this.selectedLocal = undefined;
             this.selectedLan = undefined;
-            [this.iconBtn,this.panel] = bilibiliCCHelper.get(['.bilibili-player-video-btn-subtitle','.bilibili-player-video-subtitle-setting-lan']);
+            [this.iconBtn,this.panel] = elements.getAs(['.bilibili-player-video-btn-subtitle','.bilibili-player-video-subtitle-setting-lan']);
             if(this.panel){
                 this.initUI();
                 //设置ID标记视频为已注入，防止二次初始化
@@ -720,20 +735,13 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
         cid:undefined,
         subtitle:undefined,
         datas:undefined,
-        get(selectors){
-            //数组递归，可一次查询一个列表页面元素
-            if(selectors instanceof Array) {
-                return selectors.map(selector=>this.get(selector));
-            }
-            return document.body.querySelector(selectors);
-        },
         toast(msg,error){
             if(error) console.error(msg,error);
             if(!this.toastDiv){
                 this.toastDiv = document.createElement('div');
                 this.toastDiv.className = 'bilibili-player-video-toast-item';
             }
-            const panel = this.get('.bilibili-player-video-toast-top');
+            const panel = elements.getAs('.bilibili-player-video-toast-top');
             if(!panel) return;
             clearTimeout(this.removeTimmer);
             this.toastDiv.innerText = msg + (error?`:${error}`:'');
@@ -745,39 +753,47 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
                 player.updateSubtitle(data);
                 this.toast(lan=='close'?
                            '字幕已关闭':
-                           `载入字幕:${this.subtitle.subtitles.find(item=>item.lan==lan).lan_doc}`);
+                           `载入字幕:${this.getSubtitleInfo(lan).lan_doc}`);
             }).catch(e=>{
                 this.toast('载入字幕失败',e);
             });
         },
         async getSubtitle(lan){
             if(this.datas[lan]) return this.datas[lan];
-            const item = this.subtitle.subtitles.find(item=>item.lan==lan);
+            const item = this.getSubtitleInfo(lan);
             if(!item) throw('找不到所选语言字幕'+lan);
             return fetch(item.subtitle_url)
                 .then(res=>res.json())
                 .then(data=>(this.datas[lan] = data));
         },
+        getSubtitleInfo(lan){
+            return this.subtitle.subtitles.find(item=>item.lan==lan);
+        },
         async setupData(){
             if(this.cid==window.cid && this.subtitle) return this.subtitle;
             this.cid = window.cid;
             this.subtitle = undefined;
-            this.datas = {close:{body:[]}};
+            this.datas = {close:{body:[]},local:{body:[]}};
             return this.cid&&fetch(`//api.bilibili.com/x/player.so?id=cid:${window.cid}&aid=${window.aid}`)
                 .then(res=>res.text())
                 .then(data=>data.match(/(?:<subtitle>)(.+)(?:<\/subtitle>)/))
-                .then(match=>(this.subtitle = match&&JSON.parse(match[1])));
+                .then(match=>{
+                this.subtitle = match&&JSON.parse(match[1]);
+                this.subtitle.count = this.subtitle.subtitles.length;
+                this.subtitle.subtitles.push({lan:'close',lan_doc:'关闭'},{lan:'local',lan_doc:'本地字幕'});
+                return this.subtitle;
+            });
         },
         tryInit(){
             this.setupData().then(subtitle=>{
                 if(!subtitle) return;
-                if(this.get('#bilibili-player-subtitle-btn')) {
+                if(elements.getAs('#bilibili-player-subtitle-btn')) {
                     console.log('CC助手已初始化');
                 }
-                else if(this.get('.bilibili-player-video-btn-color')){
+                else if(elements.getAs('.bilibili-player-video-btn-color')){
                     oldPlayerHelper.init(subtitle);
                 }
-                else if(this.get('.bilibili-player-video-danmaku-setting')){
+                else if(elements.getAs('.bilibili-player-video-danmaku-setting')){
                     newPlayerHelper.init(subtitle);
                 }
             }).catch(e=>{

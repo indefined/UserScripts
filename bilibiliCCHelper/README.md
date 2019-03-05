@@ -26,7 +26,7 @@ bilibili CC字幕助手
 
 ![新版](https://greasyfork.org/system/screenshots/screenshots/000/014/323/original/newPlayer.jpg)
 
-![旧版](https://greasyfork.org/system/screenshots/screenshots/000/014/324/original/oldPlayer.jpg)
+![旧版](https://greasyfork.org/system/screenshots/screenshots/000/014/409/original/oldPlayer.jpg)
 
 ![下载](https://greasyfork.org/system/screenshots/screenshots/000/014/325/original/download.jpg)
 
@@ -34,12 +34,7 @@ bilibili CC字幕助手
 ## 兼容性
 
 - chrome 71 @ Tampermonkey 4.7/4.8 测试通过
-- firefox 60 @ Tampermonkey 4.8 、Violentmonkey v2.10.1 部分功能可用
-  - 新版播放器下载/本地字幕加载功能正常可用
-  - 旧版播放器选择语言/字幕位置/描边下拉框将不可用，浏览器本身DOM解析引擎差异问题
-    - 如果视频本身有字幕，点击CC字幕按钮可切换第一种语言的字幕或关闭字幕
-    - 本地字幕可能因为无法选中而无法使用，虽然功能应该是正常的
-- Android Webview70内核原生书签法至少有firefox级别的功能可用(搞笑测试)
+- firefox 60 @ Tampermonkey 4.8 、Violentmonkey v2.10.1 测试通过
 - 不兼容GreaseMonkey4+，因为GM4的安全限制原因无法获取到视频播放器
 - 其它浏览器和脚本管理器未知
 
@@ -56,7 +51,6 @@ bilibili CC字幕助手
   - 加载可能会乱码，以后可能会更新
   - 可能会加载失败，但是不会有提醒，问题定位中
   - 字幕可能会丢失内容，因为b站的CC字幕不支持时间轴重叠
-  - 旧版播放器选择本地字幕后如需更换本地字幕需先关闭后再重新选择
   - 新版播放器选择本地字幕后
     - 如果视频本身有字幕，CC字幕按钮将处于关闭状态，点击按钮会切换到视频本身字幕
     - 如果视频本身没有字幕，CC字幕按钮外观不会变化，点击按钮可以开关本地字幕
