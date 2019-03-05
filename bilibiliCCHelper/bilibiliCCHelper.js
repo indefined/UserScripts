@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕助手
 // @namespace    indefined
-// @version      0.4.1
+// @version      0.4.2
 // @description  ASS/SRT/LRC格式字幕下载，本地ASS/SRT/LRC格式字幕加载，旧版播放器可用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -708,7 +708,7 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
             console.log('Bilibili CC Helper init new UI success.');
         },
         init(subtitle){
-            this.hasSubtitles = subtitle.subtitles && subtitle.subtitles.length;
+            this.hasSubtitles = subtitle.count;
             this.selectedLocal = undefined;
             this.selectedLan = undefined;
             [this.iconBtn,this.panel] = elements.getAs(['.bilibili-player-video-btn-subtitle','.bilibili-player-video-subtitle-setting-lan']);
