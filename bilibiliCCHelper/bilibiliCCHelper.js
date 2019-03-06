@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕助手
 // @namespace    indefined
-// @version      0.4.4
+// @version      0.4.4.1
 // @description  ASS/SRT/LRC格式字幕下载，本地ASS/SRT/LRC格式字幕加载，旧版播放器可用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -229,6 +229,8 @@ fill-rule="evenodd"></path></svg></span>`,
             },''),'srt');
         },
         encodeToASS(data){
+            this.assHead[1] = `Title: ${document.title}`;
+            this.assHead[10] = `; 字幕来源${document.location}`;
             this.updateDownload(this.assHead.concat(data.map(({from,to,content})=>{
                 return `Dialogue: 0,${this.encodeTime(from,'ASS')},${this.encodeTime(to,'ASS')},*Default,NTP,0000,0000,0000,,${content.replace(/\n/g,'\\N')}`;
             })).join('\r\n'),'ass');
