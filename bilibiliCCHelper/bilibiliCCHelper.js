@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Bilibili CC字幕助手
 // @namespace    indefined
-// @version      0.4.4.1
-// @description  ASS/SRT/LRC格式字幕下载，本地ASS/SRT/LRC格式字幕加载，旧版播放器可用CC字幕
+// @version      0.4.5
+// @description  ASS/SRT/LRC/BCC格式字幕下载，本地ASS/SRT/LRC/BCC格式字幕加载，旧版播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
 // @include      http*://www.bilibili.com/video/av*
@@ -200,6 +200,10 @@ fill-rule="evenodd"></path></svg></span>`,
                 id:'subtitle-download-lrc',name: "subtitle-type",value:"LRC",
                 onchange: ()=>this.encodeToLRC(data.body)
             },bottomPanel);
+            elements.createRadio({
+                id:'subtitle-download-bcc',name: "subtitle-type",value:"BCC",
+                onchange: ()=>this.updateDownload(JSON.stringify(data,undefined,2),'bcc')
+            },bottomPanel);
             //下载
             this.actionButton = elements.createAs('a',{
                 className: 'bpui-button bpui-state-disabled',
@@ -274,7 +278,7 @@ fill-rule="evenodd"></path></svg></span>`,
         selectFile(){
             const fileSelector = document.createElement('input')
             fileSelector.type = 'file';
-            fileSelector.accept = '.lrc,.ass,.srt';
+            fileSelector.accept = '.lrc,.ass,.srt,.bcc';
             fileSelector.oninput = ()=>{
                 this.readFile(fileSelector.files&&fileSelector.files[0]);
             };
@@ -292,6 +296,7 @@ fill-rule="evenodd"></path></svg></span>`,
                     if(name.endsWith('.lrc')) data = this.decodeFromLRC(reader.result);
                     else if(name.endsWith('.ass')) data = this.decodeFromASS(reader.result);
                     else if(name.endsWith('.srt')) data = this.decodeFromSRT(reader.result);
+                    else if(name.endsWith('.bcc')) data = JSON.parse(reader.result);
                     console.log(data);
                     player.updateSubtitle(data);
                     bilibiliCCHelper.toast(`载入本地字幕:${file.name}`);
@@ -310,7 +315,7 @@ fill-rule="evenodd"></path></svg></span>`,
             const data = [];
             input.split('\n').forEach(line=>{
                 const match = line.match(/((\[\d+:\d+\.?\d*\])+)(.*)/);
-                if (!match||match[3].trim().replace('\r','')=='') {
+                if (!match) {
                     //console.log('跳过非正文行',line);
                     return;
                 }
@@ -319,16 +324,18 @@ fill-rule="evenodd"></path></svg></span>`,
                     const t = time.split(':');
                     data.push({
                         time:t[0]*60 + (+t[1]),
-                        content:match[3]
+                        content:match[3].trim().replace('\r','')
                     });
                 });
             });
             return {
-                body:data.sort((a,b)=>a.time-b.time).map(({time,content},index)=>({
-                    from:time,
-                    to:index==data.length-1?time+20:data[index+1].time,
-                    content:content
-                }))
+                body:data.sort((a,b)=>a.time-b.time).reduce((result,item,index)=>(
+                   item.content!=''&&result.push({
+                        from:item.time,
+                        to:index==data.length-1?item.time+20:data[index+1].time,
+                        content:item.content
+                    }),result
+                ),[])
             };
         },
         decodeFromSRT(input){
