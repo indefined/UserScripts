@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕助手
 // @namespace    indefined
-// @version      0.4.3
+// @version      0.4.4
 // @description  ASS/SRT/LRC格式字幕下载，本地ASS/SRT/LRC格式字幕加载，旧版播放器可用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -57,8 +57,7 @@
 #subtitle-setting-panel ::-webkit-scrollbar{width: 7px;}
 #subtitle-setting-panel ::-webkit-scrollbar-track{border-radius: 4px;background-color: #EEE;}
 #subtitle-setting-panel ::-webkit-scrollbar-thumb{border-radius: 4px;background-color: #999;}
-</style>
-`,
+</style>`,
         oldEnableIcon:`
 <svg width="22" height="28" viewbox="0 0 22 30" xmlns="http://www.w3.org/2000/svg">
   <path id="svg_1" fill-rule="evenodd" fill="#99a2aa" d="m4.07787,6.88102l14,0a2,2 0 0 1 2,2l0,10a2,2 0 0 \
@@ -72,8 +71,14 @@
 -2.192zm-10.21,-10.21c-0.577,0.351 -0.962,0.986 -0.962,1.71l0,3a2,2 0 0 0 2,2l3,0a1,1 0 0 0 0,-2l-2,0a1,1 0 0 1 -1,\
 -1l0,-1a1,1 0 0 1 0.713,-0.958l-1.751,-1.752zm1.866,-3.79l11.172,0a2,2 0 0 1 2,2l0,10c0,0.34 -0.084,0.658 -0.233,\
 0.938l-2.48,-2.48a1,1 0 0 0 -0.287,-1.958l-1.672,0l-1.328,-1.328l0,-0.672a1,1 0 0 1 1,-1l2,0a1,1 0 0 0 0,-2l-3,\
-0a2,2 0 0 0 -1.977,1.695l-5.195,-5.195z"/></svg>
-`,
+0a2,2 0 0 0 -1.977,1.695l-5.195,-5.195z"/></svg>`,
+        newDisableIcon:`
+<span class="bp-svgicon"><svg width="22" height="22" viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg">\
+<path d="M15.172 18H4a2 2 0 0 1-2-2V6c0-.34.084-.658.233-.938l-.425-.426a1 1 0 1 1 1.414-1.414l15.556 15.556a1 \
+1 0 0 1-1.414 1.414L15.172 18zM4.962 7.79C4.385 8.141 4 8.776 4 9.5v3a2 2 0 0 0 2 2h3a1 1 0 0 0 0-2H7a1 1 0 0 1\
+-1-1v-1a1 1 0 0 1 .713-.958L4.962 7.79zM6.828 4H18a2 2 0 0 1 2 2v10c0 .34-.084.658-.233.938l-2.48-2.48A1 1 0 0 \
+0 17 12.5h-1.672L14 11.172V10.5a1 1 0 0 1 1-1h2a1 1 0 0 0 0-2h-3a2 2 0 0 0-1.977 1.695L6.828 4z" fill="#fff" \
+fill-rule="evenodd"></path></svg></span>`,
         createAs(nodeType,config,appendTo){
             const element = document.createElement(nodeType);
             config&&this.setAs(element,config);
@@ -136,44 +141,38 @@
             },appendTo).setAttribute('for',config.id);
         }
     };
-    //内嵌ASS格式样式头
-    const assHead = `\
-[Script Info]
-Title: ${document.title}
-ScriptType: v4.00+
-Collisions: Reverse
-PlayResX: 1280
-PlayResY: 720
-WrapStyle: 3
-ScaledBorderAndShadow: yes
-; ----------------------
-; 本字幕由CC字幕助手自动转换
-; 字幕来源${document.location}
-; 脚本地址https://greasyfork.org/scripts/378513
-; 设置了字幕过长自动换行，但若字幕中没有空格换行将无效
-; 字体大小依据720p 48号字体等比缩放
-; 如显示不正常请尝试使用SRT格式
-
-[V4+ Styles]
-Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, \
-StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,Segoe UI,48,&H00FFFFFF,&HF0000000,&H00000000,&HF0000000,1,0,0,0,100,100,0,0.00,1,1,3,2,30,30,20,1
-
-[Events]
-Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
-`;
 
     //编码器，用于将B站BCC字幕编码为常见字幕格式下载
-    class Encoder{
-        constructor(data){
+    const encoder = {
+        //内嵌ASS格式头
+        assHead : [
+            '[Script Info]',
+            `Title: ${document.title}`,
+            'ScriptType: v4.00+',
+            'Collisions: Reverse',
+            'PlayResX: 1280',
+            'PlayResY: 720',
+            'WrapStyle: 3',
+            'ScaledBorderAndShadow: yes',
+            '; ----------------------',
+            '; 本字幕由CC字幕助手自动转换',
+            `; 字幕来源${document.location}`,
+            '; 脚本地址https://greasyfork.org/scripts/378513',
+            '; 设置了字幕过长自动换行，但若字幕中没有空格换行将无效',
+            '; 字体大小依据720p 48号字体等比缩放',
+            '; 如显示不正常请尝试使用SRT格式',
+            '','[V4+ Styles]',
+            'Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, '
+            +'BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, '
+            +'BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding',
+            'Style: Default,Segoe UI,48,&H00FFFFFF,&HF0000000,&H00000000,&HF0000000,1,0,0,0,100,100,0,0.00,1,1,3,2,30,30,20,1',
+            '','[Events]',
+            'Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text'
+        ],
+        showDialog(data){
             if(!data||!data.body instanceof Array){
                 throw '数据错误';
             }
-            this.data = data.body;
-            this.type = undefined;
-            this.showDialog();
-        }
-        showDialog(){
             const settingDiv = elements.createAs('div',{
                 style :'position: fixed;top: 0;bottom: 0;left: 0;right: 0;background: rgba(0,0,0,0.4);z-index: 1048576;'
             },document.body),
@@ -185,21 +184,21 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
                       + `当前版本：${typeof(GM_info)!="undefined"&&GM_info.script.version||'unknow'}</a>`
                   },settingDiv),
                   textArea = this.textArea = elements.createAs('textarea',{
-                      style: 'width:350px;height: 320px;rsize:both;',readonly: true
+                      style: 'width:350px;height: 320px;resize:both;'
                   },panel),
-                  bottomPanel = elements.createAs('div',{
-                  },panel);
+                  bottomPanel = elements.createAs('div',{},panel);
+            textArea.setAttribute('readonly',true);
             elements.createRadio({
                 id:'subtitle-download-ass',name: "subtitle-type",value:"ASS",
-                onchange: ()=>this.encodeToASS()
+                onchange: ()=>this.encodeToASS(data.body)
             },bottomPanel);
             elements.createRadio({
                 id:'subtitle-download-srt',name: "subtitle-type",value:"SRT",
-                onchange: ()=>this.encodeToSRT()
+                onchange: ()=>this.encodeToSRT(data.body)
             },bottomPanel);
             elements.createRadio({
                 id:'subtitle-download-lrc',name: "subtitle-type",value:"LRC",
-                onchange: ()=>this.encodeToLRC()
+                onchange: ()=>this.encodeToLRC(data.body)
             },bottomPanel);
             //下载
             this.actionButton = elements.createAs('a',{
@@ -211,29 +210,29 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
                 innerText: "关闭",className: "bpui-button",
                 onclick: ()=>document.body.removeChild(settingDiv)
             },bottomPanel);
-        }
+        },
         updateDownload(result,type){
             this.textArea.value = result;
             URL.revokeObjectURL(this.actionButton.href);
             this.actionButton.classList.remove('bpui-state-disabled');
             this.actionButton.href = URL.createObjectURL(new Blob([result]));
             this.actionButton.download = `${document.title}.${type}`;
-        }
-        encodeToLRC(){
-            this.updateDownload(this.data.map(({from,to,content})=>{
+        },
+        encodeToLRC(data){
+            this.updateDownload(data.map(({from,to,content})=>{
                 return `${this.encodeTime(from,'LRC')} ${content.replace(/\n/g,' ')}`;
             }).join('\r\n'),'lrc');
-        }
-        encodeToSRT(){
-            this.updateDownload(this.data.reduce((accumulator,{from,to,content},index)=>{
+        },
+        encodeToSRT(data){
+            this.updateDownload(data.reduce((accumulator,{from,to,content},index)=>{
                 return `${accumulator}${index+1}\r\n${this.encodeTime(from)} --> ${this.encodeTime(to)}\r\n${content}\r\n\r\n`;
             },''),'srt');
-        }
-        encodeToASS(){
-            this.updateDownload(elements.assHead + this.data.map(({from,to,content})=>{
+        },
+        encodeToASS(data){
+            this.updateDownload(this.assHead.concat(data.map(({from,to,content})=>{
                 return `Dialogue: 0,${this.encodeTime(from,'ASS')},${this.encodeTime(to,'ASS')},*Default,NTP,0000,0000,0000,,${content.replace(/\n/g,'\\N')}`;
-            }).join('\r\n'),'ass');
-        }
+            })).join('\r\n'),'ass');
+        },
         encodeTime(input,format='SRT'){
             let time = new Date(input*1000),
                 ms = time.getMilliseconds(),
@@ -537,7 +536,7 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
                 onclick: ()=>{
                     if(this.selectedLan=='close') return;
                     bilibiliCCHelper.getSubtitle(this.selectedLan).then(data=>{
-                        new Encoder(data);
+                        encoder.showDialog(data);
                     }).catch(e=>{
                         bilibiliCCHelper.toast('获取字幕失败',e);
                     });
@@ -656,7 +655,7 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
                 onclick: ()=>{
                     if(this.selectedLan=='close') return;
                     bilibiliCCHelper.getSubtitle(this.selectedLan).then(data=>{
-                        new Encoder(data);
+                        encoder.showDialog(data);
                     }).catch(e=>{
                         bilibiliCCHelper.toast('获取字幕失败',e);
                     });
