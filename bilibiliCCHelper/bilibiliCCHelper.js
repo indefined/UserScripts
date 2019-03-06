@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕助手
 // @namespace    indefined
-// @version      0.4.2
+// @version      0.4.3
 // @description  ASS/SRT/LRC格式字幕下载，本地ASS/SRT/LRC格式字幕加载，旧版播放器可用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -52,7 +52,7 @@
   content: ' ';
 }
 /*悬停显示下拉框样式*/
-#subtitle-language-div:hover .bpui-selectmenu-list.bpui-selectmenu-list-left{display:block;}
+#subtitle-setting-panel .bpui-selectmenu:hover .bpui-selectmenu-list{display:block;}
 /*滚动条样式*/
 #subtitle-setting-panel ::-webkit-scrollbar{width: 7px;}
 #subtitle-setting-panel ::-webkit-scrollbar-track{border-radius: 4px;background-color: #EEE;}
@@ -98,27 +98,30 @@
         },
         createSelector(config,appendTo){
             const selector = this.createAs('div',{
-                id:'subtitle-language-div',
                 className:"bilibili-player-block-string-type bpui-component bpui-selectmenu selectmenu-mode-absolute",
                 style:"width:"+config.width
             },appendTo),
-                  label = this.createAs('div',{className:'bpui-selectmenu-txt'},selector),
-                  selected = config.datas.find(item=>item.value==config.initValue);
-            selected&&(label.innerHTML=selected.content)||(label.innerText=config.initValue);
-            this.createAs('div',{className:'bpui-selectmenu-arrow bpui-icon bpui-icon-arrow-down'},selector);
-            const list = this.createAs('ul',{
-                className:'bpui-selectmenu-list bpui-selectmenu-list-left',
-                style:`max-height:${config.height||'100px'};overflow:hidden auto;white-space:nowrap;`
-            },selector);
+                  selected = config.datas.find(item=>item.value==config.initValue),
+                  label = this.createAs('div',{
+                      className:'bpui-selectmenu-txt',
+                      innerHTML: selected?selected.content:config.initValue
+                  },selector),
+                  arraw = this.createAs('div',{
+                      className:'bpui-selectmenu-arrow bpui-icon bpui-icon-arrow-down'
+                  },selector),
+                  list = this.createAs('ul',{
+                      className:'bpui-selectmenu-list bpui-selectmenu-list-left',
+                      style:`max-height:${config.height||'100px'};overflow:hidden auto;white-space:nowrap;`,
+                      onclick:e=>{
+                          label.dataset.value = e.target.dataset.value;
+                          label.innerHTML = e.target.innerHTML;
+                          config.handler(e.target.dataset.value);
+                      }
+                  },selector);
             config.datas.forEach(item=>{
                 this.createAs('li',{
                     className:'bpui-selectmenu-list-row',
-                    innerHTML:item.content,
-                    onclick:e=>{
-                        label.dataset.value = e.target.dataset.value;
-                        label.innerHTML = e.target.innerHTML;
-                        item.handler(e);
-                    }
+                    innerHTML:item.content
                 },list).dataset.value = item.value;
             });
             return selector;
@@ -462,6 +465,7 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
                 }
                 else {
                     //更换本地字幕不切换设置中的字幕开关状态
+                    this.setting.lan = value;
                     this.setting.isclosed = false;
                     bilibiliCCHelper.loadSubtitle(value);
                     this.downloadBtn.classList.remove('bpui-state-disabled','bpui-button-icon');
@@ -481,7 +485,9 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
                 this.changeSubtitle('close');
             }
             else{
-                this.changeSubtitle();
+                //查找本视频是否有之前选择过的语言，如果有则选择之前的语言
+                const lan = bilibiliCCHelper.getSubtitleInfo(this.setting.lan)&&this.setting.lan
+                this.changeSubtitle(lan);
             }
             //没有字幕时设置下一次切换字幕行为为本地字幕
             if(!this.subtitle.count) this.selectedLan = 'local';
@@ -506,10 +512,7 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
                 innerHTML: this.setting.isclosed?elements.oldDisableIcon:elements.oldEnableIcon
             },btn);
             //字幕样式表
-            this.fontStyle = elements.createAs('style',{
-                type:"text/css",
-                innerHTML: this.setting.isclosed?elements.oldDisableIcon:elements.oldEnableIcon
-            },btn);
+            this.fontStyle = elements.createAs('style',{type:"text/css"},btn);
             const panel = this.panel = elements.createAs('div',{
                 id:'subtitle-setting-panel',
                 style:'position: absolute;bottom: 28px;right: 30px;background: white;border-radius: 4px;'
@@ -523,13 +526,9 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
                   opacityDiv = elements.createAs('div',{innerHTML:'<div>背景不透明度</div>'},panel);
             //选择字幕
             this.selectedLanguage = elements.createSelector({
-                width:'100px',height:'180px',
-                initValue:'关闭',
-                datas:this.subtitle.subtitles.map(({lan,lan_doc})=>({
-                    content:lan_doc,
-                    value:lan,
-                    handler:({target})=>this.changeSubtitle(target.dataset.value)
-                }))
+                width:'100px',height:'180px',initValue:'close',
+                handler:(value)=>this.changeSubtitle(value),
+                datas:this.subtitle.subtitles.map(({lan,lan_doc})=>({content:lan_doc,value:lan}))
             },languageDiv).firstElementChild;
             //下载字幕
             this.downloadBtn = elements.createAs('button',{
@@ -581,28 +580,21 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
             elements.createSelector({
                 width:'74%',height:'120px',
                 initValue:this.setting.color,
-                datas:this.configs.color.map(({content,value})=>({
-                    content,value,
-                    handler:(e)=>this.changeStyle(this.setting.color = parseInt(e.target.dataset.value))
-                }))
+                handler:(value)=>this.changeStyle(this.setting.color=parseInt(value)),
+                datas:this.configs.color
             },colorDiv);
             //字幕阴影
             elements.createSelector({
                 width:'74%',height:'120px',
                 initValue:this.setting.shadow,
-                datas:this.configs.shadow.map(({content,value})=>({
-                    content,value,
-                    handler:(e)=>this.changeStyle(this.setting.shadow = e.target.dataset.value)
-                }))
+                handler:(value)=>this.changeStyle(this.setting.shadow=value),
+                datas:this.configs.shadow
             },shadowDiv);
             //字幕位置
             elements.createSelector({
-                width:'74%',
-                initValue:this.setting.position,
-                datas:this.configs.position.map(({content,value})=>({
-                    content,value,
-                    handler:(e)=>this.changePosition(this.setting.position = e.target.dataset.value)
-                }))
+                width:'74%',initValue:this.setting.position,
+                handler:(value)=>this.changePosition(this.setting.position=value),
+                datas:this.configs.position
             },positionDiv);
             //背景透明度
             elements.createAs('input',{
@@ -637,6 +629,7 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
     //新版播放器CC字幕助手，需要维护下载按钮/本地字幕选项/关闭选项/需要时监听CC字幕按钮
     const newPlayerHelper = {
         iconBtn:undefined,
+        icon:undefined,
         panel:undefined,
         downloadBtn:undefined,
         selectedLan:undefined,
@@ -655,28 +648,30 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
         initUI(){
             const downloadBtn = this.downloadBtn = this.panel.nextElementSibling.cloneNode(),
                   selector = this.panel.querySelector('ul'),
-                  nowSelect = selector.querySelector('li.bui-select-item.bui-select-item-active'),
-                  closeItem = selector.querySelector('li.bui-select-item.bui-select-item-active'),
+                  selectedItem = selector.querySelector('li.bui-select-item.bui-select-item-active'),
+                  closeItem = selector.querySelector('li.bui-select-item[data-value="close"]'),
                   localItem = closeItem.cloneNode();
-            downloadBtn.style = 'min-width:unset!important'
-            downloadBtn.innerText = '下载';
-            downloadBtn.addEventListener('click',()=>{
-                if(this.selectedLan=='close') return;
-                bilibiliCCHelper.getSubtitle(this.selectedLan).then(data=>{
-                    new Encoder(data);
-                }).catch(e=>{
-                    bilibiliCCHelper.toast('获取字幕失败',e);
-                });
+            elements.setAs(downloadBtn,{
+                style: 'min-width:unset!important',innerText: '下载',
+                onclick: ()=>{
+                    if(this.selectedLan=='close') return;
+                    bilibiliCCHelper.getSubtitle(this.selectedLan).then(data=>{
+                        new Encoder(data);
+                    }).catch(e=>{
+                        bilibiliCCHelper.toast('获取字幕失败',e);
+                    });
+                }
             });
-            this.updateDownloadBtn(nowSelect&&nowSelect.dataset.value);
             this.panel.insertAdjacentElement('afterend',downloadBtn);
+            this.updateDownloadBtn(selectedItem&&selectedItem.dataset.value);
             //本地字幕
-            localItem.innerText = '本地字幕';
-            localItem.addEventListener('click',()=>{
-                this.selectedLocal = true;
-                decoder.selectFile();
-            });
-            selector.appendChild(localItem);
+            elements.setAs(localItem,{
+                innerText: '本地字幕',
+                onclick: ()=> {
+                    this.selectedLocal = true;
+                    decoder.selectFile();
+                }
+            },selector);
             //选中本地字幕后关闭需要手动执行
             closeItem.addEventListener('click',()=>{
                 if(!this.selectedLocal) return;
@@ -686,8 +681,7 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
             //视频本身没有字幕时，点击CC字幕按钮切换本地字幕和关闭
             //视频本身有字幕时播放器自身会切换到视频自身字幕
             if(!this.hasSubtitles){
-                const icon = this.iconBtn.querySelector('.bilibili-player-iconfont-subtitle');
-                icon&&icon.addEventListener('click',({target})=>{
+                this.icon&&this.icon.addEventListener('click',({target})=>{
                     if(!this.selectedLocal) localItem.click();
                     else closeItem.click();
                 });
@@ -702,16 +696,17 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
             }).observe(selector,{
                 subtree: true,
                 attributes: true,
-                attributeOldValue: true ,
                 attributeFilter: ['class']
             });
             console.log('Bilibili CC Helper init new UI success.');
         },
         init(subtitle){
             this.hasSubtitles = subtitle.count;
-            this.selectedLocal = undefined;
             this.selectedLan = undefined;
-            [this.iconBtn,this.panel] = elements.getAs(['.bilibili-player-video-btn-subtitle','.bilibili-player-video-subtitle-setting-lan']);
+            this.selectedLocal = false;
+            this.iconBtn = elements.getAs('.bilibili-player-video-btn-subtitle');
+            this.panel = elements.getAs('.bilibili-player-video-subtitle-setting-lan');
+            this.icon = this.iconBtn.querySelector('.bilibili-player-iconfont-subtitle');
             if(this.panel){
                 this.initUI();
                 //设置ID标记视频为已注入，防止二次初始化
@@ -720,17 +715,20 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
             else if(this.iconBtn){
                 //强制显示新版播放器CC字幕按钮，不管视频有没有字幕，反正可以选择本地字幕
                 this.iconBtn.style = 'display:block';
+                //视频本身没有字幕时把按钮图标设置成关闭状态
+                if(!this.hasSubtitles&&this.icon) this.icon.innerHTML = elements.newDisableIcon;
                 //设置ID标记视频为已注入，防止二次初始化
                 this.iconBtn.id = 'bilibili-player-subtitle-btn';
                 new MutationObserver((mutations,observer)=>{
-                    mutations.forEach(mutation=>{
-                        if(!mutation.target) return;
+                    for (const mutation of mutations){
+                        if(!mutation.target) continue;
                         if(mutation.target.classList.contains('bilibili-player-video-subtitle-setting-lan')){
                             observer.disconnect();
                             this.panel = mutation.target;
                             this.initUI();
+                            return;
                         }
-                    });
+                    }
                 }).observe(this.iconBtn,{
                     childList: true,
                     subtree: true
@@ -758,14 +756,14 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
             clearTimeout(this.removeTimmer);
             this.toastDiv.innerText = msg + (error?`:${error}`:'');
             panel.appendChild(this.toastDiv);
-            this.removeTimmer = setTimeout(()=>panel.removeChild(this.toastDiv),3000);
+            this.removeTimmer = setTimeout(()=>{
+                panel.contains(this.toastDiv)&&panel.removeChild(this.toastDiv)
+            },3000);
         },
         loadSubtitle(lan){
             this.getSubtitle(lan).then(data=>{
                 player.updateSubtitle(data);
-                this.toast(lan=='close'?
-                           '字幕已关闭':
-                           `载入字幕:${this.getSubtitleInfo(lan).lan_doc}`);
+                this.toast(lan=='close'?'字幕已关闭':`载入字幕:${this.getSubtitleInfo(lan).lan_doc}`);
             }).catch(e=>{
                 this.toast('载入字幕失败',e);
             });
