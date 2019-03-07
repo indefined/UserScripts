@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕助手
 // @namespace    indefined
-// @version      0.4.5
+// @version      0.4.6
 // @description  ASS/SRT/LRC/BCC格式字幕下载，本地ASS/SRT/LRC/BCC格式字幕加载，旧版播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -184,7 +184,7 @@ fill-rule="evenodd"></path></svg></span>`,
                       + `当前版本：${typeof(GM_info)!="undefined"&&GM_info.script.version||'unknow'}</a>`
                   },settingDiv),
                   textArea = this.textArea = elements.createAs('textarea',{
-                      style: 'width:350px;height: 320px;resize:both;'
+                      style: 'width: 350px;height: 350px;resize: both;padding: 5px;line-height: normal;'
                   },panel),
                   bottomPanel = elements.createAs('div',{},panel);
             textArea.setAttribute('readonly',true);
@@ -386,13 +386,13 @@ fill-rule="evenodd"></path></svg></span>`,
         resizeRate: 100,
         configs:{
             color:[
-                {value:'16777215',content:'<b style="color:#FFF;text-shadow: #000 0px 0px 1px, #000 0px 0px 1px, #000 0px 0px 1px;">白色</b>'},
-                {value:'16007990',content:'<b style="color:#F44336;text-shadow: #000 0px 0px 1px, #000 0px 0px 1px, #000 0px 0px 1px;">红色</b>'},
-                {value:'10233776',content:'<b style="color:#9C27B0;text-shadow: #000 0px 0px 1px, #000 0px 0px 1px, #000 0px 0px 1px;">紫色</b>'},
-                {value:'6765239',content:'<b style="color:#673AB7;text-shadow: #000 0px 0px 1px, #000 0px 0px 1px, #000 0px 0px 1px;">深紫色</b>'},
-                {value:'4149685',content:'<b style="color:#3F51B5;text-shadow: #000 0px 0px 1px, #000 0px 0px 1px, #000 0px 0px 1px;">靛青色</b>'},
-                {value:'2201331',content:'<b style="color:#2196F3;text-shadow: #000 0px 0px 1px, #000 0px 0px 1px, #000 0px 0px 1px;">蓝色</b>'},
-                {value:'240116',content:'<b style="color:#03A9F4;text-shadow: #000 0px 0px 1px, #000 0px 0px 1px, #000 0px 0px 1px;">亮蓝色</b>'}
+                {value:'16777215',content:'<span style="color:#FFF;text-shadow: #000 0px 0px 1px">白色</span>'},
+                {value:'16007990',content:'<b style="color:#F44336;text-shadow: #000 0px 0px 1px">红色</b>'},
+                {value:'10233776',content:'<b style="color:#9C27B0;text-shadow: #000 0px 0px 1px">紫色</b>'},
+                {value:'6765239',content:'<b style="color:#673AB7;text-shadow: #000 0px 0px 1px">深紫色</b>'},
+                {value:'4149685',content:'<b style="color:#3F51B5;text-shadow: #000 0px 0px 1px">靛青色</b>'},
+                {value:'2201331',content:'<b style="color:#2196F3;text-shadow: #000 0px 0px 1px">蓝色</b>'},
+                {value:'240116',content:'<b style="color:#03A9F4;text-shadow: #000 0px 0px 1px">亮蓝色</b>'}
             ],
             position:[
                 {value:'bl',content:'左下角'},
@@ -419,37 +419,19 @@ fill-rule="evenodd"></path></svg></span>`,
             }
         },
         changeStyle(){
-            this.fontStyle.innerHTML = `
-                span.subtitle-item-background{
-                    opacity: ${this.setting.backgroundopacity};
-                }
-                span.subtitle-item-text {
-                    color:#${("000000"+this.setting.color.toString(16)).slice(-6)};
-                }
-                span.subtitle-item {
-                    font-size: ${this.setting.fontsize*this.resizeRate}%;
-                    line-height: ${this.setting.fontsize*this.resizeRate*1.1}%;
-                    ${this.configs.shadow[this.setting.shadow].style}
-                }`;
+            this.fontStyle.innerHTML = `span.subtitle-item-background{opacity: ${this.setting.backgroundopacity};}`
+                + `span.subtitle-item-text {color:#${("000000"+this.setting.color.toString(16)).slice(-6)};}`
+                + `span.subtitle-item {font-size: ${this.setting.fontsize*this.resizeRate}%;line-height: 110%;}`
+                + `span.subtitle-item {${this.configs.shadow[this.setting.shadow].style}}`;
         },
         changePosition(){
             this.subtitleContainer.className = 'subtitle-position subtitle-position-'
                  +(this.setting.position||'bc');
             this.subtitleContainer.style = '';
         },
-        changeResizeStatus(state){
-            if(state){
-                this.changeResize();
-            }else{
-                this.resizeRate = 100;
-                this.changeStyle();
-            }
-        },
-        changeResize(state){
-            if (this.setting.scale) {
-                this.resizeRate = player.getWidth()/1280*100;
-                this.changeStyle();
-            }
+        changeResize(){
+            this.resizeRate = this.setting.scale?player.getWidth()/1280*100:100;
+            this.changeStyle();
         },
         changeSubtitle(value=this.subtitle.subtitles[0].lan){
             this.selectedLanguage.innerText = bilibiliCCHelper.getSubtitleInfo(value).lan_doc;
@@ -499,7 +481,6 @@ fill-rule="evenodd"></path></svg></span>`,
             }
             //没有字幕时设置下一次切换字幕行为为本地字幕
             if(!this.subtitle.count) this.selectedLan = 'local';
-            this.changeStyle();
             this.changeResize();
         },
         initUI(){
@@ -578,7 +559,7 @@ fill-rule="evenodd"></path></svg></span>`,
                 id:'subtitle-auto-resize',
                 type:"checkbox",
                 checked:this.setting.scale,
-                onchange:(e)=>this.changeResizeStatus(this.setting.scale = e.target.checked)
+                onchange:(e)=>this.changeResize(this.setting.scale = e.target.checked)
             },sizeDiv);
             elements.createAs('label',{
                 style:"cursor:pointer",
