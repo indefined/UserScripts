@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕助手
 // @namespace    indefined
-// @version      0.4.6
+// @version      0.5.0
 // @description  ASS/SRT/LRC/BCC格式字幕下载，本地ASS/SRT/LRC/BCC格式字幕加载，旧版播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -275,47 +275,132 @@ fill-rule="evenodd"></path></svg></span>`,
     const decoder = {
         srtReg:/(\d+):(\d{1,2}):(\d{1,2}),(\d{1,3})\s*-->\s*(\d+):(\d{1,2}):(\d{1,2}),(\d{1,3})\r?\n([.\s\S]+)/,
         assReg:/Dialogue:.*,(\d+):(\d{1,2}):(\d{1,2}\.?\d*),\s*?(\d+):(\d{1,2}):(\d{1,2}\.?\d*)(?:.*?,){7}(.+)/,
-        selectFile(){
-            const fileSelector = document.createElement('input')
-            fileSelector.type = 'file';
-            fileSelector.accept = '.lrc,.ass,.srt,.bcc';
-            fileSelector.oninput = ()=>{
-                this.readFile(fileSelector.files&&fileSelector.files[0]);
-            };
-            fileSelector.click();
+        encodings:['UTF-8','GB18030','BIG5','UNICODE','JIS','EUC-KR'],
+        encoding:'UTF-8',
+        dialog:undefined,
+        reader:undefined,
+        file:undefined,
+        data:undefined,
+        show(){
+            if(!this.dialog){
+                this.moveAction = ev=>this.dialogMove(ev);
+                this.dialog = elements.createAs('div',{
+                    id :'subtitle-local-selector',
+                    style :'position:fixed;z-index:1048576;padding:10px;top:50%;left:calc(50% - 185px);'
+                    +'border: 1px solid #ccd0d7;background:white;border-radius:5px;color:#99a2aa',
+                    innerHTML:'<style type="text/css">'
+                    +'.bpui-selectmenu-arrow:hover + ul.bpui-selectmenu-list.bpui-selectmenu-list-left,'
+                    +'ul.bpui-selectmenu-list.bpui-selectmenu-list-left:hover {display: block;}</style>'
+                },elements.getAs('#bilibiliPlayer'));
+                //标题栏，可拖动对话框
+                elements.createAs('div',{
+                    style:"margin-bottom: 5px;cursor:move;user-select:none;line-height:1;",
+                    innerText:'本地字幕选择',
+                    onmouseup:this.moveAction,
+                    onmousedown:this.moveAction
+                },this.dialog);
+                //选择字幕，保存文件对象并调用处理文件
+                elements.createAs('input',{
+                    style: "margin-bottom: 5px;width: 100%;",
+                    innerText: '选择字幕',
+                    type: 'file',accept:'.lrc,.ass,.srt,.bcc',
+                    oninput:  ({target})=> this.readFile(this.file = target.files&&target.files[0])
+                },this.dialog);
+                elements.createAs('br',{},this.dialog);
+                //文件编码选择，保存编码并调用处理文件
+                elements.createAs('label',{style: "margin-right: 10px;",innerText: '字幕编码'},this.dialog);
+                elements.createAs('select',{
+                    style: "width: 80px;height: 20px;border-radius: 4px;line-height: 20px;",title:'如果字幕乱码可尝试更改编码',
+                    innerHTML:this.encodings.reduce((result,item)=>`${result}<option value="${item}">${item}</option>`,''),
+                    oninput:  ({target})=> this.readFile(this.encoding = target.value)
+                },this.dialog);
+                //字幕偏移，保存DOM对象以便修改显示偏移，更改时调用字幕处理显示
+                elements.createAs('label',{style: "margin-left: 10px;",innerText: '字幕偏移(ms)'},this.dialog);
+                this.offset = elements.createAs('input',{
+                    style: "margin-left: 10px;width: 50px;border: 1px solid #ccd0d7;border-radius: 4px;line-height: 20px;",
+                    type:'number', step:100, value:0,title:'字幕相对于视频的时间偏移，负值表示将字幕延后，正值将字幕提前',
+                    oninput:  ()=> this.handleSubtitle()
+                },this.dialog);
+                //关闭按钮
+                elements.createAs('button',{
+                    style: "margin-left: 10px;",className:'bpui-button',innerText: '关闭面板',
+                    onclick:  ()=> elements.getAs('#bilibiliPlayer').removeChild(this.dialog)
+                },this.dialog);
+                //文件读取器，载入文件
+                this.reader = new FileReader();
+                this.reader.onloadend = ()=> this.decodeFile()
+                this.reader.onerror = e=> bilibiliCCHelper.toast('载入字幕失败',e);
+            }
+            else{
+                elements.getAs('#bilibiliPlayer').appendChild(this.dialog);
+                this.handleSubtitle();
+            }
         },
-        readFile(file){
-            if(!file) {
-                bilibiliCCHelper.toast('文件获取失败');
-                return;
+        dialogMove(ev){
+            if (ev.type=='mousedown'){
+                this.dialog.t = ev.pageY-this.dialog.offsetTop;
+                this.dialog.l = ev.pageX-this.dialog.offsetLeft;
+                document.body.addEventListener('mousemove',this.moveAction);
             }
-            const reader = new FileReader();
-            reader.onloadend = ()=> {
-                try{
-                    let data,name = file.name.toLowerCase();
-                    if(name.endsWith('.lrc')) data = this.decodeFromLRC(reader.result);
-                    else if(name.endsWith('.ass')) data = this.decodeFromASS(reader.result);
-                    else if(name.endsWith('.srt')) data = this.decodeFromSRT(reader.result);
-                    else if(name.endsWith('.bcc')) data = JSON.parse(reader.result);
-                    console.log(data);
-                    player.updateSubtitle(data);
-                    bilibiliCCHelper.toast(`载入本地字幕:${file.name}`);
-                }
-                catch(e){
-                    bilibiliCCHelper.toast('载入字幕失败',e);
-                };
-            };
-            reader.onerror = e=>{
+            else if (ev.type=='mouseup'){
+                document.body.removeEventListener('mousemove',this.moveAction);
+            }
+            else{
+                this.dialog.style.top = ev.pageY-this.dialog.t+'px';
+                this.dialog.style.left = ev.pageX-this.dialog.l+'px';
+            }
+        },
+        readFile(){
+            if(!this.file) {
+                this.data = undefined;
+                return bilibiliCCHelper.toast('没有文件');
+            }
+            this.reader.readAsText(this.file,this.encoding)
+        },
+        handleSubtitle(){
+            if(!this.data) return;
+            try{
+                const offset = +this.offset.value;
+                player.updateSubtitle(!offset?this.data:{
+                    body:this.data.body.map(({from,to,content})=>({
+                        from:from + offset/1000,
+                        to:to + offset/1000,
+                        content
+                    }))
+                });
+                bilibiliCCHelper.toast(`载入本地字幕:${this.file.name},偏移:${offset}ms`);
+            }
+            catch(e){
                 bilibiliCCHelper.toast('载入字幕失败',e);
+            };
+        },
+        decodeFile(){
+            try{
+                this.offset.value = 0;
+                const type = this.file.name.split('.').pop().toLowerCase();
+                switch(type){
+                    case 'lrc':this.data = this.decodeFromLRC(this.reader.result);break;
+                    case 'ass':this.data = this.decodeFromASS(this.reader.result);break;
+                    case 'srt':this.data = this.decodeFromSRT(this.reader.result);break;
+                    case 'bcc':this.data = JSON.parse(this.reader.result);break;
+                    default:throw('未知文件类型'+type);break;
+                }
+                console.log(this.data);
+                this.handleSubtitle();
             }
-            reader.readAsText(file);
+            catch(e){
+                bilibiliCCHelper.toast('解码字幕文件失败',e);
+            };
         },
         decodeFromLRC(input){
             if(!input) return;
             const data = [];
             input.split('\n').forEach(line=>{
-                const match = line.match(/((\[\d+:\d+\.?\d*\])+)(.*)/);
+                let match = line.match(/((\[\d+:\d+\.?\d*\])+)(.*)/);
                 if (!match) {
+                    if(match=line.match(/\[offset:(\d+)\]/i)) {
+                        this.offset.value = +match[1];
+                    }
                     //console.log('跳过非正文行',line);
                     return;
                 }
@@ -450,7 +535,7 @@ fill-rule="evenodd"></path></svg></span>`,
                 this.selectedLan = value;
                 this.icon.innerHTML = elements.oldEnableIcon;
                 if(value=='local') {
-                    decoder.selectFile();
+                    decoder.show();
                     this.downloadBtn.classList.add('bpui-state-disabled','bpui-button-icon');
                 }
                 else {
@@ -658,7 +743,7 @@ fill-rule="evenodd"></path></svg></span>`,
                 innerText: '本地字幕',
                 onclick: ()=> {
                     this.selectedLocal = true;
-                    decoder.selectFile();
+                    decoder.show();
                 }
             },selector);
             //选中本地字幕后关闭需要手动执行
@@ -773,6 +858,7 @@ fill-rule="evenodd"></path></svg></span>`,
             this.cid = window.cid;
             this.subtitle = undefined;
             this.datas = {close:{body:[]},local:{body:[]}};
+            decoder.data = undefined;
             return this.cid&&fetch(`//api.bilibili.com/x/player.so?id=cid:${window.cid}&aid=${window.aid}`)
                 .then(res=>res.text())
                 .then(data=>data.match(/(?:<subtitle>)(.+)(?:<\/subtitle>)/))

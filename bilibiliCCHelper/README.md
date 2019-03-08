@@ -20,8 +20,8 @@ bilibili CC字幕助手
 - 新/旧版播放器可用本地字幕加载
   - 支持ASS/SRT/LRC格式
   - 支持加载原生B站专用BCC格式
-  - 仅支持系统默认编码，否则字幕会乱码
-  - 目前在多数视频可启用，但可能会有异常情况，详见已知问题
+  - 支持UTF-8/GB18030/BIG5/UNICODE/JIS/EUC-KR编码
+  - 目前在多数视频可启用，但可能会有异常情况，详见[已知问题](#已知问题)
 
 -------------------------
 ## 功能预览
@@ -29,6 +29,8 @@ bilibili CC字幕助手
 ![新版](https://greasyfork.org/system/screenshots/screenshots/000/014/323/original/newPlayer.jpg)
 
 ![旧版](https://greasyfork.org/system/screenshots/screenshots/000/014/409/original/oldPlayer.jpg)
+
+![本地](https://greasyfork.org/system/screenshots/screenshots/000/014/446/original/local.jpg)
 
 ![下载](https://greasyfork.org/system/screenshots/screenshots/000/014/325/original/download.jpg)
 
@@ -50,7 +52,7 @@ bilibili CC字幕助手
   - LRC歌词格式本身只有起始时间戳没有结束时间，会丢弃所有字幕结束时间
   - LRC歌词格式不支持换行，如果字幕本身有换行将替换为空格
 - 本地字幕
-  - 加载可能会乱码，以后可能会更新
+  - 加载可能会乱码，如果尝试完下拉框中的编码仍然乱码，请将文件转为UTF-8编码
   - 可能会加载失败，但是不会有提醒，问题定位中
   - 新版播放器选择本地字幕后，CC字幕按钮将处于关闭状态
   - B站的CC字幕不支持内置样式，所有ASS字幕内置的样式会被丢弃
@@ -80,4 +82,4 @@ bilibili CC字幕助手
 - [x] toast，关键操作和错误提示
 - [ ] 薛定谔的本地字幕加载失败调试
 - [x] 旧版设置面板兼容优化
-- [ ] 本地字幕选择操作界面
+- [x] 本地字幕选择操作界面
