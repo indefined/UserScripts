@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕助手
 // @namespace    indefined
-// @version      0.5.0
+// @version      0.5.0.1
 // @description  ASS/SRT/LRC/BCC格式字幕下载，本地ASS/SRT/LRC/BCC格式字幕加载，旧版播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -301,7 +301,7 @@ fill-rule="evenodd"></path></svg></span>`,
                 },this.dialog);
                 //选择字幕，保存文件对象并调用处理文件
                 elements.createAs('input',{
-                    style: "margin-bottom: 5px;width: 100%;",
+                    style: "margin-bottom: 5px;width: 370px;",
                     innerText: '选择字幕',
                     type: 'file',accept:'.lrc,.ass,.srt,.bcc',
                     oninput:  ({target})=> this.readFile(this.file = target.files&&target.files[0])
@@ -310,7 +310,8 @@ fill-rule="evenodd"></path></svg></span>`,
                 //文件编码选择，保存编码并调用处理文件
                 elements.createAs('label',{style: "margin-right: 10px;",innerText: '字幕编码'},this.dialog);
                 elements.createAs('select',{
-                    style: "width: 80px;height: 20px;border-radius: 4px;line-height: 20px;",title:'如果字幕乱码可尝试更改编码',
+                    style: "width: 80px;height: 20px;border-radius: 4px;line-height: 20px;border:1px solid #ccd0d7;",
+                    title:'如果字幕乱码可尝试更改编码',
                     innerHTML:this.encodings.reduce((result,item)=>`${result}<option value="${item}">${item}</option>`,''),
                     oninput:  ({target})=> this.readFile(this.encoding = target.value)
                 },this.dialog);
