@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Bilibili CC字幕助手
 // @namespace    indefined
-// @version      0.5.0.1
-// @description  ASS/SRT/LRC/BCC格式字幕下载，本地ASS/SRT/LRC/BCC格式字幕加载，旧版播放器可启用CC字幕
+// @version      0.5.1
+// @description  旧版播放器可启用CC字幕，HTML5播放器可载入本地ASS/SRT/LRC/BCC/SBV/VTT格式字幕，ASS/SRT/LRC/BCC格式字幕下载
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
 // @include      http*://www.bilibili.com/video/av*
@@ -273,7 +273,7 @@ fill-rule="evenodd"></path></svg></span>`,
 
     //解码器，用于读取常见格式字幕并将其转换为B站可以读取BCC格式字幕
     const decoder = {
-        srtReg:/(\d+):(\d{1,2}):(\d{1,2}),(\d{1,3})\s*-->\s*(\d+):(\d{1,2}):(\d{1,2}),(\d{1,3})\r?\n([.\s\S]+)/,
+        srtReg:/(?:(\d+):)?(\d{1,2}):(\d{1,2})[,\.](\d{1,3})\s*(?:-->|,)\s*(?:(\d+):)?(\d{1,2}):(\d{1,2})[,\.](\d{1,3})\r?\n([.\s\S]+)/,
         assReg:/Dialogue:.*,(\d+):(\d{1,2}):(\d{1,2}\.?\d*),\s*?(\d+):(\d{1,2}):(\d{1,2}\.?\d*)(?:.*?,){7}(.+)/,
         encodings:['UTF-8','GB18030','BIG5','UNICODE','JIS','EUC-KR'],
         encoding:'UTF-8',
@@ -303,7 +303,7 @@ fill-rule="evenodd"></path></svg></span>`,
                 elements.createAs('input',{
                     style: "margin-bottom: 5px;width: 370px;",
                     innerText: '选择字幕',
-                    type: 'file',accept:'.lrc,.ass,.srt,.bcc',
+                    type: 'file',accept:'.lrc,.ass,.srt,.bcc,.sbv,.vtt',
                     oninput:  ({target})=> this.readFile(this.file = target.files&&target.files[0])
                 },this.dialog);
                 elements.createAs('br',{},this.dialog);
@@ -382,7 +382,8 @@ fill-rule="evenodd"></path></svg></span>`,
                 switch(type){
                     case 'lrc':this.data = this.decodeFromLRC(this.reader.result);break;
                     case 'ass':this.data = this.decodeFromASS(this.reader.result);break;
-                    case 'srt':this.data = this.decodeFromSRT(this.reader.result);break;
+                    case 'srt':case 'sbv':case 'vtt':
+                        this.data = this.decodeFromSRT(this.reader.result);break;
                     case 'bcc':this.data = JSON.parse(this.reader.result);break;
                     default:throw('未知文件类型'+type);break;
                 }
@@ -436,8 +437,8 @@ fill-rule="evenodd"></path></svg></span>`,
                     return;
                 }
                 data.push({
-                    from:match[1]*60*60 + match[2]*60 + (+match[3]) + (match[4]/1000),
-                    to:match[5]*60*60 + match[5]*60 + (+match[7]) + (match[8]/1000),
+                    from:match[1]*60*60||0 + match[2]*60 + (+match[3]) + (match[4]/1000),
+                    to:match[5]*60*60||0 + match[6]*60 + (+match[7]) + (match[8]/1000),
                     content:match[9].trim().replace(/{\\.+?}/g,'').replace(/\\N/gi,'\n').replace(/\\h/g,' ')
                 });
             });
