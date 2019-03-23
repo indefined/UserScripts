@@ -2,7 +2,7 @@
 // @name        bilibili直播间助手
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.5
+// @version     0.5.6
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -344,13 +344,13 @@ body.fullscreen-fix div#gift-control-vm {
         strings:{
             medal:{
                 name:'勋章',
-                arrawPosition:'48px',
+                position:'48px',
                 link:'//link.bilibili.com/p/center/index#/user-center/wearing-center/my-medal',
                 dataUrl:'//api.live.bilibili.com/i/api/medal?page=1&pageSize=25'
             },
             title:{
                 name:'头衔',
-                arrawPosition:'69px',
+                position:'69px',
                 link:'//link.bilibili.com/p/center/index#/user-center/wearing-center/library',
                 dataUrl:'//api.live.bilibili.com/i/api/ajaxTitleInfo?had=1&page=1&pageSize=300'
             }
@@ -413,14 +413,14 @@ body.fullscreen-fix div#gift-control-vm {
                 (target!=this.medalButton&&target!=this.titleButton)) {
                 return this.closeDialog();
             }
-            const name = this.strings[targetName].name
+            const targetConfig = this.strings[targetName];
             //保存当前对话框目标
             this.dialog.dataset.name = targetName;
             this.dialog.style = `transform-origin: ${
-                this.strings[targetName].arrawPosition} bottom 0px;position:absolute;bottom:50px;color: #23ade5;`;
+                targetConfig.position} bottom 0px;position:absolute;bottom:50px;color: #23ade5;`;
             //设置对话框箭头位置
-            this.dialogArraw.style.left = this.strings[targetName].arrawPosition;
-            this.dialogTitle.innerText = '我的'+name;
+            this.dialogArraw.style.left = targetConfig.position;
+            this.dialogTitle.innerText = '我的'+targetConfig.name;
             //显示正在加载面板
             helper.set(this.loadingDiv,{
                 style:"height:100px",
@@ -429,9 +429,10 @@ body.fullscreen-fix div#gift-control-vm {
             //清空对话框本体
             this.dialogPanel.innerHTML = '';
             //底部面板初始化为目标链接
-            this.dialogBottom.innerHTML = `<a href="${this.strings[targetName].link}" target="_blank" title="前往${
-                name}管理页面" style="color: #23ade5;">管理我的${name}</a>`;
-            helper.xhr(this.strings[targetName].dataUrl).then(async data=>{
+            this.dialogBottom.innerHTML = `<a href="${targetConfig.link}" target="_blank" title="前往${
+                name}管理页面" style="color: #23ade5;">管理我的${targetConfig.name}</a>`;
+            //获取数据并调用显示处理
+            helper.xhr(targetConfig.dataUrl).then(async data=>{
                 if(targetName=='medal') this.listMedal(data);
                 else if(targetName=='title') await this.listTitle(data);
             }).then(()=>{
@@ -731,15 +732,19 @@ body.fullscreen-fix div#gift-control-vm {
 
     doInit(){
         try{
+            //已经有一个礼物包裹的ID说明脚本运行过返回true防止二次初始化
+            if(helper.get('#giftPackage')) return true;
+            //页面中没有礼物包裹说明页面没有加载完成返回false继续监听页面加载
             if(!helper.get('.gift-package')) return false;
             this.initSetting();
             this.elementAdjuster.init(this.settings);
             this.advancedSwitcher.init(this.settings);
             this.otherGift.init(this.settings);
+            //初始化成功返回true不用监听页面加载
             return true;
         } catch (e){
             console.error('bilibili直播间助手执行错误',e);
-            //初始化失败，返回true放弃继续监听页面
+            //初始化异常，返回true放弃继续监听页面
             return true;
         }
     },
