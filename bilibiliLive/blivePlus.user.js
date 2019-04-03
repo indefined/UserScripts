@@ -39,11 +39,20 @@ const helper = {
     replace(oldItem,newItem){
         oldItem.parentNode.replaceChild(newItem,oldItem);
     },
+    encodePara(data){
+        return encodeURI(Object.entries(data).map(([k,v])=>{
+            return (v instanceof Array)?
+                v.map(i=>k+'[]='+i).join('&'):
+            typeof(v)=='string'||!Object.keys(v).length
+                ?(k+'='+v):
+            Object.entries(v).map(([k1,v1])=>`${k}[${k1}]=${v1}`)
+        }).join('&'));
+    },
     xhr(url,data){
         return fetch(url, {
             method: data?'POST':'GET',
             credentials: 'include',
-            body: data&&(typeof(data)=='string'?data:encodeURI(Object.entries(data).map(([k,v])=>`${k}=${v}`).join('&'))),
+            body: data&&(typeof(data)=='string'?data:this.encodePara(data)),
             headers: {
                 'content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
             },
@@ -430,7 +439,7 @@ body.fullscreen-fix div#gift-control-vm {
             this.dialogPanel.innerHTML = '';
             //底部面板初始化为目标链接
             this.dialogBottom.innerHTML = `<a href="${targetConfig.link}" target="_blank" title="前往${
-                name}管理页面" style="color: #23ade5;">管理我的${targetConfig.name}</a>`;
+                targetConfig.name}管理页面" style="color: #23ade5;">管理我的${targetConfig.name}</a>`;
             //获取数据并调用显示处理
             helper.xhr(targetConfig.dataUrl).then(async data=>{
                 if(targetName=='medal') this.listMedal(data);
@@ -465,7 +474,7 @@ body.fullscreen-fix div#gift-control-vm {
         },
         listMedal(data){
             let hasMedal = false;
-            if (data.code!=0||!data.data||!data.data.fansMedalList) throw(`查询勋章失败 code:${data.code}\r\n${data.message}`);
+            if (data.code!=0||!data.data||!data.data.fansMedalList) throw(`查询勋章失败 code:${data.code}</br>${data.message}`);
             if (data.data.fansMedalList.length==0) throw('还没有勋章哦～');
             data.data.fansMedalList.forEach((v)=>{
                 if (this.room.ANCHOR_UID==v.target_id) hasMedal = true;
@@ -514,7 +523,7 @@ body.fullscreen-fix div#gift-control-vm {
             }
         },
         async listTitle(data){
-            if (data.code!=0||!data.data||!data.data.list) throw(`查询头衔失败 code:${data.code}\r\n${data.message}`);
+            if (data.code!=0||!data.data||!data.data.list) throw(`查询头衔失败 code:${data.code}</br>${data.message}`);
             if (data.data.list.length==0) throw('没有头衔哦～');
             if (!this.titleInfos){
                 await helper.xhr('//api.live.bilibili.com/rc/v1/Title/webTitles').then(data => {
@@ -663,7 +672,7 @@ body.fullscreen-fix div#gift-control-vm {
                 list.className = 'common-popup-wrap t-left';
                 list.style = 'position: absolute;width: 276px;bottom: 30px;left: 0px;cursor: auto;animation:scale-in-ease 0.4s;transform-origin: 90px bottom 0px;';
                 list.innerHTML = `<div style="position: absolute;left: 90px;top: 100%;width: 0;height: 0;border-left: 4px solid transparent;
-                    border-right: 4px solid transparent;border-top: 8px solid #fff;"></div><header data-v-460dfc36="">其它礼物</header>`;
+                    border-right: 4px solid transparent;border-top: 8px solid #fff;"></div><header style="font-size:18px;color:#23ade5;margin-bottom:10px;">其它礼物</header>`;
                 list.appendChild(items);
                 this.newGift.appendChild(list);
                 helper.xhr('//api.live.bilibili.com/gift/v3/live/gift_config').then(data=>{
