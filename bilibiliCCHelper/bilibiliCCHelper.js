@@ -865,7 +865,8 @@ fill-rule="evenodd"></path></svg></span>`,
                 .then(res=>res.text())
                 .then(data=>data.match(/(?:<subtitle>)(.+)(?:<\/subtitle>)/))
                 .then(match=>{
-                this.subtitle = match&&JSON.parse(match[1]);
+                if(!match) throw('无法读取本视频字幕配置');
+                this.subtitle = JSON.parse(match[1]);
                 this.subtitle.count = this.subtitle.subtitles.length;
                 this.subtitle.subtitles.push({lan:'close',lan_doc:'关闭'},{lan:'local',lan_doc:'本地字幕'});
                 return this.subtitle;
