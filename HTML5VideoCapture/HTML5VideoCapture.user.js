@@ -217,7 +217,7 @@ function HTML5VideoCapturer(){
         let offset = -1;
         if(e.ctrlKey) offset *= 5;
         if(e.shiftKey) offset *= 10;
-        if(e.altKey) offset *= 20;
+        if(e.altKey) offset *= 60;
         videoStep(offset);
     };
     preFrame.onclick = ()=>videoStep(1/30);
