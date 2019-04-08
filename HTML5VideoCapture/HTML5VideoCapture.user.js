@@ -2,8 +2,8 @@
 // @name         HTML5视频截图器
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.3.2
-// @description  基于HTML5的原生javascript视频截图器
+// @version      0.3.3
+// @description  基于HTML5的简单原生视频截图，可简单控制视频快进/步进
 // @author       indefined
 // @include      *://*
 // @run-at       document-idle
@@ -11,7 +11,7 @@
 // @license      MIT
 // ==/UserScript==
 
-function init(){
+function HTML5VideoCapturer(){
     'use strict';
     if (document.querySelector('#HTML5VideoCapture')) return;
     const childs = "undefined"==typeof(unsafeWindow)?window.frames:unsafeWindow.frames;
@@ -44,11 +44,17 @@ function init(){
         videoStatusUpdate();
     }
 
-    function videoStep(action){
-        if (!video) return postMsg('step',action);
-        if (!video.paused) videoPlay();
-        if (action=='pre') video.currentTime -= 1/30;
-        else video.currentTime += 1/30;
+    function videoSpeedChange(speed){
+        if (!video) return postMsg('speed',speed);
+        video.playbackRate = speed;
+        videoStatusUpdate();
+    }
+
+    function videoStep(offset){
+        if (!video) return postMsg('step',offset);
+        if (Math.abs(offset)<1&&!video.paused) videoPlay();
+        video.currentTime += offset;
+        if(video.currentTime<0) video.currentTime = 0;
     }
 
     function videoDetech(){
@@ -95,7 +101,10 @@ function init(){
         }
     }
     function videoStatusUpdate(){
-        if (window==top) play.value = video.paused?"播放":"暂停";
+        if (window==top) {
+            play.value = video.paused?"播放":"暂停";
+            speed.value = video.playbackRate;
+        }
         else{
             top.postMessage({
                 action:'captureReport',
@@ -126,6 +135,9 @@ function init(){
                     case 'step':
                         videoStep(ev.data.value);
                         break;
+                    case 'speed':
+                        videoSelect(ev.data.value);
+                        break;
                     case 'select':
                         videoSelect(ev.data.id);
                         break;
@@ -137,6 +149,7 @@ function init(){
                 if (ev.data.about=='videoNums') appendSelector(ev.data);
                 else if (ev.data.about=='videoStatus'&&selector.value.startsWith(ev.data.id)){
                     play.value = ev.data.value?"播放":"暂停";;
+                    speed.value = video.playbackRate;
                 }
                 break;
         }
@@ -169,34 +182,53 @@ function init(){
     }
     function dialogMove(ev){
         if (ev.type=='mousedown'){
-            panel.t = ev.pageY-panel.offsetTop;
-            panel.l = ev.pageX-panel.offsetLeft;
-            panel.addEventListener('mousemove',dialogMove);
+            panel.tOffset = ev.pageY-panel.offsetTop;
+            panel.lOffset = ev.pageX-panel.offsetLeft;
+            document.body.addEventListener('mousemove',dialogMove);
         }
         else if (ev.type=='mouseup'){
-            panel.removeEventListener('mousemove',dialogMove);
+            document.body.removeEventListener('mousemove',dialogMove);
         }
         else{
-            panel.style.top = ev.pageY-panel.t+'px';
-            panel.style.left = ev.pageX-panel.l+'px';
+            panel.style.top = ev.pageY-panel.tOffset+'px';
+            panel.style.left = ev.pageX-panel.lOffset+'px';
         }
     }
     const panel = document.createElement('div');
     panel.id = "HTML5VideoCapture";
-    panel.style = `position: fixed;top: 50px;left: 20px;z-index: 999999;padding: 10px;background: darkcyan;`
-    panel.innerHTML = `<div style="margin-bottom: 5px;cursor:move;user-select:none;line-height:1;color:#fff">HTML5视频截图器</div>\
-<input type="button" value="检测" style="margin-right: 10px;"><select title="选择视频" style="font-family: initial;"></select>\
-<input type="button" value="播放" style="margin-left: 10px;"><input type="button" value="上一帧" style="margin-left: 10px;">\
-<input type="button" value="截图" style="margin-left: 10px;"><input type="button" value="↓" style="font-family: initial;">\
-<input type="button" value="下一帧" style="margin-left: 10px;"><input type="button" value="关闭" style="margin-left: 10px;">`
-    const {0:title,1:detech,2:selector,3:play,4:preFrame,5:capture,6:captureDown,7:nextFrame,8:close} = panel.childNodes;
+    panel.style = `position: fixed; top: 257px; left: 323px; z-index: 2147483647; padding: 5px 0; background: darkcyan; font-family: initial; border-radius: 4px;`;
+    panel.innerHTML = `<div style="cursor:move;user-select:none;color:#fff;border: none;">HTML5视频截图器</div>\
+<input type="button" value="检测" title="重新检测页面中的视频"><select title="选择视频"></select>\
+<input type="number" value="1" step=0.25 title="视频速度,双击恢复原速" style="width:40px;height:18px"><input type="button" value="播放">\
+<input type="button" value="<<" title="后退1s,按住shift 5s,ctrl 10s,alt 60s,多按相乘"><input type="button" value="<" title="后退1帧(1/30s)" style="margin-left: 0;">\
+<input type="button" value="截图" title="新建标签页打开截屏图片"><input type="button" value="↓" style="margin-left: 0;" title="直接下载截图（如果可用）">\
+<input type="button" value=">" title="前进1帧(1/30s)"><input type="button" value=">>" title="前进1s,按住shift 5s,ctrl 10s,alt 60s,多按相乘" style="margin-left: 0;">\
+<input type="button" value="关闭" style="margin-right:10px;"><style>div#HTML5VideoCapture>*\
+{line-height:20px;border-radius:2px;height:24px;border:1px solid  #ccd0d7;margin:0 0 5px 10px;padding:2px 6px;vertical-align:bottom;font-family:initial;}</style>`
+    const [title,detech,selector,speed,play,preS,preFrame,capture,captureDown,nextFrame,nextS,close] = panel.childNodes;
     title.onmousedown = dialogMove;
     title.onmouseup = dialogMove;
     selector.onchange = ()=>videoSelect(selector.value);
     detech.onclick = videoDetech;
     play.onclick = videoPlay;
-    preFrame.onclick = ()=>videoStep('pre');
-    nextFrame.onclick = ()=>videoStep('next');
+    speed.ondblclick = ()=>videoSpeedChange(speed.value=1);
+    speed.oninput = ()=>videoSpeedChange(+speed.value);
+    preS.onclick = e=>{
+        let offset = -1;
+        if(e.ctrlKey) offset *= 5;
+        if(e.shiftKey) offset *= 10;
+        if(e.altKey) offset *= 20;
+        videoStep(offset);
+    };
+    preFrame.onclick = ()=>videoStep(1/30);
+    nextS.onclick = e=>{
+        let offset = 1;
+        if(e.ctrlKey) offset *= 5;
+        if(e.shiftKey) offset *= 10;
+        if(e.altKey) offset *= 60;
+        videoStep(offset);
+    };
+    nextFrame.onclick = ()=>videoStep(-1/30);
     capture.onclick = ()=>videoShot();
     captureDown.onclick = ()=>videoShot(true);
     close.onclick = ()=>panel.remove();
@@ -204,5 +236,5 @@ function init(){
     videoDetech();
 }
 if ('function'==typeof(GM_registerMenuCommand) && window==top){
-    GM_registerMenuCommand('启用HTML5视频截图器',init);
-}else init();
+    GM_registerMenuCommand('启用HTML5视频截图器',HTML5VideoCapturer);
+}else HTML5VideoCapturer();
