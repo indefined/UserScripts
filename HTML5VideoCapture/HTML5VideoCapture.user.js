@@ -2,7 +2,7 @@
 // @name         HTML5视频截图器
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.3.4
+// @version      0.3.5
 // @description  基于HTML5的简单原生视频截图，可简单控制快进/逐帧/视频调速
 // @author       indefined
 // @include      *://*
@@ -38,7 +38,7 @@ function HTML5VideoCapturer(){
         }
     }
 
-    function videoPlay(id){
+    function videoPlay(){
         if (!video) return postMsg('play');
         video.paused?video.play():video.pause();
         videoStatusUpdate();
@@ -58,9 +58,6 @@ function HTML5VideoCapturer(){
     }
 
     function videoDetech(){
-        if (window==top){
-            while(selector.firstChild) selector.removeChild(selector.firstChild);
-        }
         videos = document.querySelectorAll('video');
         if (window!=top){
             top.postMessage({
@@ -70,10 +67,10 @@ function HTML5VideoCapturer(){
                 id:window.captureId
             },'*');
         }else{
+            while(selector.firstChild) selector.removeChild(selector.firstChild);
             appendSelector(videos);
             setTimeout(()=>{
                 if (selector.childNodes.length) return videoSelect(selector.value);
-                video = undefined;
                 const toast = document.createElement('div');
                 toast.style = `position: fixed;top: 50%;left: 50%;z-index: 999999;padding: 10px;background: darkcyan;transform: translate(-50%);color: #fff;border-radius: 6px;`
                 toast.innerText = '当前页面没有检测到HTML5视频';
@@ -97,6 +94,7 @@ function HTML5VideoCapturer(){
             videoStatusUpdate();
         }
         else {
+            video = undefined;
             postMsg('select');
         }
     }
@@ -109,7 +107,8 @@ function HTML5VideoCapturer(){
             top.postMessage({
                 action:'captureReport',
                 about:'videoStatus',
-                value:video.paused,
+                paused:video.paused,
+                speed:video.playbackRate,
                 id:window.captureId
             },'*');
         }
@@ -136,7 +135,7 @@ function HTML5VideoCapturer(){
                         videoStep(ev.data.value);
                         break;
                     case 'speed':
-                        videoSelect(ev.data.value);
+                        videoSpeedChange(ev.data.value);
                         break;
                     case 'select':
                         videoSelect(ev.data.id);
@@ -148,8 +147,8 @@ function HTML5VideoCapturer(){
             case 'captureReport':
                 if (ev.data.about=='videoNums') appendSelector(ev.data);
                 else if (ev.data.about=='videoStatus'&&selector.value.startsWith(ev.data.id)){
-                    play.value = ev.data.value?"播放":"暂停";;
-                    speed.value = video.playbackRate;
+                    play.value = ev.data.paused?"播放":"暂停";;
+                    speed.value = ev.data.speed;
                 }
                 break;
         }
@@ -197,15 +196,15 @@ function HTML5VideoCapturer(){
     const panel = document.createElement('div');
     panel.id = "HTML5VideoCapture";
     panel.style = `position:fixed;top:40px;left:30px;z-index:2147483647;padding:5px 0;background:darkcyan;font-family:initial;border-radius:4px;font-size:12px;`;
-    panel.innerHTML = `<div style="cursor:move;user-select:none;color:#fff;border: none;font-size:15px;height:auto;padding-left:0;min-width:60px">HTML5视频截图器</div>\
+    panel.innerHTML = `<div style="cursor:move;user-select:none;color:#fff;border: none;font-size:14px;height:auto;padding-left:0;min-width:60px">HTML5视频截图工具</div>\
 <input type="button" value="检测" title="重新检测页面中的视频"><select title="选择视频" style="width:unset"></select>\
-<input type="number" value="1" step=0.25 title="视频速度,双击截图器标题恢复原速" style="width:40px;" min=0><input type="button" value="播放">\
+<input type="number" value="1" step=0.25 title="视频速度,双击截图工具标题恢复原速" style="width:40px;" min=0><input type="button" value="播放">\
 <input type="button" value="<<" title="后退1s,按住shift 5s,ctrl 10s,alt 60s,多按相乘"><input type="button" value="<" title="后退1帧(1/60s)" style="margin-left: 0;">\
 <input type="button" value="截图" title="新建标签页打开视频截图"><input type="button" value="↓" style="margin-left: 0;" title="直接下载截图（如果可用）">\
 <input type="button" value=">" title="前进1帧(1/60s)"><input type="button" value=">>" title="前进1s,按住shift 5s,ctrl 10s,alt 60s,多按相乘" style="margin-left: 0;">\
-<input type="button" value="关闭" style="margin-right:10px;"><style>div#HTML5VideoCapture>*:hover {border-color: #fff;}div#HTML5VideoCapture>*{\
-line-height:20px;height:20px;border:1px solid  #ffffff99;border-radius:2px;color:#fff;margin:0 0 5px 10px;\
-padding:2px 6px;vertical-align:bottom;font-family:initial;background:transparent;box-sizing:content-box}</style>`
+<input type="button" value="关闭" style="margin-right:10px;"><style>div#HTML5VideoCapture option{color:#000;}\
+div#HTML5VideoCapture>*:hover {border-color: #fff;}div#HTML5VideoCapture>*{line-height:20px;height:20px;border:1px solid #ffffff99;border-radius:2px;\
+color:#fff;margin:0 0 5px 10px;padding:1px 4px;vertical-align:bottom;font-family:initial;background:transparent;box-sizing:content-box}</style>`
     const [title,detech,selector,speed,play,preS,preFrame,capture,captureDown,nextFrame,nextS,close] = panel.childNodes;
     title.onmousedown = dialogMove;
     title.onmouseup = dialogMove;
