@@ -2,8 +2,8 @@
 // @name         HTML5视频截图器
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.3.3
-// @description  基于HTML5的简单原生视频截图，可简单控制视频快进/步进
+// @version      0.3.4
+// @description  基于HTML5的简单原生视频截图，可简单控制快进/逐帧/视频调速
 // @author       indefined
 // @include      *://*
 // @run-at       document-idle
@@ -196,23 +196,30 @@ function HTML5VideoCapturer(){
     }
     const panel = document.createElement('div');
     panel.id = "HTML5VideoCapture";
-    panel.style = `position: fixed; top: 257px; left: 323px; z-index: 2147483647; padding: 5px 0; background: darkcyan; font-family: initial; border-radius: 4px;`;
-    panel.innerHTML = `<div style="cursor:move;user-select:none;color:#fff;border: none;">HTML5视频截图器</div>\
-<input type="button" value="检测" title="重新检测页面中的视频"><select title="选择视频"></select>\
-<input type="number" value="1" step=0.25 title="视频速度,双击恢复原速" style="width:40px;height:18px"><input type="button" value="播放">\
-<input type="button" value="<<" title="后退1s,按住shift 5s,ctrl 10s,alt 60s,多按相乘"><input type="button" value="<" title="后退1帧(1/30s)" style="margin-left: 0;">\
-<input type="button" value="截图" title="新建标签页打开截屏图片"><input type="button" value="↓" style="margin-left: 0;" title="直接下载截图（如果可用）">\
-<input type="button" value=">" title="前进1帧(1/30s)"><input type="button" value=">>" title="前进1s,按住shift 5s,ctrl 10s,alt 60s,多按相乘" style="margin-left: 0;">\
-<input type="button" value="关闭" style="margin-right:10px;"><style>div#HTML5VideoCapture>*\
-{line-height:20px;border-radius:2px;height:24px;border:1px solid  #ccd0d7;margin:0 0 5px 10px;padding:2px 6px;vertical-align:bottom;font-family:initial;}</style>`
+    panel.style = `position:fixed;top:40px;left:30px;z-index:2147483647;padding:5px 0;background:darkcyan;font-family:initial;border-radius:4px;font-size:12px;`;
+    panel.innerHTML = `<div style="cursor:move;user-select:none;color:#fff;border: none;font-size:15px;height:auto;padding-left:0;min-width:60px">HTML5视频截图器</div>\
+<input type="button" value="检测" title="重新检测页面中的视频"><select title="选择视频" style="width:unset"></select>\
+<input type="number" value="1" step=0.25 title="视频速度,双击截图器标题恢复原速" style="width:40px;" min=0><input type="button" value="播放">\
+<input type="button" value="<<" title="后退1s,按住shift 5s,ctrl 10s,alt 60s,多按相乘"><input type="button" value="<" title="后退1帧(1/60s)" style="margin-left: 0;">\
+<input type="button" value="截图" title="新建标签页打开视频截图"><input type="button" value="↓" style="margin-left: 0;" title="直接下载截图（如果可用）">\
+<input type="button" value=">" title="前进1帧(1/60s)"><input type="button" value=">>" title="前进1s,按住shift 5s,ctrl 10s,alt 60s,多按相乘" style="margin-left: 0;">\
+<input type="button" value="关闭" style="margin-right:10px;"><style>div#HTML5VideoCapture>*:hover {border-color: #fff;}div#HTML5VideoCapture>*{\
+line-height:20px;height:20px;border:1px solid  #ffffff99;border-radius:2px;color:#fff;margin:0 0 5px 10px;\
+padding:2px 6px;vertical-align:bottom;font-family:initial;background:transparent;box-sizing:content-box}</style>`
     const [title,detech,selector,speed,play,preS,preFrame,capture,captureDown,nextFrame,nextS,close] = panel.childNodes;
     title.onmousedown = dialogMove;
     title.onmouseup = dialogMove;
     selector.onchange = ()=>videoSelect(selector.value);
     detech.onclick = videoDetech;
     play.onclick = videoPlay;
-    speed.ondblclick = ()=>videoSpeedChange(speed.value=1);
-    speed.oninput = ()=>videoSpeedChange(+speed.value);
+    title.ondblclick = ()=>{
+        speed.step = 0.25;
+        videoSpeedChange(speed.value=1);
+    }
+    speed.oninput = ()=>{
+        speed.step = speed.value<1?0.1:0.25;
+        videoSpeedChange(+speed.value);
+    }
     preS.onclick = e=>{
         let offset = -1;
         if(e.ctrlKey) offset *= 5;
@@ -220,7 +227,7 @@ function HTML5VideoCapturer(){
         if(e.altKey) offset *= 60;
         videoStep(offset);
     };
-    preFrame.onclick = ()=>videoStep(1/30);
+    preFrame.onclick = ()=>videoStep(-1/60);
     nextS.onclick = e=>{
         let offset = 1;
         if(e.ctrlKey) offset *= 5;
@@ -228,7 +235,7 @@ function HTML5VideoCapturer(){
         if(e.altKey) offset *= 60;
         videoStep(offset);
     };
-    nextFrame.onclick = ()=>videoStep(-1/30);
+    nextFrame.onclick = ()=>videoStep(1/60);
     capture.onclick = ()=>videoShot();
     captureDown.onclick = ()=>videoShot(true);
     close.onclick = ()=>panel.remove();
