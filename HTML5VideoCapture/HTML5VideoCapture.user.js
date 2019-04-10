@@ -2,7 +2,7 @@
 // @name         HTML5视频截图器
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.3.5
+// @version      0.3.6
 // @description  基于HTML5的简单原生视频截图，可简单控制快进/逐帧/视频调速
 // @author       indefined
 // @include      *://*
@@ -68,7 +68,7 @@ function HTML5VideoCapturer(){
             },'*');
         }else{
             while(selector.firstChild) selector.removeChild(selector.firstChild);
-            appendSelector(videos);
+            appendVideo(videos);
             setTimeout(()=>{
                 if (selector.childNodes.length) return videoSelect(selector.value);
                 const toast = document.createElement('div');
@@ -100,7 +100,7 @@ function HTML5VideoCapturer(){
     }
     function videoStatusUpdate(){
         if (window==top) {
-            play.value = video.paused?"播放":"暂停";
+            play.innerText = video.paused?"播放":"暂停";
             speed.value = video.playbackRate;
         }
         else{
@@ -145,9 +145,9 @@ function HTML5VideoCapturer(){
                 }
                 break;
             case 'captureReport':
-                if (ev.data.about=='videoNums') appendSelector(ev.data);
+                if (ev.data.about=='videoNums') appendVideo(ev.data);
                 else if (ev.data.about=='videoStatus'&&selector.value.startsWith(ev.data.id)){
-                    play.value = ev.data.paused?"播放":"暂停";;
+                    play.innerText = ev.data.paused?"播放":"暂停";;
                     speed.value = ev.data.speed;
                 }
                 break;
@@ -169,13 +169,35 @@ function HTML5VideoCapturer(){
         }
     }
     if (window!=top) return;
-    function appendSelector(v){
+    function _c(config){
+        if(config instanceof Array) return config.map(_c);
+        const item = document.createElement(config.nodeType);
+        for(const i in config){
+            if(i=='nodeType') continue;
+            if(i=='childs' && config.childs instanceof Array) {
+                config.childs.forEach(child=>{
+                    if(child instanceof HTMLElement) item.appendChild(child);
+                    else item.appendChild(_c(child));
+                })
+                continue;
+            }
+            else if(i=='parent') {
+                config.parent.appendChild(item);
+                continue;
+            }
+            item[i] = config[i];
+        }
+        return item;
+    }
+    function appendVideo(v){
         if (v&&v.length){
             for (let i=0;i<v.length;i++){
-                const item = document.createElement('option');
-                item.value = v.id!=undefined?v.id+'-'+i:i;
-                item.innerText = v.id!=undefined?v.id+'-'+i:i;
-                selector.appendChild(item);
+                _c({
+                    nodeType:'option',
+                    value:v.id!=undefined?v.id+'-'+i:i,
+                    innerText:v.id!=undefined?v.id+'-'+i:i,
+                    parent:selector
+                })
             }
         }
     }
@@ -184,61 +206,140 @@ function HTML5VideoCapturer(){
             panel.tOffset = ev.pageY-panel.offsetTop;
             panel.lOffset = ev.pageX-panel.offsetLeft;
             document.body.addEventListener('mousemove',dialogMove);
+            document.body.addEventListener('mouseup',dialogMove);
         }
         else if (ev.type=='mouseup'){
             document.body.removeEventListener('mousemove',dialogMove);
+            document.body.removeEventListener('mouseup',dialogMove);
         }
         else{
             panel.style.top = ev.pageY-panel.tOffset+'px';
             panel.style.left = ev.pageX-panel.lOffset+'px';
         }
     }
-    const panel = document.createElement('div');
-    panel.id = "HTML5VideoCapture";
-    panel.style = `position:fixed;top:40px;left:30px;z-index:2147483647;padding:5px 0;background:darkcyan;font-family:initial;border-radius:4px;font-size:12px;`;
-    panel.innerHTML = `<div style="cursor:move;user-select:none;color:#fff;border: none;font-size:14px;height:auto;padding-left:0;min-width:60px">HTML5视频截图工具</div>\
-<input type="button" value="检测" title="重新检测页面中的视频"><select title="选择视频" style="width:unset"></select>\
-<input type="number" value="1" step=0.25 title="视频速度,双击截图工具标题恢复原速" style="width:40px;" min=0><input type="button" value="播放">\
-<input type="button" value="<<" title="后退1s,按住shift 5s,ctrl 10s,alt 60s,多按相乘"><input type="button" value="<" title="后退1帧(1/60s)" style="margin-left: 0;">\
-<input type="button" value="截图" title="新建标签页打开视频截图"><input type="button" value="↓" style="margin-left: 0;" title="直接下载截图（如果可用）">\
-<input type="button" value=">" title="前进1帧(1/60s)"><input type="button" value=">>" title="前进1s,按住shift 5s,ctrl 10s,alt 60s,多按相乘" style="margin-left: 0;">\
-<input type="button" value="关闭" style="margin-right:10px;"><style>div#HTML5VideoCapture option{color:#000;}\
-div#HTML5VideoCapture>*:hover {border-color: #fff;}div#HTML5VideoCapture>*{line-height:20px;height:20px;border:1px solid #ffffff99;border-radius:2px;\
-color:#fff;margin:0 0 5px 10px;padding:1px 4px;vertical-align:bottom;font-family:initial;background:transparent;box-sizing:content-box}</style>`
-    const [title,detech,selector,speed,play,preS,preFrame,capture,captureDown,nextFrame,nextS,close] = panel.childNodes;
-    title.onmousedown = dialogMove;
-    title.onmouseup = dialogMove;
-    selector.onchange = ()=>videoSelect(selector.value);
-    detech.onclick = videoDetech;
-    play.onclick = videoPlay;
-    title.ondblclick = ()=>{
-        speed.step = 0.25;
-        videoSpeedChange(speed.value=1);
-    }
-    speed.oninput = ()=>{
-        speed.step = speed.value<1?0.1:0.25;
-        videoSpeedChange(+speed.value);
-    }
-    preS.onclick = e=>{
-        let offset = -1;
-        if(e.ctrlKey) offset *= 5;
-        if(e.shiftKey) offset *= 10;
-        if(e.altKey) offset *= 60;
-        videoStep(offset);
-    };
-    preFrame.onclick = ()=>videoStep(-1/60);
-    nextS.onclick = e=>{
-        let offset = 1;
-        if(e.ctrlKey) offset *= 5;
-        if(e.shiftKey) offset *= 10;
-        if(e.altKey) offset *= 60;
-        videoStep(offset);
-    };
-    nextFrame.onclick = ()=>videoStep(1/60);
-    capture.onclick = ()=>videoShot();
-    captureDown.onclick = ()=>videoShot(true);
-    close.onclick = ()=>panel.remove();
-    document.body.appendChild(panel);
+    let panel,selector,speed,play;
+    panel = _c({
+        nodeType:'div',id:'HTML5VideoCapture',
+        style:'position:fixed;top:40px;left:30px;z-index:2147483647;padding:5px 0;background:darkcyan;font-family:initial;border-radius:4px;font-size:12px;text-align:left',
+        childs:[
+            {
+                nodeType:'style',
+                innerHTML:'div#HTML5VideoCapture option{color:#000;}'
+                + 'div#HTML5VideoCapture>*{margin:0 0 5px 10px;}'
+                + 'div#HTML5VideoCapture>span,div#HTML5VideoCapture>span>*{white-space:nowrap;}'
+                + 'div#HTML5VideoCapture *{font-family:initial;color:#fff;background:transparent;line-height:20px;height:20px;box-sizing:content-box;vertical-align:top;}'
+                + 'div#HTML5VideoCapture .h5vc-block {border:1px solid #ffffff99;border-radius:2px;padding:1px 4px;min-width:unset;}'
+                + 'div#HTML5VideoCapture .h5vc-block:hover {border-color: #fff;}'
+            },
+            {
+                nodeType:'div',
+                innerText:'HTML5视频截图工具',
+                style:'cursor:move;user-select:none;font-size:14px;height:auto;padding-left:0;min-width:60px;margin-right:10px;',
+                onmousedown:dialogMove,
+                ondblclick:()=>{
+                    speed.step = 0.25;
+                    videoSpeedChange(speed.value=1);
+                }
+            },
+            {
+                nodeType:'button',
+                className:'h5vc-block',
+                innerText:'检测',
+                title:'重新检测页面中的视频',
+                onclick:videoDetech
+            },
+            selector = _c({
+                nodeType:'select',
+                className:'h5vc-block',
+                title:'选择视频',
+                style:'width:unset',
+                onchange: ()=>videoSelect(selector.value)
+            }),
+            speed = _c({
+                nodeType:'input',
+                className:'h5vc-block',
+                type:'number',step:0.25,min:0,
+                title:'视频速度,双击截图工具标题恢复原速',
+                style:'width:40px;',
+                oninput:()=>{
+                    speed.step = speed.value<1?0.1:0.25;
+                    videoSpeedChange(+speed.value);
+                }
+            }),
+            play = _c({
+                nodeType:'button',
+                className:'h5vc-block',
+                innerText:'播放',
+                onclick:videoPlay
+            }),
+            {
+                nodeType:'button',
+                className:'h5vc-block',
+                innerText:'<<',
+                title:'后退1s,按住shift 5s,ctrl 10s,alt 60s,多按相乘',
+                onclick:e=>{
+                    let offset = -1;
+                    if(e.ctrlKey) offset *= 5;
+                    if(e.shiftKey) offset *= 10;
+                    if(e.altKey) offset *= 60;
+                    videoStep(offset);
+                }
+            },
+            {
+                nodeType:'button',
+                className:'h5vc-block',
+                style:'margin-left:0',
+                innerText:'<',
+                title:'上一帧(1/60s)',
+                onclick:()=>videoStep(-1/60)
+            },
+            {
+                nodeType:'button',
+                className:'h5vc-block',
+                innerText:'截图',
+                title:'新建标签页打开视频截图',
+                onclick:()=>videoShot()
+            },
+            {
+                nodeType:'button',
+                className:'h5vc-block',
+                style:'margin-left:0',
+                innerText:'↓',
+                title:'直接下载截图（如果可用）',
+                onclick:()=>videoShot(true)
+            },
+            {
+                nodeType:'button',
+                className:'h5vc-block',
+                innerText:'>',
+                title:'下一帧(1/60s)',
+                onclick:()=>videoStep(1/60)
+            },
+            {
+                nodeType:'button',
+                className:'h5vc-block',
+                style:'margin-left:0',
+                innerText:'>>',
+                title:'前进1s,按住shift 5s,ctrl 10s,alt 60s,多按相乘',
+                onclick:e=>{
+                    let offset = 1;
+                    if(e.ctrlKey) offset *= 5;
+                    if(e.shiftKey) offset *= 10;
+                    if(e.altKey) offset *= 60;
+                    videoStep(offset);
+                }
+            },
+            {
+                nodeType:'button',
+                className:'h5vc-block',
+                innerText:'关闭',
+                title:'关闭截图工具栏',
+                style:'margin-right:10px;',
+                onclick:()=>document.body.removeChild(panel)
+            }
+        ],
+        parent:document.body
+    });
     videoDetech();
 }
 if ('function'==typeof(GM_registerMenuCommand) && window==top){
