@@ -2,7 +2,7 @@
 // @name         HTML5视频截图器
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.3.6
+// @version      0.3.7
 // @description  基于HTML5的简单原生视频截图，可简单控制快进/逐帧/视频调速
 // @author       indefined
 // @include      *://*
@@ -84,7 +84,7 @@ function HTML5VideoCapturer(){
                 id:window.captureId==undefined?i:window.captureId+'-'+i
             },'*'));
         }
-        console.log(videos);
+        console.log(window.captureId,videos);
     }
     function videoSelect(id){
         selectId = id;
@@ -113,17 +113,30 @@ function HTML5VideoCapturer(){
             },'*');
         }
     }
-    window.addEventListener('message', function(ev) {
-        //console.info(ev.data);
-        if (!ev.data.action) return;
-        switch (ev.data.action){
-            case 'captureDetech':
-                if (ev.source!=window.parent) return;
+    function postMsg(type,data){
+        if (selectId==undefined||selectId=='') return;
+        const ids = selectId.split('-');
+        if (ids.length>1){
+            const target = ids.shift();
+            if (!childs[target]) return;
+            childs[target].postMessage({
+                action:'captureControl',
+                target:window.captureId==undefined?target:window.captureId+'-'+target,
+                todo:type,
+                id:ids.join('-'),
+                value:data
+            },'*');
+        }
+    }
+    //控制事件接收仅在iframe中执行
+    if (window!=top) {
+        window.addEventListener('message', function(ev) {
+            //console.info('frame recive:',ev.data);
+            if (ev.source!=window.parent || !ev.data.action) return;
+            else if(ev.data.action=='captureDetech'){
                 window.captureId = ev.data.id;
                 videoDetech();
-                break;
-            case 'captureControl':
-                if (ev.source!=window.parent||ev.data.target!=window.captureId) return;
+            }else if(ev.data.action=='captureControl' && ev.data.target==window.captureId){
                 switch (ev.data.todo){
                     case 'play':
                         videoPlay(ev.data.value);
@@ -143,32 +156,22 @@ function HTML5VideoCapturer(){
                     default:
                         break;
                 }
-                break;
-            case 'captureReport':
-                if (ev.data.about=='videoNums') appendVideo(ev.data);
-                else if (ev.data.about=='videoStatus'&&selector.value.startsWith(ev.data.id)){
-                    play.innerText = ev.data.paused?"播放":"暂停";;
-                    speed.value = ev.data.speed;
-                }
-                break;
-        }
-    });
-    function postMsg(type,data){
-        if (selectId==undefined||selectId=='') return;
-        const ids = selectId.split('-');
-        if (ids.length>1){
-            const target = ids.shift();
-            if (!childs[target]) return;
-            childs[target].postMessage({
-                action:'captureControl',
-                target:window.captureId==undefined?target:window.captureId+'-'+target,
-                todo:type,
-                id:ids.join('-'),
-                value:data
-            },'*');
+            }
+        });
+        return;
+    }
+
+    //以下UI控制界面及事件在iframe中不执行
+    let panel,selector,speed,play;
+    function topReciver(ev) {
+        //console.info('top recive:',ev.data);
+        if (ev.data.action!='captureReport') return;
+        if (ev.data.about=='videoNums') appendVideo(ev.data);
+        else if (ev.data.about=='videoStatus'&&selector.value.startsWith(ev.data.id)){
+            play.innerText = ev.data.paused?"播放":"暂停";;
+            speed.value = ev.data.speed;
         }
     }
-    if (window!=top) return;
     function _c(config){
         if(config instanceof Array) return config.map(_c);
         const item = document.createElement(config.nodeType);
@@ -217,7 +220,6 @@ function HTML5VideoCapturer(){
             panel.style.left = ev.pageX-panel.lOffset+'px';
         }
     }
-    let panel,selector,speed,play;
     panel = _c({
         nodeType:'div',id:'HTML5VideoCapture',
         style:'position:fixed;top:40px;left:30px;z-index:2147483647;padding:5px 0;background:darkcyan;font-family:initial;border-radius:4px;font-size:12px;text-align:left',
@@ -335,11 +337,15 @@ function HTML5VideoCapturer(){
                 innerText:'关闭',
                 title:'关闭截图工具栏',
                 style:'margin-right:10px;',
-                onclick:()=>document.body.removeChild(panel)
+                onclick:()=> {
+                    document.body.removeChild(panel);
+                    window.removeEventListener('message', topReciver);
+                }
             }
         ],
         parent:document.body
     });
+    window.addEventListener('message', topReciver);
     videoDetech();
 }
 if ('function'==typeof(GM_registerMenuCommand) && window==top){
