@@ -2,7 +2,7 @@
 // @name        bilibili直播间助手
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.6
+// @version     0.5.7
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -39,20 +39,24 @@ const helper = {
     replace(oldItem,newItem){
         oldItem.parentNode.replaceChild(newItem,oldItem);
     },
-    encodePara(data){
-        return encodeURI(Object.entries(data).map(([k,v])=>{
-            return (v instanceof Array)?
-                v.map(i=>k+'[]='+i).join('&'):
-            typeof(v)=='string'||!Object.keys(v).length
-                ?(k+'='+v):
-            Object.entries(v).map(([k1,v1])=>`${k}[${k1}]=${v1}`)
-        }).join('&'));
+    encodeURIC(data){
+        return (
+            (data==undefined)?data:
+            !(data instanceof Object)?encodeURIComponent(data):
+            Object.entries(data).map(([k,v])=>{
+                return (v instanceof Array)?
+                    v.map(i=>encodeURIComponent(k+'[]')+'='+encodeURIComponent(i)).join('&'):
+                (v instanceof Object)?
+                    Object.entries(v).map(([k1,v1])=>`${encodeURIComponent(`${k}[${k1}]`)}=${encodeURIComponent(v1)}`)
+                :(encodeURIComponent(k)+'='+encodeURIComponent(v))
+            }).join('&')
+        );
     },
     xhr(url,data){
         return fetch(url, {
             method: data?'POST':'GET',
             credentials: 'include',
-            body: data&&(typeof(data)=='string'?data:this.encodePara(data)),
+            body: this.encodeURIC(data),
             headers: {
                 'content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
             },
@@ -111,6 +115,7 @@ const LiveHelper = {
     position: relative;
     bottom: -55px;
     left: 4px;
+    white-space: nowrap;
 }
 
 /*礼物包裹放到礼物栏上后辣条购买悬浮面板需要提高*/
@@ -423,13 +428,12 @@ body.fullscreen-fix div#gift-control-vm {
                 return this.closeDialog();
             }
             const targetConfig = this.strings[targetName];
-            //保存当前对话框目标
+            //设置当前对话框目标
             this.dialog.dataset.name = targetName;
-            this.dialog.style = `transform-origin: ${
-                targetConfig.position} bottom 0px;position:absolute;bottom:50px;color: #23ade5;`;
-            //设置对话框箭头位置
-            this.dialogArraw.style.left = targetConfig.position;
             this.dialogTitle.innerText = '我的'+targetConfig.name;
+            //设置对话框位置
+            this.dialog.style = `transform-origin: ${targetConfig.position} bottom 0px;position:absolute;bottom:50px;color: #23ade5;`;
+            this.dialogArraw.style.left = targetConfig.position;
             //显示正在加载面板
             helper.set(this.loadingDiv,{
                 style:"height:100px",
