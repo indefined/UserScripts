@@ -361,7 +361,7 @@ body.fullscreen-fix div#gift-control-vm {
                 name:'头衔',
                 position:'69px',
                 link:'//link.bilibili.com/p/center/index#/user-center/wearing-center/library',
-                dataUrl:'//api.live.bilibili.com/i/api/ajaxTitleInfo?had=1&page=1&pageSize=300'
+                dataUrl:'//api.live.bilibili.com/appUser/myTitleList'
             }
         },
         update(item,value){
@@ -390,6 +390,11 @@ body.fullscreen-fix div#gift-control-vm {
                 style:'display:none;bottom:50px',
                 //innerHTML:`<style>#title-medal-dialog a{color: #23ade5;}</style>`
             },bottomPanel.parentNode);
+            //样式
+            helper.create('style',{
+                innerHTML:'#title-medal-dialog>div>div:nth-child(odd){background-color: #f1f2f4;}'
+                +'#title-medal-dialog #title-medal-selected-line {background: #e4f12699;}'
+            },this.dialog);
             //对话框箭头
             this.dialogArraw = helper.create('div',{
                 className:"p-absolute",
@@ -433,7 +438,7 @@ body.fullscreen-fix div#gift-control-vm {
             //显示正在加载面板
             helper.set(this.loadingDiv,{
                 style:"height:100px",
-                innerHTML:`<div data-v-ec1c3b2e="" role="progress" class="link-progress-tv" data-v-4df82965=""></div>`
+                innerHTML:`<span data-v-ec1c3b2e="" role="progress" class="link-progress-tv" data-v-4df82965=""></span>`
             })
             //清空对话框本体
             this.dialogPanel.innerHTML = '';
@@ -537,19 +542,33 @@ body.fullscreen-fix div#gift-control-vm {
                 });
             }
             data.data.list.forEach((v)=>{
-                helper.create('div',{
-                    style : 'margin-top: 12px',
+                const lvMax = v.level.length&&v.level[v.level.length-1],
+                      outOfDate = (new Date(v.expire_time)-Date.now())/1000/60/60/24<4;
+                const itemDiv = helper.create('div',{style: 'margin-top: 12px',id:v.status?'title-medal-selected-line':''},this.dialogPanel);
+                helper.create('a',{
+                    className:"live-title-icon pointer v-middle dp-i-block",
+                    href:v.url==''?'javascript:':v.url,target:'_blank',
+                    title:`${v.name} ${v.activity}\r\n${v.description}\r\n${v.url!=''?'点击前往头衔活动页面':''}`,
+                    innerHTML: `<img alt="${v.name}" src="${(this.titleInfos&&this.titleInfos[v.title])||v.title_pic&&v.title_pic.img}" class="live-title-icon pointer">`,
+                    style:`min-width:88px;`
+                },itemDiv);
+                helper.create('span',{
+                    title:`头衔经验：${v.score}\r\n${lvMax?`满级还差${v.score-lvMax}`:''}`,
+                    className:"dp-i-block v-center over-hidden v-middle",
+                    style:"height: 8px;width: 64px;margin: 0 8px;border-radius: 3px;background-color: #e3e8ec;",
+                    innerHTML:`<span class="dp-i-block h-100 v-top" style="width: ${lvMax?v.score/lvMax*100:100}%;background-color: #23ade5;"></span>`
+                },itemDiv);
+                helper.create('span',{
+                    style:`color:${outOfDate?'#f00':'#29abe1'};border:1px solid #a068f1;border-radius:3px;cursor:pointer;padding:3px;`,
                     onclick: ()=>{
-                        this.doRequire(`//api.live.bilibili.com/i/${
-                                       v.wear?`ajaxCancelWearTitle`:`ajaxWearTitle?id=${v.id}&cid=${v.cid}`}`,`${v.wear?'取消佩戴':'切换'}头衔`);
+                        this.doRequire(v.status?`//api.live.bilibili.com/i/ajaxCancelWearTitle`:`//api.live.bilibili.com/appUser/wearTitle?title=${v.title}`
+                                       ,`${v.status?'取消佩戴':'切换'}头衔`);
                         this.closeDialog();
                     },
-                    innerHTML : `<img alt="${v.name}" title="${v.name} ${v.source}\r\n${v.wear?'当前佩戴头衔，点击取消佩戴':'点击佩戴'}"
-                        src="${this.titleInfos&&this.titleInfos[v.css]}" class="live-title-icon pointer">`
-                        /*<span title="升级进度：${0}/3500000000 升级还差：${0}" class="intimacy-bar dp-i-block v-center over-hidden p-relative">
-                          <span class="dp-i-block v-top h-100" style="width: ${0}%;"></span></span>
-                        <span title="头衔经验" class="intimacy-text">${0}/${3500000000}</span>`;*/
-                },this.dialogPanel);
+                    className:'v-middle dp-i-block',
+                    title:`头衔过期时间${v.expire_time}\r\n点击${v.status?'取消佩戴':'佩戴'}`,
+                    innerText:v.status?'取消':'佩戴'
+                },itemDiv);
             });
         }
     },
