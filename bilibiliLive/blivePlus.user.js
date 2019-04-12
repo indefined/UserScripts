@@ -483,28 +483,30 @@ body.fullscreen-fix div#gift-control-vm {
             if (data.data.fansMedalList.length==0) throw('还没有勋章哦～');
             data.data.fansMedalList.forEach((v)=>{
                 if (this.room.ANCHOR_UID==v.target_id) hasMedal = true;
-                const itemDiv = helper.create('div',{style:'margin-top: 8px'},this.dialogPanel);
+                const itemDiv = helper.create('div',{
+                    style:'margin-top: 8px',
+                    id:v.status&&'title-medal-selected-line'||''
+                },this.dialogPanel);
                 helper.create('div',{
-                    title:`主播:${v.uname}\r\n点击${v.status?'取消佩戴':'切换'}勋章`,
-                    innerHTML:`<div class="label">${v.status?`<i class="medal-deco union"></i>`:''}\
-                      <span class="content">${v.medalName}</span></div><span class="level">${v.level}</span>`,
-                    className:`fans-medal-item v-middle pointer level-${v.level} ${v.status?' special-medal':''}`,
+                    title:`主播:${v.uname}\r\n${v.status?'当前佩戴勋章，点击取消佩戴':'点击佩戴此'}勋章`,
+                    innerHTML:`<div class="label"><span class="content">${v.medalName}</span></div><span class="level">${v.level}</span>`,
+                    className:`fans-medal-item v-middle pointer level-${v.level}`,
                     onclick:()=>{
-                        this.doRequire(`//api.live.bilibili.com/i/${
-                                       v.status?`ajaxCancelWear`:`ajaxWearFansMedal?medal_id=${v.medal_id}`}`,v.status?'取消佩戴勋章':'切换勋章');
+                        this.doRequire(v.status?'//api.live.bilibili.com/i/ajaxCancelWear':`//api.live.bilibili.com/i/ajaxWearFansMedal?medal_id=${v.medal_id}`
+                                       ,v.status?'取消佩戴勋章':'切换勋章');
                         this.oldMedalButton.click()&this.oldMedalButton.click();
                         this.closeDialog();
                     }
                 },itemDiv);
                 helper.create('span',{
                     title:`升级进度：${v.intimacy}/${v.next_intimacy}\r\n升级还差：${v.next_intimacy-v.intimacy}`,
-                    className:"dp-i-block v-center over-hidden",
+                    className:"dp-i-block over-hidden v-middle",
                     style:"height: 8px;width: 64px;margin: 0 8px;border-radius: 3px;background-color: #e3e8ec;",
                     innerHTML:`<span class="dp-i-block h-100 v-top" style="width: ${v.intimacy/v.next_intimacy*100}%;background-color: #23ade5;"></span>`
                 },itemDiv);
                 helper.create('a',{
-                    style:'color:#999',
-                    href:`/${v.roomid}`,target:"_blank",className:"intimacy-text",
+                    style:'color:#999;min-width:50px',
+                    href:`/${v.roomid}`,target:"_blank",className:"intimacy-text v-middle dp-i-block",
                     title:`今日亲密度剩余${v.dayLimit-v.todayFeed}\r\n点击前往主播房间`,
                     innerText:`${v.todayFeed}/${v.dayLimit}`
                 },itemDiv);
