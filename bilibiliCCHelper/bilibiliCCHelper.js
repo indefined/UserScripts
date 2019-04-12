@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Bilibili CC字幕助手
 // @namespace    indefined
-// @version      0.5.1
-// @description  旧版播放器可启用CC字幕，HTML5播放器可载入本地ASS/SRT/LRC/BCC/SBV/VTT格式字幕，ASS/SRT/LRC/BCC格式字幕下载
+// @version      0.5.2
+// @description  旧版播放器可启用CC字幕，HTML5播放器可载入本地字幕/下载字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
 // @include      http*://www.bilibili.com/video/av*
@@ -296,7 +296,6 @@ fill-rule="evenodd"></path></svg></span>`,
                 elements.createAs('div',{
                     style:"margin-bottom: 5px;cursor:move;user-select:none;line-height:1;",
                     innerText:'本地字幕选择',
-                    onmouseup:this.moveAction,
                     onmousedown:this.moveAction
                 },this.dialog);
                 //选择字幕，保存文件对象并调用处理文件
@@ -339,16 +338,18 @@ fill-rule="evenodd"></path></svg></span>`,
         },
         dialogMove(ev){
             if (ev.type=='mousedown'){
-                this.dialog.t = ev.pageY-this.dialog.offsetTop;
-                this.dialog.l = ev.pageX-this.dialog.offsetLeft;
+                this.offsetT = ev.pageY-this.dialog.offsetTop;
+                this.offsetL = ev.pageX-this.dialog.offsetLeft;
+                document.body.addEventListener('mouseup',this.moveAction);
                 document.body.addEventListener('mousemove',this.moveAction);
             }
             else if (ev.type=='mouseup'){
+                document.body.removeEventListener('mouseup',this.moveAction);
                 document.body.removeEventListener('mousemove',this.moveAction);
             }
             else{
-                this.dialog.style.top = ev.pageY-this.dialog.t+'px';
-                this.dialog.style.left = ev.pageX-this.dialog.l+'px';
+                this.dialog.style.top = ev.pageY - this.offsetT + 'px';
+                this.dialog.style.left = ev.pageX - this.offsetL +'px';
             }
         },
         readFile(){
