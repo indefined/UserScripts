@@ -15,7 +15,7 @@ bilibili CC字幕助手
 - 旧版HTML5播放器支持使用CC字幕
   - 可配置语言/字体/背景/阴影等
 - 新/旧版HTML5播放器可用CC字幕下载
-  - 支持ASS/SRT/LRC/BCC格式转换
+  - 支持ASS/SRT/LRC/BCC/TXT纯文本格式
   - 默认系统编码，CR/LF换行
 - 新/旧版HTML5播放器可载入本地字幕
   - 支持ASS/SRT/LRC/BCC/SBV/VTT格式

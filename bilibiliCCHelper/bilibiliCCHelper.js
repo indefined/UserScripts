@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕助手
 // @namespace    indefined
-// @version      0.5.3
+// @version      0.5.4
 // @description  旧版播放器可启用CC字幕，HTML5播放器可载入本地字幕/下载字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -177,14 +177,14 @@ fill-rule="evenodd"></path></svg></span>`,
                 style :'position: fixed;top: 0;bottom: 0;left: 0;right: 0;background: rgba(0,0,0,0.4);z-index: 1048576;'
             },document.body),
                   panel = elements.createAs('div',{
-                      style:'left: 50%;top: 50%;position: absolute;padding: 20px;background:white;'
+                      style:'left: 50%;top: 50%;position: absolute;padding: 15px;background:white;'
                       + 'border-radius: 8px;margin: auto;transform: translate(-50%,-50%);',
                       innerHTML: '<h2 style="font-size: 20px;color: #4fc1e9;font-weight: 400;margin-bottom: 10px;">字幕下载</h2>'
                       + '<a href="https://greasyfork.org/scripts/378513" target="_blank" style="position:absolute;right:20px;top:30px">'
                       + `当前版本：${typeof(GM_info)!="undefined"&&GM_info.script.version||'unknow'}</a>`
                   },settingDiv),
                   textArea = this.textArea = elements.createAs('textarea',{
-                      style: 'width: 350px;height: 350px;resize: both;padding: 5px;line-height: normal;'
+                      style: 'width: 400px;min-width: 300px;height: 400px;resize: both;padding: 5px;line-height: normal;border: 1px solid #e5e9ef;margin: 0px;'
                   },panel),
                   bottomPanel = elements.createAs('div',{},panel);
             textArea.setAttribute('readonly',true);
@@ -199,6 +199,10 @@ fill-rule="evenodd"></path></svg></span>`,
             elements.createRadio({
                 id:'subtitle-download-lrc',name: "subtitle-type",value:"LRC",
                 onchange: ()=>this.encodeToLRC(data.body)
+            },bottomPanel);
+            elements.createRadio({
+                id:'subtitle-download-txt',name: "subtitle-type",value:"TXT",
+                onchange: ()=>this.updateDownload(data.body.map(item=>item.content).join('\r\n'),'txt')
             },bottomPanel);
             elements.createRadio({
                 id:'subtitle-download-bcc',name: "subtitle-type",value:"BCC",
@@ -219,7 +223,7 @@ fill-rule="evenodd"></path></svg></span>`,
             this.textArea.value = result;
             URL.revokeObjectURL(this.actionButton.href);
             this.actionButton.classList.remove('bpui-state-disabled');
-            this.actionButton.href = URL.createObjectURL(new Blob([result]));
+            this.actionButton.href = URL.createObjectURL(new Blob([result],{type:'text/'+type}));
             this.actionButton.download = `${document.title}.${type}`;
         },
         encodeToLRC(data){
@@ -228,9 +232,9 @@ fill-rule="evenodd"></path></svg></span>`,
             }).join('\r\n'),'lrc');
         },
         encodeToSRT(data){
-            this.updateDownload(data.reduce((accumulator,{from,to,content},index)=>{
-                return `${accumulator}${index+1}\r\n${this.encodeTime(from)} --> ${this.encodeTime(to)}\r\n${content}\r\n\r\n`;
-            },''),'srt');
+            this.updateDownload(data.map(({from,to,content},index)=>{
+                return `${index+1}\r\n${this.encodeTime(from)} --> ${this.encodeTime(to)}\r\n${content}`;
+            }).join('\r\n\r\n'),'srt');
         },
         encodeToASS(data){
             this.assHead[1] = `Title: ${document.title}`;
