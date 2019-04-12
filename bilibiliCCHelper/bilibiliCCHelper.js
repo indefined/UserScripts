@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕助手
 // @namespace    indefined
-// @version      0.5.2
+// @version      0.5.3
 // @description  旧版播放器可启用CC字幕，HTML5播放器可载入本地字幕/下载字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -287,15 +287,16 @@ fill-rule="evenodd"></path></svg></span>`,
                 this.dialog = elements.createAs('div',{
                     id :'subtitle-local-selector',
                     style :'position:fixed;z-index:1048576;padding:10px;top:50%;left:calc(50% - 185px);'
-                    +'border: 1px solid #ccd0d7;background:white;border-radius:5px;color:#99a2aa',
+                    +'box-shadow: 0 0 4px #e5e9ef;border: 1px solid #e5e9ef;background:white;border-radius:5px;color:#99a2aa',
                     innerHTML:'<style type="text/css">'
                     +'.bpui-selectmenu-arrow:hover + ul.bpui-selectmenu-list.bpui-selectmenu-list-left,'
                     +'ul.bpui-selectmenu-list.bpui-selectmenu-list-left:hover {display: block;}</style>'
                 },elements.getAs('#bilibiliPlayer'));
-                //标题栏，可拖动对话框
+                //标题栏，可拖动对话框，双击恢复字幕时间偏移
                 elements.createAs('div',{
                     style:"margin-bottom: 5px;cursor:move;user-select:none;line-height:1;",
                     innerText:'本地字幕选择',
+                    ondblclick:()=> +this.offset.value&&this.handleSubtitle(this.offset.value=0),
                     onmousedown:this.moveAction
                 },this.dialog);
                 //选择字幕，保存文件对象并调用处理文件
@@ -315,10 +316,11 @@ fill-rule="evenodd"></path></svg></span>`,
                     oninput:  ({target})=> this.readFile(this.encoding = target.value)
                 },this.dialog);
                 //字幕偏移，保存DOM对象以便修改显示偏移，更改时调用字幕处理显示
-                elements.createAs('label',{style: "margin-left: 10px;",innerText: '字幕偏移(ms)'},this.dialog);
+                elements.createAs('label',{style: "margin-left: 10px;",innerText: '时间偏移(s)'},this.dialog);
                 this.offset = elements.createAs('input',{
                     style: "margin-left: 10px;width: 50px;border: 1px solid #ccd0d7;border-radius: 4px;line-height: 20px;",
-                    type:'number', step:100, value:0,title:'字幕相对于视频的时间偏移，负值表示将字幕延后，正值将字幕提前',
+                    type:'number', step:0.5, value:0,
+                    title:'字幕相对于视频的时间偏移，负值表示将字幕延后，正值将字幕提前\r\n双击面板标题复位时间偏移',
                     oninput:  ()=> this.handleSubtitle()
                 },this.dialog);
                 //关闭按钮
@@ -365,12 +367,12 @@ fill-rule="evenodd"></path></svg></span>`,
                 const offset = +this.offset.value;
                 player.updateSubtitle(!offset?this.data:{
                     body:this.data.body.map(({from,to,content})=>({
-                        from:from + offset/1000,
-                        to:to + offset/1000,
+                        from:from + offset,
+                        to:to + offset,
                         content
                     }))
                 });
-                bilibiliCCHelper.toast(`载入本地字幕:${this.file.name},偏移:${offset}ms`);
+                bilibiliCCHelper.toast(`载入本地字幕:${this.file.name},共${this.data.body.length}行,偏移:${offset}s`);
             }
             catch(e){
                 bilibiliCCHelper.toast('载入字幕失败',e);
@@ -378,7 +380,6 @@ fill-rule="evenodd"></path></svg></span>`,
         },
         decodeFile(){
             try{
-                this.offset.value = 0;
                 const type = this.file.name.split('.').pop().toLowerCase();
                 switch(type){
                     case 'lrc':this.data = this.decodeFromLRC(this.reader.result);break;
@@ -402,7 +403,7 @@ fill-rule="evenodd"></path></svg></span>`,
                 let match = line.match(/((\[\d+:\d+\.?\d*\])+)(.*)/);
                 if (!match) {
                     if(match=line.match(/\[offset:(\d+)\]/i)) {
-                        this.offset.value = +match[1];
+                        this.offset.value = +match[1]/1000;
                     }
                     //console.log('跳过非正文行',line);
                     return;
