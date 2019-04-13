@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Bilibili CC字幕助手
+// @name         Bilibili CC字幕工具
 // @namespace    indefined
 // @version      0.5.4
 // @description  旧版播放器可启用CC字幕，HTML5播放器可载入本地字幕/下载字幕

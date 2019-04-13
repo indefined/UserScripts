@@ -18,9 +18,9 @@
 -------------------------
 ## 兼容性
 
-- chrome 70 in Tampermonkey4.7 测试通过
-- 火狐60 in Tampermonkey4.8 、Violentmonkey测试通过
-- Greasemonkey4不工作，原因不明
+- chrome 72 @ Tampermonkey 4.7/4.8 测试通过
+- firefox 64 @ Tampermonkey 4.8 、Violentmonkey v2.10 测试通过
+- Greasemonkey4.7在firefox 64测试正常，但曾在firefox 60测试不工作 ，原因不明
 - 其它浏览器和脚本管理器未知
 
 -------------------------

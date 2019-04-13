@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name        bilibili直播间助手
+// @name        bilibili直播间工具
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
 // @version     0.5.7

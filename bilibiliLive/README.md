@@ -1,4 +1,4 @@
-bilibili直播间助手
+bilibili直播间工具
 =======================
 
 [脚本发布页](https://greasyfork.org/zh-CN/scripts/368635)
@@ -42,10 +42,10 @@ bilibili直播间助手
 -------------------------
 ## 兼容性
 
-- chrome 71 @ Tampermonkey 4.7/4.8 测试通过
-- 火狐 60 @ Tampermonkey 4.8 、Violentmonkey v2.10.1
-- Android Webview70内核原生书签法可用(搞笑测试)
-- 不兼容GreaseMonkey(连浏览器原生都不如，懒得兼容了)
+- 本脚本使用了较新的ES6+和HTML5 API，比较旧的浏览器版本可能不兼容
+- chrome 72 @ Tampermonkey 4.7/4.8 测试通过
+- 火狐 64 @ Tampermonkey 4.8 、Violentmonkey v2.10 测试通过
+- 不兼容GreaseMonkey4
 - 其它浏览器和脚本管理器未知
 
 -------------------------
@@ -64,14 +64,15 @@ bilibili直播间助手
 ## 设置存储相关
 - 本脚本会优先尝试脚本管理器提供的GM3以前的存储API存取配置
   - 如果无法获得脚本管理器提供存储API，会使用浏览器原生localStorage存储
-- 脚本配置项可在HTML5播放器中修改，如需手动修改，请参考以下步骤：
+- 脚本配置项正常可直接在HTML5播放器UI中修改，如需手动修改，请参考以下步骤：
     1. 将脚本管理器设置为高级配置模式，在脚本管理器内打开脚本，切换到存储页
-    2. 将以下配置数据需要关闭的对应项修改为false，保存后刷新页面
+    2. 将以下配置数据需要关闭的对应项后面的`true`修改为`false`，保存后刷新页面
     3. 如果保存后没有生效，请检查是否修改错误
-    4. 数据项对应含义请参考代码中settingInfos项
+    4. 数据项对应含义请参考代码中`settingInfos`项
+
 ```
 {
-"BilibiliLiveHelper": "{\"fullScreenPanel\":true,\"showVideoLink\":true,\"showOtherGift\":false,\"replaceMedalTitle\":true}"
+    "BilibiliLiveHelper": "{\"fullScreenPanel\":true,\"showVideoLink\":true,\"showOtherGift\":false,\"replaceMedalTitle\":true}"
 }
 ```
 

@@ -31,10 +31,10 @@ B站网页端添加APP首页推荐
 -------------------------
 ## 兼容性
 
-- chrome 70 in Tampermonkey4.7 测试通过
-- EDGE in Tampermonkey4.6 测试通过
-- 火狐 in Tampermonkey4.8 、Violentmonkey测试通过
-- 不兼容GreaseMonkey4，懒得兼容
+- 本脚本使用了较新的ES6+和HTML5 API，比较旧的浏览器版本可能不兼容
+- chrome 72 @ Tampermonkey 4.7/4.8 测试通过
+- firefox 64 @ Tampermonkey 4.8 、Violentmonkey v2.10 测试通过
+- 不兼容GreaseMonkey4
 - 其它浏览器和脚本管理器未知
 - 使用chrome原生扩展安装无法正常工作，因为跨域会被拦截 ~~跨域真TM麻烦~~
 

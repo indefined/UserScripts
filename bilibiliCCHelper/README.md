@@ -1,4 +1,4 @@
-bilibili CC字幕助手
+bilibili CC字幕工具
 =======================
 
 [脚本发布页](https://greasyfork.org/scripts/378513)
@@ -37,8 +37,9 @@ bilibili CC字幕助手
 -------------------------
 ## 兼容性
 
-- chrome 71 @ Tampermonkey 4.7/4.8 测试通过
-- firefox 64 @ Tampermonkey 4.8 、Violentmonkey v2.10.1 测试通过
+- 本脚本使用了较新的ES6+和HTML5 API，比较旧的浏览器版本可能不兼容
+- chrome 72 @ Tampermonkey 4.7/4.8 测试通过
+- firefox 64 @ Tampermonkey 4.8 、Violentmonkey v2.10 测试通过
 - 不兼容GreaseMonkey4+，因为GM4的安全限制原因无法获取到视频播放器
 - 其它浏览器和脚本管理器未知
 
@@ -47,6 +48,7 @@ bilibili CC字幕助手
 
 - 仅支持HTML5播放器，不支持FLASH播放器
 - 字幕下载
+  - 应该只支持浏览器自身下载，外部下载工具无效
   - ASS格式字幕下载可能会有显示不正常的情况
     - 如果是字体/样式显示不正常请使用SRT格式
     - 如果有其它显示不正常情况请提交反馈视频链接

@@ -1,6 +1,6 @@
 allow YouTube videos in twitter to fullscreen
 =========================
-允许推特YouTube视频全屏
+允许推特内YouTube视频全屏
 =========================
 
 [脚本发布页/ReleasePage](https://greasyfork.org/scripts/375464)
@@ -11,7 +11,5 @@ allow YouTube videos in twitter to fullscreen
 
 -------------------------
 
-- test in chrome 70 and firefox 60,seems it can only work with Tampermonkey
-- but seems not because of this script,none of my script can work on Twitter with Violentmonkey or Greasemonkey
-- 看上去只能在Tampermonkey里能用，chrome70和firefox 60测试都这样
-- Violentmonkey、Greasemonkey测试无法运行，但似乎是脚本管理器的问题而不是这个脚本的问题
+- 只在Tampermonkey中可用，且高级设置中`如果站点有内容安全策略 (CSP) 则向其策略加入 Tampermonkey`必须开启（默认开启）
+- only work in Tampermonkey with Advanced setting:`Add Tampermonkey to the site's content security policy (CSP) if there is one:YES`(default is YES)

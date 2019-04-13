@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         allow YouTube videos in twitter to fullscreen
-// @name:zh-CN   允许推特YouTube视频全屏
+// @name:zh-CN   允许推特内YouTube视频全屏
 // @namespace    indefined
 // @version      0.1
 // @description  make embedded YouTube video in twitter able to fullscreen
