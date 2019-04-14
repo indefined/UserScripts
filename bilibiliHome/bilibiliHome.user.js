@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.4.0
+// @version      0.4.1
 // @description  添加APP首页数据、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -121,10 +121,11 @@
                 return;
             }
             else {
-                const timeout = setTimeout(()=>tools.toast('获取授权超时'),5000);
+                actionButton.innerText = '获取中...';
+                actionButton.onclick = undefined;
                 new Promise((resolve,reject)=>{
                     GM_xmlhttpRequest({
-                        method: 'GET',
+                        method: 'GET',timeout:5000,
                         url:'https://passport.bilibili.com/login/app/third?appkey=27eb53fc9058f8c3'
                         +'&api=http%3A%2F%2Flink.acg.tv%2Fsearch.php%3Fmod%3Dforum&sign=3c7f7018a38a3e674a8a778c97d44e67',
                         onload: res=> {
@@ -133,11 +134,12 @@
                             }
                             catch(e){reject(e)}
                         },
-                        onerror: e=>reject({msg:e.error,toString:()=>'请求接口错误'})
+                        onerror: e=>reject({msg:e.error,toString:()=>'请求接口错误'}),
+                        ontimeout: e=>reject({msg:e.error,toString:()=>'请求接口超时'})
                     });
                 }).then(url=>new Promise((resolve,reject)=>{
                     GM_xmlhttpRequest({
-                        method: 'GET',url,
+                        method: 'GET',url,timeout:5000,
                         onload: res=> {
                             try{
                                 const key = res.finalUrl.match(/access_key=([0-9a-z]{32})/);
@@ -149,12 +151,14 @@
                                 resolve();
                             }catch(e){reject(e)}
                         },
-                        onerror: e=>reject({msg:e.error,toString:()=>'尝试登录错误'})
+                        onerror: e=>reject({msg:e.error,toString:()=>'获取授权错误'}),
+                        ontimeout: e=>reject({msg:e.error,toString:()=>'获取授权超时'})
                     });
                 })).catch(error=> {
+                    actionButton.innerText = '获取授权';
                     tools.toast('获取授权失败:'+error,error);
                 }).then(()=>{
-                    clearTimeout(timeout);
+                    actionButton.onclick = handleKey;
                 });
             }
         }
