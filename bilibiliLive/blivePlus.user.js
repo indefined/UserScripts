@@ -2,7 +2,7 @@
 // @name        bilibili直播间工具
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.7
+// @version     0.5.8
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -478,8 +478,10 @@ body.fullscreen-fix div#gift-control-vm {
         },
         listMedal(data){
             let hasMedal = false;
-            if (data.code!=0||!data.data||!data.data.fansMedalList) throw(`查询勋章失败 code:${data.code}</br>${data.message}`);
-            if (data.data.fansMedalList.length==0) throw('还没有勋章哦～');
+            if (data.code!=0||!data.data||!data.data.fansMedalList instanceof Array) {
+                console.error(data);
+                throw(`查询勋章失败 code:${data.code}</br>${data.message}`);
+            }
             data.data.fansMedalList.forEach((v)=>{
                 if (this.room.ANCHOR_UID==v.target_id) hasMedal = true;
                 const itemDiv = helper.create('div',{style:'margin-top: 8px'},this.dialogPanel);
@@ -525,10 +527,18 @@ body.fullscreen-fix div#gift-control-vm {
                     innerHTML:`<span class="svg-icon silver-seed" style="font-size: 15px;"></span><span>9900</span>`
                 },buyDiv);
             }
+            if (data.data.fansMedalList.length==0) {
+                const itemDiv = helper.create('p',{
+                    className:'margin-top: 8px',
+                    innerText:'你还没有勋章哦～'
+                },this.dialogPanel);
+            }
         },
         async listTitle(data){
-            if (data.code!=0||!data.data||!data.data.list) throw(`查询头衔失败 code:${data.code}</br>${data.message}`);
-            if (data.data.list.length==0) throw('没有头衔哦～');
+            if (data.code!=0||!data.data||!data.data.list instanceof Array) {
+                console.error(data);
+                throw(`查询头衔失败 code:${data.code}</br>${data.message}`);
+            }
             if (!this.titleInfos){
                 await helper.xhr('//api.live.bilibili.com/rc/v1/Title/webTitles').then(data => {
                     if (data.code!=0||!(data.data instanceof Array)) throw(`code:${data.code}\r\n${data.message}`);
@@ -555,6 +565,12 @@ body.fullscreen-fix div#gift-control-vm {
                         <span title="头衔经验" class="intimacy-text">${0}/${3500000000}</span>`;*/
                 },this.dialogPanel);
             });
+            if (data.data.list.length==0) {
+                const itemDiv = helper.create('p',{
+                    className:'margin-top: 8px',
+                    innerText:'你还没有头衔哦～'
+                },this.dialogPanel);
+            }
         }
     },
 
