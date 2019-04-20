@@ -1,6 +1,8 @@
 网易CC直播净化
 =======================
 
+[脚本发布页](https://greasyfork.org/scripts/382065)
+
 [个人脚本仓库](https://github.com/indefined/UserScripts)
 
 [问题反馈到这里](https://github.com/indefined/UserScripts/issues)
@@ -25,7 +27,7 @@
 -------------------------
 ## 功能预览
 
-![预览](./preview.jpg)
+![预览](https://greasyfork.org/system/screenshots/screenshots/000/015/035/original/preview.jpg)
 
 -------------------------
 ## 设置存储相关
