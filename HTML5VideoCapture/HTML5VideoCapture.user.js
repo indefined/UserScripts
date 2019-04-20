@@ -2,8 +2,8 @@
 // @name         HTML5视频截图器
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.3.7
-// @description  基于HTML5的简单原生视频截图，可简单控制快进/逐帧/视频调速
+// @version      0.3.8
+// @description  基于HTML5的简单任意原生视频截图，可简单控制快进/逐帧/视频调速
 // @author       indefined
 // @include      *://*
 // @run-at       document-idle
@@ -30,7 +30,7 @@ function HTML5VideoCapturer(){
             a.download = `${document.title}_${Math.floor(video.currentTime/60)}'${(video.currentTime%60).toFixed(3)}''.jpg`;
             document.head.appendChild(a);
             a.click();
-            a.remove();
+            document.head.removeChild(a);
         }catch(e){
             const imgWin = open("",'_blank');
             canvas.style = "max-width:100%";
@@ -254,7 +254,7 @@ function HTML5VideoCapturer(){
                 nodeType:'select',
                 className:'h5vc-block',
                 title:'选择视频',
-                style:'width:unset',
+                style:'width:unset;min-width:30px',
                 onchange: ()=>videoSelect(selector.value)
             }),
             speed = _c({
