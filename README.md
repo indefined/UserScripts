@@ -10,6 +10,8 @@
 
 [贴吧回复修正](./tiebaPostAdjustment/)
 
+[网易CC直播净化](./neteaseCCLiveCleaner/)
+
 [允许推特YouTube视频全屏/allow YouTube videos in twitter to fullscreen](./YTVideosInTwitterToFullscreen/)
 
 [bilibili直播间弹幕批量发送](./bilibiliLiveDanmakuQuantitiesSend/)
