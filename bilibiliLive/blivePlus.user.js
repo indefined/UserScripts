@@ -2,7 +2,7 @@
 // @name        bilibili直播间工具
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.8.1
+// @version     0.5.8.2
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -478,7 +478,7 @@ body.fullscreen-fix div#gift-control-vm {
         },
         listMedal(data){
             let hasMedal = false;
-            if (data.code!=0||!data.data||!data.data.fansMedalList instanceof Array) {
+            if (data.code!=0||!data.data||!(data.data.fansMedalList instanceof Array)) {
                 console.error(data);
                 throw(`查询勋章失败 code:${data.code}</br>${data.message}`);
             }
@@ -535,7 +535,7 @@ body.fullscreen-fix div#gift-control-vm {
             }
         },
         async listTitle(data){
-            if (data.code!=0||!data.data||!data.data.list instanceof Array) {
+            if (data.code!=0||!data.data||!(data.data.list instanceof Array)) {
                 console.error(data);
                 throw(`查询头衔失败 code:${data.code}</br>${data.message}`);
             }
