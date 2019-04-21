@@ -2,7 +2,7 @@
 // @name        bilibili直播间工具
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.8
+// @version     0.5.8.1
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -528,9 +528,9 @@ body.fullscreen-fix div#gift-control-vm {
                 },buyDiv);
             }
             if (data.data.fansMedalList.length==0) {
-                const itemDiv = helper.create('p',{
-                    className:'margin-top: 8px',
-                    innerText:'你还没有勋章哦～'
+                helper.create('p',{
+                    innerHTML:'<p data-v-17cf8b1e="" class="empty-hint-text">你还没有勋章哦～</p>'
+                    +'<div data-v-17cf8b1e="" class="empty-image"></div>'
                 },this.dialogPanel);
             }
         },
@@ -566,9 +566,9 @@ body.fullscreen-fix div#gift-control-vm {
                 },this.dialogPanel);
             });
             if (data.data.list.length==0) {
-                const itemDiv = helper.create('p',{
-                    className:'margin-top: 8px',
-                    innerText:'你还没有头衔哦～'
+                helper.create('p',{
+                    innerHTML:'<p data-v-17cf8b1e="" class="empty-hint-text">你还没有头衔哦～</p>'
+                    +'<div data-v-17cf8b1e="" class="empty-image"></div>'
                 },this.dialogPanel);
             }
         }
