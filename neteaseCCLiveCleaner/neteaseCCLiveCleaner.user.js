@@ -2,7 +2,7 @@
 // @name         网易CC直播净化
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.1
+// @version      0.1.1
 // @description  自定义屏蔽CC直播HTML5网页大部分不想看到的东西
 // @author       indefined
 // @match        *://cc.163.com/*
@@ -53,6 +53,19 @@ div#searchBoss {
 }
 .anchor-live {
     margin: 0 10px;
+}
+.header-match-rcm-imgs,
+.header-match-rcm-imgs .match-rcm-imgs-list .match-rcm-imgs-item,
+.header-match-rcm-imgs .match-rcm-imgs-list .match-rcm-imgs-item a,
+.header-match-rcm-imgs .match-rcm-imgs-list .match-rcm-imgs-item img {
+    height: 16px;
+    width: 25px;
+}
+.header-match-rcm-imgs .match-rcm-imgs-list .match-rcm-imgs-item img {
+    background-size: cover;
+}
+.header-match-rcm-imgswrap .match-arrow-left {
+    margin-top: 6px !important;
 }
 /*缩小标题栏高度后增加主框体高度*/
 body:not(.blizzardtv-iframe-body) .main-container {
@@ -451,9 +464,12 @@ div#bunShoutDynamic{}
         configDiv:document.querySelector('ul.ban-effect-list'),
         config:(()=>{
             try{
-                return 'undefined'!=typeof(GM_getValue)?
-                    JSON.parse(GM_getValue('ccLiveConfig','{}'))
-                :JSON.parse(localStorage.getItem('ccLiveConfig')||'{}');
+                if('undefined'!=typeof(GM_info)&&'undefined'!=typeof(GM_getValue)) {
+                    return JSON.parse(GM_getValue('ccLiveConfig','{}'));
+                }
+                else {
+                    return JSON.parse(localStorage.getItem('ccLiveConfig')||'{}');
+                }
             }catch(e){
                 console.error('CC直播净化:读取配置失败，使用默认配置',e);
                 return {};
@@ -464,8 +480,8 @@ div#bunShoutDynamic{}
                 if(!configList[i]) delete this.config[i];
             }
             try{
-                if('undefined'!=typeof(GM_setValue)){
-                    GM_setValue('ccLiveConfig',JSON.stringify(this.config))
+                if('undefined'!=typeof(GM_info)&&'undefined'!=typeof(GM_setValue)){
+                    GM_setValue('ccLiveConfig',JSON.stringify(this.config));
                 }
                 else {
                     localStorage.setItem('ccLiveConfig',JSON.stringify(this.config));
