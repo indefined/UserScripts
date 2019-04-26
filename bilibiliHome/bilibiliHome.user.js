@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.4.2
-// @description  添加APP首页数据、可选提交不喜欢的视频
+// @version      0.4.3
+// @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
 // @match        *://www.bilibili.com/
@@ -64,6 +64,17 @@
     text-align: center;
     font-size: 15px;
     z-index: 2;
+}
+#ranking-all ul.rank-list {
+    height: 278px;
+    overflow-y: auto;
+    overflow-y:-moz-scrollbars-none;
+}
+#ranking-all ul.rank-list::-webkit-scrollbar{
+    width:0px;
+}
+#ranking-all .rank-list .rank-item.show-detail .ri-detail{
+    width: calc(100% - 90px) !important;
 }
 </style>`;
 
@@ -350,7 +361,7 @@
         const loading = element.getLoadingDiv();
         const updateItems = target =>{
             target.removeChild(loading);
-            for (let i = 0;i<7;i++){
+            for (let i = 0;i<data[type][day].length;i++){
                 const itemData = data[type][day][i];
                 element._c({
                     nodeType:'li',
