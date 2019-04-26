@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.4.1
+// @version      0.4.2
 // @description  添加APP首页数据、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -194,20 +194,20 @@
         const listBox = element.mainDiv.querySelector('div.storey-box.clearfix');
         updateRecommend();
         function updateRecommend () {
-            let status;
+            let loading;
             element._s(listBox,{
                 innerHTML:'',
-                childs:[status=element.getLoadingDiv()]
+                childs:[loading=element.getLoadingDiv()]
             });
             GM_xmlhttpRequest({
                 method: 'GET',
                 url: 'https://app.bilibili.com/x/feed/index?build=1&mobi_app=android&idx='
-                +(Date.now()/1000).toFixed(0)+(tools.accessKey?'&access_key='+tools.accessKey:''),
+                + (Date.now()/1000).toFixed(0) + (tools.accessKey?'&access_key='+tools.accessKey:''),
                 onload: res=>{
                     try {
                         const rep = JSON.parse(res.response);
                         if (rep.code!=0){
-                            status.firstChild.innerText = `请求app首页失败 code ${rep.code}</br>msg ${rep.message}`;
+                            loading.firstChild.innerText = `请求app首页失败 code ${rep.code}</br>msg ${rep.message}`;
                             return console.error('请求app首页失败',rep);
                         }
                         element._s(listBox,{
@@ -215,12 +215,12 @@
                             childs:rep.data.map(data=>createItem(data))
                         });
                     } catch (e){
-                        status.firstChild.innerText = `请求app首页发生错误 ${e}`;
+                        loading.firstChild.innerText = `请求app首页发生错误 ${e}`;
                         console.error(e,'请求app首页发生错误');
                     }
                 },
                 onerror: e=>{
-                    status.firstChild.innerText = `请求app首页发生错误 ${e}`;
+                    loading.firstChild.innerText = `请求app首页发生错误 ${e}`;
                     console.error(e,'请求app首页发生错误');
                 }
             });
@@ -347,9 +347,9 @@
         let type = 1;
         let day = 3;
         const data = {1:{},2:{}};
-        const status = element.getLoadingDiv();
+        const loading = element.getLoadingDiv();
         const updateItems = target =>{
-            target.removeChild(status);
+            target.removeChild(loading);
             for (let i = 0;i<7;i++){
                 const itemData = data[type][day][i];
                 element._c({
@@ -359,8 +359,8 @@
                         `<i class="ri-num">${i+1}</i>`,
                         {
                             nodeType:'a', target:"_blank",
-                            href:'/video/av${itemData.aid}/',
-                            title:`${itemData.title} 播放:${itemData.play} ${itemData.duration}`,
+                            href:`/video/av${itemData.aid}/`,
+                            title:`${itemData.title}\r\n播放:${itemData.play} ${itemData.duration}`,
                             className:'ri-info-wrap clearfix',
                             childs:[
                                 (i==0?`<div class="lazy-img ri-preview"><img alt="${itemData.title}" src="${itemData.pic.split(':')[1]}@72w_45h.${tools.imgType}"></div>`:''),
@@ -380,8 +380,8 @@
         const updateRanking = ()=>{
             const target = type==1?warp.firstChild:warp.lastChild;
             while(target.firstChild) target.removeChild(target.firstChild);
-            status.firstChild.innerText = '正在加载...';
-            target.appendChild(status);
+            loading.firstChild.innerText = '正在加载...';
+            target.appendChild(loading);
             rankingAll.lastChild.href = `/ranking/${type==1?'all':'origin'}/0/0/${day}/`;
             if (!data[type][day]){
                 GM_xmlhttpRequest({
@@ -391,13 +391,13 @@
                         try {
                             const rep = JSON.parse(res.response);
                             if (rep.code!=0){
-                                status.firstChild.innerText = `请求排行榜失败 code ${rep.code}</br>msg ${rep.message}`;
+                                loading.firstChild.innerText = `请求排行榜失败 code ${rep.code}</br>msg ${rep.message}`;
                                 return console.log('请求app首页失败',rep);
                             }
                             data[type][day] = rep.data.list;
                             updateItems(target);
                         } catch (e){
-                            status.firstChild.innerText = `请求排行榜发生错误 ${e}`;
+                            loading.firstChild.innerText = `请求排行榜发生错误 ${e}`;
                             console.error('请求排行榜发生错误',e);
                         }
                     }
@@ -460,7 +460,7 @@
                     config.parent.appendChild(item);
                 }
                 else if(config[i] instanceof Object && item[i]){
-                    Object.entries(([k,v])=>{
+                    Object.entries(config[i]).forEach(([k,v])=>{
                         item[i][k] = v;
                     });
                 }
