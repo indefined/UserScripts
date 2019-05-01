@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.4.3
+// @version      0.5.0
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -78,104 +78,12 @@
 }
 </style>`;
 
-    function Setting() {
-        let actionButton;
-        element._c({
-            nodeType:'div',
-            id:'biliAppHomeSetting',
-            style:'position: fixed;top: 0;bottom: 0;left: 0;right: 0;background: rgba(0,0,0,0.4);z-index: 10000;',
-            childs:[{
-                nodeType:'div',
-                style:'width:400px;right:0;left:0;position:absolute;padding:20px;background:#fff;border-radius:8px;margin:auto;transform:translate(0,50%);',
-                childs:[
-                    '<h2 style="font-size: 20px;color: #4fc1e9;font-weight: 400;">APP首页推荐设置</h2>',
-                    {
-                        nodeType:'span',innerText:'Ｘ',
-                        style:"position: absolute;right: 15px;top: 15px;cursor: pointer;font-size: 20px;",
-                        onclick:()=>document.body.removeChild(document.getElementById('biliAppHomeSetting'))
-                    },
-                    {
-                        nodeType:'div',style:'margin: 10px 0;',
-                        childs:[
-                            [
-                                '目前获取根据个人观看喜好的APP首页数据和提交定制不喜欢的视频需要获取授权key。',
-                                '点击获取授权将从官方授权接口获取一个授权key，获取的key保存在脚本管理器内。',
-                                '如果不想使用授权，脚本仍然能从官方接口获取随机推荐视频，但内容可能不再根据个人喜好且无法提交不喜欢内容。',
-                                '点击删除授权可从脚本管理器中删除已获取授权key，脚本将按照没有获取授权的情况执行。',
-                                '授权key有效期大约一个月，如果看到奇怪的推荐提交不喜欢时遇到奇怪的错误可以尝试删除授权重新获取。'
-                            ].join('</br></br>')
-                        ]
-                    },
-                    {
-                        nodeType:'div',
-                        style:'text-align: right;line-height: 30px;',
-                        childs:[
-                            (actionButton = element._c({
-                                nodeType:'button',
-                                style:'padding:0 20px;height:30px;background:#4fc1e9;color:white;border-radius:5px;border:none;cursor:pointer;left:20px;position:absolute;',
-                                innerText:tools.accessKey?'删除授权':'获取授权',
-                                onclick:handleKey
-                            })),
-                            '<a href="https://github.com/indefined/UserScripts/issues" target="_blank" style="padding-left:20px;">github问题反馈</a>',
-                            `<a href="https://greasyfork.org/scripts/368446" target="_blank" style="padding-left:20px;">当前版本:${GM_info.script.version}</a>`
-                        ]
-                    }
-                ]
-            }],
-            parent:document.body
-        });
-        function handleKey(){
-            if (actionButton.innerText === '删除授权') {
-                tools.storageAccessKey(undefined);
-                actionButton.innerText = '获取授权';
-                tools.toast('删除授权成功');
-                return;
-            }
-            else {
-                actionButton.innerText = '获取中...';
-                actionButton.onclick = undefined;
-                new Promise((resolve,reject)=>{
-                    GM_xmlhttpRequest({
-                        method: 'GET',timeout:5000,
-                        url:'https://passport.bilibili.com/login/app/third?appkey=27eb53fc9058f8c3'
-                        +'&api=http%3A%2F%2Flink.acg.tv%2Fsearch.php%3Fmod%3Dforum&sign=3c7f7018a38a3e674a8a778c97d44e67',
-                        onload: res=> {
-                            try{
-                                resolve(JSON.parse(res.response).data.confirm_uri)
-                            }
-                            catch(e){reject(e)}
-                        },
-                        onerror: e=>reject({msg:e.error,toString:()=>'请求接口错误'}),
-                        ontimeout: e=>reject({msg:e.error,toString:()=>'请求接口超时'})
-                    });
-                }).then(url=>new Promise((resolve,reject)=>{
-                    GM_xmlhttpRequest({
-                        method: 'GET',url,timeout:5000,
-                        onload: res=> {
-                            try{
-                                const key = res.finalUrl.match(/access_key=([0-9a-z]{32})/);
-                                if (key) {
-                                    tools.storageAccessKey(key[1]);
-                                    tools.toast('获取授权成功');
-                                    actionButton.innerText = '删除授权';
-                                }
-                                resolve();
-                            }catch(e){reject(e)}
-                        },
-                        onerror: e=>reject({msg:e.error,toString:()=>'获取授权错误'}),
-                        ontimeout: e=>reject({msg:e.error,toString:()=>'获取授权超时'})
-                    });
-                })).catch(error=> {
-                    actionButton.innerText = '获取授权';
-                    tools.toast('获取授权失败:'+error,error);
-                }).then(()=>{
-                    actionButton.onclick = handleKey;
-                });
-            }
-        }
-    }
-
+    //APP首页推荐
     function InitRecommend () {
+        let historyAction,historyData = setting.historyData;
+        //退出页面前保存历史数据
+        window.addEventListener("beforeunload", ()=>setting.pushHistory(historyData));
+        //初始化标题栏并注入推荐下方
         element.mainDiv.id = 'recommend';
         element._s(element.mainDiv.querySelector('div.zone-title'),{
             innerHTML:style,
@@ -187,58 +95,88 @@
                     childs:[
                         {
                             nodeType:'div',
-                            className:'link-more',
+                            className:'link-more',style:'cursor:pointer;user-select: none;',
                             innerHTML:'<span>设置  </span><i class="icon"></i>',
-                            onclick:Setting
+                            onclick:()=>setting.show()
                         },
                         {
                             nodeType:'div',
                             className:'read-push',
                             innerHTML:'<i class="icon icon_read"></i><span class="info">换一批</span>',
-                            onclick:updateRecommend
+                            onclick:getRecommend
                         },
+                        historyAction = element._c({
+                            nodeType:'div',style:'margin-right:10px;cursor:pointer;user-select: none;',
+                            className:'link-more',
+                            innerHTML:'<i class="icon" style="transform: rotate(180deg);"></i><span>上一批</span>',
+                            onclick:popHistory
+                        }),
                     ]
                 }
             ]
         });
         document.querySelector('#home_popularize').insertAdjacentElement('afterend',element.mainDiv);
         const listBox = element.mainDiv.querySelector('div.storey-box.clearfix');
-        updateRecommend();
-        function updateRecommend () {
-            let loading;
+        getRecommend();
+
+        //获取推荐视频数据
+        function getRecommend () {
+            let loadingDiv;
             element._s(listBox,{
                 innerHTML:'',
-                childs:[loading=element.getLoadingDiv()]
+                childs:[loadingDiv=element.getLoadingDiv()]
             });
             GM_xmlhttpRequest({
                 method: 'GET',
                 url: 'https://app.bilibili.com/x/feed/index?build=1&mobi_app=android&idx='
-                + (Date.now()/1000).toFixed(0) + (tools.accessKey?'&access_key='+tools.accessKey:''),
+                + (Date.now()/1000).toFixed(0) + (setting.accessKey?'&access_key='+setting.accessKey:''),
                 onload: res=>{
                     try {
                         const rep = JSON.parse(res.response);
                         if (rep.code!=0){
-                            loading.firstChild.innerText = `请求app首页失败 code ${rep.code}</br>msg ${rep.message}`;
+                            loadingDiv.firstChild.innerText = `请求app首页失败 code ${rep.code}</br>msg ${rep.message}`;
                             return console.error('请求app首页失败',rep);
                         }
-                        element._s(listBox,{
-                            innerHTML:'',
-                            childs:rep.data.map(data=>createItem(data))
-                        });
+                        updateRecommend(rep.data);
+                        loadingDiv.style.display = 'none';
                     } catch (e){
-                        loading.firstChild.innerText = `请求app首页发生错误 ${e}`;
+                        loadingDiv.firstChild.innerText = `请求app首页发生错误 ${e}`;
                         console.error(e,'请求app首页发生错误');
                     }
                 },
                 onerror: e=>{
-                    loading.firstChild.innerText = `请求app首页发生错误 ${e}`;
+                    loadingDiv.firstChild.innerText = `请求app首页发生错误 ${e}`;
                     console.error(e,'请求app首页发生错误');
                 }
             });
         }
 
-        function createItem (data){
-            return element._c({
+        //切换历史推荐
+        function popHistory () {
+            let loadingDiv;
+            element._s(listBox,{
+                innerHTML:'',
+                childs:[loadingDiv=element.getLoadingDiv()]
+            });
+            try{
+                if(!setting.historyData) {
+                    loadingDiv.firstChild.innerText = '没有历史数据，请点击换一批获取';
+                    return;
+                }
+                updateRecommend(setting.historyData);
+                loadingDiv.style.display = 'none';
+            } catch (e){
+                loadingDiv.firstChild.innerText = `加载历史数据发生错误 ${e}`;
+                console.error(e,'加载历史数据发生错误');
+            }
+        }
+
+        //显示推荐视频
+        function updateRecommend (datas){
+            if(historyData) setting.pushHistory(historyData);
+            historyData = datas;
+            historyAction.style.display = setting.historyData?'block':'none';
+            datas.forEach(data=>element._c({
                 nodeType:'div',
                 className:'spread-module',
                 childs:[{
@@ -261,7 +199,7 @@
                                     className:'watch-later-trigger w-later',
                                     onclick:tools.watchLater
                                 },
-                                (data.dislike_reasons&&tools.accessKey)?{
+                                (data.dislike_reasons&&setting.accessKey)?{
                                     nodeType:'div',innerText:'Ｘ',
                                     className:'dislike-botton',
                                     childs:[{
@@ -283,13 +221,15 @@
                         +`<span class="danmu"><i class="icon"></i>${tools.formatNumber(data.danmaku)}</span>`
                     ]
                 }],
-            });
+                parent:listBox
+            }));
         }
 
+        //提交不喜欢视频，视频数据提前绑定在页面元素上
         function dislike (ev) {
             let target=ev.target,parent=target.parentNode;
             let cancel;
-            let url = `${document.location.protocol}//app.bilibili.com/x/feed/dislike`;
+            let url = `https://app.bilibili.com/x/feed/dislike`;
             if (parent.className!='dislike-list'){
                 cancel = true;
                 let deep = 1;
@@ -307,7 +247,7 @@
             }
             url += `?goto=${parent.dataset.goto}&id=${parent.dataset.id}&mid=${parent.dataset.mid}`
                 +`&reason_id=${target.dataset.reason_id}&rid=${parent.dataset.rid}&tag_id=${parent.dataset.tag_id}`;
-            if (tools.accessKey) url += '&access_key='+ tools.accessKey;
+            if (setting.accessKey) url += '&access_key='+ setting.accessKey;
             const handleCover = ()=>{
                 if (cancel){
                     parent.removeChild(target);
@@ -347,6 +287,7 @@
         }
     }
 
+    //全站排行榜
     function InitRanking(){
         const rankingAll = element.mainDiv.querySelector('#ranking_douga');
         rankingAll.id = 'ranking-all';
@@ -355,11 +296,118 @@
         const tab = rankingHead.querySelector('.bili-tab.rank-tab');
         const dropDown = rankingHead.querySelector('.bili-dropdown.rank-dropdown');
         const warp = rankingAll.querySelector('.rank-list-wrap');
-        let type = 1;
-        let day = 3;
+        let type = 1,day = setting.rankingDay;
         const data = {1:{},2:{}};
         const loading = element.getLoadingDiv();
-        const updateItems = target =>{
+        const detail = {};
+        dropDown.firstChild.innerText = setting.rankingDays[day];
+        element._s(dropDown.lastChild,{
+            innerHTML:'',
+            childs:Object.entries(setting.rankingDays).map(([value,text])=>({
+                nodeType:'li',innerText:text,
+                dataset:{day:value},
+                style:value==day?'display:none':'',
+                className:'dropdown-item'
+            }))
+        });
+        //创建一个显示详情的浮窗
+        detail.div = element._c({
+            nodeType:'div',style:'display:none',
+            className:'video-info-module',
+            onmouseenter: ()=> (detail.div.style.display = 'block'),
+            onmouseleave: ()=> (detail.div.style.display = 'none'),
+            childs:[
+                '<style>.clearfix.v-data>div>span{display: block;margin-bottom: 4px;width: 100%;}.clearfix.v-data>div>span>span{width:100%}</style>',
+                (detail.title = element._c({nodeType:'a',className:'v-title',target:'_blank',style:'color:#000'})),
+                {
+                    nodeType:'div',
+                    className:'clearfix v-data',
+                    childs:[
+                        {
+                            nodeType:'span',
+                            className:'lazy-img',
+                            style:'width: 160px;',
+                            childs:[detail.img = element._c({nodeType:'img'})]
+                        },
+                        detail.watchLater = element._c({
+                            nodeType:'div',title:'添加到稍后再看',
+                            className:"watch-later-trigger w-later",
+                            style:'display: block; left: 14px; top: 44px;',
+                            onclick:tools.watchLater
+                        }),
+                        {
+                            nodeType:'div',
+                            style:'display: inline-block;vertical-align: top;width: 130px;margin-left:4px',
+                            childs:[
+                                {
+                                    nodeType:'span',className:'name',
+                                    childs:[
+                                        '<i class="icon" style="background-position: -282px -154px;"></i>',
+                                        detail.author = element._c({nodeType:'span'}),
+                                    ]
+                                },
+                                {
+                                    nodeType:'span',className:'play',
+                                    childs:[
+                                        '<i class="icon"></i>',
+                                        detail.play = element._c({nodeType:'span'}),
+                                    ]
+                                },
+                                {
+                                    nodeType:'span',className:'danmu',
+                                    childs:[
+                                        '<i class="icon"></i>',
+                                        detail.video_review = element._c({nodeType:'span'}),
+                                    ]
+                                },
+                                {
+                                    nodeType:'span',className:'coin',
+                                    childs:[
+                                        '<i class="icon"></i>',
+                                        detail.coins = element._c({nodeType:'span'}),
+                                    ]
+                                },
+                                {
+                                    nodeType:'span',
+                                    childs:[
+                                        '时长:',
+                                        detail.duration = element._c({nodeType:'span',style:'vertical-align:top'}),
+                                    ]
+                                },
+                                {
+                                    nodeType:'span',
+                                    childs:[
+                                        '综合评分:',
+                                        detail.pts = element._c({nodeType:'span',style:'vertical-align:top'}),
+                                    ]
+                                },
+                            ]
+                        },
+                    ]
+                }
+            ]
+        });
+        warp.insertBefore(detail.div,warp.lastChild);
+
+        //更新显示详情浮窗内容
+        function updateDetail(itemData,offsetTop){
+            Object.entries(detail).forEach(([key,item])=>{
+                if(key=='div') {
+                    item.style.top = offsetTop + 'px';
+                    item.style.display = 'block';
+                    item.style.left = rankingAll.offsetLeft + 'px';
+                }
+                else if(key=='img') item.src = `${itemData.pic.replace(/https?:/,'')}@160w_100h.${tools.imgType}`;
+                else if(key=='watchLater') item.dataset.aid = itemData.aid;
+                else {
+                    item.innerText = tools.formatNumber(itemData[key]);
+                    item.title = itemData[key];
+                }
+                if(key=='title') item.href = `/video/av${itemData.aid}/`;
+            })
+        };
+        //将排行数据显示到指定目标中
+        function showData(target){
             target.removeChild(loading);
             for (let i = 0;i<data[type][day].length;i++){
                 const itemData = data[type][day][i];
@@ -367,7 +415,11 @@
                     nodeType:'li',
                     className:i==0?'rank-item show-detail first highlight':i<3?'rank-item highlight':'rank-item',
                     childs:[
-                        `<i class="ri-num">${i+1}</i>`,
+                        {
+                            nodeType:'i',className:'ri-num',innerText:i+1,
+                            onmouseenter: (ev)=> updateDetail(itemData,ev.pageY),
+                            onmouseleave: ()=> (detail.div.style.display = 'none'),
+                        },
                         {
                             nodeType:'a', target:"_blank",
                             href:`/video/av${itemData.aid}/`,
@@ -388,38 +440,39 @@
                 });
             }
         };
-        const updateRanking = ()=>{
+        //获取排行数据，并调用显示内容
+        function updateRanking(){
             const target = type==1?warp.firstChild:warp.lastChild;
             while(target.firstChild) target.removeChild(target.firstChild);
             loading.firstChild.innerText = '正在加载...';
             target.appendChild(loading);
             rankingAll.lastChild.href = `/ranking/${type==1?'all':'origin'}/0/0/${day}/`;
-            if (!data[type][day]){
-                GM_xmlhttpRequest({
-                    method: 'GET',
-                    url: `${document.location.protocol}//api.bilibili.com/x/web-interface/ranking?rid=0&day=${day}&type=${type}&arc_type=0`,
-                    onload: res=>{
-                        try {
-                            const rep = JSON.parse(res.response);
-                            if (rep.code!=0){
-                                loading.firstChild.innerText = `请求排行榜失败 code ${rep.code}</br>msg ${rep.message}`;
-                                return console.log('请求app首页失败',rep);
-                            }
-                            data[type][day] = rep.data.list;
-                            updateItems(target);
-                        } catch (e){
-                            loading.firstChild.innerText = `请求排行榜发生错误 ${e}`;
-                            console.error('请求排行榜发生错误',e);
+            if (data[type][day]) return showData(target);
+            GM_xmlhttpRequest({
+                method: 'GET',
+                url: `https://api.bilibili.com/x/web-interface/ranking?rid=0&day=${day}&type=${type}&arc_type=0`,
+                onload: res=>{
+                    try {
+                        const rep = JSON.parse(res.response);
+                        if (rep.code!=0){
+                            loading.firstChild.innerText = `请求排行榜失败 code ${rep.code}</br>msg ${rep.message}`;
+                            return console.log('请求app首页失败',rep);
                         }
+                        data[type][day] = rep.data.list;
+                        showData(target);
+                    } catch (e){
+                        loading.firstChild.innerText = `请求排行榜发生错误 ${e}`;
+                        console.error('请求排行榜发生错误',e);
                     }
-                });
-            }else updateItems(target);
+                }
+            });
         };
-        const updateStatus = ev=>{
+        //更新页面排行显示状态，并调用更新显示视频
+        function updateStatus(ev){
             if (ev.target.className =='dropdown-item'){
                 dropDown.firstChild.innerText = ev.target.innerText;
-                [].forEach.call(dropDown.lastChild.childNodes,c => {c.style.display=c.style.display=='none'?'unset':'none';});
-                day = ev.target.innerText=='三日'?3:7;
+                [].forEach.call(dropDown.lastChild.childNodes,c => {c.style.display=c==ev.target?'none':'unset';});
+                day = ev.target.dataset.day;
             }else{
                 [].forEach.call(tab.childNodes,c=>{
                     if (c==ev.target) c.removeEventListener('mouseover',updateStatus);
@@ -436,6 +489,143 @@
         updateRanking();
     }
 
+    //设置，包含设置变量以及设置窗口和对应的方法
+    const setting = {
+        dialog:undefined,
+        actionButton:undefined,
+        historyData:JSON.parse(GM_getValue('historyRecommend','false')),
+        rankingDays:{1:'昨天',3:'三日',7:'一周',30:'一月'},
+        rankingDay:GM_getValue('rankingDay',3),
+        accessKey:GM_getValue('biliAppHomeKey'),
+        storageAccessKey(key){
+            if(key) {
+                GM_setValue('biliAppHomeKey',this.accessKey = key);
+            }
+            else {
+                delete this.accessKey;
+                GM_deleteValue('biliAppHomeKey');
+            }
+        },
+        pushHistory(data){
+            GM_setValue('historyRecommend',JSON.stringify(this.historyData = data));
+        },
+        show(){
+            if(this.dialog) return document.body.appendChild(this.dialog);
+            this.dialog = element._c({
+                nodeType:'div',
+                id:'biliAppHomeSetting',
+                style:'position: fixed;top: 0;bottom: 0;left: 0;right: 0;background: rgba(0,0,0,0.4);z-index: 10000;',
+                childs:[{
+                    nodeType:'div',
+                    style:'width:400px;right:0;left:0;position:absolute;padding:20px;background:#fff;border-radius:8px;margin:auto;transform:translate(0,50%);',
+                    childs:[
+                        '<h2 style="font-size: 20px;color: #4fc1e9;font-weight: 400;">APP首页推荐设置</h2>',
+                        {
+                            nodeType:'span',innerText:'Ｘ',
+                            style:"position: absolute;right: 15px;top: 15px;cursor: pointer;font-size: 20px;",
+                            onclick:()=>document.body.removeChild(this.dialog)
+                        },
+                        {
+                            nodeType:'div',style:'margin: 10px 0;',
+                            childs: [
+                                {
+                                    nodeType:'label',style:"margin-right: 5px;",
+                                    innerText:'全站排行默认显示:'
+                                },
+                                {
+                                    nodeType:'select',
+                                    onchange:({target})=>GM_setValue('rankingDay',(this.rankingDay = target.value)),
+                                    childs:Object.entries(this.rankingDays).map(([day,text])=>({
+                                        nodeType:'option',value:day,innerText:text,
+                                        style:"cursor:pointer;5px;vertical-align: middle;",
+                                    })),
+                                    value:this.rankingDay
+                                }
+                            ]
+                        },
+                        {
+                            nodeType:'div',style:'margin: 10px 0;',
+                            childs:[
+                                [
+                                    '目前获取根据个人观看喜好的APP首页数据和提交定制不喜欢的视频需要获取授权key。',
+                                    '点击获取授权将从官方授权接口获取一个授权key，获取的key保存在脚本管理器内。',
+                                    '如果不想使用授权，脚本仍然能从官方接口获取随机推荐视频，但内容可能不再根据个人喜好且无法提交不喜欢内容。',
+                                    '点击删除授权可从脚本管理器中删除已获取授权key，脚本将按照没有获取授权的情况执行。',
+                                    '授权key有效期大约一个月，如果看到奇怪的推荐提交不喜欢时遇到奇怪的错误可以尝试删除授权重新获取。'
+                                ].join('</br></br>')
+                            ]
+                        },
+                        {
+                            nodeType:'div',
+                            style:'text-align: right;line-height: 30px;',
+                            childs:[
+                                this.actionButton = element._c({
+                                    nodeType:'button',
+                                    style:'padding:0 20px;height:30px;background:#4fc1e9;color:white;border-radius:5px;border:none;cursor:pointer;left:20px;position:absolute;',
+                                    innerText:this.accessKey?'删除授权':'获取授权',
+                                    onclick:()=>this.handleKey()
+                                }),
+                                '<a href="https://github.com/indefined/UserScripts/issues" target="_blank" style="padding-left:20px;">github问题反馈</a>',
+                                `<a href="https://greasyfork.org/scripts/368446" target="_blank" style="padding-left:20px;">当前版本:${GM_info.script.version}</a>`
+                            ]
+                        }
+                    ]
+                }],
+                parent:document.body
+            });
+        },
+        handleKey(){
+            if (this.actionButton.innerText === '删除授权') {
+                this.storageAccessKey(undefined);
+                this.actionButton.innerText = '获取授权';
+                tools.toast('删除授权成功');
+                return;
+            }
+            else {
+                this.actionButton.innerText = '获取中...';
+                this.actionButton.onclick = undefined;
+                new Promise((resolve,reject)=>{
+                    GM_xmlhttpRequest({
+                        method: 'GET',timeout:5000,
+                        url:'https://passport.bilibili.com/login/app/third?appkey=27eb53fc9058f8c3'
+                        +'&api=http%3A%2F%2Flink.acg.tv%2Fsearch.php%3Fmod%3Dforum&sign=3c7f7018a38a3e674a8a778c97d44e67',
+                        onload: res=> {
+                            try{
+                                resolve(JSON.parse(res.response).data.confirm_uri)
+                            }
+                            catch(e){reject(e)}
+                        },
+                        onerror: e=>reject({msg:e.error,toString:()=>'请求接口错误'}),
+                        ontimeout: e=>reject({msg:e.error,toString:()=>'请求接口超时'})
+                    });
+                }).then(url=>new Promise((resolve,reject)=>{
+                    GM_xmlhttpRequest({
+                        method: 'GET',url,timeout:5000,
+                        onload: res=> {
+                            try{
+                                const key = res.finalUrl.match(/access_key=([0-9a-z]{32})/);
+                                if (key) {
+                                    this.storageAccessKey(key[1]);
+                                    tools.toast('获取授权成功');
+                                    this.actionButton.innerText = '删除授权';
+                                }
+                                resolve();
+                            }catch(e){reject(e)}
+                        },
+                        onerror: e=>reject({msg:e.error,toString:()=>'获取授权错误'}),
+                        ontimeout: e=>reject({msg:e.error,toString:()=>'获取授权超时'})
+                    });
+                })).catch(error=> {
+                    this.actionButton.innerText = '获取授权';
+                    tools.toast('获取授权失败:'+error,error);
+                }).then(()=>{
+                    this.actionButton.onclick = this.handleKey;
+                });
+            }
+        }
+    };
+
+    //页面元素助手，包含克隆的一个未初始化版块和创建、设置页面元素的简单封装
     const element = {
         mainDiv:(()=>{
             try{
@@ -483,18 +673,8 @@
         }
     };
 
+    //一些通用模块
     const tools = {
-        accessKey:GM_getValue('biliAppHomeKey'),
-        storageAccessKey(key){
-            if(key) {
-                this.accessKey = key;
-                GM_setValue('biliAppHomeKey',key);
-            }
-            else {
-                delete this.accessKey;
-                GM_deleteValue('biliAppHomeKey');
-            }
-        },
         token:(()=>{
             try{
                 return document.cookie.match(/bili_jct=([0-9a-fA-F]{32})/)[1];
@@ -563,6 +743,7 @@
         }
     };
 
+    //初始化
     if (element.mainDiv){
         try{
             InitRecommend();
