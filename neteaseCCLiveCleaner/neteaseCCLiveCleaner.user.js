@@ -2,7 +2,7 @@
 // @name         网易CC直播净化
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.1.1
+// @version      0.1.2
 // @description  自定义屏蔽CC直播HTML5网页大部分不想看到的东西
 // @author       indefined
 // @match        *://cc.163.com/*
@@ -84,6 +84,10 @@ body:not(.blizzardtv-iframe-body) .main-wrapper {
 }
 .collapse .side-nav-container+.main-container {
     padding-left: 20px;
+}
+/*强制播放器主体无外边距*/
+main.room-main-container {
+    padding: 0 20px 0 0!important;
 }
 `
         },
