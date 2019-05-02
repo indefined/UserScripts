@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.5
+// @version      0.5.6
 // @description  加载本地字幕/下载CC字幕，旧版播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -78,6 +78,12 @@
 1 0 0 1-1.414 1.414L15.172 18zM4.962 7.79C4.385 8.141 4 8.776 4 9.5v3a2 2 0 0 0 2 2h3a1 1 0 0 0 0-2H7a1 1 0 0 1\
 -1-1v-1a1 1 0 0 1 .713-.958L4.962 7.79zM6.828 4H18a2 2 0 0 1 2 2v10c0 .34-.084.658-.233.938l-2.48-2.48A1 1 0 0 \
 0 17 12.5h-1.672L14 11.172V10.5a1 1 0 0 1 1-1h2a1 1 0 0 0 0-2h-3a2 2 0 0 0-1.977 1.695L6.828 4z" fill="#fff" \
+fill-rule="evenodd"></path></svg></span>`,
+        newEnableIcon:`
+<span class="bp-svgicon"><svg width="22" height="22" viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg">\
+<path d="M4 4h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm5 5.5a1 1 0 1 0 0-2H6a2 \
+2 0 0 0-2 2v3a2 2 0 0 0 2 2h3a1 1 0 0 0 0-2H7a1 1 0 0 1-1-1v-1a1 1 0 0 1 1-1h2zm8 0a1 1 0 0 0 0-2h-3a2 \
+2 0 0 0-2 2v3a2 2 0 0 0 2 2h3a1 1 0 0 0 0-2h-2a1 1 0 0 1-1-1v-1a1 1 0 0 1 1-1h2z" fill="#fff" \
 fill-rule="evenodd"></path></svg></span>`,
         createAs(nodeType,config,appendTo){
             const element = document.createElement(nodeType);
@@ -285,7 +291,9 @@ fill-rule="evenodd"></path></svg></span>`,
         reader:undefined,
         file:undefined,
         data:undefined,
-        show(){
+        statusHandler:undefined,
+        show(handler){
+            this.statusHandler = handler;
             if(!this.dialog){
                 this.moveAction = ev=>this.dialogMove(ev);
                 this.dialog = elements.createAs('div',{
@@ -379,6 +387,7 @@ fill-rule="evenodd"></path></svg></span>`,
                         content
                     }))
                 });
+                if('function'==typeof(this.statusHandler)) this.statusHandler(true);
                 bilibiliCCHelper.toast(`载入本地字幕:${this.file.name},共${this.data.body.length}行,偏移:${offset}s`);
             }
             catch(e){
@@ -541,21 +550,25 @@ fill-rule="evenodd"></path></svg></span>`,
                 this.downloadBtn.classList.add('bpui-state-disabled','bpui-button-icon');
                 this.icon.innerHTML = elements.oldDisableIcon;
             }
+            else if(value=='local') {
+                //本地字幕解码器产生加载事件后再切换状态
+                decoder.show((status)=>{
+                    if(status==true){
+                        this.downloadBtn.classList.add('bpui-state-disabled','bpui-button-icon');
+                        this.isclosed = false;
+                        this.selectedLan = value;
+                        this.icon.innerHTML = elements.oldEnableIcon;
+                    }
+                });
+            }
             else{
                 this.isclosed = false;
                 this.selectedLan = value;
                 this.icon.innerHTML = elements.oldEnableIcon;
-                if(value=='local') {
-                    decoder.show();
-                    this.downloadBtn.classList.add('bpui-state-disabled','bpui-button-icon');
-                }
-                else {
-                    //更换本地字幕不切换设置中的字幕开关状态
-                    this.setting.lan = value;
-                    this.setting.isclosed = false;
-                    bilibiliCCHelper.loadSubtitle(value);
-                    this.downloadBtn.classList.remove('bpui-state-disabled','bpui-button-icon');
-                }
+                this.setting.lan = value;
+                this.setting.isclosed = false;
+                bilibiliCCHelper.loadSubtitle(value);
+                this.downloadBtn.classList.remove('bpui-state-disabled','bpui-button-icon');
             }
         },
         toggleSubtitle(){
@@ -753,8 +766,13 @@ fill-rule="evenodd"></path></svg></span>`,
             elements.setAs(localItem,{
                 innerText: '本地字幕',
                 onclick: ()=> {
-                    this.selectedLocal = true;
-                    decoder.show();
+                    decoder.show((status)=>{
+                        if(status==true){
+                            this.selectedLocal = true;
+                            this.downloadBtn.classList.add('bui-button-disabled','bpui-button-icon');
+                            this.icon.innerHTML = elements.newEnableIcon;
+                        }
+                    });
                 }
             },selector);
             //选中本地字幕后关闭需要手动执行
@@ -762,6 +780,7 @@ fill-rule="evenodd"></path></svg></span>`,
                 if(!this.selectedLocal) return;
                 this.selectedLocal = false;
                 bilibiliCCHelper.loadSubtitle('close');
+                this.icon.innerHTML = elements.newDisableIcon;
             });
             //视频本身没有字幕时，点击CC字幕按钮切换本地字幕和关闭
             //视频本身有字幕时播放器自身会切换到视频自身字幕
