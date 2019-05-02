@@ -2,8 +2,8 @@
 // @name         HTML5视频截图器
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.3.8
-// @description  基于HTML5的简单任意原生视频截图，可简单控制快进/逐帧/视频调速
+// @version      0.3.9
+// @description  基于HTML5的简单任意原生视频截图，可控制快进/逐帧/视频调速
 // @author       indefined
 // @include      *://*
 // @run-at       document-idle
@@ -41,13 +41,11 @@ function HTML5VideoCapturer(){
     function videoPlay(){
         if (!video) return postMsg('play');
         video.paused?video.play():video.pause();
-        videoStatusUpdate();
     }
 
     function videoSpeedChange(speed){
         if (!video) return postMsg('speed',speed);
         video.playbackRate = speed;
-        videoStatusUpdate();
     }
 
     function videoStep(offset){
@@ -88,8 +86,16 @@ function HTML5VideoCapturer(){
     }
     function videoSelect(id){
         selectId = id;
+        if(video) {
+            video.removeEventListener('play',videoStatusUpdate);
+            video.removeEventListener('pause',videoStatusUpdate);
+            video.removeEventListener('ratechange',videoStatusUpdate);
+        }
         if (videos[id]){
             video = videos[id];
+            video.addEventListener('play',videoStatusUpdate);
+            video.addEventListener('pause',videoStatusUpdate);
+            video.addEventListener('ratechange',videoStatusUpdate);
             video.scrollIntoView();
             videoStatusUpdate();
         }
