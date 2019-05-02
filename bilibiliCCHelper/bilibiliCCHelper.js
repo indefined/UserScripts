@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.4
-// @description  旧版播放器可启用CC字幕，HTML5播放器可载入本地字幕/下载字幕
+// @version      0.5.5
+// @description  加载本地字幕/下载CC字幕，旧版播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
 // @include      http*://www.bilibili.com/video/av*
@@ -210,19 +210,19 @@ fill-rule="evenodd"></path></svg></span>`,
             },bottomPanel);
             //下载
             this.actionButton = elements.createAs('a',{
-                className: 'bpui-button bpui-state-disabled',
+                className: 'bpui-button bpui-state-disabled bui bui-button bui-button-disabled bui-button-blue',
                 innerText: "下载",style: 'height: 24px;margin-right: 5px;'
             },bottomPanel);
             //关闭
             elements.createAs('button',{
-                innerText: "关闭",className: "bpui-button",
+                innerText: "关闭",className: "bpui-button bui bui-button bui-button-blue",style:'border:none',
                 onclick: ()=>document.body.removeChild(settingDiv)
             },bottomPanel);
         },
         updateDownload(result,type){
             this.textArea.value = result;
             URL.revokeObjectURL(this.actionButton.href);
-            this.actionButton.classList.remove('bpui-state-disabled');
+            this.actionButton.classList.remove('bpui-state-disabled','bui-button-disabled');
             this.actionButton.href = URL.createObjectURL(new Blob([result],{type:'text/'+type}));
             this.actionButton.download = `${document.title}.${type}`;
         },
@@ -296,11 +296,10 @@ fill-rule="evenodd"></path></svg></span>`,
                     +'.bpui-selectmenu-arrow:hover + ul.bpui-selectmenu-list.bpui-selectmenu-list-left,'
                     +'ul.bpui-selectmenu-list.bpui-selectmenu-list-left:hover {display: block;}</style>'
                 },elements.getAs('#bilibiliPlayer'));
-                //标题栏，可拖动对话框，双击恢复字幕时间偏移
+                //标题栏，可拖动对话框
                 elements.createAs('div',{
                     style:"margin-bottom: 5px;cursor:move;user-select:none;line-height:1;",
                     innerText:'本地字幕选择',
-                    ondblclick:()=> +this.offset.value&&this.handleSubtitle(this.offset.value=0),
                     onmousedown:this.moveAction
                 },this.dialog);
                 //选择字幕，保存文件对象并调用处理文件
@@ -320,16 +319,20 @@ fill-rule="evenodd"></path></svg></span>`,
                     oninput:  ({target})=> this.readFile(this.encoding = target.value)
                 },this.dialog);
                 //字幕偏移，保存DOM对象以便修改显示偏移，更改时调用字幕处理显示
-                elements.createAs('label',{style: "margin-left: 10px;",innerText: '时间偏移(s)'},this.dialog);
+                elements.createAs('label',{
+                    style: "margin-left: 10px;",innerText: '时间偏移(s)',title:'字幕相对于视频的时间偏移，双击此标签复位时间偏移',
+                    ondblclick:()=> +this.offset.value&&this.handleSubtitle(this.offset.value=0)
+                },this.dialog);
                 this.offset = elements.createAs('input',{
                     style: "margin-left: 10px;width: 50px;border: 1px solid #ccd0d7;border-radius: 4px;line-height: 20px;",
                     type:'number', step:0.5, value:0,
-                    title:'字幕相对于视频的时间偏移，负值表示将字幕延后，正值将字幕提前\r\n双击面板标题复位时间偏移',
+                    title:'负值表示将字幕延后，正值将字幕提前',
                     oninput:  ()=> this.handleSubtitle()
                 },this.dialog);
                 //关闭按钮
                 elements.createAs('button',{
-                    style: "margin-left: 10px;",className:'bpui-button',innerText: '关闭面板',
+                    style: "margin-left: 10px;border:none;",innerText: '关闭面板',
+                    className:'bpui-button bui bui-button bui-button-blue',
                     onclick:  ()=> elements.getAs('#bilibiliPlayer').removeChild(this.dialog)
                 },this.dialog);
                 //文件读取器，载入文件
@@ -422,13 +425,13 @@ fill-rule="evenodd"></path></svg></span>`,
                 });
             });
             return {
-                body:data.sort((a,b)=>a.time-b.time).reduce((result,item,index)=>(
-                   item.content!=''&&result.push({
+                body:data.sort((a,b)=>a.time-b.time).map((item,index)=>(
+                    item.content!=''&&{
                         from:item.time,
                         to:index==data.length-1?item.time+20:data[index+1].time,
                         content:item.content
-                    }),result
-                ),[])
+                    }
+                )).filter(item=>item)
             };
         },
         decodeFromSRT(input){

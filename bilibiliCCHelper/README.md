@@ -14,10 +14,12 @@ bilibili CC字幕工具
 
 - 旧版HTML5播放器支持使用CC字幕
   - 可配置语言/字体/背景/阴影等
-- 新/旧版HTML5播放器可用CC字幕下载
+- CC字幕下载
+  - 新/旧版HTML5播放器可用
   - 支持ASS/SRT/LRC/BCC/TXT纯文本格式
   - 默认系统编码，CR/LF换行
-- 新/旧版HTML5播放器可载入本地字幕
+- 载入本地字幕
+  - 新/旧版HTML5播放器可用
   - 支持ASS/SRT/LRC/BCC/SBV/VTT格式
   - 支持字幕偏移调整，支持读取LRC歌词内置偏移
   - 支持UTF-8/GB18030/BIG5/UNICODE/JIS/EUC-KR编码
