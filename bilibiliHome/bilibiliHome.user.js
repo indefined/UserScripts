@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.5.1
+// @version      0.5.2
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -68,11 +68,6 @@
 #ranking-all ul.rank-list {
     height: 320px;
     overflow-y: auto;
-    -moz-overflow-y: scrollbars-none;
-    -ms-overflow-style:none;
-}
-#recommend ::-webkit-scrollbar{
-    width:0px;
 }
 #ranking-all .rank-list .rank-item.show-detail .ri-detail{
     width: calc(100% - 90px) !important;
@@ -101,17 +96,21 @@
                 }
             ]
         });
-        const listBox = element.mainDiv.querySelector('div.storey-box.clearfix');
-        element._s(listBox,{
-            style:'overflow-y: auto;-moz-overflow-y: scrollbars-none;-ms-overflow-style:none;',
-            innerHTML:''
+        const scrollBox = element.mainDiv.querySelector('div.storey-box.clearfix');
+        let listBox;
+        element._s(scrollBox,{
+            innerHTML:'',style:'overflow-y: auto;',
+            childs:[listBox = element._c({
+                nodeType:'div',className:scrollBox.className,
+                id:'recommend-list',style:'overflow-y: visible;width:calc(100% + 20px)'
+            })]
         });
         const moreButton = element._c({
             nodeType:'div',className:"clearfix",
-            innerHTML:'<div class="load-state" style="cursor: pointer;">加载更多</div>',
+            innerHTML:'<div class="load-state" style="cursor: pointer;padding:4px">加载更多</div>',
             onclick:getRecommend
         });
-        listBox.insertAdjacentElement('afterend',moreButton);
+        scrollBox.insertAdjacentElement('afterend',moreButton);
         document.querySelector('#home_popularize').insertAdjacentElement('afterend',element.mainDiv);
         if(setting.historyData) updateRecommend(setting.historyData);
         if(!setting.historyData.length||!setting.noAutoFresh) getRecommend();
@@ -181,7 +180,7 @@
                                             nodeType:'div',
                                             dataset:{reason_id:reason.reason_id},
                                             innerText:reason.reason_name,
-                                            title:`标记因为【${reason.reason_name}】不喜欢`,
+                                            title:`提交因为【${reason.reason_name}】不喜欢`,
                                             onclick:dislike,
                                         }))
                                     }]
@@ -196,6 +195,7 @@
                 parent:listBox
             }));
             listBox.scrollTop = listBox.scrollHeight;
+            scrollBox.scrollTop = scrollBox.scrollHeight;
         }
 
         //提交不喜欢视频，视频数据提前绑定在页面元素上
@@ -290,7 +290,7 @@
             onmouseenter: ()=> (detail.div.style.display = 'block'),
             onmouseleave: ()=> (detail.div.style.display = 'none'),
             childs:[
-                '<style>.clearfix.v-data>div>span{display: block;margin-bottom: 4px;width: 100%;}.clearfix.v-data>div>span>span{width:100%}</style>',
+                '<style>.clearfix.v-data>div>span{display: block;margin-bottom: 4px;width: 100%;}',
                 (detail.title = element._c({nodeType:'a',className:'v-title',target:'_blank',style:'color:#000'})),
                 {
                     nodeType:'div',
@@ -310,7 +310,7 @@
                         }),
                         {
                             nodeType:'div',
-                            style:'display: inline-block;vertical-align: top;width: 130px;margin-left:4px',
+                            style:'display: inline-block;vertical-align: top;width: 130px;margin-left:3px',
                             childs:[
                                 {
                                     nodeType:'span',className:'name',
@@ -468,6 +468,7 @@
         historyData:JSON.parse(GM_getValue('historyRecommend','[]')),
         historyLimit:+GM_getValue('historyLimit')||10,
         noAutoFresh:!!GM_getValue('noAutoFresh'),
+        noScrollBar:!!GM_getValue('noScrollBar'),
         rankingDays:{1:'昨天',3:'三日',7:'一周',30:'一月'},
         rankingDay:GM_getValue('rankingDay',3),
         accessKey:GM_getValue('biliAppHomeKey'),
@@ -492,6 +493,17 @@
         setNoAutoFresh(status){
             GM_setValue('noAutoFresh',this.noAutoFresh=+status);
         },
+        setScrollBar(status=this.noScrollBar){
+            if(!this.styleDiv) {
+                this.styleDiv = element._c({
+                    nodeType:'style',
+                    parent:document.head
+                });
+            }
+            this.styleDiv.innerHTML = !status?`#recommend #recommend-list{height:unset!important}`
+            :`#ranking-all .rank-list-wrap{width:calc(200% + 40px)}#ranking-all .rank-list-wrap.show-origin{margin-left:calc(-100% - 20px)}`;
+            if(status!=this.noScrollBar) GM_setValue('noScrollBar',this.noScrollBar=+status);
+        },
         show(){
             if(this.dialog) return document.body.appendChild(this.dialog);
             this.dialog = element._c({
@@ -500,7 +512,7 @@
                 style:'position: fixed;top: 0;bottom: 0;left: 0;right: 0;background: rgba(0,0,0,0.4);z-index: 10000;',
                 childs:[{
                     nodeType:'div',
-                    style:'width:250px;right:0;left:0;position:absolute;padding:20px;background:#fff;border-radius:8px;margin:auto;transform:translate(0,50%);',
+                    style:'width:200px;right:0;left:0;position:absolute;padding:20px;background:#fff;border-radius:8px;margin:auto;transform:translate(0,50%);',
                     childs:[
                         {
                             nodeType:'h2',innerText:'APP首页推荐设置',
@@ -532,11 +544,11 @@
                                 '<label style="margin-right: 5px;">保存历史推荐数量:</label>',
                                 `<span style="margin-right: 5px;color:#00f" title="${[
                                     '保存的推荐可在下次打开网页时向上滚动显示',
-                                    '提交不喜欢的状态不会被保存，但是没有必要再次提交不喜欢',
+                                    '提交不喜欢的状态不会被保存在本地，但是已经提交给服务器所以没有必要再次提交',
                                     '每10条推荐占用空间约2KB，注意不要保存太多以免拖慢脚本管理器'
                                 ].join('\r\n')}">(?)</span>`,
                                 {
-                                    nodeType:'input',type:'number',value:this.historyLimit,min:0,step:1,
+                                    nodeType:'input',type:'number',value:this.historyLimit,min:0,step:10,
                                     onchange:({target})=>this.setHistoryLimit(target.value),
                                     style:'width:50px'
                                 },
@@ -546,10 +558,22 @@
                             nodeType:'div',style:'margin: 10px 0;',
                             childs: [
                                 '<label style="margin-right: 5px;">不自动刷新推荐:</label>',
-                                '<span style="margin-right: 5px;color:#00f" title="不勾选则显示上次保存的历史推荐，加载新数据需手动点击加载更多，无历史推荐时此项无效。">(?)</span>',
+                                '<span style="margin-right: 5px;color:#00f" title="勾选此项则打开首页时显示上次保存的历史推荐，加载新数据需手动点击加载更多\r\n无历史推荐时此项无效">(?)</span>',
                                 {
                                     nodeType:'input',type:'checkbox',checked:this.noAutoFresh,
                                     onchange:({target})=>this.setNoAutoFresh(target.checked),
+                                    style:'vertical-align: bottom',
+                                },
+                            ]
+                        },
+                        {
+                            nodeType:'div',style:'margin: 10px 0;',
+                            childs: [
+                                '<label style="margin-right: 5px;">不显示滚动条:</label>',
+                                '<span style="margin-right: 5px;color:#00f" title="勾选此项将不显示滚动条，但是列表仍然可以滚动">(?)</span>',
+                                {
+                                    nodeType:'input',type:'checkbox',checked:this.noScrollBar,
+                                    onchange:({target})=>this.setScrollBar(target.checked),
                                     style:'vertical-align: bottom',
                                 },
                             ]
@@ -568,7 +592,7 @@
                                 ].join('\r\n')}">(?)</span>`,
                                 {
                                     nodeType:'button',
-                                    style:'padding:0 20px;height:30px;background:#4fc1e9;color:white;border-radius:5px;border:none;cursor:pointer;',
+                                    style:'padding:0 15px;height:30px;background:#4fc1e9;color:white;border-radius:5px;border:none;cursor:pointer;',
                                     innerText:this.accessKey?'删除授权':'获取授权',
                                     onclick:({target})=>this.handleKey(target)
                                 },
@@ -758,6 +782,7 @@
     //初始化
     if (element.mainDiv){
         try{
+            setting.setScrollBar();
             InitRecommend();
             InitRanking();
         }catch(e){

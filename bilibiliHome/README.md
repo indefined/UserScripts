@@ -20,7 +20,7 @@ B站网页端添加APP首页推荐
 ![图片预览](https://greasyfork.org/system/screenshots/screenshots/000/011/238/original/bilibiliHome.user.jpg)
 
 -------------------------
-## 设置说明
+## 授权说明
 
 - 目前获取根据个人观看喜好的APP首页数据和提交定制不喜欢的视频需要获取授权key。
 - 点击获取授权将从官方授权接口获取一个授权key，获取的key保存在脚本管理器内。
