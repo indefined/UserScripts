@@ -2,7 +2,7 @@
 // @name         网易CC直播净化
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.1.2
+// @version      0.1.3
 // @description  自定义屏蔽CC直播HTML5网页大部分不想看到的东西
 // @author       indefined
 // @match        *://cc.163.com/*
@@ -25,51 +25,42 @@
         miniBorder:{
             title:'缩小播放器边距',
             style:`
-/*网页标题栏高度*/
+/*网页导航栏高度调整*/
 div#header {
-    height: 30px !important;
+    height: 40px !important;
 }
-.header-center {
+.header-center,
+.menu-location,
+.user-do-item:not(#searchBoss),
+.user-do-item .def-font,
+.my-info-label{
+    line-height: 30px !important;
     height: 30px !important;
-}
-.hover-list {
-    top: 30px;
 }
 .padding-block .location-item {
     margin: 0 5px;
-    font-size: 15px;
 }
 .padding-block .menu-classification {
     padding: 0;
 }
-.menu-location {
-    height: 30px !important;
-}
 div#searchBoss {
-    margin: 0;
+    margin: -3px 0 0 0;
 }
-.user-do-item {
-    line-height: 30px !important;
+.my-info-label .my-info-portrait {
+    margin-top: 0 !important;
 }
 .anchor-live {
     margin: 0 10px;
 }
-.header-match-rcm-imgs,
-.header-match-rcm-imgs .match-rcm-imgs-list .match-rcm-imgs-item,
-.header-match-rcm-imgs .match-rcm-imgs-list .match-rcm-imgs-item a,
-.header-match-rcm-imgs .match-rcm-imgs-list .match-rcm-imgs-item img {
-    height: 16px;
-    width: 25px;
+.hover-list {
+    top: 33px;
 }
-.header-match-rcm-imgs .match-rcm-imgs-list .match-rcm-imgs-item img {
-    background-size: cover;
-}
-.header-match-rcm-imgswrap .match-arrow-left {
-    margin-top: 6px !important;
+.header-match-rcm-imgswrap {
+    margin-top: -2px;
 }
 /*缩小标题栏高度后增加主框体高度*/
 body:not(.blizzardtv-iframe-body) .main-container {
-    height: calc(100% - 30px) !important;
+    height: calc(100% - 40px) !important;
 }
 /*主框体对齐到顶部*/
 body:not(.blizzardtv-iframe-body) .main-wrapper {
@@ -87,7 +78,11 @@ body:not(.blizzardtv-iframe-body) .main-wrapper {
 }
 /*强制播放器主体无外边距*/
 main.room-main-container {
-    padding: 0 20px 0 0!important;
+    padding: 0 !important;
+}
+/*解除网页宽度限制*/
+body.normal-game-room{
+   min-width: unset !important;
 }
 `
         },
