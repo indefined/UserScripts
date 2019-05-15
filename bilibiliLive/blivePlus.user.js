@@ -64,7 +64,8 @@ const helper = {
         });
         document.body.appendChild(toast);
         setTimeout(()=>document.body.removeChild(toast),3000);
-    }
+    },
+    isFirefox:navigator.userAgent.indexOf('Firefox')!=-1
 };
 
 const LiveHelper = {
@@ -451,6 +452,12 @@ body.fullscreen-fix div#gift-control-vm {
                 else if(targetName=='title') await this.listTitle(data);
             }).then(()=>{
                 this.loadingDiv.style = 'display:none';
+                if(helper.isFirefox && (this.dialogPanel.scrollHeight>this.dialogPanel.clientHeight)) {
+                    this.dialogPanel.style.width = this.dialogPanel.offsetWidth + 20 + 'px';
+                }
+                else {
+                    this.dialogPanel.style.width = 'unset';
+                }
             }).catch (e=>{
                 this.loadingDiv.innerHTML = `<p class="des">解析返回错误${e}～</p>`;
                 console.error(e);
