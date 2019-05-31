@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.5.2
+// @version      0.5.3
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -66,7 +66,6 @@
     z-index: 2;
 }
 #ranking-all ul.rank-list {
-    height: 320px;
     overflow-y: auto;
 }
 #ranking-all .rank-list .rank-item.show-detail .ri-detail{
@@ -113,7 +112,7 @@
         scrollBox.insertAdjacentElement('afterend',moreButton);
         document.querySelector('#home_popularize').insertAdjacentElement('afterend',element.mainDiv);
         if(setting.historyData) updateRecommend(setting.historyData);
-        if(!setting.historyData.length||!setting.noAutoFresh) getRecommend();
+        for(let i=0;i<setting.autoFreshCount;i++) getRecommend();
 
         //获取推荐视频数据
         function getRecommend () {
@@ -466,8 +465,9 @@
     const setting = {
         dialog:undefined,
         historyData:JSON.parse(GM_getValue('historyRecommend','[]')),
-        historyLimit:+GM_getValue('historyLimit')||10,
-        noAutoFresh:!!GM_getValue('noAutoFresh'),
+        historyLimit:isNaN(+GM_getValue('historyLimit'))?10:+GM_getValue('historyLimit'),
+        autoFreshCount:isNaN(+GM_getValue('autoFreshCount'))?1:+GM_getValue('autoFreshCount'),
+        boxHeight:+GM_getValue('boxHeight')||2,
         noScrollBar:!!GM_getValue('noScrollBar'),
         rankingDays:{1:'昨天',3:'三日',7:'一周',30:'一月'},
         rankingDay:GM_getValue('rankingDay',3),
@@ -490,19 +490,33 @@
             GM_setValue('historyLimit',this.historyLimit = +limit);
             this.pushHistory([]);
         },
-        setNoAutoFresh(status){
-            GM_setValue('noAutoFresh',this.noAutoFresh=+status);
+        setAutoFreshCount(count){
+            GM_setValue('autoFreshCount',this.autoFreshCount = +count);
         },
-        setScrollBar(status=this.noScrollBar){
+        setBoxHeight(line){
+            GM_setValue('boxHeight',this.boxHeight=+line);
+            this.setStyle();
+        },
+        setScrollBar(status){
+            GM_setValue('noScrollBar',this.noScrollBar=+status);
+            this.setStyle();
+        },
+        setStyle(){
             if(!this.styleDiv) {
                 this.styleDiv = element._c({
                     nodeType:'style',
                     parent:document.head
                 });
             }
-            this.styleDiv.innerHTML = !status?`#recommend #recommend-list{height:unset!important}`
-            :`#ranking-all .rank-list-wrap{width:calc(200% + 40px)}#ranking-all .rank-list-wrap.show-origin{margin-left:calc(-100% - 20px)}`;
-            if(status!=this.noScrollBar) GM_setValue('noScrollBar',this.noScrollBar=+status);
+            if(this.noScrollBar) {
+                this.styleDiv.innerHTML = '#ranking-all .rank-list-wrap{width:calc(200% + 40px)}'
+                    + '#ranking-all .rank-list-wrap.show-origin{margin-left:calc(-100% - 20px)}';
+            }
+            else {
+                this.styleDiv.innerHTML = '#recommend #recommend-list{height:unset!important}';
+            }
+            this.styleDiv.innerHTML += `#recommend  .storey-box {height:calc(336px / 2 * ${this.boxHeight})}`
+                + `#ranking-all ul.rank-list{height:calc(336px / 2 * ${this.boxHeight} - 16px)}`;
         },
         show(){
             if(this.dialog) return document.body.appendChild(this.dialog);
@@ -541,7 +555,7 @@
                         {
                             nodeType:'div',style:'margin: 10px 0;',
                             childs: [
-                                '<label style="margin-right: 5px;">保存历史推荐数量:</label>',
+                                '<label style="margin-right: 5px;">保存推荐数量:</label>',
                                 `<span style="margin-right: 5px;color:#00f" title="${[
                                     '保存的推荐可在下次打开网页时向上滚动显示',
                                     '提交不喜欢的状态不会被保存在本地，但是已经提交给服务器所以没有必要再次提交',
@@ -557,13 +571,25 @@
                         {
                             nodeType:'div',style:'margin: 10px 0;',
                             childs: [
-                                '<label style="margin-right: 5px;">不自动刷新推荐:</label>',
-                                '<span style="margin-right: 5px;color:#00f" title="勾选此项则打开首页时显示上次保存的历史推荐，加载新数据需手动点击加载更多\r\n无历史推荐时此项无效">(?)</span>',
+                                '<label style="margin-right: 5px;">自动刷新页数:</label>',
+                                '<span style="margin-right: 5px;color:#00f" title="每次打开首页时自动加载的新推荐页数，每页10条">(?)</span>',
                                 {
-                                    nodeType:'input',type:'checkbox',checked:this.noAutoFresh,
-                                    onchange:({target})=>this.setNoAutoFresh(target.checked),
-                                    style:'vertical-align: bottom',
-                                },
+                                    nodeType:'input',type:'number',value:this.autoFreshCount,min:0,step:1,
+                                    onchange:({target})=>this.setAutoFreshCount(+target.value),
+                                    style:'width:50px'
+                                }
+                            ]
+                        },
+                        {
+                            nodeType:'div',style:'margin: 10px 0;',
+                            childs: [
+                                '<label style="margin-right: 5px;">显示推荐高度:</label>',
+                                '<span style="margin-right: 5px;color:#00f" title="显示推荐框的行数，超出的推荐内容会产生滚动条来容纳">(?)</span>',
+                                {
+                                    nodeType:'input',type:'number',value:this.boxHeight,min:2,step:2,
+                                    onchange:({target})=>this.setBoxHeight(+target.value),
+                                    style:'width:50px'
+                                }
                             ]
                         },
                         {
@@ -782,7 +808,7 @@
     //初始化
     if (element.mainDiv){
         try{
-            setting.setScrollBar();
+            setting.setStyle();
             InitRecommend();
             InitRanking();
         }catch(e){
