@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.5.3
+// @version      0.5.4
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -90,6 +90,12 @@
                             className:'link-more',style:'cursor:pointer;user-select: none;',
                             innerHTML:'<span>设置  </span><i class="icon"></i>',
                             onclick:()=>setting.show()
+                        },
+                        {
+                            nodeType:'div',
+                            className:'read-push',style:'cursor:pointer;user-select: none;',
+                            innerHTML:'<i class="icon icon_read"></i><span class="info">加载更多</span>',
+                            onclick:getRecommend
                         }
                     ]
                 }
@@ -101,13 +107,18 @@
             innerHTML:'',style:'overflow-y: auto;',
             childs:[listBox = element._c({
                 nodeType:'div',className:scrollBox.className,
-                id:'recommend-list',style:'overflow-y: visible;width:calc(100% + 20px)'
+                id:'recommend-list',style:'overflow-y: visible;width:calc(100% + 20px)',
+                innerHTML:'<span style="display:none">empty</span>'
             })]
         });
         const moreButton = element._c({
             nodeType:'div',className:"clearfix",
-            innerHTML:'<div class="load-state" style="cursor: pointer;padding:4px">加载更多</div>',
-            onclick:getRecommend
+            innerHTML:'<div class="load-state" style="cursor: pointer;padding:4px">回到推荐顶部</div>',
+            onclick:()=>{
+                listBox.scrollTop = 0;
+                scrollBox.scrollTop = 0;
+                element.mainDiv.scrollIntoView();
+            }
         });
         scrollBox.insertAdjacentElement('afterend',moreButton);
         document.querySelector('#home_popularize').insertAdjacentElement('afterend',element.mainDiv);
@@ -117,7 +128,7 @@
         //获取推荐视频数据
         function getRecommend () {
             let loadingDiv;
-            listBox.appendChild(loadingDiv=element.getLoadingDiv('recommend'));
+            listBox.insertAdjacentElement('afterBegin',loadingDiv=element.getLoadingDiv('recommend'));
             GM_xmlhttpRequest({
                 method: 'GET',
                 url: 'https://app.bilibili.com/x/feed/index?build=1&mobi_app=android&idx='
@@ -146,7 +157,8 @@
 
         //显示推荐视频
         function updateRecommend (datas){
-            datas.forEach(data=>element._c({
+            const point = listBox.firstChild;
+            datas.forEach(data=>point.insertAdjacentElement('beforeBegin',element._c({
                 nodeType:'div',
                 className:'spread-module',
                 childs:[{
@@ -190,11 +202,10 @@
                         `<p class="num"><span class="play"><i class="icon"></i>${tools.formatNumber(data.play)}</span>`
                         +`<span class="danmu"><i class="icon"></i>${tools.formatNumber(data.danmaku)}</span>`
                     ]
-                }],
-                parent:listBox
-            }));
-            listBox.scrollTop = listBox.scrollHeight;
-            scrollBox.scrollTop = scrollBox.scrollHeight;
+                }]
+            })));
+            listBox.scrollTop = 0;
+            scrollBox.scrollTop = 0;
         }
 
         //提交不喜欢视频，视频数据提前绑定在页面元素上
@@ -241,7 +252,7 @@
                         if (par.code == 0){
                             handleCover();
                         }else if((par.code==-101 && par.message=='账号未登录') || par.code==-400){
-                            tools.storageAccessKey(undefined);
+                            setting.storageAccessKey(undefined);
                             tools.toast(`未获取授权或者授权失效，请点击设置重新获取授权`);
                         }
                         else{
@@ -482,8 +493,10 @@
             }
         },
         pushHistory(data){
-            this.historyData.push(...data);
-            while(this.historyData.length>this.historyLimit) this.historyData.shift();
+            this.historyData.unshift(...data);
+        },
+        saveHistory(){
+            while(this.historyData.length>this.historyLimit) this.historyData.pop();
             GM_setValue('historyRecommend',JSON.stringify(this.historyData));
         },
         setHistoryLimit(limit){
@@ -810,6 +823,7 @@
         try{
             setting.setStyle();
             InitRecommend();
+            window.addEventListener("beforeunload", ()=>setting.saveHistory());
             InitRanking();
         }catch(e){
             console.error(e);

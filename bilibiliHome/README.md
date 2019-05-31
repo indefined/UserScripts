@@ -17,7 +17,7 @@ B站网页端添加APP首页推荐
 - 不喜欢/撤销不喜欢
 - 全站排行榜
 
-![图片预览](https://greasyfork.org/system/screenshots/screenshots/000/011/238/original/bilibiliHome.user.jpg)
+![图片预览](https://greasyfork.org/system/screenshots/screenshots/000/015/605/original/preview.jpg)
 
 -------------------------
 ## 授权说明
