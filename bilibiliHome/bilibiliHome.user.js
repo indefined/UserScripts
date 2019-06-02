@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.5.4
+// @version      0.5.5
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -122,7 +122,11 @@
         });
         scrollBox.insertAdjacentElement('afterend',moreButton);
         document.querySelector('#home_popularize').insertAdjacentElement('afterend',element.mainDiv);
+
+        const recommends = [];//保存当前页面中的推荐元素，用于清除多余内容
+        //显示历史推荐
         if(setting.historyData) updateRecommend(setting.historyData);
+        //加载新推荐
         for(let i=0;i<setting.autoFreshCount;i++) getRecommend();
 
         //获取推荐视频数据
@@ -158,7 +162,7 @@
         //显示推荐视频
         function updateRecommend (datas){
             const point = listBox.firstChild;
-            datas.forEach(data=>point.insertAdjacentElement('beforeBegin',element._c({
+            datas.forEach(data=>recommends.push(point.insertAdjacentElement('beforeBegin',element._c({
                 nodeType:'div',
                 className:'spread-module',
                 childs:[{
@@ -203,7 +207,9 @@
                         +`<span class="danmu"><i class="icon"></i>${tools.formatNumber(data.danmaku)}</span>`
                     ]
                 }]
-            })));
+            }))));
+            //移除多余的显示内容
+            while(setting.pageLimit && recommends.length>setting.pageLimit) listBox.removeChild(recommends.shift());
             listBox.scrollTop = 0;
             scrollBox.scrollTop = 0;
         }
@@ -477,6 +483,7 @@
         dialog:undefined,
         historyData:JSON.parse(GM_getValue('historyRecommend','[]')),
         historyLimit:isNaN(+GM_getValue('historyLimit'))?10:+GM_getValue('historyLimit'),
+        pageLimit:+GM_getValue('pageLimit')||0,
         autoFreshCount:isNaN(+GM_getValue('autoFreshCount'))?1:+GM_getValue('autoFreshCount'),
         boxHeight:+GM_getValue('boxHeight')||2,
         noScrollBar:!!GM_getValue('noScrollBar'),
@@ -501,7 +508,9 @@
         },
         setHistoryLimit(limit){
             GM_setValue('historyLimit',this.historyLimit = +limit);
-            this.pushHistory([]);
+        },
+        setPageLimit(limit){
+            GM_setValue('pageLimit',this.pageLimit = +limit);
         },
         setAutoFreshCount(count){
             GM_setValue('autoFreshCount',this.autoFreshCount = +count);
@@ -570,7 +579,7 @@
                             childs: [
                                 '<label style="margin-right: 5px;">保存推荐数量:</label>',
                                 `<span style="margin-right: 5px;color:#00f" title="${[
-                                    '保存的推荐可在下次打开网页时向上滚动显示',
+                                    '页面关闭时会保存此数量的最新推荐，保存的推荐下次打开首页时会显示在新推荐的下方',
                                     '提交不喜欢的状态不会被保存在本地，但是已经提交给服务器所以没有必要再次提交',
                                     '每10条推荐占用空间约2KB，注意不要保存太多以免拖慢脚本管理器'
                                 ].join('\r\n')}">(?)</span>`,
@@ -579,6 +588,22 @@
                                     onchange:({target})=>this.setHistoryLimit(target.value),
                                     style:'width:50px'
                                 },
+                            ]
+                        },
+                        {
+                            nodeType:'div',style:'margin: 10px 0;',
+                            childs: [
+                                '<label style="margin-right: 5px;">页面显示限制:</label>',
+                                `<span style="margin-right: 5px;color:#00f" title="${[
+                                    '页面中显示的推荐数量限制，超出的旧推荐会从推荐框中清除',
+                                    '0表示无限制，更改设置后需要点击加载更多才会生效',
+                                    '应当比保存推荐设置的数量大，否则保存的推荐不会全部被显示没有意义'
+                                ].join('\r\n')}">(?)</span>`,
+                                {
+                                    nodeType:'input',type:'number',value:this.pageLimit,min:0,step:10,
+                                    onchange:({target})=>this.setPageLimit(+target.value),
+                                    style:'width:50px'
+                                }
                             ]
                         },
                         {
