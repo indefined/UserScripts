@@ -2,7 +2,7 @@
 // @name         网易CC直播净化
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.1.3
+// @version      0.1.4
 // @description  自定义屏蔽CC直播HTML5网页大部分不想看到的东西
 // @author       indefined
 // @match        *://cc.163.com/*
@@ -128,7 +128,7 @@ div#vbr-limit-alert {
             style:`
 /*解除播放器高度锁定，根据网页宽度自动缩放*/
 body:not(.blizzardtv-iframe-body) div#live_player {
-    height: unset !important;
+    height: 100% !important;
 }
 /*解除高度限制后停播状态的聊天区高度竟然需要手动指定，醉了
 #chat {
@@ -203,6 +203,16 @@ div#newMountRemindWin {
 }
 `
         },
+        noPlayerAd:{
+            title:'去除播放器内广告',
+            default:true,
+            style:`
+/*播放器内广告*/
+div#advertising {
+    display: none !important;
+}
+`
+        },
         foldRank:{
             title:'自动折叠榜单区',
             default:true,
@@ -264,6 +274,8 @@ div#room-tabs:hover+.chat-list {
     display: none !important;
 }
 .gameH5Theater div#live-wrapper ,
+.gameFlashTheater #live_player,
+.gameH5Theater #live_player,
 .gameH5FullScreen div#live-wrapper {
     height: 100% !important;
 }
