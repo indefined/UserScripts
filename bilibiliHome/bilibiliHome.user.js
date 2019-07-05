@@ -1,11 +1,12 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.5.5
+// @version      0.5.6
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
 // @match        *://www.bilibili.com/
+// @match        *://www.bilibili.com/index.html
 // @license      MIT
 // @connect      app.bilibili.com
 // @connect      api.bilibili.com
