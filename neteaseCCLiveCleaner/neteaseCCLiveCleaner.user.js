@@ -2,8 +2,8 @@
 // @name         网易CC直播净化
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.1.4
-// @description  自定义屏蔽CC直播HTML5网页大部分不想看到的东西
+// @version      0.1.5
+// @description  自定义屏蔽CC直播HTML5网页大部分不想看到的碍眼特效和内容
 // @author       indefined
 // @match        *://cc.163.com/*
 // @grant        GM_getValue
@@ -361,18 +361,22 @@ span.chat-tip-container{
         noChatPriv:{
             title:'去除聊天气泡',
             style:`
-/*聊天气泡同行*/
+/*聊天气泡同行，去除背景和聊天框*/
 .chat_info,
 .chat_msg_con,
-.chat_msg_normal{
+.chat_msg_normal {
     display: inline !important;
+    border: none !important;
+    background: none !important;
 }
-/*去除聊天气泡*/
-.chat_msg>div {
+/*去除聊天气泡图片和换行*/
+.chat_msg>div,
+.chat_item_bubble>div>br,
+.chat_item_bubble>br{
     display: none !important;
 }
 .chat_msg,
-.chat_msg_normal>span{
+.chat_msg_normal>*{
     display: inline !important;
     background: none !important;
     color: #000 !important;
