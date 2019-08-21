@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.5.6
+// @version      0.5.7
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -168,7 +168,7 @@
                 className:'spread-module',
                 childs:[{
                     nodeType:'a',target:'_blank',
-                    href:'/video/av'+data.param,
+                    href:data.goto=='av'?`/video/av${data.param}`:data.uri,
                     dataset:{
                         tag_id:data.tag?data.tag.tag_id:'',
                         id:data.param,goto:data.goto,mid:data.mid,rid:data.tid
@@ -178,14 +178,14 @@
                             nodeType:'div',className:'pic',
                             childs:[
                                 `<div class="lazy-img"><img alt="${data.title}" src="${data.cover}@160w_100h.${tools.imgType}" /></div>`,
-                                `<span title="分区：${data.tname}" class="tname">${data.tname}</span>`,
-                                `<span class="dur">${tools.formatNumber(data.duration,'time')}</span>`,
-                                {
+                                `<span title="分区：${data.tname||data.badge}" class="tname">${data.tname||data.badge}</span>`,
+                                data.duration&&`<span class="dur">${tools.formatNumber(data.duration,'time')}</span>`||'',
+                                data.goto=='av'?{
                                     nodeType:'div',
                                     dataset:{aid:data.param},title:'稍后再看',
                                     className:'watch-later-trigger w-later',
                                     onclick:tools.watchLater
-                                },
+                                }:'',
                                 (data.dislike_reasons&&setting.accessKey)?{
                                     nodeType:'div',innerText:'Ｘ',
                                     className:'dislike-botton',
@@ -738,7 +738,7 @@
         })(),
         getLoadingDiv(target){
             return this._c({
-                nodeType:'div',style:target=='recommend'?'padding:0':'',
+                nodeType:'div',style:target=='recommend'?'padding:0;width:100%;height:unset':'',
                 className:target=='recommend'?'load-state spread-module':'load-state',
                 innerHTML:'<span class="loading">正在加载...</span>'
             });
