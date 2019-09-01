@@ -2,9 +2,9 @@
 // @name        bilibili直播间工具
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.9
+// @version     0.5.10
 // @author      indefined
-// @description 可配置 直播间切换勋章/头衔、硬币/银瓜子直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
+// @description 可配置 直播间切换勋章/头衔、硬币直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
 // @grant       GM_getValue
 // @grant       GM_setValue
@@ -532,13 +532,6 @@ body.fullscreen-fix div#gift-control-vm {
                     className:"dp-i-block pointer",
                     onclick:()=>this.buyMedal('metal'),
                     innerHTML:`<span style="border: 1.8px solid #c8c8c8;border-radius: 50%;border-color: #23ade5;">硬</span><span>20</span>`
-                },buyDiv);
-                helper.create('div',{
-                    title:"使用9900银瓜子购买本房间勋章",
-                    style:"margin-left: 10px;",
-                    className:"dp-i-block pointer",
-                    onclick:()=>this.buyMedal('silver'),
-                    innerHTML:`<span class="svg-icon silver-seed" style="font-size: 15px;"></span><span>9900</span>`
                 },buyDiv);
             }
             if (data.data.fansMedalList.length==0) {
