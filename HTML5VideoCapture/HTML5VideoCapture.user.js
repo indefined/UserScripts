@@ -2,7 +2,7 @@
 // @name         HTML5视频截图器
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.3.9
+// @version      0.4.0
 // @description  基于HTML5的简单任意原生视频截图，可控制快进/逐帧/视频调速
 // @author       indefined
 // @include      *://*
@@ -11,11 +11,82 @@
 // @license      MIT
 // ==/UserScript==
 
-function HTML5VideoCapturer(){
+(function HTML5VideoCapturer(){
     'use strict';
     if (document.querySelector('#HTML5VideoCapture')) return;
     const childs = "undefined"==typeof(unsafeWindow)?window.frames:unsafeWindow.frames;
-    let videos,video,selectId;
+    let videos,video,selectId,hoverItem;
+    const configList = {
+        active:{
+            content:'开启/关闭工具栏',
+            title:'全局工具栏快捷键开关，必须至少同时按下ctrl/shift/alt之一，尽量避免常用快捷键以免冲突',
+            key:'K',
+            ctrlKey:true,
+            shiftKey:true,
+            altKey:false
+        },
+        forward:{
+            content:'前进',
+            title:'使视频前进1秒，按住ctrl/shift/alt快进倍率等同工具栏按钮说明',
+            key:'ArrowRight'
+        },
+        backward:{
+            content:'后退',
+            title:'使视频后退1秒，按住ctrl/shift/alt快退倍率等同工具栏按钮说明',
+            key:'ArrowLeft'
+        },
+        nextFrame:{
+            content:'下一帧',
+            title:'使视频前进一帧（最小分辨率1/60秒）',
+            key:'f'
+        },
+        preFrame:{
+            content:'上一帧',
+            title:'使视频后退一帧（最小分辨率1/60秒）',
+            key:'d'
+        },
+        play:{
+            content:'播放/暂停',
+            key:'Space'
+        },
+        speedUp:{
+            content:'加速',
+            title:'使视频加速，大于1倍速时步长0.25倍速，最大有效值大概为16倍',
+            key:'c'
+        },
+        speedDown:{
+            content:'减速',
+            title:'使视频减速，小于1倍速时步长为0.1倍速，最小有效值为0.1倍',
+            key:'x'
+        },
+        speedOri:{
+            content:'原速',
+            title:'恢复1倍速播放视频',
+            key:'z',
+        },
+        capture:{
+            content:'截图',
+            title:'按下该按键打开新窗口显示截图，同时按住ctrl会尝试直接下载，如果直接下载失败也会打开新窗口',
+            key:'s'
+        },
+        panelActive:{
+            content:'截图工具栏有效',
+            title:'当鼠标悬停在工具栏上或者光标焦点在工具栏上时快捷键有效，光标在输入框中例外，快捷键会操作选中视频',
+            type:'checkbox',
+            disabled:true,
+            key:'',
+            value:true
+        },
+        playerActive:{
+            content:'播放器悬停有效',
+            title:'当鼠标悬停在视频上时快捷键有效，无论工具栏是否打开，快捷键会直接操作被悬停视频且不会有提示。'
+            + '\n由于各种播放器外壳影响该功能可能不会生效，且可能和播放器外壳自身快捷键冲突，建议针对网页保存，不建议全局开启',
+            type:'checkbox',
+            key:'',
+            value:true
+        }
+    },
+          config = configList;
     function videoShot(down){
         if (!video) return postMsg('shot',down);
         const canvas = document.createElement("canvas");
@@ -134,6 +205,100 @@ function HTML5VideoCapturer(){
             },'*');
         }
     }
+    //监听鼠标移动并保存被悬停视频或工具栏……极其低效却很简单通用的实现
+    //不需要监听视频悬停时应当移除（工具栏自带悬停检测，但作用会被该函数覆盖）
+    function hoverListener(ev) {
+        if (ev.target instanceof HTMLVideoElement || (panel&&panel.contains(ev.target))) hoverItem = ev.target;
+        else hoverItem = undefined;
+    }
+    if(config.playerActive.value) document.addEventListener('mousemove',hoverListener);
+    //快捷键处理函数
+    function keyHandler(ev,key) {
+        let value;
+        switch(key) {
+            case 'speedUp':
+                if(video) value = video.playbackRate+(video.playbackRate<1?0.1:0.25);
+                else if(speed) {
+                    speed.step = speed.value<1?0.1:0.25;;
+                    value = speed.value;
+                }
+                videoSpeedChange(value);
+                break;
+            case 'speedDown':
+                if(video) {
+                    value = video.playbackRate - (video.playbackRate>1?0.25:0.1);
+                    if(value<0.1) video.playbackRate = 0.1;
+                }
+                else if(speed) {
+                    speed.step = speed.value<1?0.1:0.25;;
+                    value = speed.value;
+                }
+                videoSpeedChange(value);
+                break;
+            case 'speedOri':
+                videoSpeedChange(1);
+                break;
+            case 'play':
+                videoPlay();
+                break;
+            case 'nextFrame':
+                videoStep(1/60);
+                break;
+            case 'perFrame':
+                videoStep(-1/60);
+                break;
+            case 'forward':
+                value = 1;
+                if(ev.ctrlKey) value *= 5;
+                if(ev.shiftKey) value *= 10;
+                if(ev.altKey) value *= 60;
+                videoStep(value);
+                break;
+            case 'backward':
+                value = -1;
+                if(ev.ctrlKey) value *= 5;
+                if(ev.shiftKey) value *= 10;
+                if(ev.altKey) value *= 60;
+                videoStep(value);
+                break;
+            case 'capture':
+                videoShot(ev.ctrlKey);
+                break;
+            default:
+                break;
+        }
+    }
+    //全局快捷键监听函数
+    function keyListener(ev) {
+        console.log(ev);
+        if (
+            config.active.key == ev.key
+            &&config.active.shiftKey == ev.shiftKey
+            &&config.active.ctrlKey == ev.ctrlKey
+            &&config.active.altKey == ev.altKey
+        ) {
+            top.postMessage({
+                action:'captureReport',
+                about:'panelActive',
+                id:window.captureId
+            },'*');
+        }
+        else if (!hoverItem||ev.target instanceof HTMLInputElement) return;
+        let value;
+        if(value = Object.entries(config).find(([k,v])=>v.key.toLowerCase()==ev.key.toLowerCase())){
+            //将待操作视频暂时替换为鼠标悬停视频，并保存原视频备份
+            const videoBk = video;
+            if(hoverItem instanceof HTMLVideoElement) video = hoverItem;
+            try{
+                keyHandler(ev,value[0]);
+            }catch(e){
+                console.error(e);
+            }
+            //操作完成将待操作视频还原为备份视频
+            if(videoBk) video = videoBk;
+        }
+    }
+    document.addEventListener('keydown',keyListener);
     //控制事件接收仅在iframe中执行
     if (window!=top) {
         window.addEventListener('message', function(ev) {
@@ -173,11 +338,13 @@ function HTML5VideoCapturer(){
         //console.info('top recive:',ev.data);
         if (ev.data.action!='captureReport') return;
         if (ev.data.about=='videoNums') appendVideo(ev.data);
+        else if (ev.data.about=='panelActive') panelActive();
         else if (ev.data.about=='videoStatus'&&selector.value.startsWith(ev.data.id)){
             play.innerText = ev.data.paused?"播放":"暂停";;
             speed.value = ev.data.speed;
         }
     }
+    window.addEventListener('message', topReciver);
     function _c(config){
         if(config instanceof Array) return config.map(_c);
         const item = document.createElement(config.nodeType);
@@ -226,9 +393,11 @@ function HTML5VideoCapturer(){
             panel.style.left = ev.pageX-panel.lOffset+'px';
         }
     }
-    panel = _c({
+    function createPanel(){panel = _c({
         nodeType:'div',id:'HTML5VideoCapture',
         style:'position:fixed;top:40px;left:30px;z-index:2147483647;padding:5px 0;background:darkcyan;font-family:initial;border-radius:4px;font-size:12px;text-align:left',
+        onmouseenter:()=>(hoverItem = panel),
+        onmouseleave:()=>(hoverItem = undefined),
         childs:[
             {
                 nodeType:'style',
@@ -284,21 +453,15 @@ function HTML5VideoCapturer(){
                 nodeType:'button',
                 className:'h5vc-block',
                 innerText:'<<',
-                title:'后退1s,按住shift 5s,ctrl 10s,alt 60s,多按相乘',
-                onclick:e=>{
-                    let offset = -1;
-                    if(e.ctrlKey) offset *= 5;
-                    if(e.shiftKey) offset *= 10;
-                    if(e.altKey) offset *= 60;
-                    videoStep(offset);
-                }
+                title:'后退1秒,按住shift 5倍,ctrl 10倍,alt 60倍,多按相乘',
+                onclick:e=>keyHandler(e,'backward')
             },
             {
                 nodeType:'button',
                 className:'h5vc-block',
                 style:'margin-left:0',
                 innerText:'<',
-                title:'上一帧(1/60s)',
+                title:'上一帧(1/60秒)',
                 onclick:()=>videoStep(-1/60)
             },
             {
@@ -320,7 +483,7 @@ function HTML5VideoCapturer(){
                 nodeType:'button',
                 className:'h5vc-block',
                 innerText:'>',
-                title:'下一帧(1/60s)',
+                title:'下一帧(1/60秒)',
                 onclick:()=>videoStep(1/60)
             },
             {
@@ -328,14 +491,8 @@ function HTML5VideoCapturer(){
                 className:'h5vc-block',
                 style:'margin-left:0',
                 innerText:'>>',
-                title:'前进1s,按住shift 5s,ctrl 10s,alt 60s,多按相乘',
-                onclick:e=>{
-                    let offset = 1;
-                    if(e.ctrlKey) offset *= 5;
-                    if(e.shiftKey) offset *= 10;
-                    if(e.altKey) offset *= 60;
-                    videoStep(offset);
-                }
+                title:'前进1秒,按住shift 5倍,ctrl 10倍,alt 60倍,多按相乘',
+                onclick:e=>keyHandler(e,'forward')
             },
             {
                 nodeType:'button',
@@ -343,17 +500,19 @@ function HTML5VideoCapturer(){
                 innerText:'关闭',
                 title:'关闭截图工具栏',
                 style:'margin-right:10px;',
-                onclick:()=> {
-                    document.body.removeChild(panel);
-                    window.removeEventListener('message', topReciver);
-                }
+                onclick:panelActive
             }
-        ],
-        parent:document.body
-    });
-    window.addEventListener('message', topReciver);
-    videoDetech();
-}
-if ('function'==typeof(GM_registerMenuCommand) && window==top){
-    GM_registerMenuCommand('启用HTML5视频截图器',HTML5VideoCapturer);
-}else HTML5VideoCapturer();
+        ]
+    })};
+    function panelActive(){
+        if(document.body.contains(panel)) document.body.removeChild(panel);
+        else {
+            if(!panel) createPanel();
+            document.body.appendChild(panel);
+            if(!selector.length) videoDetech();
+        }
+    }
+    if ('function'==typeof(GM_registerMenuCommand) && window==top){
+        GM_registerMenuCommand('启用HTML5视频截图器',panelActive);
+    }
+})();
