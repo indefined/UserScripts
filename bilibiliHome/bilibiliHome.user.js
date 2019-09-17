@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.5.7
+// @version      0.5.7.1
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -732,7 +732,10 @@
             try{
                 return document.querySelector('#bili_douga').cloneNode(true);
             }catch(e){
-                console.error('添加APP首页推荐找不到动画版块');
+                let ck = document.cookie.replace(/([a-zA-Z0-9]{16})/g,'****************'),
+                    uid = ck.match(/DedeUserID=(\d+)/);
+                if(uid) ck = ck.replace(new RegExp(uid[1],'g'),'******');
+                console.error('添加APP首页推荐找不到动画版块，反馈请提供下面cookie字符串（已去除个人信息）',ck);
                 return undefined;
             }
         })(),
