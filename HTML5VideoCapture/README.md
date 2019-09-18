@@ -23,9 +23,9 @@ HTML5视频截图器
 
 ## 使用说明
 
-- 脚本启动：
+- 脚本启动：使用脚本管理器（目前确认Tampermonkey、Violentmonkey可用）安装脚本
   - 方法1：使用快捷键启动，默认为`ctrl+alt+a`，打开工具栏后可自行设置快捷键和作用范围
-  - 方法1：使用脚本管理器安装脚本，在脚本管理器按钮上点击‘启用HTML5视频截图器’打开工具栏
+  - 方法2：在脚本管理器按钮上点击‘启用HTML5视频截图器’打开工具栏
   - ![脚本启动](https://greasyfork.org/system/screenshots/screenshots/000/011/875/original/HTML5VideoCapture.TM.jpg) ![脚本启动](https://greasyfork.org/system/screenshots/screenshots/000/011/876/original/HTML5VideoCapture.VM.jpg)
 
 - 视频识别
