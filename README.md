@@ -1,4 +1,4 @@
-基于Chrome下的Tampermonkey写的一些网页端用户脚本
+本工程下存放的脚本基本是在Chrome下的Tampermonkey里直接写的，水平差代码乱见谅
 
 [bilibili网页端首页增加APP首页推荐](./bilibiliHome/)
 
