@@ -2,7 +2,7 @@
 // @name         HTML5视频截图器
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.4.1
+// @version      0.4.1.1
 // @description  基于HTML5的简单任意原生视频截图，可控制快进/逐帧/视频调速，支持自定义快捷键
 // @author       indefined
 // @include      *://*
@@ -18,7 +18,7 @@
 (async function HTML5VideoCapturer(){
     'use strict';
     let allConfigs,config;
-    if(typeof(GM)) {
+    if(typeof(GM)!='undefined') {
         GM_getValue = GM.getValue;
         GM_setValue = GM.setValue;
     }
