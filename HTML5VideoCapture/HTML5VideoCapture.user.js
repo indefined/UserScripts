@@ -2,7 +2,7 @@
 // @name         HTML5视频截图器
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.4.1.1
+// @version      0.4.2
 // @description  基于HTML5的简单任意原生视频截图，可控制快进/逐帧/视频调速，支持自定义快捷键
 // @author       indefined
 // @include      *://*
@@ -36,6 +36,11 @@
             content:'截图',
             title:'按下该按键打开新窗口显示截图，同时按住shift会尝试直接下载，如果直接下载失败也会打开新窗口',
             key:'s'
+        },
+        downCapture:{
+            content:'直接下载截图',
+            title:'按下该按键会尝试直接下载，如果直接下载失败效果等同于按下截图',
+            key:'q'
         },
         preFrame:{
             content:'上一帧',
@@ -103,11 +108,12 @@
             allConfigs = {};
             GM_setValue('config',JSON.stringify(allConfigs));
         }
-        config = allConfigs && (allConfigs[document.location.host] || allConfigs.default) || Object.assign({},configList);
+        //防止后续更新配置导致原先保存配置缺失项目，暂时先这样吧，后面如果复杂需要单独写个方法来实现查缺和去无效
+        config = Object.assign({},configList, allConfigs && (allConfigs[document.location.host] || allConfigs.default));
         //如果没有开启全局播放器快捷键则关闭悬停监听，这函数挺神经病的
         document.removeEventListener('mousemove',hoverListener);
         if(config.playerActive.checked) document.addEventListener('mousemove',hoverListener);
-        return allConfigs[site]||allConfigs.default||config;
+        return Object.assign({},configList, allConfigs[site]||allConfigs.default||config);
     }
     async function saveConfig(value,site) {
         if(!value) {
@@ -308,6 +314,9 @@
             case 'capture':
                 videoShot(ev.shiftKey);
                 break;
+            case 'downCapture':
+                videoShot(true);
+                break;
             default:
                 break;
         }
@@ -417,6 +426,9 @@
             else if(i=='parent') {
                 config.parent.appendChild(item);
                 continue;
+            }
+            else if(i=='for') {
+                item.setAttribute('for',config[i]);
             }
             item[i] = config[i];
         }
@@ -611,12 +623,12 @@
         })
         settingForm = _c({
             nodeType:'form',
-            style:'user-select: none;height: auto;overflow: hidden;margin-right: 0;display:none',
+            style:'user-select: none;height: auto;overflow: hidden;margin-right: 0;display:none;font-size:12px',
             childs:[
                 ...Object.entries(configList).map(([k,v])=>([
                     {
                         nodeType:'input',className:'h5vc-block',name:k,type:v.type,
-                        title:v.title,
+                        title:v.title,id:'h5vc-setting-'+k,style:'display:inline-block',
                         disabled:v.disabled,
                         onclick:function(ev){this.select()&&ev.preventDefault()},
                         onkeydown:function(ev){
@@ -629,7 +641,7 @@
                             else this.value = '';
                         },
                     },
-                    {nodeType:'span',innerHTML:v.content,title:v.title},
+                    {nodeType:'label',innerHTML:v.content,title:v.title,for:'h5vc-setting-'+k,style:'display:inline-block'},
                     {nodeType:'br'}
                 ])).flat(),
                 ...Object.entries(actionKey).map(([k,v])=>({
