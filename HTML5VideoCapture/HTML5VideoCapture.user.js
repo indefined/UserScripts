@@ -2,7 +2,7 @@
 // @name         HTML5视频截图器
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.4.3
+// @version      0.4.4
 // @description  基于HTML5的简单任意原生视频截图，可控制快进/逐帧/视频调速，支持自定义快捷键
 // @author       indefined
 // @include      *://*
@@ -282,13 +282,14 @@
     }
     //快捷键处理函数
     function keyHandler(ev,key) {
+        //console.log(ev,key)
         let value;
         switch(key) {
             case 'speedUp':
                 if(video) value = video.playbackRate+(video.playbackRate<1?0.1:0.25);
                 else if(speed) {
-                    speed.step = speed.value<1?0.1:0.25;;
-                    value = speed.value;
+                    speed.step = speed.value<1?0.1:0.25;
+                    value = +speed.value + (+speed.step);
                 }
                 videoSpeedChange(value);
                 break;
@@ -298,8 +299,8 @@
                     if(value<0.1) video.playbackRate = 0.1;
                 }
                 else if(speed) {
-                    speed.step = speed.value<1?0.1:0.25;;
-                    value = speed.value;
+                    speed.step = speed.value>1?0.25:0.1;
+                    value = +speed.value - speed.step;
                 }
                 videoSpeedChange(value);
                 break;
@@ -312,7 +313,7 @@
             case 'nextFrame':
                 videoStep(1/60);
                 break;
-            case 'perFrame':
+            case 'preFrame':
                 videoStep(-1/60);
                 break;
             case 'forward':
