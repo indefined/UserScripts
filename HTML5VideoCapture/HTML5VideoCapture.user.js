@@ -2,7 +2,7 @@
 // @name         HTML5视频截图器
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.4.2
+// @version      0.4.3
 // @description  基于HTML5的简单任意原生视频截图，可控制快进/逐帧/视频调速，支持自定义快捷键
 // @author       indefined
 // @include      *://*
@@ -99,6 +99,23 @@
             checked:false
         }
     };
+    /**
+    深拷贝一个配置，并检查缺失配置项和无效项
+    value: 待检查/拷贝的配置，可为空。
+    return: 深拷贝的配置对象，去除无效项并添加缺失项默认值。当value为空时返回默认配置的克隆
+    **/
+    function cloneConfig(value) {
+        const clone = {};
+        if(!value) value = configList;
+        for(const item in configList) {
+            clone[item] = {};
+            for(const i in configList[item]) {
+                if(value[item]) clone[item][i] = value[item][i];
+                else clone[item][i] = configList[item][i];
+            }
+        }
+        return clone;
+    }
     async function loadConfig(site){
         try{
             allConfigs = await GM_getValue('config','{}');
@@ -108,18 +125,19 @@
             allConfigs = {};
             GM_setValue('config',JSON.stringify(allConfigs));
         }
-        //防止后续更新配置导致原先保存配置缺失项目，暂时先这样吧，后面如果复杂需要单独写个方法来实现查缺和去无效
-        config = Object.assign({},configList, allConfigs && (allConfigs[document.location.host] || allConfigs.default));
+        //使用深拷贝方法查缺和去无效
+        config = cloneConfig(allConfigs[document.location.host] || allConfigs.default);
         //如果没有开启全局播放器快捷键则关闭悬停监听，这函数挺神经病的
         document.removeEventListener('mousemove',hoverListener);
         if(config.playerActive.checked) document.addEventListener('mousemove',hoverListener);
-        return Object.assign({},configList, allConfigs[site]||allConfigs.default||config);
+        //有要求读取的网站配置时，返回要求的配置，否则返回默认配置，否则（全空，初次运行）返回初始配置
+        return allConfigs[site]||allConfigs.default||config;
     }
     async function saveConfig(value,site) {
         if(!value) {
             if(site&&site!='default') delete allConfigs[site];
             else {
-                allConfigs.default = Object.assign({},configList);
+                allConfigs.default = cloneConfig();
             }
         }
         else {
@@ -323,7 +341,7 @@
     }
     //全局快捷键监听函数
     function keyListener(ev) {
-        //console.log(ev);
+        //console.log(ev,hoverItem);
         const key = new RegExp(ev.key,'i')
         if (
             config.active.key.match(key)
@@ -657,7 +675,7 @@
     }
     async function checkData() {
         let keys = settingForm[0].value.split('+');
-        let value = Object.assign({},config);
+        let value = cloneConfig(config);
         if(keys.length<2&&keys[0]!='') throw '全局快捷键至少应当同时按下ctrl/shift/alt之一';
         value.active.key = keys[keys.length-1];
         value.active.ctrlKey = keys.indexOf('ctrl')!=-1;
