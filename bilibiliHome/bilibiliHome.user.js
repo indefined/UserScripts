@@ -1,12 +1,11 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.5.7.1
+// @version      0.5.8
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @match        *://www.bilibili.com/
-// @match        *://www.bilibili.com/index.html
+// @match        *://www.bilibili.com/*
 // @license      MIT
 // @connect      app.bilibili.com
 // @connect      api.bilibili.com
@@ -732,6 +731,7 @@
             try{
                 return document.querySelector('#bili_douga').cloneNode(true);
             }catch(e){
+                if(document.location.pathname!='/'&&document.location.pathname!='/index.html') return undefined;
                 let ck = document.cookie.replace(/([a-zA-Z0-9]{16})/g,'****************'),
                     uid = ck.match(/DedeUserID=(\d+)/);
                 if(uid) ck = ck.replace(new RegExp(uid[1],'g'),'******');
