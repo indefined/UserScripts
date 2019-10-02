@@ -2,7 +2,7 @@
 // @name        bilibili直播间工具
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.10
+// @version     0.5.11
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、硬币直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -62,9 +62,10 @@ const helper = {
             },
         }).then(res => res.json());
     },
-    toast(msg){
+    toast(msg,error){
+        if(error) console.error(error);
         let toast = this.create('div',{
-            innerHTML:`<div class="link-toast fixed success" style="left: 40%;top: 50%;"><span class="toast-text">${msg}</span></div>`
+            innerHTML:`<div class="link-toast fixed success" style="left: 40%;top: 50%;"><span class="toast-text">${msg} ${error||''}</span></div>`
         });
         document.body.appendChild(toast);
         setTimeout(()=>document.body.removeChild(toast),3000);
@@ -339,8 +340,8 @@ body.fullscreen-fix div#gift-control-vm {
         },
         init(settings){
             this.settings = settings;
-            this.initStyle();
             this.initValues();
+            this.initStyle();
             this.initGiftPackage();
             this.update();
             this.updateVideoLink();
@@ -793,7 +794,7 @@ body.fullscreen-fix div#gift-control-vm {
             //初始化成功返回true不用监听页面加载
             return true;
         } catch (e){
-            console.error('bilibili直播间助手执行错误',e);
+            helper.toast('bilibili直播间助手执行错误',e);
             //初始化异常，返回true放弃继续监听页面
             return true;
         }
@@ -801,15 +802,14 @@ body.fullscreen-fix div#gift-control-vm {
     init(){
         if(this.doInit()) return;
         new MutationObserver((mutations,observer) => {
-            mutations.forEach((mutation)=>{
-                for (const addedNode of mutation.addedNodes) {
-                    if (addedNode.id == 'chat-control-panel-vm'){
-                        observer.disconnect();
-                        this.doInit();
-                        return;
-                    }
+            //console.log(mutations)
+            for(const mutation of mutations){
+                if(mutation.target.id=='chat-control-panel-vm'){
+                    observer.disconnect();
+                    this.doInit();
+                    return;
                 }
-            });
+            }
         }).observe(helper.get('#aside-area-vm')||document.body, {
             childList: true,
             subtree: true
