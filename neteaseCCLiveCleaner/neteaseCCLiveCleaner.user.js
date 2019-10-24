@@ -2,7 +2,7 @@
 // @name         网易CC直播净化
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.1.5
+// @version      0.1.6
 // @description  自定义屏蔽CC直播HTML5网页大部分不想看到的碍眼特效和内容
 // @author       indefined
 // @match        *://cc.163.com/*
@@ -189,6 +189,7 @@ span.js-live-title.nick{
             style:`
 /*播放器内的横幅，似乎有很多种*/
 div#player-banner,
+#new-player-banner,
 /*<!-- 贵族视频区进场横幅 -->*/
 div#nobility_screen_enter,
 /*<!-- 坐骑动效和横幅动效 -->*/
