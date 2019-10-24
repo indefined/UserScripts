@@ -2,7 +2,7 @@
 // @name        bilibili直播间工具
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.11
+// @version     0.5.12
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、硬币直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -250,12 +250,9 @@ body.fullscreen-fix div#gift-control-vm {
                 className:'info-section dp-i-block v-middle title-link',
                 style:'margin-left:16px;font-size:16px'
             });
-            this.observer = new MutationObserver(mutations => {
+            this.titleObserver = new MutationObserver(mutations => {
                 mutations.forEach((mutation)=>{
-                    if (mutation.attributeName=='data-player-state') {
-                        this.handleFullScreenPanel(this.playerPanel.getAttribute('data-player-state'),mutation.oldValue);
-                    }
-                    else if (mutation.target.className==="bilibili-live-player-video-round-title") {
+                    if (mutation.target.className==="bilibili-live-player-video-round-title") {
                         this.updateVideoLink();
                     }
                     for (const addedNode of mutation.addedNodes) {
@@ -263,6 +260,12 @@ body.fullscreen-fix div#gift-control-vm {
                             this.updateVideoLink();
                         }
                     }
+                });
+            });
+            this.bodyObserver = new MutationObserver(mutations => {
+                mutations.forEach((mutation)=>{
+                    if(!mutation.attributeName) return;
+                    this.handleFullScreenPanel(this.checkStatus(document.body.className), this.checkStatus(mutation.oldValue));
                 });
             });
         },
@@ -294,6 +297,14 @@ body.fullscreen-fix div#gift-control-vm {
                 },this.titlePanel);
             }
         },
+        //检查全屏状态
+        //className:body的class值
+        //return:'web-fullscreen'|'normal'|'fullscreen'
+        checkStatus(className) {
+            return !className ? 'normal' : className.includes('player-full-win') && !className.includes('hide-aside-area')?
+                  'web-fullscreen' : className.includes('full') ?
+                  'fullscreen' : 'normal';
+        },
         //全屏礼物面板调整
         //value='web-fullscreen'|'normal'|'fullscreen'
         handleFullScreenPanel(newValue,oldValue){
@@ -320,23 +331,27 @@ body.fullscreen-fix div#gift-control-vm {
                     this.handleFullScreenPanel('normal','fullscreen');
                 }
                 else{
-                    const nowValue = this.playerPanel.getAttribute('data-player-state')||'normal',
+                    const nowValue = this.checkStatus(document.body.className),
                           oldValue = nowValue=='normal'?'fullscreen':'normal';
                     this.handleFullScreenPanel(nowValue,oldValue);
                 }
             }
-            this.observer.disconnect();
-            if(!this.settings.showVideoTitle&&!this.settings.fullScreenPanel) return;
-            const config = {subtree:true};
             if(this.settings.showVideoLink) {
-                config.childList = true;
+                this.titleObserver.observe(this.playerPanel, {subtree:true,childList:true});
+            }
+            else {
+                this.titleObserver.disconnect();
             }
             if(this.settings.fullScreenPanel){
-                config.attributes = true;
-                config.attributeOldValue = true;
-                config.attributeFilter = ['data-player-state'];
+                this.bodyObserver.observe(document.body,{
+                    attributes: true,
+                    attributeOldValue: true,
+                    attributeFilter: ['class']
+                });
             }
-            this.observer.observe(this.playerPanel, config);
+            else {
+                this.bodyObserver.disconnect();
+            }
         },
         init(settings){
             this.settings = settings;
