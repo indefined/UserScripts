@@ -2,7 +2,7 @@
 // @name         网易CC直播净化
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.1.6
+// @version      0.1.7
 // @description  自定义屏蔽CC直播HTML5网页大部分不想看到的碍眼特效和内容
 // @author       indefined
 // @match        *://cc.163.com/*
@@ -458,17 +458,16 @@ li.chat_item.notify.activity-notify {
         noDMBullet:{
             title:'去除弹幕气泡',
             style:`
-/*弹幕气泡*/
-.nobility_bulletScreen {
+/*弹幕气泡，去除所有弹幕下的背景边框并隐藏所有弹幕下图片*/
+.cmt *{
     display: inline !important;
     background: none !important;
     border: none !important;
-    padding: 0 !important;
+    padding: 0 5px 0 !important;
     margin: 0 !important;
 }
-.nobility_bulletScreen img,
-span.nobility_bulletScreen_adrom {
-    display: none
+.cmt img{
+    display: none !important;
 }
 /*喊话气泡，不知道内部怎么样的*/
 div#bunShoutDynamic{}
