@@ -2,7 +2,7 @@
 // @name        bilibili直播间工具
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.12
+// @version     0.5.13
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、硬币直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -76,7 +76,15 @@ const helper = {
 const LiveHelper = {
     settingInfos:{
         fullScreenPanel:{
-            name:'全屏礼物栏/全屏弹幕发送框',
+            name:'全屏/网页全屏礼物栏',
+            group:'elementAdjuster'
+        },
+        fullScreenChat:{
+            name:'全屏弹幕发送框',
+            group:'elementAdjuster'
+        },
+        chatInGiftPanel:{
+            name:'全屏弹幕发送框放入礼物栏',
             group:'elementAdjuster'
         },
         showVideoLink:{
@@ -182,6 +190,34 @@ body.fullscreen-fix div#gift-control-vm {
     display: block!important;
 }
 
+/*直接放在控制栏上的全屏发送框*/
+.bilibili-live-player-video-controller-content .chat-input-ctnr.p-relative {
+    display: inline-block;
+    right: 0;
+    margin-top: 0;
+    float: right;
+    vertical-align: sub
+}
+.bilibili-live-player-video-controller-content textarea.chat-input{
+    height:25px;
+    width: 355px;
+    padding:0;
+    color: #fff;
+    background: rgba(0,0,0,.6);
+}
+.bilibili-live-player-video-controller-content textarea.chat-input .input-limit-hint{
+    right: 0;
+    bottom: unset;
+}
+
+.bilibili-live-player-video-controller-content .right-action.p-absolute{
+    position: relative!important;
+    display: inline-block!important;
+    vertical-align: super;
+    float: right;
+}
+
+/*放在礼物栏上的全屏弹幕发送框*/
 .bilibili-live-player-video-controller .gift-control-panel .chat-input-ctnr{
     display: inline-block!important;
     vertical-align: middle!important;
@@ -240,6 +276,7 @@ body.fullscreen-fix div#gift-control-vm {
             this.giftPackage = helper.get('.item.z-gift-package');
             this.playerPanel = helper.get('.bilibili-live-player.relative');
             this.screenPanel = helper.get('.bilibili-live-player-video-controller');
+            this.controller = helper.get('.bilibili-live-player-video-controller-content');
             this.inputPanel = helper.get('div.chat-input-ctnr.p-relative');
             this.titlePanel = helper.get('div.normal-mode');
             this.controlPanel = this.inputPanel.parentNode;
@@ -265,7 +302,7 @@ body.fullscreen-fix div#gift-control-vm {
             this.bodyObserver = new MutationObserver(mutations => {
                 mutations.forEach((mutation)=>{
                     if(!mutation.attributeName) return;
-                    this.handleFullScreenPanel(this.checkStatus(document.body.className), this.checkStatus(mutation.oldValue));
+                    this.handleFullScreenPanel();
                 });
             });
         },
@@ -297,26 +334,28 @@ body.fullscreen-fix div#gift-control-vm {
                 },this.titlePanel);
             }
         },
-        //检查全屏状态
-        //className:body的class值
-        //return:'web-fullscreen'|'normal'|'fullscreen'
-        checkStatus(className) {
-            return !className ? 'normal' : className.includes('player-full-win') && !className.includes('hide-aside-area')?
+        //全屏礼物面板调整
+        handleFullScreenPanel(){
+            const className = document.body.className,
+                  status = !className ? 'normal' : className.includes('player-full-win') && !className.includes('hide-aside-area')?
                   'web-fullscreen' : className.includes('full') ?
                   'fullscreen' : 'normal';
-        },
-        //全屏礼物面板调整
-        //value='web-fullscreen'|'normal'|'fullscreen'
-        handleFullScreenPanel(newValue,oldValue){
-            if (newValue=='normal'){
+            if((status=='normal'||!this.settings.fullScreenPanel)&&this.screenPanel.contains(this.toolBar)){
                 this.leftContainer.appendChild(this.toolBar);
-            }else{
+            }
+            else if (status!='normal'&&this.settings.fullScreenPanel&&!this.screenPanel.contains(this.toolBar)){
                 this.screenPanel.appendChild(this.toolBar);
             }
-            if (newValue=='fullscreen'){
-                this.giftPanel.appendChild(this.inputPanel);
-                this.giftPanel.appendChild(this.sendButton);
-            }else if(oldValue=='fullscreen'){
+            if (status=='fullscreen'&&this.settings.fullScreenChat){
+                if(this.settings.chatInGiftPanel&&this.settings.fullScreenPanel&&!this.giftPanel.contains(this.sendButton)){
+                    this.giftPanel.appendChild(this.inputPanel);
+                    this.giftPanel.appendChild(this.sendButton);
+                }
+                else if((!this.settings.chatInGiftPanel||!this.settings.fullScreenPanel)&&!this.controller.contains(this.sendButton)){
+                    this.controller.appendChild(this.sendButton);
+                    this.controller.appendChild(this.inputPanel);
+                }
+            }else if((status!='fullscreen'||!this.settings.fullScreenChat)&&!this.bottomPanel.contains(this.sendButton)){
                 this.controlPanel.insertBefore(this.inputPanel,this.bottomPanel);
                 this.bottomPanel.appendChild(this.sendButton);
             }
@@ -326,15 +365,8 @@ body.fullscreen-fix div#gift-control-vm {
             if(item=='showVideoLink') {
                 this.updateVideoLink();
             }
-            else if(item=='fullScreenPanel') {
-                if(value==false) {
-                    this.handleFullScreenPanel('normal','fullscreen');
-                }
-                else{
-                    const nowValue = this.checkStatus(document.body.className),
-                          oldValue = nowValue=='normal'?'fullscreen':'normal';
-                    this.handleFullScreenPanel(nowValue,oldValue);
-                }
+            else if(item=='fullScreenPanel'||item=='fullScreenChat'||item=='chatInGiftPanel') {
+                this.handleFullScreenPanel();
             }
             if(this.settings.showVideoLink) {
                 this.titleObserver.observe(this.playerPanel, {subtree:true,childList:true});
@@ -342,7 +374,7 @@ body.fullscreen-fix div#gift-control-vm {
             else {
                 this.titleObserver.disconnect();
             }
-            if(this.settings.fullScreenPanel){
+            if(this.settings.fullScreenPanel||this.settings.fullScreenChat){
                 this.bodyObserver.observe(document.body,{
                     attributes: true,
                     attributeOldValue: true,
