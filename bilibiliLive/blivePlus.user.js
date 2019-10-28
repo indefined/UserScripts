@@ -2,7 +2,7 @@
 // @name        bilibili直播间工具
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.13
+// @version     0.5.14
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、硬币直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -534,7 +534,20 @@ body.fullscreen-fix div#gift-control-vm {
             if (!confirm(`是否确认使用${type=='silver'?'9900银瓜子':'20硬币'}购买本房间勋章？`)){
                 return;
             }
-            this.doRequire(`//api.vc.bilibili.com/link_group/v1/member/buy_medal?coin_type=${type}&master_uid=${this.room.ANCHOR_UID}&platform=android`,'购买勋章');
+            let token = document.cookie.match(/bili_jct=([0-9a-fA-F]{32})/);
+            if (!token) return helper.toast('找不到令牌');
+            token = token[1];
+            return helper.xhr(`//api.vc.bilibili.com/link_group/v1/member/buy_medal`,{
+                coin_type: type,
+                master_uid: this.room.ANCHOR_UID,
+                platform: 'android',
+                csrf_token: token,
+                csrf: token
+            }).then(data=>{
+                helper.toast(`购买勋章${data.code==0?'成功':`失败 code ${data.code} ${data.message}`}`);
+            }).catch(e=>{
+                helper.toast(`购买勋章出错${e}`)
+            });
         },
         listMedal(data){
             let hasMedal = false;
