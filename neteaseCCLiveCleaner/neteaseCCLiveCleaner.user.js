@@ -2,7 +2,7 @@
 // @name         网易CC直播净化
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.1.7
+// @version      0.1.8
 // @description  自定义屏蔽CC直播HTML5网页大部分不想看到的碍眼特效和内容
 // @author       indefined
 // @match        *://cc.163.com/*
@@ -73,12 +73,18 @@ body:not(.blizzardtv-iframe-body) .main-wrapper {
 .collapse .side-nav-container {
     width: 0;
 }
-.collapse .side-nav-container+.main-container {
-    padding-left: 20px;
+.collapse .side-nav-container+.page-right-container {
+    float: none !important;
+    width: 100% !important;
 }
 /*强制播放器主体无外边距*/
-main.room-main-container {
+.scrollContainer ,
+.room-main-container {
+    margin-top: 0 !important;
     padding: 0 !important;
+}
+.main-container {
+    padding: 20px;
 }
 /*解除网页宽度限制*/
 body.normal-game-room{
@@ -538,6 +544,22 @@ div#bunShoutDynamic{}
                 for(const id in configList) {
                     this.createItem(id,configList[id]);
                 }
+            }
+            else {
+                new MutationObserver((mutations, observer)=>{
+                    //console.log(mutations)
+                    for (const mutation of mutations){
+                        if(!mutation.target) continue;
+                        if(mutation.target.id=='effectSwitch'){
+                            observer.disconnect();
+                            this.configDiv = document.querySelector('ul.ban-effect-list');
+                            return this.init();
+                        }
+                    }
+                }).observe(document.body,{
+                    childList: true,
+                    subtree: true,
+                });
             }
         }
     };
