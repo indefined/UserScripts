@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.6.0
+// @version      0.6.1
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -75,6 +75,10 @@
 }
 #ranking-all ul.rank-list {
     overflow-y: auto;
+    padding-top: 0 !important;
+}
+#ranking-all .rank-head {
+    margin-bottom: 20px !important;
 }
 #ranking-all .rank-list .rank-item.show-detail .ri-detail{
     width: calc(100% - 90px) !important;
@@ -97,8 +101,9 @@
                         childs:[
                             {
                                 nodeType:'div',
+                                style: 'width: 86px;',
                                 className:'btn btn-change',
-                                innerHTML:'<i class="bilifont bili-icon_caozuo_huanyihuan"></i><span class="info">更多</span>',
+                                innerHTML:'<i class="bilifont bili-icon_caozuo_huanyihuan"></i><span class="info">加载更多</span>',
                                 onclick:getRecommend
                             },
                             {
@@ -405,8 +410,8 @@
 .ri-title{line-height:18px;height:18px;overflow:hidden;color:#222}.rank-list .rank-item .ri-detail
 .ri-point{line-height:12px;color:#99a2aa;height:12px;margin-top:5px;display:none;overflow:hidden}.rank-list .rank-item.show-detail
 .ri-detail .ri-title{height:36px;line-height:18px;margin-top:-3px;width:150px;padding:0}.rank-list .rank-item.show-detail
-.ri-point{display:block}.rank-list .rank-item:hover .ri-title{color:#00a1d6}.sec-rank{overflow:hidden}.sec-rank
-.rank-head{height:24px;line-height:24px}.sec-rank .rank-head h3{float:left;font-size:18px;font-weight:400}.sec-rank .rank-head
+.ri-point{display:block}.rank-list .rank-item:hover .ri-title{color:#00a1d6}.sec-rank{overflow:hidden}
+.sec-rank .rank-head h3{float:left;font-size:18px;font-weight:400}.sec-rank .rank-head
 .rank-tab{margin-left:20px;float:left}.sec-rank .rank-head .rank-dropdown{float:right}.sec-rank
 .rank-list-wrap{width:200%;overflow:hidden;zoom:1;transition:all .2s linear}.sec-rank .rank-list-wrap
 .rank-list{padding-bottom:15px;min-height:278px;width:50%;float:left;padding-top:20px;position:relative}.sec-rank .rank-list-wrap
@@ -440,7 +445,7 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
 .icon{background-position:-282px -90px}.video-info-module .v-data .danmu .icon{background-position:-282px -218px}.video-info-module
 .v-data .star .icon{background-position:-282px -346px}.video-info-module .v-data .coin .icon{background-position:-282px -410px}
 </style>
-<header class="rank-head"><h3>排行</h3><div class="bili-tab rank-tab"><div class="bili-tab-item on">全部</div><div class="bili-tab-item">原创</div></div>
+<header class="rank-head rank-header"><h3 class="name">排行</h3><div class="bili-tab rank-tab"><div class="bili-tab-item on">全部</div><div class="bili-tab-item">原创</div></div>
 <div class="bili-dropdown rank-dropdown"><span class="selected">三日</span><i class="icon icon-arrow-down"></i>
 <ul class="dropdown-list"><li class="dropdown-item" style="display: none;">三日</li><li class="dropdown-item">一周</li></ul></div></header>
 <div class="rank-list-wrap"><ul class="rank-list hot-list"><li class="state"><div class="b-loading"></div></li></ul><ul class="rank-list origin-list">
@@ -501,7 +506,7 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                                 {
                                     nodeType:'span',className:'name',
                                     childs:[
-                                        '<i class="icon" style="background-position: -282px -154px;"></i>',
+                                        '<i class="icon bilifont bili-icon_xinxi_UPzhu" style="background-position: -282px -154px;"></i>',
                                         detail.author = element._c({nodeType:'span'}),
                                     ]
                                 },
@@ -707,9 +712,9 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
             }
             if (element.isNew) {
                 this.styleDiv.innerHTML += `#recommend  .storey-box {height:calc(404px / 2 * ${this.boxHeight})}`
-                    + ` #ranking-all ul.rank-list{height:calc(404px / 2 * ${this.boxHeight} + 28px)}`
+                    + ` #ranking-all ul.rank-list{height:calc(404px / 2 * ${this.boxHeight})}`
                     + `@media screen and (max-width: 1438px) { #recommend  .storey-box {height:calc(360px / 2 * ${this.boxHeight})}`
-                    + `#ranking-all ul.rank-list{height:calc(360px / 2 * ${this.boxHeight} + 28px)}}`;
+                    + `#ranking-all ul.rank-list{height:calc(360px / 2 * ${this.boxHeight})}}`;
             }
             else {
                 this.styleDiv.innerHTML += `#recommend  .storey-box {height:calc(336px / 2 * ${this.boxHeight})}`
@@ -822,8 +827,7 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                             nodeType:'div',style:'margin: 10px 0;',
                             childs: [
                                 '<label style="margin-right: 5px;">APP接口授权:</label>',
-                                `<span style="margin-right: 5px;color:#00f" title="${
-                                [
+                                `<span style="margin-right: 5px;color:#00f" title="${[
                                     '目前获取根据个人观看喜好的APP首页数据和提交定制不喜欢的视频需要获取授权key。',
                                     '点击获取授权将从官方授权接口获取一个授权key，获取的key保存在脚本管理器内。',
                                     '如果不想使用授权，脚本仍然能从官方接口获取随机推荐视频，但内容可能不再根据个人喜好且无法提交不喜欢内容。',
@@ -1034,6 +1038,7 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
         }
     }
     if (element.mainDiv){
+        if (document.querySelector('.international-home')) element.isNew = true;;
         init();
     }
     else {
