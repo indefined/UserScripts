@@ -2,7 +2,7 @@
 // @name         HTML5视频截图器
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.4.4
+// @version      0.4.5
 // @description  基于HTML5的简单任意原生视频截图，可控制快进/逐帧/视频调速，支持自定义快捷键
 // @author       indefined
 // @include      *://*
@@ -165,16 +165,17 @@
         const canvas = document.createElement("canvas");
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
-        canvas.getContext('2d')
-            .drawImage(video, 0, 0, canvas.width, canvas.height);
+        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
         try{
             if (!down) throw `i don't want to do it.`;
-            const a = document.createElement('a');
-            a.href = canvas.toDataURL('image/jpeg', 0.95);
-            a.download = `${document.title}_${Math.floor(video.currentTime/60)}'${(video.currentTime%60).toFixed(3)}''.jpg`;
-            document.head.appendChild(a);
-            a.click();
-            document.head.removeChild(a);
+            canvas.toBlob(blob=>{
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `${document.title}_${Math.floor(video.currentTime/60)}'${(video.currentTime%60).toFixed(3)}''.jpg`;
+                document.head.appendChild(a);
+                a.click();
+                document.head.removeChild(a);
+            },'image/jpeg', 0.95);
         }catch(e){
             const imgWin = open("",'_blank');
             canvas.style = "max-width:100%";
@@ -277,7 +278,7 @@
     //监听鼠标是否悬停在视频或工具栏……极其低效却很简单通用的实现，开启关闭判断放在loadConfig中
     //不需要监听视频悬停时应当移除（工具栏自带悬停检测，但作用会被该函数覆盖）
     function hoverListener(ev) {
-        if (ev.target instanceof HTMLVideoElement || (panel&&panel.contains(ev.target))) hoverItem = ev.target;
+        if (ev.target instanceof HTMLVideoElement || (window==top&&panel&&panel.contains(ev.target))) hoverItem = ev.target;
         else hoverItem = undefined;
     }
     //快捷键处理函数
