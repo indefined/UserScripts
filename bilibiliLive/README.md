@@ -72,7 +72,15 @@ bilibili直播间工具
 
 ```
 {
-    "BilibiliLiveHelper": "{\"fullScreenPanel\":true,\"showVideoLink\":true,\"showOtherGift\":false,\"replaceMedalTitle\":true}"
+    "BilibiliLiveHelper": "{
+        \"giftInPanel\":true,
+        \"fullScreenPanel\":true,
+        \"fullScreenChat\":true,
+        \"chatInGiftPanel\":true,
+        \"showVideoLink\":true,
+        \"replaceMedalTitle\":true,
+        \"showOtherGift\":false
+    }"
 }
 ```
 

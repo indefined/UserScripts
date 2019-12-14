@@ -2,7 +2,7 @@
 // @name        bilibili直播间工具
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.14
+// @version     0.5.15
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、硬币直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -75,6 +75,10 @@ const helper = {
 
 const LiveHelper = {
     settingInfos:{
+        giftInPanel:{
+            name:'礼物栏道具包裹',
+            group:'elementAdjuster'
+        },
         fullScreenPanel:{
             name:'全屏/网页全屏礼物栏',
             group:'elementAdjuster'
@@ -107,7 +111,13 @@ const LiveHelper = {
                 type:'text/css',
                 innerHTML:`
 /*礼物包裹图标*/
-.gift-package {
+.gift-presets .z-gift-package {
+    display: inline-block !important;
+    vertical-align: top !important;
+    cursor: pointer !important;
+    position: relative! important;
+}
+.gift-presets .gift-package {
     bottom:-2px!important;
     background: url(//s1.hdslb.com/bfs/live/d57afb7c5596359970eb430655c6aef501a268ab.png)!important;
     width: 48px!important;
@@ -116,11 +126,11 @@ const LiveHelper = {
     margin-right: 10px!important;
 }
 
-.gift-package>*{
+.gift-presets .gift-package>*{
     display:none!important;
 }
 
-.gift-package:after {
+.gift-presets .gift-package:after {
     content: '道具包裹';
     position: relative;
     bottom: -55px;
@@ -274,6 +284,10 @@ body.fullscreen-fix div#gift-control-vm {
             this.toolBar = helper.get('#gift-control-vm');
             this.giftPanel = helper.get('div.gift-presets.p-relative.t-right');
             this.giftPackage = helper.get('.item.z-gift-package');
+            if(this.giftPackage) {
+                this.giftPackage.id = 'giftPackage';
+                this.giftPackageContainer = this.giftPackage.parentNode;
+            }
             this.playerPanel = helper.get('.bilibili-live-player.relative');
             this.screenPanel = helper.get('.bilibili-live-player-video-controller');
             this.controller = helper.get('.bilibili-live-player-video-controller-content');
@@ -307,15 +321,18 @@ body.fullscreen-fix div#gift-control-vm {
             });
         },
         //礼物包裹
-        initGiftPackage(){
+        updateGiftPackage(){
             if (this.giftPackage&&this.giftPanel){
-                helper.set(this.giftPackage,{
-                    className:"dp-i-block v-top pointer p-relative bg-cover",
-                    id:"giftPackage"
-                },this.giftPanel);
-                helper.get('.gift-package').className = 'gift-package live-skin-main-text';
-                const guardIcon = helper.get('div.m-guard-ent.gift-section.guard-ent');
-                if (guardIcon) guardIcon.parentNode.removeChild(guardIcon);
+                if(this.settings.giftInPanel) {
+                    this.giftPanel.appendChild(this.giftPackage);
+                    helper.get('.gift-package').className = 'gift-package live-skin-main-text';
+                    const guardIcon = helper.get('div.m-guard-ent.gift-section.guard-ent');
+                    if (guardIcon) guardIcon.parentNode.removeChild(guardIcon);
+                }
+                else if(this.giftPackage.parentNode!=this.giftPackageContainer) {
+                    this.giftPackageContainer.appendChild(this.giftPackage);
+                    helper.get('.gift-package').className = 'gift-package live-skin-highlight-bg';
+                }
             }
         },
         //轮播链接
@@ -365,6 +382,9 @@ body.fullscreen-fix div#gift-control-vm {
             if(item=='showVideoLink') {
                 this.updateVideoLink();
             }
+            else if(item=='giftInPanel') {
+                return this.updateGiftPackage();
+            }
             else if(item=='fullScreenPanel'||item=='fullScreenChat'||item=='chatInGiftPanel') {
                 this.handleFullScreenPanel();
             }
@@ -389,9 +409,9 @@ body.fullscreen-fix div#gift-control-vm {
             this.settings = settings;
             this.initValues();
             this.initStyle();
-            this.initGiftPackage();
             this.update();
             this.updateVideoLink();
+            this.updateGiftPackage();
         }
     },
 
