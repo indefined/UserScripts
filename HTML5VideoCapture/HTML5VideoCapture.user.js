@@ -2,7 +2,7 @@
 // @name         HTML5视频截图器
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.4.5
+// @version      0.4.5.1
 // @description  基于HTML5的简单任意原生视频截图，可控制快进/逐帧/视频调速，支持自定义快捷键
 // @author       indefined
 // @include      *://*
@@ -166,12 +166,13 @@
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+        const name = `${document.title}_${Math.floor(video.currentTime/60)}'${(video.currentTime%60).toFixed(3)}''.jpg`;
         try{
             if (!down) throw `i don't want to do it.`;
             canvas.toBlob(blob=>{
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
-                a.download = `${document.title}_${Math.floor(video.currentTime/60)}'${(video.currentTime%60).toFixed(3)}''.jpg`;
+                a.download = name;
                 document.head.appendChild(a);
                 a.click();
                 document.head.removeChild(a);
