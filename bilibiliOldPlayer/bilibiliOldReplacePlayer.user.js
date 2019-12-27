@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         替换bilibili旧版播放器
 // @namespace    indefined
-// @version      0.1
+// @version      0.1.1
 // @description  通过替换脚本的方法切换旧版播放器
 // @author       indefined
 // @match        *://*.bilibili.com/watchlater/*
@@ -52,7 +52,6 @@ if(vd&&vd.aid&&getInternetExplorerVersion()!==9){$("#__bofqi").innerHTML='<div c
 <script type="text/javascript" src="//static.hdslb.com/phoenix/dist/js/comment.min.js"></script>
 <script type="text/javascript" src="//static.hdslb.com/js/jquery.qrcode.min.js"></script>
 <link rel="stylesheet" href="//static.hdslb.com/phoenix/dist/css/comment.min.css" type="text/css">
-<script type="text/javascript" src="//s1.hdslb.com/bfs/cm/st/bundle.js" crossorigin=""></script>
 <script type="text/javascript" src="//static.hdslb.com/common/js/footer.js"></script>
 </body>`);
                 document.close()
