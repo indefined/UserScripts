@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         替换bilibili旧版播放器
 // @namespace    indefined
-// @version      0.1.1
+// @version      0.1.2
 // @description  通过替换脚本的方法切换旧版播放器
 // @author       indefined
 // @match        *://*.bilibili.com/watchlater/*
@@ -13,7 +13,8 @@
 (function() {
     'use strict';
 
-    window.stop();
+    //window.stop();/*阻止网页的继续加载，但是似乎chrome78以上会导致document.write无效
+    document.write('<!--');//忽略原网页后面数据的加载，作用有限*/
     if(location.pathname.startsWith('/video')) {
         //av页
         fetch(location.href)
@@ -21,8 +22,9 @@
             .then(text=>text.match(/<script type="text\/javascript">window.__BILI_CONFIG__.+?<\/script>.+?<\/script>.+?<\/script>/))//从原网页里把原始视频数据扒出来
             .then(match=>{
             if(match){
-                document.open();
-                document.write(`
+                const w = window//.open();
+                w.document.open();
+                w.document.write(`
 <body>
 <!--主样式表-->
 <link rel="stylesheet" href="https://s1.hdslb.com/bfs/static/jinkela/videoplay/css/video.1.b1b7706abd590dd295794f540f7669a5d8d978b3.css">
@@ -54,7 +56,7 @@ if(vd&&vd.aid&&getInternetExplorerVersion()!==9){$("#__bofqi").innerHTML='<div c
 <link rel="stylesheet" href="//static.hdslb.com/phoenix/dist/css/comment.min.css" type="text/css">
 <script type="text/javascript" src="//static.hdslb.com/common/js/footer.js"></script>
 </body>`);
-                document.close()
+                w.document.close();
             }
         });
     }
