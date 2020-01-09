@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.6
+// @version      0.5.7
 // @description  加载本地字幕/下载CC字幕，旧版播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -176,7 +176,7 @@ fill-rule="evenodd"></path></svg></span>`,
             'Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text'
         ],
         showDialog(data){
-            if(!data||!data.body instanceof Array){
+            if(!data||!(data.body instanceof Array)){
                 throw '数据错误';
             }
             const settingDiv = elements.createAs('div',{
@@ -339,7 +339,7 @@ fill-rule="evenodd"></path></svg></span>`,
                 },this.dialog);
                 //关闭按钮
                 elements.createAs('button',{
-                    style: "margin-left: 10px;border:none;",innerText: '关闭面板',
+                    style: "margin-left: 10px;border:none;width:max-content;",innerText: '关闭面板',
                     className:'bpui-button bui bui-button bui-button-blue',
                     onclick:  ()=> elements.getAs('#bilibiliPlayer').removeChild(this.dialog)
                 },this.dialog);
