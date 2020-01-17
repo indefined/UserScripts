@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.6.1
+// @version      0.6.2
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -1020,14 +1020,11 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
             req.send(`aid=${target.dataset.aid}&csrf=${tools.token}`);
             return false;
         },
-        //unuse 该接口会被CORS拦截，明明都是破站的接口竟然不给主站设白名单……
-        findTagId(name) {
-            return fetch(`//t.bilibili.com/topic/name/${name}/feed`,{method:'head'}).then(r=>r.url.split('\/').reverse()[1])
-        }
     };
 
     //初始化
     function init() {
+        if (document.querySelector('.international-home')) element.isNew = true;;
         try{
             setting.setStyle();
             InitRecommend();
@@ -1038,12 +1035,9 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
         }
     }
     if (element.mainDiv){
-        if (document.querySelector('.international-home')) element.isNew = true;;
         init();
     }
     else {
-        if(document.querySelector('.international-home')) {
-            element.isNew = true;
             new MutationObserver((mutations,observer)=>{
                 //console.log(mutations)
                 for(const mutation of mutations){
@@ -1060,9 +1054,5 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                 childList: true,
                 subtree: true,
             });
-        }
-        else if(document.location.pathname=='/'||document.location.pathname=='/index.html'){
-            console.error('添加APP首页推荐找不到动画版块');
-        }
     }
 })();
