@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.6.3
+// @version      0.6.4
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -215,6 +215,9 @@
                 className:'spread-module',
                 childs:[{
                     nodeType:'a',target:'_blank',
+                    onmouseenter: tools.preview,
+                    onmouseleave: tools.preview,
+                    onmousemove: tools.preview,
                     href:data.goto=='av'?`/video/av${data.param}`:data.uri,
                     dataset:{
                         tag_id:data.tag?data.tag.tag_id:'',
@@ -225,6 +228,9 @@
                             nodeType:'div',className:'pic',
                             childs:[
                                 `<div class="lazy-img"><img alt="${data.title}" src="${data.cover}@160w_100h.${tools.imgType}" /></div>`,
+                                `<div class="cover-preview-module"></div>`,
+                                `<div class="mask-video"></div>`,
+                                `<div class="danmu-module"></div>`,
                                 `<span title="分区：${data.tname||data.badge}" class="tname">${data.tname||data.badge}</span>`,
                                 data.duration&&`<span class="dur">${tools.formatNumber(data.duration,'time')}</span>`||'',
                                 data.goto=='av'?{
@@ -265,6 +271,9 @@
                 childs:[
                     {
                         nodeType:'div',className:'card-pic',
+                        onmouseenter: tools.preview,
+                        onmouseleave: tools.preview,
+                        onmousemove: tools.preview,
                         dataset:{
                             tag_id:data.tag?data.tag.tag_id:'',
                             id:data.param,goto:data.goto,mid:data.mid,rid:data.tid
@@ -275,6 +284,8 @@
                             + `<div class="left"><span><i class="bilifont bili-icon_shipin_bofangshu"></i>${tools.formatNumber(data.play)}</span>`
                             +(data.like&&`<span><i class="bilifont bili-icon_shipin_dianzanshu"></i>${data.like}</span></div>`||'</div>')
                             + `<div class="right"><span>${data.duration&&tools.formatNumber(data.duration,'time')||''}</span></div></div></a>`,
+                            `<div class="cover-preview-module van-framepreview"></div>`,
+                            `<div class="danmu-module van-danmu"></div>`,
                             `<span title="分区：${data.tname||data.badge}" class="tname">${data.tname||data.badge}</span>`,
                             data.goto=='av'?{
                                 nodeType:'div',
@@ -477,98 +488,73 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
         //创建一个显示详情的浮窗
         detail.div = element._c({
             nodeType:'div',style:'display:none',
-            className:'video-info-module',
+            className:'spread-module video-info-module',
             onmouseenter: ()=> (detail.div.style.display = 'block'),
             onmouseleave: ()=> (detail.div.style.display = 'none'),
-            childs:[
-                '<style>.clearfix.v-data>div>span{display: block;margin-bottom: 4px;width: 100%;}',
-                (detail.title = element._c({nodeType:'a',className:'v-title',target:'_blank',style:'color:#000'})),
-                {
-                    nodeType:'div',
-                    className:'clearfix v-data',
-                    childs:[
-                        {
-                            nodeType:'span',
-                            className:'lazy-img',
-                            style:'width: 160px;',
-                            childs:[detail.img = element._c({nodeType:'img'})]
-                        },
-                        detail.watchLater = element._c({
-                            nodeType:'div',title:'添加到稍后再看',
-                            className:"watch-later-trigger w-later van-watchlater black",
-                            style:'display: block; left: 14px; top: 44px;',
-                            onclick:tools.watchLater
-                        }),
-                        {
-                            nodeType:'div',
-                            style:'display: inline-block;vertical-align: top;width: 130px;margin-left:3px',
-                            childs:[
-                                {
-                                    nodeType:'span',className:'name',
-                                    childs:[
-                                        '<i class="icon bilifont bili-icon_xinxi_UPzhu" style="background-position: -282px -154px;"></i>',
-                                        detail.author = element._c({nodeType:'span'}),
-                                    ]
-                                },
-                                {
-                                    nodeType:'span',className:'play',
-                                    childs:[
-                                        '<i class="icon bilifont bili-icon_shipin_bofangshu"></i>',
-                                        detail.play = element._c({nodeType:'span'}),
-                                    ]
-                                },
-                                {
-                                    nodeType:'span',className:'danmu',
-                                    childs:[
-                                        '<i class="icon bilifont bili-icon_shipin_danmushu"></i>',
-                                        detail.video_review = element._c({nodeType:'span'}),
-                                    ]
-                                },
-                                {
-                                    nodeType:'span',className:'coin',
-                                    childs:[
-                                        '<i class="icon bilifont bili-icon_shipin_yingbishu"></i>',
-                                        detail.coins = element._c({nodeType:'span'}),
-                                    ]
-                                },
-                                {
-                                    nodeType:'span',
-                                    childs:[
-                                        '时长:',
-                                        detail.duration = element._c({nodeType:'span',style:'vertical-align:top'}),
-                                    ]
-                                },
-                                {
-                                    nodeType:'span',
-                                    childs:[
-                                        '综合评分:',
-                                        detail.pts = element._c({nodeType:'span',style:'vertical-align:top'}),
-                                    ]
-                                },
-                            ]
-                        },
-                    ]
-                }
-            ]
         });
         warp.insertBefore(detail.div,warp.lastChild);
 
         //更新显示详情浮窗内容
-        function updateDetail(itemData,offsetTop){
-            Object.entries(detail).forEach(([key,item])=>{
-                if(key=='div') {
-                    item.style.top = offsetTop + 'px';
-                    item.style.display = 'block';
-                    item.style.left = rankingAll.offsetLeft + 'px';
-                }
-                else if(key=='img') item.src = `${itemData.pic.replace(/https?:/,'')}@160w_100h.${tools.imgType}`;
-                else if(key=='watchLater') item.dataset.aid = itemData.aid;
-                else {
-                    item.innerText = tools.formatNumber(itemData[key]);
-                    item.title = itemData[key];
-                }
-                if(key=='title') item.href = `/video/av${itemData.aid}/`;
-            })
+        function updateDetail(data,offsetTop){
+            element._s(detail.div,{
+                style: `display:"none";left:${rankingAll.offsetLeft}px;top:${offsetTop}px;`,
+                innerHTML:['<style>.clearfix.v-data>div>span{display: block;margin-bottom: 4px;width: 100%;}',
+                           '.cover-preview-module.show {opacity: 1}',
+                           '.cover-preview-module .cover {position: absolute;left: 0;top: 7px;height: 98px;width: 100%;margin-top: 2px}',
+                           '.spread-module .pic {position: relative;display: block;overflow: hidden;border-radius: 4px}</style>',
+                          ].join(''),
+                childs:[
+                    `<a class="v-title" target="_blank" style="color: rgb(0, 0, 0);" title="${data.title}" href="${`/video/av${data.aid}/`}">${data.title}</a>`,
+                    {
+                        nodeType:'div',
+                        className:'clearfix v-data',
+                        childs:[
+                            {nodeType:'div',style:'display: inline-block;width:160px',
+                             childs:[{
+                                nodeType:'a',target:'_blank',
+                                onmouseenter: tools.preview,
+                                onmouseleave: tools.preview,
+                                onmousemove: tools.preview,
+                                dataset:{id:data.aid},
+                                childs:[
+                                    {
+                                        nodeType:'div',className:'pic',
+                                        childs:[
+                                            `<div class="lazy-img"><img alt="${data.title}" src="${data.pic.replace(/https?:/,'')}@160w_100h.${tools.imgType}" /></div>`,
+                                            `<div class="cover-preview-module ${element.isNew?'van-framepreview':''} ranking"></div>`,
+                                            `<div class="mask-video"></div>`,
+                                            `<div class="danmu-module van-danmu"></div>`,
+                                            //`<span title="分区：${data.tname||data.badge}" class="tname">${data.tname||data.badge}</span>`,
+                                            {
+                                                nodeType:'div',
+                                                dataset:{aid:data.aid},title:'稍后再看',
+                                                className:'watch-later-trigger w-later watch-later-video van-watchlater black',
+                                                onclick:tools.watchLater
+                                            },
+                                        ]
+                                    },
+                                ]
+                            }]},
+                            {
+                                nodeType:'div',
+                                style:'display: inline-block;vertical-align: top;width: 130px;margin-left:3px',
+                                childs:[
+                                    '<span class="name"><i class="icon bilifont bili-icon_xinxi_UPzhu" style="background-position: -282px -154px;"></i>'+
+                                    `<a href="//space.bilibili.com/${data.mid}/" target="_blank" title="${data.author}">${data.author}</a></span>`,
+                                    '<span class="play"><i class="icon bilifont bili-icon_shipin_bofangshu"></i>'+
+                                    `<span title="${data.play}">${tools.formatNumber(data.play)}</span></span>`,
+                                    '<span class="danmu"><i class="icon bilifont bili-icon_shipin_danmushu"></i>'+
+                                    `<span title="${data.video_review}">${tools.formatNumber(data.video_review)}</span></span>`,
+                                    '<span class="coin"><i class="icon bilifont bili-icon_shipin_yingbishu"></i>'+
+                                    `<span title="${data.conis}">${tools.formatNumber(data.coins)}</span></span>`,
+                                    `<span>时长:<span style="vertical-align: top;" title="${tools.formatNumber(data.duration)}">${tools.formatNumber(data.duration)}</span>`,
+                                    `<span>综合评分:<span style="vertical-align: top;" title="${data.pts}">${tools.formatNumber(data.pts)}</span></span>`,
+                                ]
+                            },
+                        ]
+                    }
+                ]
+            });
         };
         //将排行数据显示到指定目标中
         function showData(target,data){
@@ -1020,6 +1006,91 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
             req.send(`aid=${target.dataset.aid}&csrf=${tools.token}`);
             return false;
         },
+        //视频预览……做得挺深井冰的……
+        previewImage (pv,target,width) {
+            if(!pv||!target||!target.cover) return;
+            let pWidth = target.parentNode.offsetWidth, data = target.cover,
+                  percent = +width/pWidth,
+                  index = Math.floor(percent*data.index.length),
+                  url = data.image[Math.floor(index/data.img_x_len/data.img_y_len)],
+                  size = pWidth * data.img_x_len,
+                  y = Math.floor(index/data.img_x_len) * -pWidth/data.img_x_size * data.img_y_size,
+                  x = (index % target.cover.img_x_len) * -pWidth;
+            if(pv.classList.contains('van-framepreview')) {
+                if(pv.classList.contains('ranking')) y += 10;
+                pv.style = `background-image: url(${url}); background-position: ${x}px ${y}px; background-size: ${size}px;opacity:1;`;
+                pv.innerHTML = `<div class="van-fpbar-box"><span style="width: ${percent*100}%;display:block;"></span></div>`;
+            }
+            else {
+                pv.innerHTML = `<div class="cover" style="background-image: url(${url}); background-position: ${x}px ${y}px; background-size: ${size}px;"></div>`
+                    + `<div class="progress-bar van-fpbar-box"><span style="width: ${percent*100}%;display:block;"></span></div>`
+            }
+        },
+        previewDanmu (target,status) {
+            if(!target||!target.data||!target.data.length) return;
+            clearInterval(target.timmer);
+            if(status) {
+                let count = 0;
+                target.timmer = setInterval(()=>{
+                    if(count%target.data.length==0) {
+                        count==0;
+                        target.innerHTML = target.data.map((item,i)=>`<p class="dm van-danmu-item ${i%2?'':'row2'}">${item}</p>`).join('');
+                    }
+                    const item = target.children[count++];
+                    if(!item) return;
+                    item.style = `left: -${item.offsetWidth}px; transition: left 5s linear 0s;`;
+                },2.5*1000);
+            }
+        },
+        preview (ev){
+            let deep = 1,target = ev.target;
+            while(!target.dataset.id&&deep++<4){
+                target=target.parentNode;
+            }
+            const pv = target.querySelector('.cover-preview-module'),
+                  danmu = target.querySelector('.danmu-module');
+            if(!ev.target||!pv||!danmu) return;
+            if(ev.type=='mouseenter') {
+                target.timmer = setTimeout(()=>{
+                    if(!target.timmer) return;
+                    pv.classList.add('show');
+                    danmu.classList.add('show');
+                    if(!target.cover) {
+                        fetch(`//api.bilibili.com/pvideo?aid=${target.dataset.id}&_=${Date.now()}`)
+                            .then(res=>res.json())
+                            .then(d=>(target.cover = d.data))
+                            .then(()=>fetch(`//api.bilibili.com/x/v2/dm/ajax?aid=${target.dataset.id}&_=${Date.now()}`))
+                            .then(res=>res.json())
+                            .then(d=>(danmu.data = d.data))
+                            .then(()=>{
+                            if(!target.timmer) return;
+                            tools.previewImage(pv,target,ev.offsetX);
+                            tools.previewDanmu(danmu,'on');
+                            delete target.timmer;
+                        });
+                    }
+                    else {
+                        tools.previewImage(pv,target,ev.offsetX);
+                        tools.previewDanmu(danmu,'on');
+                        delete target.timmer;
+                    }
+                },100);
+            }
+            else if(ev.type=='mouseleave') {
+                clearTimeout(target.timmer);
+                delete target.timmer;
+                pv.classList.remove('show');
+                if(pv.classList.contains('van-framepreview')) {
+                    pv.style.opacity = 0;
+                }
+                danmu.classList.remove('show');
+                tools.previewDanmu(danmu);
+            }
+            else {
+                if(!target.cover) return;
+                tools.previewImage(pv,target,ev.offsetX);
+            }
+        }
     };
 
     //初始化

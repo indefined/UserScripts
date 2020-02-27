@@ -15,6 +15,7 @@ B站网页端添加APP首页推荐
 - bilibili网页端首页添加APP首页推荐内容
 - 添加/撤销稍后再看
 - 不喜欢/撤销不喜欢
+- 视频/弹幕预览
 - 全站排行榜
 
 ![图片预览](https://greasyfork.org/system/screenshots/screenshots/000/015/605/original/preview.jpg)
