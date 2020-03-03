@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.6.4
+// @version      0.6.4.2
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -215,9 +215,9 @@
                 className:'spread-module',
                 childs:[{
                     nodeType:'a',target:'_blank',
-                    onmouseenter: tools.preview,
-                    onmouseleave: tools.preview,
-                    onmousemove: tools.preview,
+                    onmouseenter: data.goto=='av'&&tools.preview,
+                    onmouseleave: data.goto=='av'&&tools.preview,
+                    onmousemove: data.goto=='av'&&tools.preview,
                     href:data.goto=='av'?`/video/av${data.param}`:data.uri,
                     dataset:{
                         tag_id:data.tag?data.tag.tag_id:'',
@@ -271,9 +271,9 @@
                 childs:[
                     {
                         nodeType:'div',className:'card-pic',
-                        onmouseenter: tools.preview,
-                        onmouseleave: tools.preview,
-                        onmousemove: tools.preview,
+                        onmouseenter: data.goto=='av'&&tools.preview,
+                        onmouseleave: data.goto=='av'&&tools.preview,
+                        onmousemove: data.goto=='av'&&tools.preview,
                         dataset:{
                             tag_id:data.tag?data.tag.tag_id:'',
                             id:data.param,goto:data.goto,mid:data.mid,rid:data.tid
@@ -546,7 +546,7 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                                     '<span class="danmu"><i class="icon bilifont bili-icon_shipin_danmushu"></i>'+
                                     `<span title="${data.video_review}">${tools.formatNumber(data.video_review)}</span></span>`,
                                     '<span class="coin"><i class="icon bilifont bili-icon_shipin_yingbishu"></i>'+
-                                    `<span title="${data.conis}">${tools.formatNumber(data.coins)}</span></span>`,
+                                    `<span title="${data.coins}">${tools.formatNumber(data.coins)}</span></span>`,
                                     `<span>时长:<span style="vertical-align: top;" title="${tools.formatNumber(data.duration)}">${tools.formatNumber(data.duration)}</span>`,
                                     `<span>综合评分:<span style="vertical-align: top;" title="${data.pts}">${tools.formatNumber(data.pts)}</span></span>`,
                                 ]
@@ -1043,13 +1043,14 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
             }
         },
         preview (ev){
+            if(!ev.target) return;
             let deep = 1,target = ev.target;
             while(!target.dataset.id&&deep++<4){
                 target=target.parentNode;
             }
             const pv = target.querySelector('.cover-preview-module'),
                   danmu = target.querySelector('.danmu-module');
-            if(!ev.target||!pv||!danmu) return;
+            if(!pv||!danmu) return;
             if(ev.type=='mouseenter') {
                 target.timmer = setTimeout(()=>{
                     if(!target.timmer) return;
