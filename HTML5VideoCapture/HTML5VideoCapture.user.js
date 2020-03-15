@@ -2,7 +2,7 @@
 // @name         HTML5视频截图器
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.4.5.1
+// @version      0.4.6
 // @description  基于HTML5的简单任意原生视频截图，可控制快进/逐帧/视频调速，支持自定义快捷键
 // @author       indefined
 // @include      *://*
@@ -97,6 +97,13 @@
             type:'checkbox',
             key:'',
             checked:false
+        },
+        saveAsTimeStamp:{
+            content:'截图文件名按照当前时间保存',
+            title:'勾选此项则下载的截图文件名按照当前时间戳保存，否则按照视频播放时间保存',
+            type:'checkbox',
+            key:'',
+            checked:false
         }
     };
     /**
@@ -166,7 +173,10 @@
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-        const name = `${document.title}_${Math.floor(video.currentTime/60)}'${(video.currentTime%60).toFixed(3)}''.jpg`;
+        const timestamp = config.saveAsTimeStamp.checked?
+              new Date().toLocaleString('zh', {hour12: false}):
+        `${Math.floor(video.currentTime/60)}'${(video.currentTime%60).toFixed(3)}''`;
+        const name = `${document.title}_${timestamp}.jpg`;
         try{
             if (!down) throw `i don't want to do it.`;
             canvas.toBlob(blob=>{
@@ -708,6 +718,14 @@
                 else {
                     let v = value.active;
                     item.value = v.ctrlKey!=undefined?(v.ctrlKey&&'ctrl+'||'')+(v.shiftKey&&'shift+'||'')+(v.altKey&&'alt+'||'')+v.key:v.key
+                }
+            }
+            else {
+                if(item.type=='checkbox') {
+                    item.checked = false;
+                }
+                else{
+                    item.value = '';
                 }
             }
         }
