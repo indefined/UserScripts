@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.7
+// @version      0.5.8
 // @description  加载本地字幕/下载CC字幕，旧版播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @include      http*://www.bilibili.com/video/av*
+// @include      http*://www.bilibili.com/video/*
 // @include      http*://www.bilibili.com/bangumi/play/ss*
 // @include      http*://www.bilibili.com/bangumi/play/ep*
 // @include      http*://www.bilibili.com/watchlater/
@@ -889,7 +889,8 @@ fill-rule="evenodd"></path></svg></span>`,
             this.subtitle = undefined;
             this.datas = {close:{body:[]},local:{body:[]}};
             decoder.data = undefined;
-            return this.cid&&fetch(`//api.bilibili.com/x/player.so?id=cid:${window.cid}&aid=${window.aid}`)
+            if(!window.cid||(!window.aid&&!window.bvid)) return;
+            return fetch(`//api.bilibili.com/x/player.so?id=cid:${window.cid}${window.aid?`&aid=${window.aid}`:`&bvid=${window.bvid}`}`)
                 .then(res=>res.text())
                 .then(data=>data.match(/(?:<subtitle>)(.+)(?:<\/subtitle>)/))
                 .then(match=>{
