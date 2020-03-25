@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.8
+// @version      0.5.9
 // @description  加载本地字幕/下载CC字幕，旧版播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -382,8 +382,8 @@ fill-rule="evenodd"></path></svg></span>`,
                 const offset = +this.offset.value;
                 player.updateSubtitle(!offset?this.data:{
                     body:this.data.body.map(({from,to,content})=>({
-                        from:from + offset,
-                        to:to + offset,
+                        from:from - offset,
+                        to:to - offset,
                         content
                     }))
                 });
