@@ -645,7 +645,8 @@ fill-rule="evenodd"></path></svg></span>`,
             elements.createAs('a',{
                 className: this.subtitle.allow_submit?'bpui-button':'bpui-button bpui-state-disabled',
                 innerText: '添加字幕',
-                href: this.subtitle.allow_submit?`https://member.bilibili.com/v2#/zimu/my-zimu/zimu-editor?aid=${window.aid}&cid=${window.cid}`:'javascript:',
+                href: !this.subtitle.allow_submit?'javascript:'
+                :`https://member.bilibili.com/v2#/zimu/my-zimu/zimu-editor?cid=${window.cid}&${window.aid?`aid=${window.aid}`:`bvid=${window.bvid}`}`,
                 target: '_blank',
                 style: 'margin-right: 0px;height: 24px;padding:0 6px;',
                 title: this.subtitle.allow_submit?'':'本视频无法添加字幕，可能原因是:\r\n·UP主未允许观众投稿字幕\r\n·您未达到UP主设置的投稿字幕条件',
