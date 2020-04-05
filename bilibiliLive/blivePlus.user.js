@@ -2,7 +2,7 @@
 // @name        bilibili直播间工具
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.16
+// @version     0.5.17
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、硬币直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -70,6 +70,7 @@ const helper = {
         document.body.appendChild(toast);
         setTimeout(()=>document.body.removeChild(toast),3000);
     },
+    position:target=>Array.from(target.parentNode.children).indexOf(target) * 22 + 3,
     isFirefox:navigator.userAgent.indexOf('Firefox')!=-1
 };
 
@@ -77,6 +78,10 @@ const LiveHelper = {
     settingInfos:{
         giftInPanel:{
             name:'礼物栏道具包裹',
+            group:'elementAdjuster'
+        },
+        oldGiftStyle:{
+            name:'旧版道具包裹样式',
             group:'elementAdjuster'
         },
         fullScreenPanel:{
@@ -144,7 +149,7 @@ const LiveHelper = {
 }
 
 /*礼物包裹内样式*/
-.gift-item-wrap .expiration {
+.gift-style-modify .gift-item-wrap .expiration {
     padding: 1px 5px!important;
     border-radius: 15px!important;
     text-align: center!important;
@@ -154,7 +159,7 @@ const LiveHelper = {
     word-break: keep-all!important;
 }
 
-.gift-item-wrap {
+.gift-style-modify .gift-item-wrap {
     margin: 10px 0px 0px 5px!important;
     width: unset!important;
 }
@@ -163,15 +168,15 @@ const LiveHelper = {
     overflow: visible;
 }
 
-.gift-item-wrap:nth-of-type(-n+5) {
+.gift-style-modify .gift-item-wrap:nth-of-type(-n+5) {
     margin-top: 5px!important;
 }
 
-.common-popup-wrap.arrow-bottom.popup {
+.gift-style-modify .common-popup-wrap.arrow-bottom.popup {
     min-width: 274px!important;
 }
 
-.item-box {
+.gift-style-modify .item-box {
     width: 100%!important;
 }
 
@@ -333,6 +338,12 @@ body.fullscreen-fix div#gift-control-vm {
                     this.giftPackageContainer.appendChild(this.giftPackage);
                     helper.get('.gift-package').className = 'gift-package live-skin-highlight-bg';
                 }
+                if(this.settings.oldGiftStyle) {
+                    this.giftPackage.classList.add('gift-style-modify');
+                }
+                else {
+                    this.giftPackage.classList.remove('gift-style-modify');
+                }
             }
         },
         //轮播链接
@@ -382,7 +393,7 @@ body.fullscreen-fix div#gift-control-vm {
             if(item=='showVideoLink') {
                 this.updateVideoLink();
             }
-            else if(item=='giftInPanel') {
+            else if(item=='giftInPanel'||item=='oldGiftStyle') {
                 return this.updateGiftPackage();
             }
             else if(item=='fullScreenPanel'||item=='fullScreenChat'||item=='chatInGiftPanel') {
@@ -492,7 +503,6 @@ body.fullscreen-fix div#gift-control-vm {
             helper.replace(this.titleButton,this.oldTitleButton);
             document.body.removeEventListener('click', this.handler);
         },
-        position:target=>Array.from(target.parentNode.children).indexOf(target) * 22 + 3,
         handleDialog(target){
             if (this.dialog.contains(target)) return;
             const targetName = target.dataset.name;
@@ -505,8 +515,8 @@ body.fullscreen-fix div#gift-control-vm {
             this.dialog.dataset.name = targetName;
             this.dialogTitle.innerText = '我的'+targetConfig.name;
             //设置对话框位置
-            this.dialog.style = `transform-origin: ${this.position(target)}px bottom 0px;position:absolute;bottom:50px;color: #23ade5;`;
-            this.dialogArraw.style.left = this.position(target) + 'px';
+            this.dialog.style = `transform-origin: ${helper.position(target)}px bottom 0px;position:absolute;bottom:50px;color: #23ade5;`;
+            this.dialogArraw.style.left = helper.position(target) + 'px';
             //显示正在加载面板
             helper.set(this.loadingDiv,{
                 style:"height:100px",
@@ -792,7 +802,7 @@ body.fullscreen-fix div#gift-control-vm {
                 items.innerHTML = '<div data-v-ec1c3b2e="" class="tv"><div data-v-4df82965="" data-v-ec1c3b2e="" role="progress" class="link-progress-tv"></div></div>';
                 list.className = 'common-popup-wrap t-left';
                 list.style = 'position: absolute;width: 276px;bottom: 30px;left: 0px;cursor: auto;animation:scale-in-ease 0.4s;transform-origin: 90px bottom 0px;';
-                list.innerHTML = `<div style="position: absolute;left: ${this.position(target)}px;top: 100%;width: 0;height: 0;border-left: 4px solid transparent;
+                list.innerHTML = `<div style="position: absolute;left: ${helper.position(target)}px;top: 100%;width: 0;height: 0;border-left: 4px solid transparent;
                     border-right: 4px solid transparent;border-top: 8px solid #fff;"></div><header style="font-size:18px;color:#23ade5;margin-bottom:10px;">其它礼物</header>`;
                 list.appendChild(items);
                 this.newGift.appendChild(list);
