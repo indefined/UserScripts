@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.6.4.2
+// @version      0.6.5
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -151,7 +151,7 @@
             innerHTML:'',style:'overflow:hidden auto;display:block',
             childs:[listBox = element._c({
                 nodeType:'div',className:scrollBox.className,
-                id:'recommend-list',style:'overflow-y: auto;align-content: flex-start;',
+                id:'recommend-list',
                 innerHTML:'<span style="display:none">empty</span>'
             })]
         });
@@ -178,6 +178,19 @@
         //加载新推荐
         for(let i=0;i<setting.autoFreshCount;i++) getRecommend();
 
+        //如果是新版页面，因为弹性布局原因，需要根据情况设置宽度避免因为不显示滚动条干扰溢出
+        if(element.isNew) {
+            setting.setListWidth = function() {
+                if(listBox.scrollHeight>listBox.clientHeight && setting.noScrollBar) {
+                    listBox.style = 'overflow-y: auto;align-content: flex-start;width: calc(100% + 20px) !important';
+                }
+                else {
+                    listBox.style = 'overflow-y: auto;align-content: flex-start;width: 100% !important';
+                }
+            }
+            setting.setListWidth();
+            new MutationObserver(setting.setListWidth).observe(listBox,{childList:true});
+        }
         //获取推荐视频数据
         function getRecommend () {
             let loadingDiv;
@@ -687,24 +700,34 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                 });
             }
             if(this.noScrollBar) {
+                //不显示滚动条情况下，将内层容器宽度设置为比外层宽度多一个滚动条，则滚动条位置会溢出被遮挡
                 this.styleDiv.innerHTML = '#ranking-all .rank-list-wrap{width:calc(200% + 40px)}'
                     + '#ranking-all .rank-list-wrap.show-origin{margin-left:calc(-100% - 20px)}'
-                    + '#recommend #recommend-list{width:calc(100% + 20px)!important;}';
+                    ;
+                //左侧推荐容器本同理，但因为新版弹性布局如果没有滚动条内容会伸展到超出可视范围，需针对设置
             }
             else {
-                this.styleDiv.innerHTML = '#recommend #recommend-list{height:unset!important;'
-                    + (element.isNew&&'width:100%!important;'||'width:calc(100% + 20px)!important;')
-                    + '}';
+                //显示滚动条情况下，排行榜容器维持原样式，内层容器自带滚动条。
+                //左侧推荐容器将内层高度设置为弹性，则外层容器固定高度下如果内容超出会显示滚动条。
+                this.styleDiv.innerHTML = '#recommend #recommend-list{height:unset!important;}';
             }
+
+            //设置推荐容器宽高
             if (element.isNew) {
                 this.styleDiv.innerHTML += `#recommend  .storey-box {height:calc(404px / 2 * ${this.boxHeight})}`
                     + ` #ranking-all ul.rank-list{height:calc(404px / 2 * ${this.boxHeight})}`
                     + `@media screen and (max-width: 1438px) { #recommend  .storey-box {height:calc(360px / 2 * ${this.boxHeight})}`
                     + `#ranking-all ul.rank-list{height:calc(360px / 2 * ${this.boxHeight})}}`;
+                if(this.setListWidth) {
+                    //新版的推荐容器宽度针对设置，该方法由初始化推荐容器的方法自行构造，真是深井冰的一团糟乱调用
+                    this.setListWidth();
+                }
             }
             else {
+                //旧版因为固定间隔布局的原因，无论滚动条在内还是在外是否显示均需要维持比外层多一个滚动条宽度
                 this.styleDiv.innerHTML += `#recommend  .storey-box {height:calc(336px / 2 * ${this.boxHeight})}`
-                    + `#ranking-all ul.rank-list{height:calc(336px / 2 * ${this.boxHeight} - 16px)}`;
+                    + `#ranking-all ul.rank-list{height:calc(336px / 2 * ${this.boxHeight} - 16px)}`
+                    + '#recommend #recommend-list{width:calc(100% + 20px)!important;}';
             }
         },
         show(){
