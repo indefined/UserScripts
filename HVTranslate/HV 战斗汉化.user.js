@@ -8,7 +8,7 @@
 // @exclude        *://*hentaiverse.org/pages/showequip.php?*
 // @include        file:///D:/Datas/Downloads/*.htm
 // @core           http://userscripts-mirror.org/scripts/show/41369
-// @version        0.1
+// @version        0.1.1
 // @grant none
 // ==/UserScript==
 (function () {
@@ -45,7 +45,7 @@
         '' : '',
         '' : '',
         'Damages a single enemy. Depending on your equipped weapon, this can place certain status effects on the affected monster. To attack, click here, then click your target. Simply clicking an enemy will also perform a normal attack.' : '普通攻击，取决于你的武器能对怪物造成特定的伤害，单击此处并点击目标怪物进行攻击，没有选中技能法术时仅点击怪物也有相同效果。可以使用键盘的1~9/0来攻击怪物目标。普通攻击命中怪物可以获得5%~10%斗气。',
-        'Use special skills and magic. To use offensive spells and skills, first click it, then click your target. To use it on yourself, click it twice.' : '使用一个技能法术，重复点击技能书按钮可以切换技能和法术列表。对于攻击和乏抑技能法术，点击技能然后选择目标，对于治疗和辅助自用法术，仅需点击。按键盘R可重复释放上一个法术。',
+        'Use special skills and magic. To use offensive spells and skills, first click it, then click your target. To use it on yourself, click it twice.' : '使用一个技能法术。对于攻击和乏抑技能法术，点击技能然后选择目标，对于治疗和辅助自用法术，仅需点击。按键盘R可重复释放上一个法术，重复点击技能书按钮可以切换技能和法术列表。你可以在HV设置中将常用技能法术放在快捷栏上。',
         'Use various consumable items that can replenish your vitals or augment your power in various ways.' : '使用战斗补给品中的道具，它们能恢复你的状态或者给你带来各方面提升。',
         'Toggle Spirit Channeling.' : '切换灵动架式。当你有 50% 以上的斗气可以开启，开启后每次行动消耗 1 点灵力值和 10% 斗气，物理伤害增幅 +100%，魔力值消耗减少 25%。',
         'Increases your defensive capabilities for the next turn.' : '本回合和下一回合你的物理和魔法缓伤增幅 +25%。消耗 10% 斗气恢复 10% 基础生命值 (需要 10%+ 斗气)。',
@@ -70,9 +70,9 @@
         //武器技能
         'A precision strike towards the sensory organs of your enemy inflicts massive damage and temporarily blinds it.' : '使目标盲眼 100 回合。',
         'Does additional damage to blinded targets.' : '打击盲眼的目标有额外伤害。约 50% 机率会使盲眼的目标中毒 15 回合。',
-        'Hits up to five targets multiple times.' : '可击中多达 5 个相邻目标的 10~20 段攻击。',
+        'Hits up to five targets multiple times.' : '给多达 5 个相邻目标造成 10~20 段攻击。',
         '' : '',
-        'Bash an enemy with your shield to stun it, which opens up for devastating strikes with your weapon.' : '不需要装备盾牌。使目标晕眩 5 回合。打出敲击伤害。',
+        'Bash an enemy with your shield to stun it, which opens up for devastating strikes with your weapon.' : '使目标晕眩 5 回合。打出敲击伤害。',
         'Follow up with an attack that, if used on a stunned target, causes a large amount of damage and a chance of inflicting bleed.' : '在已晕眩的敌人上堆 5 道流血伤口 (流血百分比 = 50%) 持续 5 回合。打击晕眩的敌人有额外伤害。',
         'Finish off a mortally wounded enemy. Instantly kills a target with bleed and less than 25% health.' : '立即杀死生命值低于 25% 且正在流血的敌人。当目标的生命值在 25% 之上只会受到一般技巧伤害。',
         '' : '',
@@ -80,9 +80,9 @@
         'Tears through enemy defenses, leaving them vulnerable for followup attacks.' : '对多个目标给予 3 道破甲效果。',
         'A mighty swing with your weapon causes all enemies with penetrated armor to stagger.' : '打击破甲目标可给予晕眩效果。',
         '' : '',
-        'Channels the power of the heavens for a powerful strike that causes massive carnage.' : '给予 3 道破甲 (缓伤降至 25%) 和 5 道流血 (流血百分比 = 20%) 的效果，可达 5 个目标。',
+        'Channels the power of the heavens for a powerful strike that causes massive carnage.' : '给予多达5个目标 3 道破甲 (缓伤降至 25%) 和 5 道流血 (流血百分比 = 20%) 的效果。',
         '' : '',
-        'Focus your magical power into your staff for a precision strike towards the head of your enemy, causing major damage and stunning it.' : '导致晕眩 5 回合，但不会使已晕眩的目标再晕眩。打出魔法性质伤害，而非物理性质。会触发魔力合流特效。',
+        'Focus your magical power into your staff for a precision strike towards the head of your enemy, causing major damage and stunning it.' : '使目标晕眩 5 回合，但不会使已晕眩的目标再晕眩。打出魔法性质伤害，而非物理性质。会触发魔力合流特效。',
         '' : '',
         'Massive AoE damage to all enemies on the battlefield.' : '对战场上所有的敌人打出虚空高伤害。',
         '' : '',

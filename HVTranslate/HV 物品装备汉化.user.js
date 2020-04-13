@@ -11,7 +11,7 @@
 // @match        *://*hentaiverse.org/?s=Bazaar&ss=es*
 // @match        *://forums.e-hentai.org/*
 // @exclude      *://forums.e-hentai.org/index.php?act*
-// @version      5.6
+// @version      5.6.1
 // ==/UserScript==
 
 if (document.location.href.match(/ss=iw/)&&!document.getElementById('item_pane'))return
@@ -726,6 +726,9 @@ function load(){
         'Katalox':'铁木',
 
         'adfouhasd':'',//防止空缺
+        //大小写转换
+        'Of ' : 'of ',
+        'The ' : 'the ',
         ///////////////////////////////////////////防具后缀////////////////////////////////////////////
         'of the Cheetah':'猎豹之',
         'of Negation':'否定之',
@@ -755,6 +758,7 @@ function load(){
         ////////////////////////////////////////////////////武器后缀/////////////////////////////////
         'of Slaughter':'<span style=\"background:#FF0000;color:#FFFFFF\" >杀戮</span>',
         'of <b>Slaughter</b>':'<span style=\"background:#FF0000;color:#FFFFFF\" >杀戮</span>',
+        'of <!--coloro:#f00--><span style="color:#f00"><!--/coloro-->Slaughter<!--colorc--></span>':'<span style=\"background:#FF0000;color:#FFFFFF\" >杀戮</span>',
         'of Swiftness':'加速',
         'of Balance':'平衡',
         'of the Battlecaster':'战法师',

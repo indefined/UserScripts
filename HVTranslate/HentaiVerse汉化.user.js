@@ -8,7 +8,7 @@
 // @include        *://hentaiverse.org/*
 // @include        *://alt.hentaiverse.org/*
 // @core           http://userscripts-mirror.org/scripts/show/41369
-// @version        5.6.1
+// @version        5.6.2
 // @grant none
 // ==/UserScript==
 (function () {
@@ -506,11 +506,12 @@
         'There are three flowers in a vase. The third flower is green.' : '你的攻击/魔法伤害、攻击/魔法命中和暴击率、回避/抵抗率大幅提升+25%。持续 50 回合。（出处：玩偶特工）',
         'It is time to kick ass and chew bubble-gum... and here is some gum.' : '你的攻击和咒语伤害大幅提升+100%，持续 50 回合。必定命中且必定暴击。同时每回合补充基础魔力与基础生命值 20%。（出处：极度空间）',
         //魔药解释
-        'You gain' : '你得到',
-        'resistance to ' : '的',
-        '元素魔法 attacks and do ' : '魔法耐性且获得 ',
-        'more damage with ' : '的额外',
-        ' magicks.' : '魔法伤害。',
+        'You gain +25% resistance to Fire 元素魔法 attacks and do 25% more damage with Fire magicks.' : '你获得 +25% 的火系魔法耐性且获得 25% 的额外火系魔法伤害。',
+        'You gain +25% resistance to Cold 元素魔法 attacks and do 25% more damage with Cold magicks.' : '你获得 +25% 的冰冷魔法耐性且获得 25% 的额外冰系魔法伤害。',
+        'You gain +25% resistance to Elec 元素魔法 attacks and do 25% more damage with Elec magicks.' : '你获得 +25% 的雷系魔法耐性且获得 25% 的额外雷系魔法伤害。',
+        'You gain +25% resistance to Wind 元素魔法 attacks and do 25% more damage with Wind magicks.' : '你获得 +25% 的风系魔法耐性且获得 25% 的额外风系魔法伤害。',
+        'You gain +25% resistance to Holy 元素魔法 attacks and do 25% more damage with Holy magicks.' : '你获得 +25% 的神圣魔法耐性且获得 25% 的额外神圣魔法伤害。',
+        'You gain +25% resistance to Dark 元素魔法 attacks and do 25% more damage with Dark magicks.' : '你获得 +25% 的黑暗魔法耐性且获得 25% 的额外黑暗魔法伤害。',
         'Melee attacks do additional ' : '近战攻击变为',
         //卷轴效果
         'Grants the Haste effect.' : '使用产生加速效果。',
@@ -665,7 +666,6 @@
         '\'s Box' : '盒子(等级9)',
         'Stocking Stuffers' : '圣诞袜小礼物(等级7)',
         'Iron Heart': '钢铁之心(等级8)',
-        'Figurine' : '小马公仔',
         '猫人族\'的花' : '猫人族的花',
         'Dinosaur Egg' : '恐龙蛋(等级7)',
         'Precursor Smoothie Blender' : '远古冰沙机(等级8)',
@@ -1178,8 +1178,7 @@
         'The monsters you create will' : '这些你的自创怪',
         'be mixed in with the normal battles in all forms of play.' : '会在任何普通模式的战斗中出现',
         'start out weak, but' : '起初相当脆弱，但是',
-        'can be upgraded by infusing them with Power' : '它们可以被能量',
-        'and by unlocking special perks with ' : '强化 以及特殊强化 通过',
+        'can be upgraded by infusing them with Power Crystals, and by unlocking special perks with ' : '它们可以被能量水晶升级，以及特殊强化 通过',
         'To get started, select a monster class from the list to the left' : '要开始创建怪物的话，请从左侧列表选择一个怪物类型',
         'The class determines a number of factors:' : '不同的怪物类型决定了',
         'The starting primary stats' : '怪物的初始属性',
@@ -1215,9 +1214,9 @@
         'Like 天人s, they have high resistances to 元素魔法 magicks. They are almost imprevious to 黑暗魔法 magicks, but highly vulnerable to 神圣魔法 attacks.' : '与天人类似，魔灵对元素魔法具有高抗性，对黑暗魔法具有很高抗性，但是惧怕物理攻击和神圣魔法。',
         'Instead of forged weapons, these creatures take advantage of their physical malleability to reshape parts of their own body into blade-like weapons or sharp implements that they use for 斩击 and stabbing attacks. Higher level daimons are said to be able to conjure weapons of pure darkness that can bypass all defenses not especially enchanted to withstand it.' : '比起使用锻造的武器，魔灵更擅长使用自己身体塑性而成的肢体武器，这些肢体武器像刀片和尖刺一样锐利，使得魔灵可以使用刺击和斩击攻击，高阶的魔灵据说可以召唤纯净黑暗武器，能无视除了黑暗抗性之外的所有抗性对敌人造成伤害。',
         '龙类 consist of Dragons, Drakes, and all other creatures that could be mistaken for giant flying fire-breathing lizards. That is however somewhat of an over-simplification as not all 龙类 can fly, while breath attacks are not always fire, and are only fully developed in mature members of the species.' : '龙类包括龙，双足飞龙，以及一切会被认为是巨大的飞天喷火蜥蜴的生物，这种分类可能有点过于简化，因为并不是所有的龙类都有飞行能力，它们的吐息也不一定是火焰，只有它们之中发展最为成熟的那些种类才具有这些特性。',
-        '元素s are metaphysical beings that manifest as crystalline beings of pure 元素魔法 energy. It is thought that they can change between different 元素魔法 forms at will, but this has never been observed in battle.' : '元素生物是一种抽象的存在，表现为纯粹元素的结晶，通常它们被认为可以自由的切换自身的元素魔法的形态，但是从来没有在战斗中观测到这种情况。',
+        'Elementals are metaphysical beings that manifest as crystalline beings of pure 元素魔法 energy. It is thought that they can change between different 元素魔法 forms at will, but this has never been observed in battle.' : '元素生物是一种抽象的存在，表现为纯粹元素的结晶，通常它们被认为可以自由的切换自身的元素魔法的形态，但是从来没有在战斗中观测到这种情况。',
         '巨人s are huge, slow and stupid. The only reason they still thrive as a species is their extreme natural aggression and immense 力量, combined with the fact that they are highly amused by smashing anything they can get a hold of.' : '巨人是一种缓慢巨大而且愚蠢的生物，它们之所以能茁壮成长的原因是因为它们自身极端的侵略性以及极强的力量，加上它们对粉碎一切它们能抓住的物体都非常感兴趣。',
-        '类人s comprise the various intelligent bipedal primates found in the world. While they have no notable supernatural powers nor beastlike 力量, and are largely covered in a soft and delicate skin which grants only minor protection from the elements, a variety of armor and weapons fill the gaps in their natural defenses and give them a surprisingly large amount of flexibility in their offensive capabilities.' : '类人类生物通常包括世界上发现的各种有智能的灵长类动物。虽然它们没有明显的超自然能力和野兽般的力量，而且大部分被柔软细腻的肌肤所保护，这使得它们对元素魔法几乎没有抵抗力，但是它们可以使用各式各样的铠甲和武器保护自己，使得这些生物具有惊人的延展性和潜力。',
+        '类人s comprise the various intelligent bipedal primates found in the world. While they have no notable supernatural powers nor beastlike 力量, and are largely covered in a soft and delicate skin which grants only minor protection from the elements, a variety of armor和武器 fill the gaps in their natural defenses and give them a surprisingly large amount of flexibility in their offensive capabilities.' : '类人类生物通常包括世界上发现的各种有智能的灵长类动物。虽然它们没有明显的超自然能力和野兽般的力量，而且大部分被柔软细腻的肌肤所保护，这使得它们对元素魔法几乎没有抵抗力，但是它们可以使用各式各样的铠甲和武器保护自己，使得这些生物具有惊人的延展性和潜力。',
         '机器人s are essentially living machines, remnants of ancient and highly advanced civilizations. The art of making such machinations has been long lost, but many still roam the world, oblivious of the fate that has befallen their deceased masters.' : '机器人本质上是一种有生命的机械，是古文明的遗物，制造这种阴谋般的产物的技术已经失传已久，很多机器人在世界游荡，在命运的指引下，不经意间邂逅了它们已故的主人。',
         'Many variants of 机器人s exist, from large bipedal machines forged for destruction to smaller humanoid builds created for peaceful purposes. Some were originally fitted with a wide variety of weaponry, but due to wear and lack of maintenance, most of the 机器人s that are still functional equip themselves with simple melee weapons.These are typically blade- and spike-shaped attachments in place of a limb or other tool.' : '机器人存在许多变种，由巨大的战斗双足机械到小型的民用人形机器人均有存在，一些机器人原本配备了多种武器装备，但是因为缺乏维护，大部分机器人还是只能使用简单的近战武器进行攻击，比如安装在肢体上的锯片以及穗形尖刺进行攻击。',
         'There are however rumors of terrible machines that are capable of searing a creature to the bones with a stream of fire, or shatter their bodies with a torrent of deadly metal.' : '不过有传言说，一些可怕的机器人能用火焰把其他生物烧焦，或者用一堆致命的金属构造物刺穿敌人的身体。',
@@ -1227,7 +1226,7 @@
         '妖精s are not a single species, but most of the big folk will be hard pressed to tell a pixie apart from a faery. They are commonly armed with using tiny swords and rapiers, and while they do not have much 力量 to put behind a thrust, their ability to seek out the most vulnerable parts of a target still make them a force to be reckoned with.' : '妖精并不是一种单一的物种，但是大部分人都难以分辨小精灵与精灵的区别，它们通常手持微小的剑或者细剑，而且通常没有多少力量用剑进行刺击攻击，但是它们能寻找敌人最脆弱的地点进行攻击依然是妖精一个不可小视的能力。',
         'Higher level 妖精s can master powerful magicks, and many an unwary adventurer have engaged them recklessly only to be sent to an early grave.' : '高阶的妖精掌握了强大的法术，可以早早的把那些轻敌的冒险家送入坟墓。',
         'the best way of dealing with them is swatting them with a 锤击 attack, but they are fast and hard to hit. Their tiny size also makes them difficult to hit them with stabbing weapons. All 妖精s have some resistance to 元素魔法 magicks, and depending on their natural affinity they can even be fully imprevious to some elements. They are however naturally weak to the 黑暗魔法 magicks.' : '惧怕锤击攻击，但是动作极其敏捷，难以击中，所以使用刺击武器更加难以击中它们，所有的妖精对元素魔法都有一定的抗性，而且因为它们的自然亲和力，它们对神圣魔法也有一定的抵抗，但是它们非常惧怕黑暗魔法。',
-        'Physically weak' : '妖精的物理抗性较弱',
+        '物理ly weak' : '妖精的物理抗性较弱',
         '不死族s are animated necrotic remnants of living beings, cursed to an eternal lifeless existance with no warmth or joy. They range from mindless brutes such as zombies and animated skeletons, to higher undeads that have preserved parts of their mind but lost their soul, like liches, vampires and banshees.' : '不死族就是一些会动的残肢断尸，被诅咒而成为永生的存在的它们没有温暖和快乐的概念，它们的范围从无主的野兽尸骸比如亡灵或者僵尸，到高等的亡灵与巫妖，它们在保留意识的同时也失去了它们的灵魂。',
         'Having no need to maintain a body temperature and no vital processes that can be disturbed by electricity, undeads are highly resistant to cold and electrical magicks. Being born from darkness itself also makes them imprevious to 黑暗魔法 magicks, but they are vulnerable to 神圣魔法 attacks and fire magicks.' : '尸体没有保持体温的必要，也不惧怕电的伤害，使其有较高的冰冷与闪电抗性，诞生与黑暗魔法本身的它们也对黑暗魔法有极高的抗性，但是它们惧怕神圣魔法和火焰魔法的攻击。',
         'attacks are ineffective due to a lack of weak points, but cutting off limbs works reasonably well.' : '攻击对亡灵并没有多大的意义，但是切断它们的四肢倒是非常有效的战术。',
@@ -1890,7 +1889,7 @@
         '' : '',
         '' : '',
     /////////////////////////////////////////////////////词缀处理
-        //永远保持词缀处理在字典最后，以免造成其它有意义句子被打断
+        ///*//永远保持词缀处理在字典最后，以免造成其它有意义句子被打断
         ' and ' : ' 和 ',
         ' or ' : ' 或者 ',
         ' of ' : ' ',
@@ -1900,6 +1899,7 @@
         '' : '',
         '' : '',
         '' : '',
+        //*/
     '':''};
 
 
