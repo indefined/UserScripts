@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.9
+// @version      0.5.10
 // @description  加载本地字幕/下载CC字幕，旧版播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -199,7 +199,7 @@ fill-rule="evenodd"></path></svg></span>`,
                 onchange: ()=>this.encodeToASS(data.body)
             },bottomPanel);
             elements.createRadio({
-                id:'subtitle-download-srt',name: "subtitle-type",value:"SRT",
+                id:'subtitle-download-srt',name: "subtitle-type",value:"SRT",checked:'checked',
                 onchange: ()=>this.encodeToSRT(data.body)
             },bottomPanel);
             elements.createRadio({
@@ -224,6 +224,8 @@ fill-rule="evenodd"></path></svg></span>`,
                 innerText: "关闭",className: "bpui-button bui bui-button bui-button-blue",style:'border:none',
                 onclick: ()=>document.body.removeChild(settingDiv)
             },bottomPanel);
+            //默认转换SRT格式
+            this.encodeToSRT(data.body);
         },
         updateDownload(result,type){
             this.textArea.value = result;
