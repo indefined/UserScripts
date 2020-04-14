@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.10
+// @version      0.5.11
 // @description  加载本地字幕/下载CC字幕，旧版播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -9,6 +9,8 @@
 // @include      http*://www.bilibili.com/bangumi/play/ss*
 // @include      http*://www.bilibili.com/bangumi/play/ep*
 // @include      http*://www.bilibili.com/watchlater/
+// @include      http*://www.bilibili.com/medialist/play/ml*
+// @include      http*://www.bilibili.com/blackboard/html5player.html*
 // @license      MIT
 // @grant        none
 // ==/UserScript==
@@ -380,21 +382,19 @@ fill-rule="evenodd"></path></svg></span>`,
         },
         handleSubtitle(){
             if(!this.data) return;
-            try{
-                const offset = +this.offset.value;
-                player.updateSubtitle(!offset?this.data:{
-                    body:this.data.body.map(({from,to,content})=>({
-                        from:from - offset,
-                        to:to - offset,
-                        content
-                    }))
-                });
+            const offset = +this.offset.value;
+            bilibiliCCHelper.updateSubtitle(!offset?this.data:{
+                body:this.data.body.map(({from,to,content})=>({
+                    from:from - offset,
+                    to:to - offset,
+                    content
+                }))
+            }).then(()=>{
                 if('function'==typeof(this.statusHandler)) this.statusHandler(true);
                 bilibiliCCHelper.toast(`载入本地字幕:${this.file.name},共${this.data.body.length}行,偏移:${offset}s`);
-            }
-            catch(e){
+            }).catch(e=>{
                 bilibiliCCHelper.toast('载入字幕失败',e);
-            };
+            });
         },
         decodeFile(){
             try{
@@ -537,7 +537,7 @@ fill-rule="evenodd"></path></svg></span>`,
             this.subtitleContainer.style = '';
         },
         changeResize(){
-            this.resizeRate = this.setting.scale?player.getWidth()/1280*100:100;
+            this.resizeRate = this.setting.scale?bilibiliCCHelper.window.player.getWidth()/1280*100:100;
             this.changeStyle();
         },
         changeSubtitle(value=this.subtitle.subtitles[0].lan){
@@ -707,11 +707,11 @@ fill-rule="evenodd"></path></svg></span>`,
                 }
             },opacityDiv);
             //播放器缩放
-            player.addEventListener('video_resize', (event) => {
+            bilibiliCCHelper.window.player.addEventListener('video_resize', (event) => {
                 this.changeResize(event);
             });
             //退出页面保存配置
-            window.addEventListener("beforeunload", (event) => {
+            bilibiliCCHelper.window.addEventListener("beforeunload", (event) => {
                 this.saveSetting();
             });
             //初始化字幕
@@ -722,7 +722,9 @@ fill-rule="evenodd"></path></svg></span>`,
             this.subtitle = subtitle;
             this.selectedLan = undefined;
             this.setting = JSON.parse(localStorage.bilibili_player_settings).subtitle;
-            if(!this.setting) throw('获取设置失败');
+            if(!this.setting) {
+                this.setting = {backgroundopacity: 0.5,color: 16777215,fontsize: 1,isclosed: false,scale: true,shadow: "0", position: 'bc'};
+            }
             this.initUI();
         }
     };//oldPlayerHelper END
@@ -849,6 +851,8 @@ fill-rule="evenodd"></path></svg></span>`,
 
     //启动器
     const bilibiliCCHelper = {
+        window:"undefined"==typeof(unsafeWindow)?window:unsafeWindow,
+        player:undefined,
         cid:undefined,
         subtitle:undefined,
         datas:undefined,
@@ -867,13 +871,14 @@ fill-rule="evenodd"></path></svg></span>`,
                 panel.contains(this.toastDiv)&&panel.removeChild(this.toastDiv)
             },3000);
         },
+        async updateSubtitle(data){
+            this.window.player.updateSubtitle(data);
+        },
         loadSubtitle(lan){
-            this.getSubtitle(lan).then(data=>{
-                player.updateSubtitle(data);
-                this.toast(lan=='close'?'字幕已关闭':`载入字幕:${this.getSubtitleInfo(lan).lan_doc}`);
-            }).catch(e=>{
-                this.toast('载入字幕失败',e);
-            });
+            this.getSubtitle(lan)
+                .then(data=>this.updateSubtitle(data))
+                .then(()=>this.toast(lan=='close'?'字幕已关闭':`载入字幕:${this.getSubtitleInfo(lan).lan_doc}`))
+                .catch(e=>this.toast('载入字幕失败',e));
         },
         async getSubtitle(lan){
             if(this.datas[lan]) return this.datas[lan];
@@ -887,13 +892,25 @@ fill-rule="evenodd"></path></svg></span>`,
             return this.subtitle.subtitles.find(item=>item.lan==lan);
         },
         async setupData(){
-            if(this.cid==window.cid && this.subtitle) return this.subtitle;
-            this.cid = window.cid;
+            if(this.cid==this.window.cid && this.subtitle) return this.subtitle;
+            if(location.pathname=='/blackboard/html5player.html') {
+                let match = location.search.match(/cid=(\d+)/i);
+                if(!match) return;
+                this.window.cid = match[1];
+                match = location.search.match(/aid=(\d+)/i);
+                if(match) this.window.aid = match[1];
+                match = location.search.match(/bvid=(\d+)/i);
+                if(match) this.window.bvid = match[1];
+            }
+            this.cid = this.window.cid;
+            this.aid = this.window.aid;
+            this.bvid = this.window.bvid;
+            this.player = this.window.player;
             this.subtitle = undefined;
             this.datas = {close:{body:[]},local:{body:[]}};
             decoder.data = undefined;
             if(!window.cid||(!window.aid&&!window.bvid)) return;
-            return fetch(`//api.bilibili.com/x/player.so?id=cid:${window.cid}${window.aid?`&aid=${window.aid}`:`&bvid=${window.bvid}`}`)
+            return fetch(`//api.bilibili.com/x/player.so?id=cid:${this.cid}${this.aid?`&aid=${this.aid}`:`&bvid=${this.bvid}`}`)
                 .then(res=>res.text())
                 .then(data=>data.match(/(?:<subtitle>)(.+)(?:<\/subtitle>)/))
                 .then(match=>{
@@ -923,9 +940,10 @@ fill-rule="evenodd"></path></svg></span>`,
         init(){
             this.tryInit();
             new MutationObserver((mutations, observer)=>{
+                //console.log(mutations)
                 mutations.forEach(mutation=>{
                     if(!mutation.target) return;
-                    if(mutation.target.getAttribute('stage')==0){
+                    if(mutation.target.getAttribute('stage')==1){
                         this.tryInit();
                     }
                 });
