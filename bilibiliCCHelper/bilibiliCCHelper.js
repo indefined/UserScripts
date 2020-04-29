@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.11
-// @description  加载本地字幕/下载CC字幕，旧版播放器可启用CC字幕
+// @version      0.5.12
+// @description  可以在B站加载外挂本地字幕、下载B站的CC字幕，旧版B站播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
 // @include      http*://www.bilibili.com/video/*
@@ -318,7 +318,7 @@ fill-rule="evenodd"></path></svg></span>`,
                 elements.createAs('input',{
                     style: "margin-bottom: 5px;width: 370px;",
                     innerText: '选择字幕',
-                    type: 'file',accept:'.lrc,.ass,.srt,.bcc,.sbv,.vtt',
+                    type: 'file',accept:'.lrc,.ass,.ssa,.srt,.bcc,.sbv,.vtt',
                     oninput:  ({target})=> this.readFile(this.file = target.files&&target.files[0])
                 },this.dialog);
                 elements.createAs('br',{},this.dialog);
@@ -401,9 +401,8 @@ fill-rule="evenodd"></path></svg></span>`,
                 const type = this.file.name.split('.').pop().toLowerCase();
                 switch(type){
                     case 'lrc':this.data = this.decodeFromLRC(this.reader.result);break;
-                    case 'ass':this.data = this.decodeFromASS(this.reader.result);break;
-                    case 'srt':case 'sbv':case 'vtt':
-                        this.data = this.decodeFromSRT(this.reader.result);break;
+                    case 'ass':case 'ssa': this.data = this.decodeFromASS(this.reader.result);break;
+                    case 'srt':case 'sbv':case 'vtt': this.data = this.decodeFromSRT(this.reader.result);break;
                     case 'bcc':this.data = JSON.parse(this.reader.result);break;
                     default:throw('未知文件类型'+type);break;
                 }

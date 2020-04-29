@@ -20,7 +20,7 @@ bilibili CC字幕工具
   - 默认系统编码，CR/LF换行
 - 载入本地字幕
   - 新/旧版HTML5播放器可用
-  - 支持ASS/SRT/LRC/BCC/SBV/VTT格式
+  - 支持ASS/SSA/SRT/LRC/BCC/SBV/VTT格式
   - 支持字幕偏移调整，支持读取LRC歌词内置偏移
   - 支持UTF-8/GB18030/BIG5/UNICODE/JIS/EUC-KR编码
   - 目前在多数视频可启用，但可能会有异常情况，如果遇到异常情况请先查看是否为[已知问题](#已知问题)
