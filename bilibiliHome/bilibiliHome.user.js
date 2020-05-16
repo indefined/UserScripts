@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.6.5
+// @version      0.6.6
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -1050,19 +1050,14 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
             }
         },
         previewDanmu (target,status) {
-            if(!target||!target.data||!target.data.length) return;
+            if(!target||!target.data||!target.data.length||!target.previewDanmu) return;
             clearInterval(target.timmer);
             if(status) {
-                let count = 0;
-                target.timmer = setInterval(()=>{
-                    if(count%target.data.length==0) {
-                        count==0;
-                        target.innerHTML = target.data.map((item,i)=>`<p class="dm van-danmu-item ${i%2?'':'row2'}">${item}</p>`).join('');
-                    }
-                    const item = target.children[count++];
-                    if(!item) return;
-                    item.style = `left: -${item.offsetWidth}px; transition: left 5s linear 0s;`;
-                },2.5*1000);
+                target.previewDanmu();
+                target.timmer = setInterval(target.previewDanmu, 2.5*1000);
+            }
+            else {
+                target.style.opacity = 0;
             }
         },
         preview (ev){
@@ -1085,17 +1080,28 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                             .then(d=>(target.cover = d.data))
                             .then(()=>fetch(`//api.bilibili.com/x/v2/dm/ajax?aid=${target.dataset.id}&_=${Date.now()}`))
                             .then(res=>res.json())
-                            .then(d=>(danmu.data = d.data))
-                            .then(()=>{
+                            .then(d=>{
+                            danmu.data = d.data;
+                            danmu.count = 0;
+                            danmu.previewDanmu = function (){
+                                danmu.style.opacity = 1;
+                                if(danmu.count%danmu.data.length==0) {
+                                    danmu.count = 0;
+                                    danmu.innerHTML = danmu.data.map((item,i)=>`<p class="dm van-danmu-item ${i%2?'':'row2'}">${item}</p>`).join('');
+                                }
+                                const item = danmu.children[danmu.count++];
+                                if(!item) return;
+                                item.style = `left: -${item.offsetWidth}px; transition: left 5s linear 0s;`;
+                            };
                             if(!target.timmer) return;
                             tools.previewImage(pv,target,ev.offsetX);
-                            tools.previewDanmu(danmu,'on');
+                            tools.previewDanmu(danmu, true);
                             delete target.timmer;
                         });
                     }
                     else {
                         tools.previewImage(pv,target,ev.offsetX);
-                        tools.previewDanmu(danmu,'on');
+                        tools.previewDanmu(danmu, true);
                         delete target.timmer;
                     }
                 },100);
@@ -1108,7 +1114,7 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                     pv.style.opacity = 0;
                 }
                 danmu.classList.remove('show');
-                tools.previewDanmu(danmu);
+                tools.previewDanmu(danmu, false);
             }
             else {
                 if(!target.cover) return;
