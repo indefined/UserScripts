@@ -2,7 +2,7 @@
 // @name         网易CC直播净化
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.1.8
+// @version      0.1.9
 // @description  自定义屏蔽CC直播HTML5网页大部分不想看到的碍眼特效和内容
 // @author       indefined
 // @match        *://cc.163.com/*
@@ -25,6 +25,9 @@
         miniBorder:{
             title:'缩小播放器边距',
             style:`
+body {
+    min-width: unset !important;
+}
 /*网页导航栏高度调整*/
 div#header {
     height: 40px !important;
@@ -214,6 +217,8 @@ div#newMountRemindWin {
             title:'去除播放器内广告',
             default:true,
             style:`
+/*播放器超值守护？*/
+#live_left_bottom_box_wrap,
 /*播放器内广告*/
 div#advertising {
     display: none !important;
@@ -250,7 +255,7 @@ div#room-tabs:hover+.chat-list {
     display: none;
 }
 .gameH5TheaterBar .room-tabs-chat-list {
-    height: calc(100% - 104px) !important;
+    height: calc(100% - 100px) !important;
 }
 `
         },
@@ -268,7 +273,7 @@ div#room-tabs:hover+.chat-list {
 }
 /*隐藏公告和榜单后*/
 .gameH5TheaterBar .room-tabs-chat-list {
-    height: calc(100% - 104px);
+    height: calc(100% - 100px);
 }
 `
         },
