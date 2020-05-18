@@ -2,11 +2,11 @@
 // @name         HTML5视频截图器
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.4.7
+// @version      0.4.8
 // @description  基于HTML5的简单任意原生视频截图，可控制快进/逐帧/视频调速，支持自定义快捷键
 // @author       indefined
 // @include      *://*
-// @run-at       document-idle
+// @run-at       document-end
 // @grant        GM_registerMenuCommand
 // @grant        GM_getValue
 // @grant        GM_setValue
@@ -104,6 +104,15 @@
             type:'checkbox',
             key:'',
             checked:false
+        },
+        crossOrigin:{
+            content:'视频匿名跨域',
+            title:'如果此选项被勾选，则网页打开时加载的非本网站视频会匿名访问。\n'
+            +'此操作可以解决部分视频无法直接下载截图问题，但可能导致更多视频无法播放，建议仅在无法截图网站尝试设置。\n'
+            +'注意此功能是一次性静态执行的，只会在网站刚加载时运行一次，后续加载的视频无效，且更改后需刷新生效。',
+            type:'checkbox',
+            key:'',
+            checked:false
         }
     };
     /**
@@ -169,6 +178,14 @@
     if (document.querySelector('#HTML5VideoCapture')) return;
     const childs = "undefined"==typeof(unsafeWindow)?window.frames:unsafeWindow.frames;
     await loadConfig();
+    //匿名跨域，仅在启动时检查并操作一遍，实际作用有限
+    if (config.crossOrigin.checked) {
+        Array.from(document.querySelectorAll('video')).forEach(v=>{
+            if(!v.src||v.src.indexOf(location.host)==-1) {
+                v.setAttribute('crossorigin','anonymous');
+            }
+        });
+    }
     let videos,video,selectId,hoverItem;
     function videoShot(down){
         if (!video) return postMsg('shot',down);
