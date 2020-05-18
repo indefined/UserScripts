@@ -2,7 +2,7 @@
 // @name         HTML5视频截图器
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.4.8
+// @version      0.4.9
 // @description  基于HTML5的简单任意原生视频截图，可控制快进/逐帧/视频调速，支持自定义快捷键
 // @author       indefined
 // @include      *://*
@@ -83,17 +83,17 @@
             key:'c'
         },
         panelActive:{
-            content:'截图工具栏有效',
-            title:'当鼠标悬停在工具栏上或者光标焦点在工具栏上时快捷键有效，光标在输入框中例外，快捷键会操作选中视频',
+            content:'快捷键在截图工具栏上有效',
+            title:'当鼠标光标在工具栏上非输入区域时快捷键会生效，快捷键作用与点击操作按钮相同会操作选中视频',
             type:'checkbox',
             key:'',
             checked:true,
             disabled:true
         },
         playerActive:{
-            content:'播放器悬停有效',
-            title:'当鼠标悬停在视频上时快捷键有效，无论工具栏是否打开，快捷键会直接操作被悬停视频且不会有提示。'
-            + '\n由于各种播放器外壳影响该功能可能不会生效，且可能和播放器外壳自身快捷键冲突，建议针对网站设置，不建议全局开启',
+            content:'启用播放器悬停快捷键支持',
+            title:'勾选时当鼠标悬停在视频上时快捷键会生效，无论工具栏是否打开，快捷键会直接操作被悬停视频且不会有提示。'
+            + '\n由于各种播放器外壳影响该功能可能不会生效，且可能和播放器外壳自身快捷键冲突，建议针对网站设置是否开启',
             type:'checkbox',
             key:'',
             checked:false
@@ -135,7 +135,8 @@
         }
         return clone;
     }
-    async function loadConfig(site){
+    //读取全部设置，赋值本网站生效配置的全局变量，并返回指定域名的单独配置
+    async function getConfig(site){
         try{
             allConfigs = await GM_getValue('config','{}');
             if(allConfigs) allConfigs = JSON.parse(allConfigs);
@@ -152,6 +153,11 @@
         //有要求读取的网站配置时，返回要求的配置，否则返回默认配置，否则（全空，初次运行）返回初始配置
         return allConfigs[site]||allConfigs.default||config;
     }
+    /**
+    保存某个网站设置
+    value: 待保存的网站配置值，如为空则会删除该网站设置
+    site: 待保存的网站
+    **/
     async function saveConfig(value,site) {
         if(!value) {
             if(site&&site!='default') delete allConfigs[site];
@@ -170,14 +176,14 @@
             });
         });
         await GM_setValue('config',JSON.stringify(allConfigs));
-        await loadConfig(document.location.host);
+        await getConfig(document.location.host);
         //通知iframe重新加载设置
         [].forEach.call(childs,(w,i)=>w.postMessage({action:'reload'},'*'));
     }
-    //截图和视频操作相关函数从以下开始
-    if (document.querySelector('#HTML5VideoCapture')) return;
-    const childs = "undefined"==typeof(unsafeWindow)?window.frames:unsafeWindow.frames;
-    await loadConfig();
+
+    //读取加载配置
+    await getConfig();
+
     //匿名跨域，仅在启动时检查并操作一遍，实际作用有限
     if (config.crossOrigin.checked) {
         Array.from(document.querySelectorAll('video')).forEach(v=>{
@@ -186,6 +192,9 @@
             }
         });
     }
+
+    //截图和视频操作相关函数从以下开始
+    const childs = "undefined"==typeof(unsafeWindow)?window.frames:unsafeWindow.frames;
     let videos,video,selectId,hoverItem;
     function videoShot(down){
         if (!video) return postMsg('shot',down);
@@ -238,6 +247,7 @@
                 action:'captureReport',
                 about:'videoNums',
                 length:videos.length,
+                host:location.host,
                 id:window.captureId
             },'*');
         }else{
@@ -291,6 +301,7 @@
             },'*');
         }
     }
+    //向包含目标视频的子窗体发送控制信息，全局变量selectId逐层往下层递归
     function postMsg(type,data){
         if (selectId==undefined||selectId=='') return;
         const ids = selectId.split('-');
@@ -306,7 +317,7 @@
             },'*');
         }
     }
-    //监听鼠标是否悬停在视频或工具栏……极其低效却很简单通用的实现，开启关闭判断放在loadConfig中
+    //监听鼠标是否悬停在视频或工具栏……极其低效却很简单通用的实现，开启关闭判断放在getConfig中
     //不需要监听视频悬停时应当移除（工具栏自带悬停检测，但作用会被该函数覆盖）
     function hoverListener(ev) {
         if (ev.target instanceof HTMLVideoElement || (window==top&&panel&&panel.contains(ev.target))) hoverItem = ev.target;
@@ -415,7 +426,7 @@
                 videoDetech();
             }
             else if(ev.data.action=='reload'){
-                loadConfig();
+                getConfig();
                 [].forEach.call(childs,(w,i)=>w.postMessage({action:'reload'},'*'));
             }else if(ev.data.action=='captureControl' && ev.data.target==window.captureId){
                 switch (ev.data.todo){
@@ -442,6 +453,7 @@
         return;
     }
 
+    //以下UI控制界面及事件在iframe中不执行
     function toast(text,error){
         if(error) console.error(error);
         const toast = document.createElement('div');
@@ -450,8 +462,8 @@
         document.body.appendChild(toast);
         setTimeout(()=>toast.remove(),1000);
     }
-    //以下UI控制界面及事件在iframe中不执行
     let panel,selector,speed,play,settingForm;
+    let loadSite, saveSite, clearSite;
     function topReciver(ev) {
         //console.info('top recive:',ev.data);
         if (ev.data.action!='captureReport') return;
@@ -497,6 +509,27 @@
                 })
             }
         }
+        if (v.host) {
+            let op = Array.from(loadSite.options).find(option=>option.value==v.host);
+            if (op) {
+                op.innerHTML = `【${v.id}】${op.value}`;
+            }
+            op = Array.from(clearSite.options).find(option=>option.value==v.host);
+            if (op) {
+                op.innerHTML = `【${v.id}】${op.value}`;
+            }
+            op = Array.from(saveSite.options).find(option=>option.value==v.host);
+            if (op) {
+                op.innerHTML = `【${v.id}】${op.value}`;
+            }
+            else {
+                saveSite.add(_c({
+                    nodeType: 'option',
+                    value: v.host,
+                    innerHTML: `【${v.id}】${v.host}`
+                }));
+            }
+        }
     }
     function dialogMove(ev){
         if (ev.type=='mousedown'){
@@ -526,8 +559,11 @@
                 + 'div#HTML5VideoCapture>*{margin:0 10px 5px 0}'
                 + 'div#HTML5VideoCapture>span,div#HTML5VideoCapture>span>*{white-space:nowrap;}'
                 + 'div#HTML5VideoCapture *{font-family:initial;color:#fff;background:transparent;line-height:20px;height:20px;box-sizing:content-box;vertical-align:top;}'
-                + 'div#HTML5VideoCapture .h5vc-block {border:1px solid #ffffff99;border-radius:2px;padding:1px 4px;min-width:unset;}'
+                + 'div#HTML5VideoCapture .h5vc-block {border:1px solid #ffffff99;border-radius:2px;padding:1px 4px;min-width:unset;margin-top:0}'
                 + 'div#HTML5VideoCapture .h5vc-block:hover {border-color: #fff;}'
+                + 'div#HTML5VideoCapture .setting-switcher:before {content:"﹀"}'
+                + 'div#HTML5VideoCapture .setting-switcher.setting-open:before {content:"︿"}'
+                + 'div#HTML5VideoCapture .setting-switcher:not(.setting-open)+form {display:none}'
             },
             {
                 nodeType:'div',
@@ -622,92 +658,134 @@
                 title:'关闭截图工具栏',
                 style:'margin-right:0',
                 onclick:panelActive
-            }
+            },
+            //以下为快捷键设置和相关控制逻辑
+            {
+                nodeType:'div',className:'setting-switcher',
+                style:'text-align: center;cursor: pointer;user-select: none;margin-bottom:0',
+                onclick:(ev)=>ev.target.classList.toggle('setting-open')
+            },
+            settingForm = _c({
+                nodeType:'form',
+                style:'user-select: none;height: auto;overflow: hidden;margin-right: 0; font-size:12px',
+                childs:[
+                    ...Object.entries(configList).map(([k,v])=>([
+                        {
+                            nodeType:'input',className:'h5vc-block',name:k,type:v.type,
+                            title:v.title,id:'h5vc-setting-'+k,style:'display:inline-block',
+                            disabled:v.disabled,
+                            onclick:function(ev){this.select()&&ev.preventDefault()},
+                            onkeydown:function(ev){
+                                const key = ev.key;
+                                if (key!='Control' && key!='Shift' && key!='Alt') {
+                                    if(this.name=='active') this.value = (ev.ctrlKey&&'Ctrl+'||'')+(ev.shiftKey&&'Shift+'||'')+(ev.altKey&&'Alt+'||'')+ev.key.toUpperCase();
+                                    else this.value = key.toUpperCase();
+                                }
+                                if(key!='Backspace' && key != 'Delete') ev.preventDefault();
+                                else this.value = '';
+                            },
+                        },
+                        {nodeType:'label',innerHTML:v.content,title:v.title,for:'h5vc-setting-'+k,style:'display:inline-block'},
+                        {nodeType:'br'}
+                    ])).flat(),
+                    {
+                        nodeType:'button',
+                        className:'h5vc-block',
+                        innerHTML:'保存默认',
+                        title:'保存通用默认设置，默认设置将在没有设置专用设置的网站生效',
+                        onclick:(ev)=> confirm('是否确认保存默认设置') &&
+                        checkSettingFrom()
+                            .then(config=>saveConfig(config,'default')&toast('保存成功'))
+                            .catch(e=>toast('保存错误',e))&ev.preventDefault()
+                    },
+                    {
+                        nodeType:'button',
+                        className:'h5vc-block',
+                        innerHTML:'重设默认',
+                        title:'重设默认设置为原始值，此操作不会改变其它专用网站设置',
+                        onclick:(ev)=> confirm('是否确认清除默认设置') &&
+                        saveConfig(undefined,'default')
+                            .then(()=>loadSettingForm(configList)&toast('重设成功'))
+                            .catch(e=>toast('重设错误',e))&ev.preventDefault()
+                    },
+                    loadSite = _c({
+                        nodeType:'select',className:'h5vc-block',
+                        style:'width:55px;',
+                        innerHTML:'<option value="">查看...</option>',
+                        title:'显示保存的设置内容，此网站中的内嵌网页域名会有与视频编号对应的标识',
+                        onchange:(ev)=>getConfig(ev.target.value).then(loadSettingForm)
+                    }),
+                    saveSite = _c({
+                        nodeType:'select', className:'h5vc-block',
+                        style:'width:70px;',
+                        innerHTML:'<option value="">保存为...</option><option value="'+location.host+'">'+location.host+'</option>',
+                        title:'保存网站专用设置，专用设置在该网站内将覆盖默认设置\n'
+                            +'仅显示在本网页上加载的域名，带有编号的是内嵌网页的域名，可根据视频编号识别',
+                        onchange:(ev)=> {
+                            const value = ev.target.value;
+                            ev.target.value = '';
+                            if (value=='' || !confirm('是否确认保存'+value+'设置')) {
+                                return;
+                            }
+                            checkSettingFrom()
+                                .then(config=>saveConfig(config,value)&loadSettingForm(config)&toast('保存成功'))
+                                .then(()=>clearSite.querySelector(`[value="${ev.target.value}"]`))
+                                .then(find=>{
+                                if (find) return;
+                                loadSite.add(_c({nodeType:'option',value:value,innerHTML:value}));
+                                clearSite.add(_c({nodeType:'option',value:value,innerHTML:value}))
+                            })
+                                .catch(e=>toast('保存错误',e))
+                        }
+                    }),
+                    clearSite = _c({
+                        nodeType:'select', className:'h5vc-block',
+                        style:'width:55px;',
+                        innerHTML:'<option value="">清除...</option>',
+                        title:'清除网站专用设置，清除之后默认设置内容将在该网站生效',
+                        onchange:(ev)=> {
+                            const value = ev.target.value;
+                            ev.target.value = '';
+                            if (!confirm('是否确认清除'+value+'设置')) return;
+                            saveConfig(undefined, value)
+                                .then(()=>loadSite.querySelector(`[value="${value}"]`))
+                                .then(find=>find&&loadSite.removeChild(find))
+                                .then(()=>clearSite.querySelector(`[value="${value}"]`))
+                                .then(find=>find&&clearSite.removeChild(find))
+                                .then(()=>loadSettingForm(config)&toast('清除成功'))
+                                .catch(e=>toast('清除错误',e))
+                        }
+                    }),
+                ]
+            })
         ]
     })};
 
-    //设置窗口和相关控制逻辑
-    const actionKey = {
-        loadDefault:{
-            content:'读取默认',
-            title:'读取通用默认设置内容',
-            action:()=>loadConfig('default').then(reloadConfig)
-        },
-        loadSite:{
-            content:'读取本网站',
-            title:'读取本网站专用设置内容',
-            action:()=>loadConfig(document.location.host).then(reloadConfig)
-        },
-        saveDefault:{
-            content:'保存默认',
-            title:'保存通用默认设置，默认设置将在没有设置专用设置的网页生效',
-            action:()=>checkData()
-            .then(config=>saveConfig(config,'default')&toast('保存成功'))
-            .catch(e=>toast('保存错误',e))
-        },
-        saveSite:{
-            content:'保存本网站',
-            title:'保存本网站专用设置，专用设置在本网站内将覆盖默认设置',
-            action:()=>checkData()
-            .then(config=>saveConfig(config,document.location.host)&toast('保存成功'))
-            .catch(e=>toast('保存错误',e))
-        },
-        resetDefault:{
-            content:'重设默认',
-            title:'重设默认设置为原始值',
-            action:()=> saveConfig(undefined,'default')
-            .then(()=>reloadConfig(configList)&toast('重设成功'))
-            .catch(e=>toast('重设错误',e))
-        },
-        clearSite:{
-            content:'清除本网站',
-            title:'清除本网站专用设置，清除之后默认设置内容将在本网站生效',
-            action:()=> saveConfig(undefined,document.location.host)
-            .then(()=>reloadConfig(config)&toast('清除成功'))
-            .catch(e=>toast('清除错误',e))
-        },
-    };
-    function createSettingForm() {
-        if(!panel) return;
-        _c({
-            nodeType:'div',innerHTML:'﹀',style:'text-align: center;cursor: pointer;user-select: none;margin-bottom:0',
-            onclick:()=>(settingForm.style.display = settingForm.style.display=='none'?'block':'none'),parent:panel
-        })
-        settingForm = _c({
-            nodeType:'form',
-            style:'user-select: none;height: auto;overflow: hidden;margin-right: 0;display:none;font-size:12px',
-            childs:[
-                ...Object.entries(configList).map(([k,v])=>([
-                    {
-                        nodeType:'input',className:'h5vc-block',name:k,type:v.type,
-                        title:v.title,id:'h5vc-setting-'+k,style:'display:inline-block',
-                        disabled:v.disabled,
-                        onclick:function(ev){this.select()&&ev.preventDefault()},
-                        onkeydown:function(ev){
-                            const key = ev.key;
-                            if (key!='Control' && key!='Shift' && key!='Alt') {
-                                if(this.name=='active') this.value = (ev.ctrlKey&&'Ctrl+'||'')+(ev.shiftKey&&'Shift+'||'')+(ev.altKey&&'Alt+'||'')+ev.key.toUpperCase();
-                                else this.value = key.toUpperCase();
-                            }
-                            if(key!='Backspace' && key != 'Delete') ev.preventDefault();
-                            else this.value = '';
-                        },
-                    },
-                    {nodeType:'label',innerHTML:v.content,title:v.title,for:'h5vc-setting-'+k,style:'display:inline-block'},
-                    {nodeType:'br'}
-                ])).flat(),
-                ...Object.entries(actionKey).map(([k,v])=>({
-                    nodeType:'button',
-                    className:'h5vc-block',name:k,
-                    innerHTML:v.content,
-                    title:v.title,
-                    onclick:(ev)=>v.action(ev)&ev.preventDefault()
-                }))
-            ],
-            parent:panel
-        })
+    //初始化设置面板的配置，仅在创建设置面板时调用
+    function initSettingFrom() {
+        loadSite.add(_c({
+            nodeType: 'option',
+            innerHTML: '默认',
+        }));
+        for (const item in allConfigs) {
+            if (item=='default') continue;
+            loadSite.add(_c({
+                nodeType: 'option',
+                value: item,
+                innerHTML: item==location.host?'【△】'+item:item,
+            }));
+            clearSite.add(_c({
+                nodeType: 'option',
+                value: item,
+                innerHTML: item==location.host?'【△】'+item:item,
+            }));
+        }
+        loadSettingForm(config);
     }
-    async function checkData() {
+
+    //检查并返回设置窗口中的设置，实际方法是同步的，设置成异步是为了方便.then
+    //throw: 检查设置不符合要求时抛出错误string，目前仅检测全局启动快捷键
+    async function checkSettingFrom() {
         let keys = settingForm[0].value.split('+');
         let value = cloneConfig(config);
         if(keys.length<2&&keys[0]!='') throw '全局快捷键至少应当同时按下ctrl/shift/alt之一';
@@ -727,7 +805,9 @@
         }
         return value;
     }
-    function reloadConfig(value) {
+
+    //给定一个设置，显示在设置面板中，读取设置时使用
+    function loadSettingForm(value) {
         for(let item of settingForm) {
             if(value[item.name]) {
                 if(item.type=='checkbox') {
@@ -751,10 +831,14 @@
             }
         }
     }
+
     function panelActive(){
         if(document.body.contains(panel)) document.body.removeChild(panel);
         else {
-            if(!panel) createPanel()&createSettingForm()&reloadConfig(config);
+            if(!panel) {
+                createPanel();
+                initSettingFrom();
+            }
             document.body.appendChild(panel);
             if(!selector.length) videoDetech();
         }
