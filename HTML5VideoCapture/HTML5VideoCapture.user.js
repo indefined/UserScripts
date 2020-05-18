@@ -2,7 +2,7 @@
 // @name         HTML5视频截图器
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.4.6
+// @version      0.4.7
 // @description  基于HTML5的简单任意原生视频截图，可控制快进/逐帧/视频调速，支持自定义快捷键
 // @author       indefined
 // @include      *://*
@@ -120,6 +120,9 @@
                 if(value[item]) clone[item][i] = value[item][i];
                 else clone[item][i] = configList[item][i];
             }
+        }
+        for (const i in clone) {
+            clone[i].key = clone[i].key.toUpperCase();
         }
         return clone;
     }
@@ -355,9 +358,10 @@
     //全局快捷键监听函数
     function keyListener(ev) {
         //console.log(ev,hoverItem);
-        const key = new RegExp(ev.key,'i')
+        if (ev.target instanceof HTMLTextAreaElement||ev.target instanceof HTMLInputElement) return;
+        const key = ev.key.toUpperCase();
         if (
-            config.active.key.match(key)
+            config.active.key == key
             &&config.active.shiftKey == ev.shiftKey
             &&config.active.ctrlKey == ev.ctrlKey
             &&config.active.altKey == ev.altKey
@@ -368,9 +372,9 @@
                 id:window.captureId
             },'*');
         }
-        else if (!hoverItem||ev.target instanceof HTMLInputElement) return;
+        else if (!hoverItem) return;
         let value;
-        if(value = Object.entries(config).find(([k,v])=>k!='active'&&v.key.match(key))){
+        if(value = Object.entries(config).find(([k,v])=>k!='active'&&v.key==key)){
             //将待操作视频暂时替换为鼠标悬停视频，并保存原视频备份
             const videoBk = video;
             if(hoverItem instanceof HTMLVideoElement) video = hoverItem;
@@ -665,8 +669,8 @@
                         onkeydown:function(ev){
                             const key = ev.key;
                             if (key!='Control' && key!='Shift' && key!='Alt') {
-                                if(this.name=='active') this.value = (ev.ctrlKey&&'ctrl+'||'')+(ev.shiftKey&&'shift+'||'')+(ev.altKey&&'alt+'||'')+ev.key;
-                                else this.value = key;
+                                if(this.name=='active') this.value = (ev.ctrlKey&&'Ctrl+'||'')+(ev.shiftKey&&'Shift+'||'')+(ev.altKey&&'Alt+'||'')+ev.key.toUpperCase();
+                                else this.value = key.toUpperCase();
                             }
                             if(key!='Backspace' && key != 'Delete') ev.preventDefault();
                             else this.value = '';
@@ -691,9 +695,9 @@
         let value = cloneConfig(config);
         if(keys.length<2&&keys[0]!='') throw '全局快捷键至少应当同时按下ctrl/shift/alt之一';
         value.active.key = keys[keys.length-1];
-        value.active.ctrlKey = keys.indexOf('ctrl')!=-1;
-        value.active.shiftKey = keys.indexOf('shift')!=-1;
-        value.active.altKey = keys.indexOf('alt')!=-1;
+        value.active.ctrlKey = keys.indexOf('Ctrl')!=-1;
+        value.active.shiftKey = keys.indexOf('Shift')!=-1;
+        value.active.altKey = keys.indexOf('Alt')!=-1;
         for(let item of settingForm) {
             if(value[item.name]) {
                 if(item.type=='checkbox') {
@@ -713,11 +717,11 @@
                     item.checked = value[item.name].checked;
                 }
                 else if(item.name!='active'){
-                    item.value = value[item.name].key
+                    item.value = value[item.name].key.toUpperCase()
                 }
                 else {
                     let v = value.active;
-                    item.value = v.ctrlKey!=undefined?(v.ctrlKey&&'ctrl+'||'')+(v.shiftKey&&'shift+'||'')+(v.altKey&&'alt+'||'')+v.key:v.key
+                    item.value = v.ctrlKey!=undefined?(v.ctrlKey&&'Ctrl+'||'')+(v.shiftKey&&'Shift+'||'')+(v.altKey&&'Alt+'||'')+v.key:v.key.toUpperCase()
                 }
             }
             else {
