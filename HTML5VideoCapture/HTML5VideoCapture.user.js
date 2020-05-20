@@ -195,8 +195,16 @@
 
     //截图和视频操作相关函数从以下开始
     const childs = "undefined"==typeof(unsafeWindow)?window.frames:unsafeWindow.frames;
-    let videos,video,selectId,hoverItem;
-    function videoShot(down){
+    let videos, video, selectId, hoverItem;
+
+    //监听鼠标是否悬停在视频或工具栏……极其低效却很简单通用的实现，开启关闭判断放在getConfig中
+    //不需要监听视频悬停时应当移除（工具栏自带悬停检测，但作用会被该函数覆盖）
+    function hoverListener(ev) {
+        if (ev.target instanceof HTMLVideoElement || (window==top&&panel&&panel.contains(ev.target))) hoverItem = ev.target;
+        else hoverItem = undefined;
+    }
+
+    function videoCapture(down){
         if (!video) return postMsg('shot',down);
         const canvas = document.createElement("canvas");
         canvas.width = video.videoWidth;
@@ -266,6 +274,7 @@
         }
         console.log(window.captureId,videos);
     }
+
     function videoSelect(id){
         selectId = id;
         if(video) {
@@ -286,6 +295,7 @@
             postMsg('select');
         }
     }
+
     function videoStatusUpdate(){
         if (window==top) {
             play.innerText = video.paused?"播放":"暂停";
@@ -301,6 +311,7 @@
             },'*');
         }
     }
+
     //向包含目标视频的子窗体发送控制信息，全局变量selectId逐层往下层递归
     function postMsg(type,data){
         if (selectId==undefined||selectId=='') return;
@@ -317,12 +328,7 @@
             },'*');
         }
     }
-    //监听鼠标是否悬停在视频或工具栏……极其低效却很简单通用的实现，开启关闭判断放在getConfig中
-    //不需要监听视频悬停时应当移除（工具栏自带悬停检测，但作用会被该函数覆盖）
-    function hoverListener(ev) {
-        if (ev.target instanceof HTMLVideoElement || (window==top&&panel&&panel.contains(ev.target))) hoverItem = ev.target;
-        else hoverItem = undefined;
-    }
+
     //快捷键处理函数
     function keyHandler(ev,key) {
         //console.log(ev,key)
@@ -374,10 +380,10 @@
                 videoStep(value);
                 break;
             case 'capture':
-                videoShot(ev.shiftKey);
+                videoCapture(ev.shiftKey);
                 break;
             case 'downCapture':
-                videoShot(true);
+                videoCapture(true);
                 break;
             default:
                 break;
@@ -434,7 +440,7 @@
                         videoPlay(ev.data.value);
                         break;
                     case 'shot':
-                        videoShot(ev.data.value);
+                        videoCapture(ev.data.value);
                         break;
                     case 'step':
                         videoStep(ev.data.value);
@@ -462,19 +468,23 @@
         document.body.appendChild(toast);
         setTimeout(()=>toast.remove(),1000);
     }
-    let panel,selector,speed,play,settingForm;
-    let loadSite, saveSite, clearSite;
-    function topReciver(ev) {
-        //console.info('top recive:',ev.data);
-        if (ev.data.action!='captureReport') return;
-        if (ev.data.about=='videoNums') appendVideo(ev.data);
-        else if (ev.data.about=='panelActive') panelActive();
-        else if (ev.data.about=='videoStatus'&&selector.value.startsWith(ev.data.id)){
-            play.innerText = ev.data.paused?"播放":"暂停";;
-            speed.value = ev.data.speed;
+    function dialogMove(ev){
+        if (ev.type=='mousedown'){
+            panel.tOffset = ev.pageY-panel.offsetTop;
+            panel.lOffset = ev.pageX-panel.offsetLeft;
+            document.body.addEventListener('mousemove',dialogMove);
+            document.body.addEventListener('mouseup',dialogMove);
+        }
+        else if (ev.type=='mouseup'){
+            document.body.removeEventListener('mousemove',dialogMove);
+            document.body.removeEventListener('mouseup',dialogMove);
+        }
+        else{
+            panel.style.top = ev.pageY-panel.tOffset+'px';
+            panel.style.left = ev.pageX-panel.lOffset+'px';
         }
     }
-    window.addEventListener('message', topReciver);
+    //简易创建页面元素的封装，方便嵌套，实际调用或许会发生相当奇怪问题……
     function _c(config){
         if(config instanceof Array) return config.map(_c);
         const item = document.createElement(config.nodeType);
@@ -498,6 +508,27 @@
         }
         return item;
     }
+
+    let panel, selector, speed, play, settingForm;
+    let loadSite, saveSite, clearSite;
+
+    //顶层窗体事件接收，处理来自子窗体汇报的数据状态
+    function topReciver(ev) {
+        //console.info('top recive:',ev.data);
+        if (ev.data.action!='captureReport') return;
+        if (ev.data.about=='videoNums') appendVideo(ev.data);
+        else if (ev.data.about=='panelActive') panelActive();
+        else if (ev.data.about=='videoStatus'&&selector.value.startsWith(ev.data.id)){
+            play.innerText = ev.data.paused?"播放":"暂停";;
+            speed.value = ev.data.speed;
+        }
+    }
+    window.addEventListener('message', topReciver);
+
+    /**往工具栏下拉面板中添加视频
+     * v: {id: 视频所处窗体ID, length: 视频数量, host: 视频所处窗体域名}
+     * 当为顶层窗体时仅含有length成员
+    **/
     function appendVideo(v){
         if (v&&v.length){
             for (let i=0;i<v.length;i++){
@@ -531,238 +562,224 @@
             }
         }
     }
-    function dialogMove(ev){
-        if (ev.type=='mousedown'){
-            panel.tOffset = ev.pageY-panel.offsetTop;
-            panel.lOffset = ev.pageX-panel.offsetLeft;
-            document.body.addEventListener('mousemove',dialogMove);
-            document.body.addEventListener('mouseup',dialogMove);
-        }
-        else if (ev.type=='mouseup'){
-            document.body.removeEventListener('mousemove',dialogMove);
-            document.body.removeEventListener('mouseup',dialogMove);
-        }
-        else{
-            panel.style.top = ev.pageY-panel.tOffset+'px';
-            panel.style.left = ev.pageX-panel.lOffset+'px';
-        }
-    }
-    function createPanel(){panel = _c({
-        nodeType:'div',id:'HTML5VideoCapture',
-        style:'position:fixed;top:40px;left:30px;z-index:2147483647;padding:5px 10px;background:darkcyan;font-family:initial;border-radius:4px;font-size:12px;text-align:left',
-        onmouseenter:()=>(hoverItem = panel),
-        onmouseleave:()=>(hoverItem = undefined),
-        childs:[
-            {
-                nodeType:'style',
-                innerHTML:'div#HTML5VideoCapture option{color:#000;}'
-                + 'div#HTML5VideoCapture>*{margin:0 10px 5px 0}'
-                + 'div#HTML5VideoCapture>span,div#HTML5VideoCapture>span>*{white-space:nowrap;}'
-                + 'div#HTML5VideoCapture *{font-family:initial;color:#fff;background:transparent;line-height:20px;height:20px;box-sizing:content-box;vertical-align:top;}'
-                + 'div#HTML5VideoCapture .h5vc-block {border:1px solid #ffffff99;border-radius:2px;padding:1px 4px;min-width:unset;margin-top:0}'
-                + 'div#HTML5VideoCapture .h5vc-block:hover {border-color: #fff;}'
-                + 'div#HTML5VideoCapture .setting-switcher:before {content:"﹀"}'
-                + 'div#HTML5VideoCapture .setting-switcher.setting-open:before {content:"︿"}'
-                + 'div#HTML5VideoCapture .setting-switcher:not(.setting-open)+form {display:none}'
-            },
-            {
-                nodeType:'div',
-                innerText:'HTML5视频截图工具',
-                style:'cursor:move;user-select:none;font-size:14px;height:auto;min-width:60px;margin-right:0',
-                onmousedown:dialogMove,
-                ondblclick:()=>{
-                    speed.step = 0.25;
-                    videoSpeedChange(speed.value=1);
-                }
-            },
-            {
-                nodeType:'button',
-                className:'h5vc-block',
-                innerText:'检测',
-                title:'重新检测页面中的视频',
-                onclick:videoDetech
-            },
-            selector = _c({
-                nodeType:'select',
-                className:'h5vc-block',
-                title:'选择视频',
-                style:'width:unset;min-width:30px',
-                onchange: ()=>videoSelect(selector.value)
-            }),
-            speed = _c({
-                nodeType:'input',
-                className:'h5vc-block',
-                type:'number',step:0.25,min:0,
-                title:'视频速度,双击截图工具标题恢复原速',
-                style:'width:40px;',
-                oninput:()=>{
-                    speed.step = speed.value<1?0.1:0.25;
-                    videoSpeedChange(+speed.value);
-                }
-            }),
-            play = _c({
-                nodeType:'button',
-                className:'h5vc-block',
-                innerText:'播放',
-                onclick:videoPlay
-            }),
-            {
-                nodeType:'button',
-                className:'h5vc-block',
-                style:'margin-right:0',
-                innerText:'<<',
-                title:'后退1秒,按住shift 5倍,ctrl 10倍,alt 60倍,多按相乘',
-                onclick:e=>keyHandler(e,'backward')
-            },
-            {
-                nodeType:'button',
-                className:'h5vc-block',
-                innerText:'<',
-                title:'上一帧(1/60秒)',
-                onclick:()=>videoStep(-1/60)
-            },
-            {
-                nodeType:'button',
-                className:'h5vc-block',
-                style:'margin-right:0',
-                innerText:'截图',
-                title:'新建标签页打开视频截图',
-                onclick:()=>videoShot()
-            },
-            {
-                nodeType:'button',
-                className:'h5vc-block',
-                innerText:'↓',
-                title:'直接下载截图（如果可用）',
-                onclick:()=>videoShot(true)
-            },
-            {
-                nodeType:'button',
-                className:'h5vc-block',
-                style:'margin-right:0',
-                innerText:'>',
-                title:'下一帧(1/60秒)',
-                onclick:()=>videoStep(1/60)
-            },
-            {
-                nodeType:'button',
-                className:'h5vc-block',
-                innerText:'>>',
-                title:'前进1秒,按住shift 5倍,ctrl 10倍,alt 60倍,多按相乘',
-                onclick:e=>keyHandler(e,'forward')
-            },
-            {
-                nodeType:'button',
-                className:'h5vc-block',
-                innerText:'关闭',
-                title:'关闭截图工具栏',
-                style:'margin-right:0',
-                onclick:panelActive
-            },
-            //以下为快捷键设置和相关控制逻辑
-            {
-                nodeType:'div',className:'setting-switcher',
-                style:'text-align: center;cursor: pointer;user-select: none;margin-bottom:0',
-                onclick:(ev)=>ev.target.classList.toggle('setting-open')
-            },
-            settingForm = _c({
-                nodeType:'form',
-                style:'user-select: none;height: auto;overflow: hidden;margin-right: 0; font-size:12px',
-                childs:[
-                    ...Object.entries(configList).map(([k,v])=>([
-                        {
-                            nodeType:'input',className:'h5vc-block',name:k,type:v.type,
-                            title:v.title,id:'h5vc-setting-'+k,style:'display:inline-block',
-                            disabled:v.disabled,
-                            onclick:function(ev){this.select()&&ev.preventDefault()},
-                            onkeydown:function(ev){
-                                const key = ev.key;
-                                if (key!='Control' && key!='Shift' && key!='Alt') {
-                                    if(this.name=='active') this.value = (ev.ctrlKey&&'Ctrl+'||'')+(ev.shiftKey&&'Shift+'||'')+(ev.altKey&&'Alt+'||'')+ev.key.toUpperCase();
-                                    else this.value = key.toUpperCase();
-                                }
-                                if(key!='Backspace' && key != 'Delete') ev.preventDefault();
-                                else this.value = '';
-                            },
-                        },
-                        {nodeType:'label',innerHTML:v.content,title:v.title,for:'h5vc-setting-'+k,style:'display:inline-block'},
-                        {nodeType:'br'}
-                    ])).flat(),
-                    {
-                        nodeType:'button',
-                        className:'h5vc-block',
-                        innerHTML:'保存默认',
-                        title:'保存通用默认设置，默认设置将在没有设置专用设置的网站生效',
-                        onclick:(ev)=> confirm('是否确认保存默认设置') &&
-                        checkSettingFrom()
-                            .then(config=>saveConfig(config,'default')&toast('保存成功'))
-                            .catch(e=>toast('保存错误',e))&ev.preventDefault()
-                    },
-                    {
-                        nodeType:'button',
-                        className:'h5vc-block',
-                        innerHTML:'重设默认',
-                        title:'重设默认设置为原始值，此操作不会改变其它专用网站设置',
-                        onclick:(ev)=> confirm('是否确认清除默认设置') &&
-                        saveConfig(undefined,'default')
-                            .then(()=>loadSettingForm(configList)&toast('重设成功'))
-                            .catch(e=>toast('重设错误',e))&ev.preventDefault()
-                    },
-                    loadSite = _c({
-                        nodeType:'select',className:'h5vc-block',
-                        style:'width:55px;',
-                        innerHTML:'<option value="">查看...</option>',
-                        title:'显示保存的设置内容，此网站中的内嵌网页域名会有与视频编号对应的标识',
-                        onchange:(ev)=>getConfig(ev.target.value).then(loadSettingForm)
-                    }),
-                    saveSite = _c({
-                        nodeType:'select', className:'h5vc-block',
-                        style:'width:70px;',
-                        innerHTML:'<option value="">保存为...</option><option value="'+location.host+'">'+location.host+'</option>',
-                        title:'保存网站专用设置，专用设置在该网站内将覆盖默认设置\n'
-                            +'仅显示在本网页上加载的域名，带有编号的是内嵌网页的域名，可根据视频编号识别',
-                        onchange:(ev)=> {
-                            const value = ev.target.value;
-                            ev.target.value = '';
-                            if (value=='' || !confirm('是否确认保存'+value+'设置')) {
-                                return;
-                            }
-                            checkSettingFrom()
-                                .then(config=>saveConfig(config,value)&loadSettingForm(config)&toast('保存成功'))
-                                .then(()=>clearSite.querySelector(`[value="${ev.target.value}"]`))
-                                .then(find=>{
-                                if (find) return;
-                                loadSite.add(_c({nodeType:'option',value:value,innerHTML:value}));
-                                clearSite.add(_c({nodeType:'option',value:value,innerHTML:value}))
-                            })
-                                .catch(e=>toast('保存错误',e))
-                        }
-                    }),
-                    clearSite = _c({
-                        nodeType:'select', className:'h5vc-block',
-                        style:'width:55px;',
-                        innerHTML:'<option value="">清除...</option>',
-                        title:'清除网站专用设置，清除之后默认设置内容将在该网站生效',
-                        onchange:(ev)=> {
-                            const value = ev.target.value;
-                            ev.target.value = '';
-                            if (!confirm('是否确认清除'+value+'设置')) return;
-                            saveConfig(undefined, value)
-                                .then(()=>loadSite.querySelector(`[value="${value}"]`))
-                                .then(find=>find&&loadSite.removeChild(find))
-                                .then(()=>clearSite.querySelector(`[value="${value}"]`))
-                                .then(find=>find&&clearSite.removeChild(find))
-                                .then(()=>loadSettingForm(config)&toast('清除成功'))
-                                .catch(e=>toast('清除错误',e))
-                        }
-                    }),
-                ]
-            })
-        ]
-    })};
 
-    //初始化设置面板的配置，仅在创建设置面板时调用
-    function initSettingFrom() {
+    //初始化创建工具栏面板
+    function createPanel(){
+        panel = _c({
+            nodeType:'div',id:'HTML5VideoCapture',
+            style:'position:fixed;top:40px;left:30px;z-index:2147483647;padding:5px 10px;background:darkcyan;font-family:initial;border-radius:4px;font-size:12px;text-align:left',
+            onmouseenter:()=>(hoverItem = panel),
+            onmouseleave:()=>(hoverItem = undefined),
+            childs:[
+                {
+                    nodeType:'style',
+                    innerHTML:'div#HTML5VideoCapture option{color:#000;}'
+                    + 'div#HTML5VideoCapture>*{margin:0 10px 5px 0}'
+                    + 'div#HTML5VideoCapture>span,div#HTML5VideoCapture>span>*{white-space:nowrap;}'
+                    + 'div#HTML5VideoCapture *{font-family:initial;color:#fff;background:transparent;line-height:20px;height:20px;box-sizing:content-box;vertical-align:top;}'
+                    + 'div#HTML5VideoCapture .h5vc-block {border:1px solid #ffffff99;border-radius:2px;padding:1px 4px;min-width:unset;margin-top:0}'
+                    + 'div#HTML5VideoCapture .h5vc-block:hover {border-color: #fff;}'
+                    + 'div#HTML5VideoCapture .setting-switcher:before {content:"﹀"}'
+                    + 'div#HTML5VideoCapture .setting-switcher.setting-open:before {content:"︿"}'
+                    + 'div#HTML5VideoCapture .setting-switcher:not(.setting-open)+form {display:none}'
+                },
+                {
+                    nodeType:'div',
+                    innerText:'HTML5视频截图工具',
+                    style:'cursor:move;user-select:none;font-size:14px;height:auto;min-width:60px;margin-right:0',
+                    onmousedown:dialogMove,
+                    ondblclick:()=>{
+                        speed.step = 0.25;
+                        videoSpeedChange(speed.value=1);
+                    }
+                },
+                {
+                    nodeType:'button',
+                    className:'h5vc-block',
+                    innerText:'检测',
+                    title:'重新检测页面中的视频',
+                    onclick:videoDetech
+                },
+                selector = _c({
+                    nodeType:'select',
+                    className:'h5vc-block',
+                    title:'选择视频',
+                    style:'width:unset;min-width:30px',
+                    onchange: ()=>videoSelect(selector.value)
+                }),
+                speed = _c({
+                    nodeType:'input',
+                    className:'h5vc-block',
+                    type:'number',step:0.25,min:0,
+                    title:'视频速度,双击截图工具标题恢复原速',
+                    style:'width:40px;',
+                    oninput:()=>{
+                        speed.step = speed.value<1?0.1:0.25;
+                        videoSpeedChange(+speed.value);
+                    }
+                }),
+                play = _c({
+                    nodeType:'button',
+                    className:'h5vc-block',
+                    innerText:'播放',
+                    onclick:videoPlay
+                }),
+                {
+                    nodeType:'button',
+                    className:'h5vc-block',
+                    style:'margin-right:0',
+                    innerText:'<<',
+                    title:'后退1秒,按住shift 5倍,ctrl 10倍,alt 60倍,多按相乘',
+                    onclick:e=>keyHandler(e,'backward')
+                },
+                {
+                    nodeType:'button',
+                    className:'h5vc-block',
+                    innerText:'<',
+                    title:'上一帧(1/60秒)',
+                    onclick:()=>videoStep(-1/60)
+                },
+                {
+                    nodeType:'button',
+                    className:'h5vc-block',
+                    style:'margin-right:0',
+                    innerText:'截图',
+                    title:'新建标签页打开视频截图',
+                    onclick:()=>videoCapture()
+                },
+                {
+                    nodeType:'button',
+                    className:'h5vc-block',
+                    innerText:'↓',
+                    title:'直接下载截图（如果可用）',
+                    onclick:()=>videoCapture(true)
+                },
+                {
+                    nodeType:'button',
+                    className:'h5vc-block',
+                    style:'margin-right:0',
+                    innerText:'>',
+                    title:'下一帧(1/60秒)',
+                    onclick:()=>videoStep(1/60)
+                },
+                {
+                    nodeType:'button',
+                    className:'h5vc-block',
+                    innerText:'>>',
+                    title:'前进1秒,按住shift 5倍,ctrl 10倍,alt 60倍,多按相乘',
+                    onclick:e=>keyHandler(e,'forward')
+                },
+                {
+                    nodeType:'button',
+                    className:'h5vc-block',
+                    innerText:'关闭',
+                    title:'关闭截图工具栏',
+                    style:'margin-right:0',
+                    onclick:panelActive
+                },
+                //以下为快捷键设置和相关控制逻辑
+                {
+                    nodeType:'div',className:'setting-switcher',
+                    style:'text-align: center;cursor: pointer;user-select: none;margin-bottom:0',
+                    onclick:(ev)=>ev.target.classList.toggle('setting-open')
+                },
+                settingForm = _c({
+                    nodeType:'form',
+                    style:'user-select: none;height: auto;overflow: hidden;margin-right: 0; font-size:12px',
+                    childs:[
+                        ...Object.entries(configList).map(([k,v])=>([
+                            {
+                                nodeType:'input',className:'h5vc-block',name:k,type:v.type,
+                                title:v.title,id:'h5vc-setting-'+k,style:'display:inline-block',
+                                disabled:v.disabled,
+                                onclick:function(ev){this.select()&&ev.preventDefault()},
+                                onkeydown:function(ev){
+                                    const key = ev.key;
+                                    if (key!='Control' && key!='Shift' && key!='Alt') {
+                                        if(this.name=='active') this.value = (ev.ctrlKey&&'Ctrl+'||'')+(ev.shiftKey&&'Shift+'||'')+(ev.altKey&&'Alt+'||'')+ev.key.toUpperCase();
+                                        else this.value = key.toUpperCase();
+                                    }
+                                    if(key!='Backspace' && key != 'Delete') ev.preventDefault();
+                                    else this.value = '';
+                                },
+                            },
+                            {nodeType:'label',innerHTML:v.content,title:v.title,for:'h5vc-setting-'+k,style:'display:inline-block'},
+                            {nodeType:'br'}
+                        ])).flat(),
+                        {
+                            nodeType:'button',
+                            className:'h5vc-block',
+                            innerHTML:'保存默认',
+                            title:'保存通用默认设置，默认设置将在没有设置专用设置的网站生效',
+                            onclick:(ev)=> confirm('是否确认保存默认设置') &&
+                            checkSettingFrom()
+                                .then(config=>saveConfig(config,'default')&toast('保存成功'))
+                                .catch(e=>toast('保存错误',e))&ev.preventDefault()
+                        },
+                        {
+                            nodeType:'button',
+                            className:'h5vc-block',
+                            innerHTML:'重设默认',
+                            title:'重设默认设置为原始值，此操作不会改变其它专用网站设置',
+                            onclick:(ev)=> confirm('是否确认清除默认设置') &&
+                            saveConfig(undefined,'default')
+                                .then(()=>loadSettingForm(configList)&toast('重设成功'))
+                                .catch(e=>toast('重设错误',e))&ev.preventDefault()
+                        },
+                        loadSite = _c({
+                            nodeType:'select',className:'h5vc-block',
+                            style:'width:55px;',
+                            innerHTML:'<option value="">查看...</option>',
+                            title:'显示保存的设置内容，此网站中的内嵌网页域名会有与视频编号对应的标识',
+                            onchange:(ev)=>getConfig(ev.target.value).then(loadSettingForm)
+                        }),
+                        saveSite = _c({
+                            nodeType:'select', className:'h5vc-block',
+                            style:'width:70px;',
+                            innerHTML:'<option value="">保存为...</option><option value="'+location.host+'">'+location.host+'</option>',
+                            title:'保存网站专用设置，专用设置在该网站内将覆盖默认设置\n'
+                                +'仅显示在本网页上加载的域名，带有编号的是内嵌网页的域名，可根据视频编号识别',
+                            onchange:(ev)=> {
+                                const value = ev.target.value;
+                                ev.target.value = '';
+                                if (value=='' || !confirm('是否确认保存'+value+'设置')) {
+                                    return;
+                                }
+                                checkSettingFrom()
+                                    .then(config=>saveConfig(config,value)&loadSettingForm(config)&toast('保存成功'))
+                                    .then(()=>clearSite.querySelector(`[value="${ev.target.value}"]`))
+                                    .then(find=>{
+                                    if (find) return;
+                                    loadSite.add(_c({nodeType:'option',value:value,innerHTML:value}));
+                                    clearSite.add(_c({nodeType:'option',value:value,innerHTML:value}))
+                                })
+                                    .catch(e=>toast('保存错误',e))
+                            }
+                        }),
+                        clearSite = _c({
+                            nodeType:'select', className:'h5vc-block',
+                            style:'width:55px;',
+                            innerHTML:'<option value="">清除...</option>',
+                            title:'清除网站专用设置，清除之后默认设置内容将在该网站生效',
+                            onchange:(ev)=> {
+                                const value = ev.target.value;
+                                ev.target.value = '';
+                                if (!confirm('是否确认清除'+value+'设置')) return;
+                                saveConfig(undefined, value)
+                                    .then(()=>loadSite.querySelector(`[value="${value}"]`))
+                                    .then(find=>find&&loadSite.removeChild(find))
+                                    .then(()=>clearSite.querySelector(`[value="${value}"]`))
+                                    .then(find=>find&&clearSite.removeChild(find))
+                                    .then(()=>loadSettingForm(config)&toast('清除成功'))
+                                    .catch(e=>toast('清除错误',e))
+                            }
+                        }),
+                    ]
+                })
+            ]
+        });
+
+        //初始化设置面板的配置
         loadSite.add(_c({
             nodeType: 'option',
             innerHTML: '默认',
@@ -837,7 +854,6 @@
         else {
             if(!panel) {
                 createPanel();
-                initSettingFrom();
             }
             document.body.appendChild(panel);
             if(!selector.length) videoDetech();
