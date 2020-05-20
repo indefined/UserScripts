@@ -2,7 +2,7 @@
 // @name         HTML5视频截图器
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.4.9
+// @version      0.4.10
 // @description  基于HTML5的简单任意原生视频截图，可控制快进/逐帧/视频调速，支持自定义快捷键
 // @author       indefined
 // @include      *://*
@@ -205,7 +205,7 @@
     }
 
     function videoCapture(down){
-        if (!video) return postMsg('shot',down);
+        if (!video) return;
         const canvas = document.createElement("canvas");
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
@@ -232,17 +232,17 @@
     }
 
     function videoPlay(){
-        if (!video) return postMsg('play');
+        if (!video) return;
         video.paused?video.play():video.pause();
     }
 
     function videoSpeedChange(speed){
-        if (!video) return postMsg('speed',speed);
+        if (!video) return;
         video.playbackRate = speed;
     }
 
     function videoStep(offset){
-        if (!video) return postMsg('step',offset);
+        if (!video) return;
         if (Math.abs(offset)<1&&!video.paused) videoPlay();
         video.currentTime += offset;
         if(video.currentTime<0) video.currentTime = 0;
@@ -329,18 +329,46 @@
         }
     }
 
-    //快捷键处理函数
-    function keyHandler(ev,key) {
-        //console.log(ev,key)
+    //视频动作处理函数，接收视频控制数据并转发调用最终处理
+    function videoAction(todo, value, id) {
+        if (video) {
+            switch (todo){
+                case 'play':
+                    videoPlay(value);
+                    break;
+                case 'shot':
+                    videoCapture(value);
+                    break;
+                case 'step':
+                    videoStep(value);
+                    break;
+                case 'speed':
+                    videoSpeedChange(value);
+                    break;
+                default:
+                    break;
+            }
+        }
+        else if (todo=='select'&&id) videoSelect(id);
+        else {
+            postMsg(todo, value);
+        }
+    }
+
+    //命令处理函数，分析命令，处理命令参数并调用视频控制
+    //action: 动作命令，与快捷键存储变量名相同
+    //ev: 调用命令时的按键动作，部分命令对shift/ctrl/alt敏感
+    function actionHandler(action, ev) {
+        //console.log(action, ev)
         let value;
-        switch(key) {
+        switch(action) {
             case 'speedUp':
                 if(video) value = video.playbackRate+(video.playbackRate<1?0.1:0.25);
                 else if(speed) {
                     speed.step = speed.value<1?0.1:0.25;
                     value = +speed.value + (+speed.step);
                 }
-                videoSpeedChange(value);
+                videoAction('speed',value);
                 break;
             case 'speedDown':
                 if(video) {
@@ -351,39 +379,39 @@
                     speed.step = speed.value>1?0.25:0.1;
                     value = +speed.value - speed.step;
                 }
-                videoSpeedChange(value);
+                videoAction('speed', value);
                 break;
             case 'speedOri':
-                videoSpeedChange(1);
+                videoAction('speed', 1);
                 break;
             case 'play':
-                videoPlay();
+                videoAction('play', value);
                 break;
             case 'nextFrame':
-                videoStep(1/60);
+                videoAction('step', 1/60);
                 break;
             case 'preFrame':
-                videoStep(-1/60);
+                videoAction('step', -1/60);
                 break;
             case 'forward':
                 value = 1;
                 if(ev.ctrlKey) value *= 5;
                 if(ev.shiftKey) value *= 10;
                 if(ev.altKey) value *= 60;
-                videoStep(value);
+                videoAction('step', value);
                 break;
             case 'backward':
                 value = -1;
                 if(ev.ctrlKey) value *= 5;
                 if(ev.shiftKey) value *= 10;
                 if(ev.altKey) value *= 60;
-                videoStep(value);
+                videoAction('step', value);
                 break;
             case 'capture':
-                videoCapture(ev.shiftKey);
+                videoAction('shot', ev.shiftKey);
                 break;
             case 'downCapture':
-                videoCapture(true);
+                videoAction('shot', true);
                 break;
             default:
                 break;
@@ -413,7 +441,7 @@
             const videoBk = video;
             if(hoverItem instanceof HTMLVideoElement) video = hoverItem;
             try{
-                keyHandler(ev,value[0]);
+                actionHandler(value[0], ev);
             }catch(e){
                 console.error(e);
             }
@@ -422,6 +450,7 @@
         }
     }
     document.addEventListener('keydown',keyListener);
+
     //控制事件接收仅在iframe中执行
     if (window!=top) {
         window.addEventListener('message', function(ev) {
@@ -435,25 +464,7 @@
                 getConfig();
                 [].forEach.call(childs,(w,i)=>w.postMessage({action:'reload'},'*'));
             }else if(ev.data.action=='captureControl' && ev.data.target==window.captureId){
-                switch (ev.data.todo){
-                    case 'play':
-                        videoPlay(ev.data.value);
-                        break;
-                    case 'shot':
-                        videoCapture(ev.data.value);
-                        break;
-                    case 'step':
-                        videoStep(ev.data.value);
-                        break;
-                    case 'speed':
-                        videoSpeedChange(ev.data.value);
-                        break;
-                    case 'select':
-                        videoSelect(ev.data.id);
-                        break;
-                    default:
-                        break;
-                }
+                videoAction(ev.data.todo, ev.data.value, ev.data.id);
             }
         });
         return;
@@ -463,7 +474,7 @@
     function toast(text,error){
         if(error) console.error(error);
         const toast = document.createElement('div');
-        toast.style = `position: fixed;top: 50%;left: 50%;z-index: 2147483647;padding: 10px;background: darkcyan;transform: translate(-50%);color: #fff;border-radius: 6px;`
+        toast.style = `position: fixed;top: 50%;left: 50%;z-index: 2147483647;padding: 10px;background: darkcyan;transform: translate(-50%);color: #fff;border-radius: 6px;box-shadow:#666 0px 0px 4px`
         toast.innerText = text + (error||'');
         document.body.appendChild(toast);
         setTimeout(()=>toast.remove(),1000);
@@ -590,7 +601,8 @@
                     onmousedown:dialogMove,
                     ondblclick:()=>{
                         speed.step = 0.25;
-                        videoSpeedChange(speed.value=1);
+                        speed.value = 1;
+                        actionHandler('speedOri');
                     }
                 },
                 {
@@ -613,16 +625,13 @@
                     type:'number',step:0.25,min:0,
                     title:'视频速度,双击截图工具标题恢复原速',
                     style:'width:40px;',
-                    oninput:()=>{
-                        speed.step = speed.value<1?0.1:0.25;
-                        videoSpeedChange(+speed.value);
-                    }
+                    oninput:()=> actionHandler('speedUp')
                 }),
                 play = _c({
                     nodeType:'button',
                     className:'h5vc-block',
                     innerText:'播放',
-                    onclick:videoPlay
+                    onclick: ()=> actionHandler('play')
                 }),
                 {
                     nodeType:'button',
@@ -630,14 +639,14 @@
                     style:'margin-right:0',
                     innerText:'<<',
                     title:'后退1秒,按住shift 5倍,ctrl 10倍,alt 60倍,多按相乘',
-                    onclick:e=>keyHandler(e,'backward')
+                    onclick:e=> actionHandler('backward', e)
                 },
                 {
                     nodeType:'button',
                     className:'h5vc-block',
                     innerText:'<',
                     title:'上一帧(1/60秒)',
-                    onclick:()=>videoStep(-1/60)
+                    onclick:e=> actionHandler('preFrame', e)
                 },
                 {
                     nodeType:'button',
@@ -645,14 +654,14 @@
                     style:'margin-right:0',
                     innerText:'截图',
                     title:'新建标签页打开视频截图',
-                    onclick:()=>videoCapture()
+                    onclick:e=> actionHandler('capture', e)
                 },
                 {
                     nodeType:'button',
                     className:'h5vc-block',
                     innerText:'↓',
                     title:'直接下载截图（如果可用）',
-                    onclick:()=>videoCapture(true)
+                    onclick:()=> actionHandler('downCapture')
                 },
                 {
                     nodeType:'button',
@@ -660,14 +669,14 @@
                     style:'margin-right:0',
                     innerText:'>',
                     title:'下一帧(1/60秒)',
-                    onclick:()=>videoStep(1/60)
+                    onclick:e=> actionHandler('nextFrame')
                 },
                 {
                     nodeType:'button',
                     className:'h5vc-block',
                     innerText:'>>',
                     title:'前进1秒,按住shift 5倍,ctrl 10倍,alt 60倍,多按相乘',
-                    onclick:e=>keyHandler(e,'forward')
+                    onclick:e=> actionHandler('forward', e)
                 },
                 {
                     nodeType:'button',
@@ -745,15 +754,14 @@
                                 if (value=='' || !confirm('是否确认保存'+value+'设置')) {
                                     return;
                                 }
-                                checkSettingFrom()
-                                    .then(config=>saveConfig(config,value)&loadSettingForm(config)&toast('保存成功'))
-                                    .then(()=>clearSite.querySelector(`[value="${ev.target.value}"]`))
-                                    .then(find=>{
-                                    if (find) return;
+                                checkSettingFrom().then(config=>{
+                                    saveConfig(config, value);
+                                    loadSettingForm(config);
+                                    toast('保存成功');
+                                    if (clearSite.querySelector(`[value="${value}"]`)) return;
                                     loadSite.add(_c({nodeType:'option',value:value,innerHTML:value}));
                                     clearSite.add(_c({nodeType:'option',value:value,innerHTML:value}))
-                                })
-                                    .catch(e=>toast('保存错误',e))
+                                }).catch(e=>toast('保存错误',e))
                             }
                         }),
                         clearSite = _c({
@@ -835,7 +843,7 @@
                 }
                 else {
                     let v = value.active;
-                    item.value = v.ctrlKey!=undefined?(v.ctrlKey&&'Ctrl+'||'')+(v.shiftKey&&'Shift+'||'')+(v.altKey&&'Alt+'||'')+v.key:v.key.toUpperCase()
+                    item.value = (v.ctrlKey&&'Ctrl+'||'')+(v.shiftKey&&'Shift+'||'')+(v.altKey&&'Alt+'||'')+v.key.toUpperCase()
                 }
             }
             else {
