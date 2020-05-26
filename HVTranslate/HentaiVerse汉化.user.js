@@ -1,14 +1,17 @@
 // ==UserScript==
 // @name           HentaiVerse汉化
+// @namespace      hentaiverse.org
+// @author         ggxxsol & NeedXuyao & mbbdzz & indefined & etc.
 // @icon           https://e-hentai.org/favicon.ico
-// @description    整合HV装备物品、界面和其他部分的汉化
+// @description    整合HV装备物品、界面和其他部分的汉化，带原文切换功能
 // @notice         必须在Hentaiverse主菜单 CHARACTER→SETTINGS 勾选自定义字体(Use Custom Font)并在之后一行文本框中填上任意字体名称，拉到最下面Apply Changes才会生效
 // @notice         如与Live Percentile Ranges同时使用，将脚本运行顺序置于Live Percentile Ranges之后
 // @notice         如有其它脚本共同运行冲突也可尝试调整脚本运行顺序，但无法保证兼容
+// @notice         切换原文可能和其它脚本的功能产生冲突，比如同时使用HVToolBox时在物品商店和仓库中仓库栏物品将无法切回原文，因为该栏内容已经被HVToolBox修改过
 // @include        *://hentaiverse.org/*
 // @include        *://alt.hentaiverse.org/*
 // @core           http://userscripts-mirror.org/scripts/show/41369
-// @version        5.6.2
+// @version        2020.05.24
 // @grant none
 // ==/UserScript==
 (function () {
@@ -695,12 +698,18 @@
         'Pot of Gold' : '黄金罐(等级7)',
         'Dinosaur Egg' : '恐龙蛋(等级7)',
         '' : '',
-        '' : '',
+        '/Coupon$/' : '礼券',
         '' : '',
         '' : '',
         '' : '',
         '' : '',
     ///////////////////////////////////////////////////////装备改造
+        'Elemental Proficiency' : '元素 魔法熟练度',
+        'Divine Proficiency' : '神圣 魔法熟练度',
+        'Forbidden Proficiency' : '黑暗 魔法熟练度',
+        '减益魔法 Proficiency' : '减益 魔法熟练度',
+        'Supportive Proficiency' : '辅助 魔法熟练度',
+        '' : '',
         'Select an equipment piece from the list to the left' : '从左侧列表选择一件装备',
         'then hit' : '然后点击',
         'hit Repair ' : '点击下方的Repair Item按钮',
@@ -928,7 +937,7 @@
         'You currently have' : '你目前拥有',
         'Each ticket costs' : '购买一张彩票将花费',
         'Choose number to buy' : '输入购买数量',
-        'You hold' : '你拥有',
+        '/You hold ([\\d,]+) of/' : '你拥有 $1 /',
         'sold tickets' : '张已售出的彩票',
         'Stock:' : '库存',
         'Soul Fragment' : '灵魂碎片',
@@ -1112,6 +1121,8 @@
         'You still have to feed this monsters enough crystals to reach powerlevel 25 and give it a name to activate it.' : '要激活这个怪物你必须喂食其水晶令其达到25战斗力等级，然后为其取名',
         'Primary attributes' : '主属性',
         'Elemental mitigation' : '元素抗性',
+        '/^Primary$/' : '主属性',
+        '/^Element$/' : '元素抗性',
         'Other stats' : '其他属性加成',
         'Powerlevel' : '战斗力',
         'chow' : '饲料',
@@ -1306,19 +1317,56 @@
         'One-Handed' : '单手',
         'Two-Handed' : '双手',
         //装备类型
+        'Cloth' : '布甲',
+        '/Light$/' : '轻甲',
+        'Heavy' : '重甲',
+        '/^Shield$/' : '盾牌',
         'Staffs' : '法杖',
-        'Longsword' : '长剑',
-        'Katana' : '日本刀',
         '法杖s' : '法杖',
+        //法杖类型
         'Oak' : '橡木',
         'Ebony':'*乌木',
         'Redwood' : '红衫木',
         'Willow' : '柳木',
         'Katalox' : '铁木',
-        'Cloth' : '布甲',
-        '/Light$/' : '轻甲',
-        'Heavy' : '重甲',
-        '/^Shield$/' : '盾牌',
+        //单手武器
+        'Axe' : '斧',
+        'Club' : '棍',
+        'Rapier' : '西洋剑',
+        'Shortsword' : '短剑',
+        'Wakizashi' : '胁差',
+        'Sword Chucks' : '锁链双剑',
+        'Dagger' : '匕首',
+        //双手武器
+        'Scythe' : '镰刀',
+        'Mace' : '重锤',
+        'Estoc' : '刺剑',
+        'Longsword' : '长剑',
+        'Katana' : '日本刀',
+        //盾类型
+        'Buckler' : '小圆盾',
+        'Kite Shield' : '鸢盾',
+        'Force Shield' : '立场盾',
+        'Tower Shield' : '塔盾',
+        //护甲类型
+        'Cotton' : '棉制',
+        'Phase' : '相位',
+        'Shade' : '暗影',
+        'Leather' : '皮革',
+        'Plate' : '板甲',
+        'Power ': '动力 ',
+        //旧版护甲类型
+        'Silk' : '丝绸',
+        'Gossamer' : '薄纱',
+        'Dragon Hide' : '龙皮',
+        'Kevlar' : '凯夫拉',
+        'Chainmail' : '锁子甲',
+        //锁子甲特有部位
+        'Coif' : '头巾',
+        'Mitons' : '护手',
+        'Hauberk' : '装甲',
+        'Chausses' : '裤',
+        //护甲部位
         'Cap' : '帽',
         'Robe' : '长袍',
         'Breastplate' : '护胸',
@@ -1331,31 +1379,11 @@
         'Shoes' : '鞋',
         'Boots' : '靴子',
         'Sabatons' : '铁靴',
-        'Buckler' : '小圆盾',
-        'Kite Shield' : '鸢盾',
-        'Force Shield' : '立场盾',
-        'Cotton' : '棉制',
-        'Phase' : '相位',
-        'Shade' : '暗影',
-        'Leather' : '皮革',
-        'Plate' : '板甲',
         'Helmet' : '头盔',
-        'Axe' : '斧',
-        'Club' : '棍',
-        'Rapier' : '西洋剑',
-        'Scythe' : '镰刀',
-        'Mace' : '重锤',
-        'Estoc' : '刺剑',
-        'Shortsword' : '短剑',
-        'Wakizashi' : '胁差',
-        'Dagger' : '匕首',
-        'Power Armor' : '动力 盔甲',
-        'Power 护腿' : '动力 护腿',
-        'Power 护胫' : '动力 护胫',
-        'Power 手甲' : '动力 手甲',
-        'Power 头盔' : '动力 头盔',
-        'Power 靴子' : '动力 铁靴',
-        //装备等级
+        '动力 Armor' : '动力 盔甲',
+
+        //装备品质
+        'Flimsy' : '薄弱',
         'Crude' : '劣等',
         'Fair' : '一般',
         'Average' : '中等',
@@ -1365,6 +1393,7 @@
         'Magnificent' : '☆史诗☆',
         'Legendary' : '✪传奇✪',
         'Peerless' : '☯无双☯',
+
         //前缀
         'Ethereal' : '虚空',
         'Fiery' : '红莲(火)',
@@ -1385,10 +1414,27 @@
         'Jade' : '翡翠的（风抗）',
         'Cobalt' : '冰蓝的（冰抗）',
         'Ruby' : '红宝石（火抗）',
-        'Astral' : '五芒星（星界）',
         'Onyx' : '缟玛瑙（暗抗）',
         'Savage' : '残暴的（暴伤）',
         'Shielding' : '盾化的（格挡）',
+        //旧版前缀
+        'Bronze' : '铜',
+        'Iron' : '铁',
+        'Silver' : '银',
+        'Steel' : '钢',
+        'Gold' : '金',
+        'Platinum' : '白金',
+        'Titanium' : '钛',
+        'Emerald' : '祖母绿',
+        'Sapphire' : '蓝宝石',
+        'Diamond' : '金刚石',
+        'Prism' : '光棱',
+        'trimmed' : '镶边',
+        'adorned' : '装饰',
+        'tipped' : '前端',
+        'Astral' : '五芒星',
+        'Quintessential' : '第五元素',
+
         //后缀
         //独立的装备页面of the会分行导致无法匹配，留在字典最后处理
         //为防止错误匹配其它单词，使用结尾正则表达式仅匹配后缀
@@ -1424,16 +1470,22 @@
         '/Fleet$/' : '迅捷',
         '/Negation$/' : '否定',
         //部分旧装备后缀
-        '/Cheetah$/':'猎豹之',
-        '/Fire-eater$/':'噬火者',
-        '/Thunder-child$/':'雷之子',
-        '/Wind-waker$/':'风之杖',
-        '/Spirit-ward$/':'灵魂护佑',
-        '/Raccoon$/':'招架',
-        '/Frost-born$/':'寒冰',
-        '/Priestess$/':'牧师',
-        '/Curse-weaver$/':'咒术师',
-        '/Thrice-blessed$/':'三重祝福',
+        '/Ox$/' : '牛（力量）',
+        '/Raccoon$/' : '浣熊（灵巧）',
+        '/Cheetah$/' : '猎豹（敏捷）',
+        '/Turtle$/' : '乌龟（体质）',
+        '/Fox$/' : '狐狸（智力）',
+        '/Owl$/' : '猫头鹰（智慧）',
+        '/Hulk$/' : '浩克（虚抗）',
+        '/Shielding Aura$/' : '守护光环（魂抗）',
+        '/Priestess$/' : '牧师',
+        '/Stone-Skinned$/' : '硬皮（减伤）',
+        '/Fire-eater$/' : '吞火者（火抗）',
+        '/Frost-born$/' : '冰人（冰抗）',
+        '/Thunder-child$/' : '雷之子（雷抗）',
+        '/Wind-waker$/' : '驭风者（风抗）',
+        '/Thrice-blessed$/' : '三重祝福（圣抗）',
+        '/Spirit-ward$/' : '幽冥结界（暗抗）',
 
         //装备属性
         'Tradeable' : '可交易',
@@ -1523,7 +1575,7 @@
         '' : '',
         'points drained' : '点吸收量',
         '汲取 Magic' : '魔力汲取',
-        '汲取 灵力' : '灵力汲取',
+        '汲取 Spirit' : '灵力汲取',
         '汲取 体力' : '体力汲取',
         'turns' : '回合',
         'chance -' : '几率 -',
@@ -1889,14 +1941,14 @@
         '' : '',
         '' : '',
     /////////////////////////////////////////////////////词缀处理
-        ///*//永远保持词缀处理在字典最后，以免造成其它有意义句子被打断
+        //本段内容处理包括装备后缀of/the、技能说明框中的of/and/or，但同时会对其它文本内容造成影响
+        ///*//因此永远保持词缀处理在字典最后，以免造成其它有意义句子被打断
         ' and ' : ' 和 ',
         ' or ' : ' 或者 ',
         ' of ' : ' ',
         '/ of$/' : '',
-        'the' : '',
-        'The' : '',
-        '' : '',
+        ' the ' : ' ',
+        '/ the$/i' : '',
         '' : '',
         '' : '',
         //*/
@@ -1962,6 +2014,38 @@
         }
     }
 
+    var list = [];
+    var translate = true;
+    var change;
+
+    function restore() {
+        for(var i of list) {
+            var temp = i.item.data;
+            i.item.data = i.data;
+            i.data = temp;
+        }
+        translate = !translate;
+        change.innerHTML = translate?'英':'中';
+    }
+    function initRestore() {
+        document.addEventListener('keydown',(ev)=>{
+            if(ev.altKey&&(ev.key=='a'||ev.key=='A')) {
+                restore();
+            }
+        });
+        if(change=document.getElementById('change-translate')) {
+            return change.addEventListener('click',restore);
+        }
+        change = document.createElement('div');
+        change.innerHTML = "英";
+        change.title = '点击切换翻译';
+        change.id = 'change-translate';
+        change.addEventListener('click',restore);
+        change.style.cssText = "cursor:pointer;z-index:1000;font-size: 16px;position:fixed; top:200px; left:0px; color: white;background : black";
+        document.body.appendChild(change);
+    }
+    initRestore();
+
     // function to do the replacement for xpath element
     function replace(xpath) {
         texts = document.evaluate(xpath, document, null, 6, null);
@@ -1972,12 +2056,16 @@
                 for(var index in regexs){
                     temp = temp.replace( regexs[index], replacements[index] );
                 }
-                if(temp!=text.data) text.data = temp;
+                if(temp!=text.data) {
+                    list.push({item:text,data:text.data});
+                    text.data = temp;
+                }
             }
         }
     }
     replace('//body//text()[ normalize-space(.) != "" ]');
     const mo = new MutationObserver((mutations,observer) => {
+        if(!translate) return;
         if(mutations[0].target.style.visibility!='hidden') {
             replace(`//div[@id='${mutations[0].target.id}']//text()[ normalize-space(.) != "" ]`);
         }

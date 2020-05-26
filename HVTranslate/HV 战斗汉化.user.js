@@ -1,5 +1,7 @@
 // ==UserScript==
 // @name           HV 战斗汉化
+// @namespace      hentaiverse.org
+// @author         indefined
 // @icon           https://e-hentai.org/favicon.ico
 // @description    仅对HV战斗说明框进行汉化
 // @include        *://hentaiverse.org/*
@@ -8,7 +10,7 @@
 // @exclude        *://*hentaiverse.org/pages/showequip.php?*
 // @include        file:///D:/Datas/Downloads/*.htm
 // @core           http://userscripts-mirror.org/scripts/show/41369
-// @version        0.1.1
+// @version        2020.04.13
 // @grant none
 // ==/UserScript==
 (function () {
