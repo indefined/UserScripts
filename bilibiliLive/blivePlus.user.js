@@ -2,7 +2,7 @@
 // @name        bilibili直播间工具
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.19
+// @version     0.5.19.1
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、硬币直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -350,7 +350,7 @@ body.fullscreen-fix div#gift-control-vm {
             }
             else{
                 const target = helper.get('.bilibili-live-player-video-round-title'),
-                      match = target&&target.innerText.match(/((av\d+)|bv([a-zA-Z0-9]+)).+(P(\d))+?/i);
+                      match = target&&target.innerText.match(/((av\d+)|(bv[a-zA-Z0-9]+)).+(P(\d+))+?/i);
                 match&&helper.set(this.title,{
                     innerText:match[1],
                     href:`//www.bilibili.com/video/${match[1]}${match[5]&&match[5]!=1&&`?p=${match[5]}`||''}`
