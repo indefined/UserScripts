@@ -2,8 +2,8 @@
 // @name         HTML5视频截图器
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.4.10
-// @description  基于HTML5的简单任意原生视频截图，可控制快进/逐帧/视频调速，支持自定义快捷键
+// @version      0.4.11
+// @description  基于HTML5的简单原生视频截图，可控制快进/逐帧/视频调速，支持自定义快捷键
 // @author       indefined
 // @include      *://*
 // @run-at       document-end
@@ -98,6 +98,13 @@
             key:'',
             checked:false
         },
+        stopPropagation:{
+            content:'尝试覆盖网页快捷键',
+            title:'勾选此选项则触发快捷键时会尝试忽略覆盖网页原有快捷键，不一定会生效',
+            type:'checkbox',
+            key:'',
+            checked:false
+        },
         saveAsTimeStamp:{
             content:'截图文件名按照当前时间保存',
             title:'勾选此项则下载的截图文件名按照当前时间戳保存，否则按照视频播放时间保存',
@@ -124,11 +131,14 @@
         const clone = {};
         if(!value) value = configList;
         for(const item in configList) {
-            clone[item] = {};
+            //使用assign覆盖合并拷贝……因为二层结构暂时没有引用变量大概安全吧……
+            clone[item] = Object.assign({},configList[item],value[item]);
+            /*
             for(const i in configList[item]) {
                 if(value[item]) clone[item][i] = value[item][i];
                 else clone[item][i] = configList[item][i];
             }
+            */
         }
         for (const i in clone) {
             clone[i].key = clone[i].key.toUpperCase();
@@ -176,9 +186,12 @@
             });
         });
         await GM_setValue('config',JSON.stringify(allConfigs));
-        await getConfig(document.location.host);
-        //通知iframe重新加载设置
-        [].forEach.call(childs,(w,i)=>w.postMessage({action:'reload'},'*'));
+        //为了防止保存延迟，延时重新加载设置
+        setTimeout(()=>{
+            getConfig(document.location.host);
+            //通知iframe重新加载设置
+            [].forEach.call(childs,(w,i)=>w.postMessage({action:'reload'},'*'));
+        },100);
     }
 
     //读取加载配置
@@ -436,7 +449,13 @@
         }
         else if (!hoverItem) return;
         let value;
-        if(value = Object.entries(config).find(([k,v])=>k!='active'&&v.key==key)){
+        if(value = Object.entries(config).find(([k,v])=>k!='active'&&v.key==key&&v.shiftKey==ev.shiftKey&&v.altKey==ev.altKey&&v.ctrlKey==ev.ctrlKey)){
+            //阻止覆盖网页原有快捷键
+            if (config.stopPropagation.checked) {
+                ev.stopPropagation();
+                ev.stopImmediatePropagation();
+                ev.preventDefault();
+            }
             //将待操作视频暂时替换为鼠标悬停视频，并保存原视频备份
             const videoBk = video;
             if(hoverItem instanceof HTMLVideoElement) video = hoverItem;
@@ -705,8 +724,7 @@
                                 onkeydown:function(ev){
                                     const key = ev.key;
                                     if (key!='Control' && key!='Shift' && key!='Alt') {
-                                        if(this.name=='active') this.value = (ev.ctrlKey&&'Ctrl+'||'')+(ev.shiftKey&&'Shift+'||'')+(ev.altKey&&'Alt+'||'')+ev.key.toUpperCase();
-                                        else this.value = key.toUpperCase();
+                                        this.value = (ev.ctrlKey&&'Ctrl+'||'')+(ev.shiftKey&&'Shift+'||'')+(ev.altKey&&'Alt+'||'')+ev.key.toUpperCase();
                                     }
                                     if(key!='Backspace' && key != 'Delete') ev.preventDefault();
                                     else this.value = '';
@@ -811,20 +829,19 @@
     //检查并返回设置窗口中的设置，实际方法是同步的，设置成异步是为了方便.then
     //throw: 检查设置不符合要求时抛出错误string，目前仅检测全局启动快捷键
     async function checkSettingFrom() {
-        let keys = settingForm[0].value.split('+');
         let value = cloneConfig(config);
-        if(keys.length<2&&keys[0]!='') throw '全局快捷键至少应当同时按下ctrl/shift/alt之一';
-        value.active.key = keys[keys.length-1];
-        value.active.ctrlKey = keys.indexOf('Ctrl')!=-1;
-        value.active.shiftKey = keys.indexOf('Shift')!=-1;
-        value.active.altKey = keys.indexOf('Alt')!=-1;
         for(let item of settingForm) {
             if(value[item.name]) {
                 if(item.type=='checkbox') {
                     value[item.name].checked = item.checked;
                 }
-                else if(item.name!='active'){
-                    value[item.name].key = item.value;
+                else if(item.name){
+                    let keys = item.value.split('+');
+                    if(keys.length<2&&item.name=='active') throw '全局快捷键至少应当同时按下ctrl/shift/alt之一';
+                    value[item.name].key = keys[keys.length-1];
+                    value[item.name].ctrlKey = keys.indexOf('Ctrl')!=-1;
+                    value[item.name].shiftKey = keys.indexOf('Shift')!=-1;
+                    value[item.name].altKey = keys.indexOf('Alt')!=-1;
                 }
             }
         }
@@ -838,23 +855,22 @@
                 if(item.type=='checkbox') {
                     item.checked = value[item.name].checked;
                 }
-                else if(item.name!='active'){
-                    item.value = value[item.name].key.toUpperCase()
-                }
                 else {
-                    let v = value.active;
+                    let v = value[item.name];
                     item.value = (v.ctrlKey&&'Ctrl+'||'')+(v.shiftKey&&'Shift+'||'')+(v.altKey&&'Alt+'||'')+v.key.toUpperCase()
                 }
             }
             else {
                 if(item.type=='checkbox') {
-                    item.checked = false;
+                    item.checked = configList[item.name].checked;
                 }
-                else{
-                    item.value = '';
+                else if (item.name){
+                    let v = configList[item.name];
+                    item.value = (v.ctrlKey&&'Ctrl+'||'')+(v.shiftKey&&'Shift+'||'')+(v.altKey&&'Alt+'||'')+v.key.toUpperCase()
                 }
             }
         }
+        loadSite.value = '';
     }
 
     function panelActive(){
