@@ -2,7 +2,7 @@
 // @name         HTML5视频截图器
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.4.11
+// @version      0.4.12
 // @description  基于HTML5的简单原生视频截图，可控制快进/逐帧/视频调速，支持自定义快捷键
 // @author       indefined
 // @include      *://*
@@ -108,6 +108,13 @@
         saveAsTimeStamp:{
             content:'截图文件名按照当前时间保存',
             title:'勾选此项则下载的截图文件名按照当前时间戳保存，否则按照视频播放时间保存',
+            type:'checkbox',
+            key:'',
+            checked:false
+        },
+        forceStepStop:{
+            content:'逐帧强制暂停',
+            title:'勾选此项后进行逐帧操作将临时挟持忽略视频的播放功能从而实现强制暂停，适用性和副作用未知，建议按需开启',
             type:'checkbox',
             key:'',
             checked:false
@@ -254,9 +261,23 @@
         video.playbackRate = speed;
     }
 
+    function nothing(){}
+
     function videoStep(offset){
         if (!video) return;
-        if (Math.abs(offset)<1&&!video.paused) videoPlay();
+        if (Math.abs(offset)<1) {
+            if (config.forceStepStop.checked) {
+                if (video.play!=nothing) {
+                    video.doPlayBackup = video.play;
+                    video.play = nothing;
+                }
+                clearTimeout(video.restorePlayTimmer);
+                video.restorePlayTimmer = setTimeout((function(){
+                    this.play = this.doPlayBackup;
+                }).bind(video),150);
+            }
+            if (!video.paused) video.pause();
+        }
         video.currentTime += offset;
         if(video.currentTime<0) video.currentTime = 0;
     }
