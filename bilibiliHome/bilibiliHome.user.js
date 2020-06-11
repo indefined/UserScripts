@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.6.6
+// @version      0.6.7
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -11,6 +11,7 @@
 // @connect      api.bilibili.com
 // @connect      passport.bilibili.com
 // @connect      link.acg.tv
+// @connect      www.mcbbs.net
 // @grant        GM_xmlhttpRequest
 // @grant        GM_getValue
 // @grant        GM_setValue
@@ -240,7 +241,7 @@
                         {
                             nodeType:'div',className:'pic',
                             childs:[
-                                `<div class="lazy-img"><img alt="${data.title}" src="${data.cover}@160w_100h.${tools.imgType}" /></div>`,
+                                `<div class="lazy-img"><img src="${data.cover}@160w_100h.${tools.imgType}" /></div>`,
                                 `<div class="cover-preview-module"></div>`,
                                 `<div class="mask-video"></div>`,
                                 `<div class="danmu-module"></div>`,
@@ -293,7 +294,7 @@
                         },
                         childs:[
                             `<a href="${data.goto=='av'?`/video/av${data.param}`:data.uri}" target="_blank">`
-                            + `<img src="${data.cover}@216w_122h_1c_100q.${tools.imgType}" alt="${data.title}"><div class="count">`
+                            + `<img src="${data.cover}@216w_122h_1c_100q.${tools.imgType}"><div class="count">`
                             + `<div class="left"><span><i class="bilifont bili-icon_shipin_bofangshu"></i>${tools.formatNumber(data.play)}</span>`
                             +(data.like&&`<span><i class="bilifont bili-icon_shipin_dianzanshu"></i>${data.like}</span></div>`||'</div>')
                             + `<div class="right"><span>${data.duration&&tools.formatNumber(data.duration,'time')||''}</span></div></div></a>`,
@@ -525,6 +526,7 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                             {nodeType:'div',style:'display: inline-block;width:160px',
                              childs:[{
                                 nodeType:'a',target:'_blank',
+                                href: '/video/av'+data.aid,
                                 onmouseenter: tools.preview,
                                 onmouseleave: tools.preview,
                                 onmousemove: tools.preview,
@@ -533,7 +535,7 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                                     {
                                         nodeType:'div',className:'pic',
                                         childs:[
-                                            `<div class="lazy-img"><img alt="${data.title}" src="${data.pic.replace(/https?:/,'')}@160w_100h.${tools.imgType}" /></div>`,
+                                            `<div class="lazy-img" style="height:100px"><img src="${data.pic.replace(/https?:/,'')}@160w_100h.${tools.imgType}" /></div>`,
                                             `<div class="cover-preview-module ${element.isNew?'van-framepreview':''} ranking"></div>`,
                                             `<div class="mask-video"></div>`,
                                             `<div class="danmu-module van-danmu"></div>`,
@@ -588,7 +590,7 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                             title:`${itemData.title}\r\n播放:${itemData.play} ${itemData.duration}`,
                             className:'ri-info-wrap clearfix',
                             childs:[
-                                (i==0?`<div class="lazy-img ri-preview"><img alt="${itemData.title}" src="${itemData.pic.split(':')[1]}@72w_45h.${tools.imgType}"></div>`:''),
+                                (i==0?`<div class="lazy-img ri-preview"><img src="${itemData.pic.split(':')[1]}@72w_45h.${tools.imgType}"></div>`:''),
                                 `<div class="ri-detail"><p class="ri-title">${itemData.title}</p><p class="ri-point">综合评分：${tools.formatNumber(itemData.pts)}</p></div>`,
                                 (i==0?{
                                     nodeType:'div',title:'添加到稍后再看',
@@ -877,7 +879,7 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                     GM_xmlhttpRequest({
                         method: 'GET',timeout:10000,
                         url:'https://passport.bilibili.com/login/app/third?appkey=27eb53fc9058f8c3'
-                        +'&api=http%3A%2F%2Flink.acg.tv%2Fsearch.php%3Fmod%3Dforum&sign=3c7f7018a38a3e674a8a778c97d44e67',
+                        +'&api=https%3A%2F%2Fwww.mcbbs.net%2Fbilibili_connect.php&sign=78d0f6a90a58e7dc5198f05dc481c06f',
                         onload: res=> {
                             try{
                                 resolve(JSON.parse(res.response).data.confirm_uri)
@@ -987,7 +989,7 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                 innerHTML:msg,
                 parent:document.body
             });
-            setTimeout(()=>document.body.removeChild(div),3000);
+            setTimeout(()=>document.body.removeChild(div),2000);
             return false;
         },
         formatNumber (input,format='number'){
