@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.6.7
+// @version      0.6.7.1
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -879,7 +879,7 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                     GM_xmlhttpRequest({
                         method: 'GET',timeout:10000,
                         url:'https://passport.bilibili.com/login/app/third?appkey=27eb53fc9058f8c3'
-                        +'&api=https%3A%2F%2Fwww.mcbbs.net%2Fbilibili_connect.php&sign=78d0f6a90a58e7dc5198f05dc481c06f',
+                        +'&api=https%3A%2F%2Fwww.mcbbs.net%2Ftemplate%2Fmcbbs%2Fimage%2Fspecial_photo_bg.png&sign=04224646d1fea004e79606d3b038c84a',
                         onload: res=> {
                             try{
                                 resolve(JSON.parse(res.response).data.confirm_uri)
