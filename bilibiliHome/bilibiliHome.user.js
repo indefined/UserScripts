@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.6.7.1
+// @version      0.6.8
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -153,6 +153,7 @@
             childs:[listBox = element._c({
                 nodeType:'div',className:scrollBox.className,
                 id:'recommend-list',
+                style:'overflow:auto',
                 innerHTML:'<span style="display:none">empty</span>'
             })]
         });
@@ -434,7 +435,7 @@
 .rank-item.show-detail .ri-preview{display:block}.rank-list .rank-item .ri-detail{float:left}.rank-list .rank-item .ri-detail
 .ri-title{line-height:18px;height:18px;overflow:hidden;color:#222}.rank-list .rank-item .ri-detail
 .ri-point{line-height:12px;color:#99a2aa;height:12px;margin-top:5px;display:none;overflow:hidden}.rank-list .rank-item.show-detail
-.ri-detail .ri-title{height:36px;line-height:18px;margin-top:-3px;width:150px;padding:0}.rank-list .rank-item.show-detail
+.ri-detail .ri-title{height:36px;line-height:18px;width:150px;padding:0}.rank-list .rank-item.show-detail
 .ri-point{display:block}.rank-list .rank-item:hover .ri-title{color:#00a1d6}.sec-rank{overflow:hidden}
 .sec-rank .rank-head h3{float:left;font-size:18px;font-weight:400}.sec-rank .rank-head
 .rank-tab{margin-left:20px;float:left}.sec-rank .rank-head .rank-dropdown{float:right}.sec-rank
@@ -658,6 +659,7 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
         autoFreshCount:isNaN(+GM_getValue('autoFreshCount'))?1:+GM_getValue('autoFreshCount'),
         boxHeight:+GM_getValue('boxHeight')||2,
         noScrollBar:!!GM_getValue('noScrollBar'),
+        reduceHeight:!!GM_getValue('reduceHeight',0),
         rankingDays:{1:'昨天',3:'三日',7:'一周',30:'一月'},
         rankingDay:GM_getValue('rankingDay',3),
         accessKey:GM_getValue('biliAppHomeKey'),
@@ -694,6 +696,10 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
             GM_setValue('noScrollBar',this.noScrollBar=+status);
             this.setStyle();
         },
+        setReduceHeight(status){
+            GM_setValue('reduceHeight',this.reduceHeight=+status);
+            this.setStyle();
+        },
         setStyle(){
             if(!this.styleDiv) {
                 this.styleDiv = element._c({
@@ -714,12 +720,12 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                 this.styleDiv.innerHTML = '#recommend #recommend-list{height:unset!important;}';
             }
 
+            const reduceHeight = this.reduceHeight? ' - 12px' : '';
             //设置推荐容器宽高
             if (element.isNew) {
-                this.styleDiv.innerHTML += `#recommend  .storey-box {height:calc(404px / 2 * ${this.boxHeight})}`
-                    + ` #ranking-all ul.rank-list{height:calc(404px / 2 * ${this.boxHeight})}`
-                    + `@media screen and (max-width: 1438px) { #recommend  .storey-box {height:calc(360px / 2 * ${this.boxHeight})}`
-                    + `#ranking-all ul.rank-list{height:calc(360px / 2 * ${this.boxHeight})}}`;
+                this.styleDiv.innerHTML +=
+                    `#recommend  .storey-box, #ranking-all ul.rank-list{height:calc(404px / 2 * ${this.boxHeight} ${reduceHeight})}`
+                    + `@media screen and (max-width: 1438px) { #recommend  .storey-box, #ranking-all ul.rank-list{height:calc(364px / 2 * ${this.boxHeight} ${reduceHeight})} }`;
                 if(this.setListWidth) {
                     //新版的推荐容器宽度针对设置，该方法由初始化推荐容器的方法自行构造，真是深井冰的一团糟乱调用
                     this.setListWidth();
@@ -727,8 +733,8 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
             }
             else {
                 //旧版因为固定间隔布局的原因，无论滚动条在内还是在外是否显示均需要维持比外层多一个滚动条宽度
-                this.styleDiv.innerHTML += `#recommend  .storey-box {height:calc(336px / 2 * ${this.boxHeight})}`
-                    + `#ranking-all ul.rank-list{height:calc(336px / 2 * ${this.boxHeight} - 16px)}`
+                this.styleDiv.innerHTML += `#recommend  .storey-box {height:calc(336px / 2 * ${this.boxHeight}${reduceHeight})}`
+                    + `#ranking-all ul.rank-list{height:calc(336px / 2 * ${this.boxHeight}${reduceHeight} - 16px)}`
                     + '#recommend #recommend-list{width:calc(100% + 20px)!important;}';
             }
         },
@@ -820,6 +826,18 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                                     onchange:({target})=>this.setBoxHeight(+target.value),
                                     style:'width:50px'
                                 }
+                            ]
+                        },
+                        {
+                            nodeType:'div',style:'margin: 10px 0;',
+                            childs: [
+                                '<label style="margin-right: 5px;">高度减去间隔:</label>',
+                                '<span style="margin-right: 5px;color:#00f" title="勾选此项推荐框的高度将减去一行间隔，如果你对浏览器进行缩放导致显示超出可以尝试勾选">(?)</span>',
+                                {
+                                    nodeType:'input',type:'checkbox',checked:this.reduceHeight,
+                                    onchange:({target})=>this.setReduceHeight(target.checked),
+                                    style:'vertical-align: bottom',
+                                },
                             ]
                         },
                         {
