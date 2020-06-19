@@ -2,7 +2,7 @@
 // @name         HTML5视频截图器
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.4.12
+// @version      0.4.13
 // @description  基于HTML5的简单原生视频截图，可控制快进/逐帧/视频调速，支持自定义快捷键
 // @author       indefined
 // @include      *://*
@@ -365,7 +365,8 @@
 
     //视频动作处理函数，接收视频控制数据并转发调用最终处理
     function videoAction(todo, value, id) {
-        if (video) {
+        if (todo=='select'&&id) videoSelect(id);
+        else if (video) {
             switch (todo){
                 case 'play':
                     videoPlay(value);
@@ -383,7 +384,6 @@
                     break;
             }
         }
-        else if (todo=='select'&&id) videoSelect(id);
         else {
             postMsg(todo, value);
         }
@@ -665,7 +665,10 @@
                     type:'number',step:0.25,min:0,
                     title:'视频速度,双击截图工具标题恢复原速',
                     style:'width:40px;',
-                    oninput:()=> actionHandler('speedUp')
+                    oninput:()=> {
+                        speed.step = speed.value<1?0.1:0.25;
+                        videoAction('speed', +speed.value);
+                    }
                 }),
                 play = _c({
                     nodeType:'button',
@@ -739,7 +742,7 @@
                         ...Object.entries(configList).map(([k,v])=>([
                             {
                                 nodeType:'input',className:'h5vc-block',name:k,type:v.type,
-                                title:v.title,id:'h5vc-setting-'+k,style:'display:inline-block',
+                                title:v.title,id:'h5vc-setting-'+k,style:'display: inline-block;-webkit-appearance: checkbox;',
                                 disabled:v.disabled,
                                 onclick:function(ev){this.select()&&ev.preventDefault()},
                                 onkeydown:function(ev){
