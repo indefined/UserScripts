@@ -3,45 +3,52 @@
 // @namespace    hentaiverse.org
 // @author       ggxxsol & mbbdzz & indefined & etc.
 // @description  汉化物品、装备界面及论坛，带装备高亮/装备店隐藏锁定装备，带翻译原文切换功能，会直接替换网页源码所以可能导致其它脚本冲突
-// @notice       必须在Hentaiverse主菜单 CHARACTER→SETTINGS 勾选 Use Custom Font 并在下一行 font-family 填上任意字体名称，拉到最下面Apply Changes才会生效
+// @notice       此修改版大幅度乱重构了原有脚本执行逻辑，对其它脚本的兼容性有一定提升，但丢失原脚本装备后缀语序倒转功能和部分物品弹窗说明汉化
 // @notice       如有同时使用其它汉化，需要先于其它汉化脚本运行才会生效
-// @notice       如与HVtoolBox同时使用，将脚本运行顺序置于HVtoolBox之前，如与其它脚本同时使用冲突，也可尝试调整脚本运行顺序，但不保证兼容
-// @notice       虽然脚本设计可以在各种HV装备和物品页面及论坛运行，但由于和其它脚本冲突概率大，仅在装备仓库和装备商店及论坛启用，其它页面如有需要自行添加@match
-// @notice       使用切换原文功能可能造成意想不到的结果，特别是当你同时使用其它脚本之后，切换回原文会造成其它脚本的大部分功能失效
+// @notice       与HVtoolBox在大部分装备列表冲突会失去装备高亮功能；在物品仓库中会导致HVtoolBox部分物品功能无效；与Live Percentile Ranges在装备详情页冲突
+// @notice       默认只在物品列表、装备店、论坛启用，如需包含其它装备物品页面汉化可在脚本管理器设置中将原始排除添加为用户包含或者将下方对应@exclude改为@match
+// @notice       如与其它脚本同时使用冲突，可尝试调整脚本运行顺序，但无法保证完全兼容
 // @notice       如果你要在论坛买东西，挑好东西之后最好切换到原文再复制内容，因为别人并不一定看得懂经过翻译过后的东西
 // @icon         http://e-hentai.org/favicon.ico
-// @match        *://*hentaiverse.org/?s=Character&ss=in*
+// @exclude        *://*hentaiverse.org/?s=Character&ss=in*
+// @match        *://*hentaiverse.org/?s=Bazaar&ss=is*
+// @exclude        *://*hentaiverse.org/?s=Character&ss=eq*
 // @match        *://*hentaiverse.org/?s=Bazaar&ss=es*
+// @match        *://*hentaiverse.org/?s=Bazaar&ss=ss*
+// @match        *://*hentaiverse.org/?s=Character&ss=it*
+// @exclude        *://*hentaiverse.org/?s=Battle&ss=iw*
 // @match        *://forums.e-hentai.org/*showtopic=*
-// @version      2020.05.24
+// @match        *://*hentaiverse.org/?s=Bazaar&ss=lt*
+// @match        *://*hentaiverse.org/?s=Bazaar&ss=la*
+// @exclude        *://*hentaiverse.org/?s=Forge*
+// @exclude        *://*hentaiverse.org/equip/*
+// @exclude        *://*hentaiverse.org/pages/showequip.php?*
+// @version      2020.06.07
 // ==/UserScript==
 
 if (document.location.href.match(/ss=iw/)&&!document.getElementById('item_pane'))return
 if (document.getElementById('riddlemaster')||document.getElementById('textlog')) return;
 var items, equips, regItems, regEquips;
-var list = [], translate = true, change, added;
-load();//加载翻译字典
-build();//转换字典
-initRestore();//原文切换按钮
+var list = [], translated = true, changer;
+
 main();//执行汉化
+
 function main(){
     var location,i;
     var itemdiv,equipdiv;
     var lklist = [
         'Character&ss=in',  //装备仓库0
         'Bazaar&ss=is',     //道具店1
-        'Character&ss=eq',  //装备2
+        'Character&ss=eq',  //更换装备2
         'Bazaar&ss=es',     //装备店3
         'Bazaar&ss=ss',     //祭坛4
         'Character&ss=it',  //道具仓库5
-        'ss=iw',            //iw汉化6
-        'forums',           //论坛汉化7
+        'Battle&ss=iw',     //iw汉化6
+        'showtopic=',       //论坛汉化7
         'Bazaar&ss=lt',     //武器彩票8
         'Bazaar&ss=la',     //防具彩票9
-        'Forge&ss=up&*',    //强化10
-        'Forge&ss=en&*',    //附魔11
-        'Forge',            //锻造12
-        'equip',            //装备页 13
+        'Forge&ss=',        //锻造10
+        'equip',            //装备页11
     ];
     for(i=0;i<lklist.length;i++){
         if(document.location.href.match(lklist[i])){
@@ -49,40 +56,32 @@ function main(){
             break;
         }
     }
+
+    if (i<lklist.length) {
+        //有匹配命中需要翻译的页面
+        load();//加载翻译字典
+        build();//转换字典
+        initRestore();//原文切换按钮
+    }
+
     switch (location){
         case 0: //装备仓库
-            try{
-                translateEquips(document.querySelector("#inv_equip.cspp"));
-                translateEquips(document.querySelector("#inv_eqstor.cspp"));
-            }
-            catch(e){}
+            translateEquipsList();
             break;
 
         case 1: //道具店1
-            break;
-            equipdiv = document.querySelectorAll(".itemlist");
-            translateItems(equipdiv[0]);
-            translateItems(equipdiv[1]);
+            Array.from(document.querySelectorAll(".itemlist>tbody>tr>td>div")).forEach(translateItems);
             break;
 
-        case 2: //装备2
-            equipdiv = document.querySelector("#eqsb");
-            if(equipdiv) {
-                translateEquips(equipdiv);
-            }
-            equipdiv = document.querySelector("#equip_pane");
-            if(equipdiv) {
-                translateEquips(equipdiv);
-            }
+        case 2: //更换装备页2
+            translateEquipsList();
+            Array.from(document.querySelectorAll(".eqb>div")).forEach(translateEquips);
             break;
 
         case 3: //装备店3
-            equipdiv = document.querySelectorAll(".equiplist");
-            translateEquips(equipdiv[0]);
-            translateEquips(equipdiv[1]);
+            translateEquipsList();
             var equhide = document.createElement('button');
             equhide.style.cssText = "font-size:15px; position:absolute;top:82px; left:2px  ;text-align:left";
-            equhide.title = '点击切换';
             try{
                 if(!localStorage.hideflag) localStorage.hideflag = "隐藏锁定装备";
                 if(localStorage.hideflag=="隐藏锁定装备"){
@@ -90,12 +89,16 @@ function main(){
                     for(i = 0 ;i <equipdiv.length;i++) {
                         equipdiv[i].parentNode.style.display = "none";
                     }
+                    equhide.innerHTML = "点击显示锁定装备";
                 }
-                equhide.innerHTML = "当前"+localStorage.hideflag;
+                else {
+                    equhide.innerHTML = "点击隐藏锁定装备";
+                }
             }
             catch(e){alert(e)}
             equhide.onclick = function(){
                 equipdiv = document.querySelectorAll(".il");
+                this.innerHTML = "点击"+localStorage.hideflag;
                 if(localStorage.hideflag=="隐藏锁定装备"){
                     localStorage.hideflag = "显示锁定装备";
                     for(i = 0 ;i <equipdiv.length;i++) {
@@ -108,21 +111,21 @@ function main(){
                         equipdiv[i].parentNode.style.display = "none";
                     }
                 }
-                this.innerHTML = "当前"+localStorage.hideflag;
             }
             document.body.appendChild(equhide);
             break;
 
         case 4: // 祭坛4
-            translateItems(document.querySelector("#item_pane"));
+            Array.from(document.querySelectorAll(".itemlist>tbody>tr>td>div")).forEach(translateItems);
             break;
 
         case 5: //道具仓库5
-            translateItems(document.querySelector("#mainpane"));
+            Array.from(document.querySelectorAll(".itemlist>tbody>tr>td>div")).forEach(translateItems);
+            Array.from(document.querySelectorAll(".sa>div:last-child>div")).forEach(translateItems);
             break;
 
         case 6: // iw
-            translateEquips(document.querySelector("#item_pane"));
+            translateEquipsList();
             break;
 
         case 7: //论坛
@@ -142,25 +145,30 @@ function main(){
 
         case 8: //武器彩卷
         case 9: //防具彩卷
-        case 10: //强化
-        case 11: //附魔
             translateEquips(document.querySelector("#leftpane"));
             break;
 
-        case 12: //锻造
-            if(equipdiv = document.getElementById("upgrade_button")) equipdiv.style.cssText = "position:relative; top:20px; ";
-            translateEquips(document.querySelector("#item_pane"));
+        case 10: //锻造
+            if (document.querySelector('#equip_extended')) {
+                //左侧的装备详细面板
+                translateEquips(document.querySelector("#leftpane"));
+                //右侧可强化项目
+                Array.from(document.querySelectorAll('#rightpane>div tr[onmouseover]>td:first-child>.fc2')).forEach(translateEquips);
+                //强化项目的说明文字
+                Array.from(document.querySelectorAll('#rightpane>div[id^="costpane"]>div :first-child>.fc2')).forEach(translateEquips);
+                //强化所需材料
+                Array.from(document.querySelectorAll('#rightpane>div[id^="costpane"]>table :first-child>.fc2')).forEach(translateItems);
+            }
+            else {
+                translateEquipsList();
+            }
             break;
 
-        case 13: //装备属性页面
-            translateEquips(document.body);
+        case 11: //装备属性页面
+            translateEquips(document.getElementById('showequip'));
             break;
+
         default: //没有匹配命中需要翻译的网页
-            //移除添加的原文切换按钮
-            if(added) {
-                console.log(change)
-                document.body.removeChild(change);
-            }
             break;
     }
 }
@@ -171,8 +179,8 @@ function restore() {
         i.item.innerHTML = i.html;
         i.html = temp;
     }
-    translate = !translate;
-    change.innerHTML = translate?'英':'中';
+    translated = !translated;
+    changer.innerHTML = translated?'英':'中';
 }
 function initRestore() {
     document.addEventListener('keydown',(ev)=>{
@@ -180,18 +188,21 @@ function initRestore() {
             restore();
         }
     });
-    if(change=document.getElementById('change-translate')) {
-        added = false;
-        return change.addEventListener('click',restore);
+    if(changer=document.getElementById('change-translate')) {
+        return changer.addEventListener('click',restore);
     }
-    added = true;
-    change = document.createElement('div');
-    change.innerHTML = "英";
-    change.title = '点击切换翻译';
-    change.id = 'change-translate';
-    change.addEventListener('click',restore);
-    change.style.cssText = "cursor:pointer;z-index:1000;font-size: 16px;position:fixed; top:200px; left:0px; color: white;background : black";
-    document.body.appendChild(change);
+    changer = document.createElement('div');
+    changer.innerHTML = "英";
+    changer.title = '点击切换翻译';
+    changer.id = 'change-translate';
+    changer.addEventListener('click',restore);
+    changer.style.cssText = "cursor:pointer;z-index:1000;font-size: 16px;position:fixed; top:200px; left:0px; color: white;background : black";
+    document.body.appendChild(changer);
+}
+
+function translateEquipsList(){
+    Array.from(document.querySelectorAll(".equiplist div[id^='e'][onmouseover]")).forEach(translateEquips);
+    Array.from(document.querySelectorAll(".hvut-eq-h5")).forEach(translateEquips);
 }
 
 function translateEquips(div){
@@ -225,8 +236,8 @@ function build() {
     }
     regEquips = {};
     for(var j in equips) {
-        var vj = j.replace(/^of the /,'of\\s*(<[^<]+>\\s*)*the\\s*(<[^<]+>\\s*)*\\s*').replace(/^of ([^<\\])/,'of\\s*(<[^<]+>\\s*)*$1');
-        regEquips[j] = new RegExp(vj,'gi');
+        var vj = j.replace(/^of the /,'([Oo]f\\s*(<[^<]+>\\s*)*)?([Tt]he\\s*(<[^<]+>\\s*)*\\s*)?').replace(/^of /,'([Oo]f\\s*(<[^<]+>\\s*)*)?');
+        regEquips[j] = new RegExp(vj,'g');
     }
 }
 
@@ -326,9 +337,7 @@ function load(){
         'Vibrant' : '活力',
         'Coruscating' : '闪耀',
         'Catalyst items' : '催化剂',
-        'Catalyst' : '催化剂',
-        'Scroll' : '卷轴',
-        'Infusion' : '魔药',
+        'Catalysts?' : '催化剂',
         'Low-Grade Cloth': '低级布料',
         'Mid-Grade Cloth': '中级布料',
         'High-Grade Cloth': '高级布料',
@@ -398,7 +407,7 @@ function load(){
         'Holographic Rainbow Projector' : '全像式彩虹投影机(等级8)',
         'Pot of Gold' : '黄金罐(等级7)',
         'Dinosaur Egg' : '恐龙蛋(等级7)',
-        'Figurine' : '小马公仔',
+
         //药品解释
         'Provides a long-lasting health restoration effect.' : '持续回复2%的基础HP,持续50回合.',
         'Instantly restores a large amount of health.' : '立刻回复100%的基础HP.',
@@ -532,6 +541,7 @@ function load(){
         'Magical Base Damage' : '(魔法伤害)',
         'Magical Hit Chance' : '(魔法命中率)',
         'Physical Defense' : '(物理减伤)',
+        'Magical Defense' : '(魔法减伤)',
         'Evade Chance' : '(回避率)',
         'Block Chance' : '(格挡率)',
         'Parry Chance' : '(招架率)',
@@ -565,48 +575,93 @@ function load(){
         'Resist Chance' : '(抵抗率)',
         'Physical Crit Chance' : '(物理暴击率)',
         'Magical Crit Chance' : '(魔法暴击率)',
+
         //物品类型
+        'Tokens?' : '令牌',
+        'Consumables?' : '消耗品',
+        'Crystal Packs?' : '水晶包',
+        'Crystals?' : '水晶',
+        'Artifacts?' : '遗物',
+        'Materials?' : '材料',
+        'Scraps?': '废料',
+        'Potions' : '药品',
+        'Trophy|Trophies' : '奖杯',
+        'Monster Foods?|Foods?' : '怪物食品',
+        'Shards?': '碎片',
+        'Infusions?' : '魔药',
+        'Scrolls?' : '卷轴',
+        'Bindings?' : '粘合剂',
+        'Restoratives?' : '回复品',
+        'Specials?' : '特殊',
+        'Figurines|Pony Figurine' : '小马公仔',
+        'Collectables?' : '收藏品',
 
-        'Token' : '令牌',
-        'Consumable' : '消耗品',
-        'Crystal' : '水晶',
-        'Artifact' : '遗物',
-        'Material' : '素材',
-        'Trophy' : '奖杯',
-        'Monster Food' : '怪物食品',
-        'Collectable' : '收藏品',
-        //材料
-        'Low-Grade' : '低级',
-        'Mid-Grade' : '中级',
-        'High-Grade' : '高级',
-        'Cloth' : '布料',
-
-        'Leather' : '皮革',
-        'Wood' : '木材',
-        'Metals' : '金属',
-        'Metal' : '金属',
-        'Scrap' : '碎片',
-        'Materials' : '材料',
-        'Crystals' : '水晶',
     };
 
     //装备字典
     equips = {
         /////////////////////////////////装备属性
-        //'Potency Tier':'潜力等级',
-        //'One-handed Weapon':'单手武器',
-        //'Two-handed Weapon':'双手武器',
+        'One-handed':'单手',
+        'Two-handed':'双手',
+        'One-Handed':'单手',
+        'Two-Handed':'双手',
+        'One Handed':'单手',
+        'Two Handed':'双手',
+        'Weapon':'武器',
         'Staff':'法杖',
         'Cloth Armor':'布甲',
         'Light Armor':'轻甲',
         'Heavy Armor':'重甲',
-        'Level':'装备等级',
+
+        'Condition:':'耐久:',
+        'Untradeable':'不可交易',
+        'Tradeable':'可交易',
+        'Level ':'等级 ',
+        'Soulbound':'灵魂绑定',
+        'Unassigned':'未确定',
+        'Potency Tier':'潜能等级',
+
+        'Ether Tap':'魔力回流',
+        'Bleeding Wound':'流血',
+        'Penetrated Armor':'破甲',
+        'Stunned':'眩晕',
+        'Siphon Spirit':'灵力吸取',
+        'Siphon Magic':'偷取魔力',
+        'Siphon Health':'生命吸取',
+        'Ether Theft':'魔力回流',
+        'Lasts for':'持续',
+        'chance - ':'几率 - ',
+        'turns':'回合',
+        'points':'点',
+        'drained':'吸取量',
+        'DOT':'持续伤害比例',
+
+        'Elemental Strike':'属性攻击',
+        'Fire Strike':'火焰冲击',
+        'Cold Strike':'冰霜冲击',
+        'Elec Strike':'闪电冲击',
+        'Wind Strike':'狂风冲击',
+        'Holy Strike':'神圣冲击',
+        'Dark Strike':'黑暗冲击',
+        'Void Strike':'虚空冲击',
+
+        'Damage Mitigations':'伤害减免',
+        'Fire ':'火焰 ',
+        'Cold ':'冰霜 ',
+        'Elec ':'闪电 ',
+        'Wind ':'狂风 ',
+        'Holy ':'神圣 ',
+        'Dark ':'黑暗 ',
+        'Void ':'虚空 ',
+        'Crushing':'敲击',
+        'Piercing':'穿刺',
+        'Slashing':'斩击',
+
         'Magic Crit Chance':'魔法暴击率',
         'Attack Crit Chance':'攻击暴击率',
         'Attack Accuracy':'物理命中',
         'Attack Critical':'物理暴击',
         'Attack Damage':'攻击伤害',
-        'Damage Mitigations':'伤害减免',
         'Parry Chance':'招架率',
         'Magic Damage':'魔法伤害',
         'Magic Critical':'魔法暴击',
@@ -615,83 +670,44 @@ function load(){
         'Physical Mitigation':'物理减伤',
         'Magical Mitigation':'魔法减伤',
         'Block Chance':'格挡率',
-        'Upgrades and Enchantments':'升级与附魔',
-        'Primary Attributes':'属性加成',
         'Evade Chance':'回避率',
         'Casting Speed':'施法速度',
         'Resist Chance':'抵抗率',
         'Spell Crit':'法术暴击',
         'Spell Damage':'法术伤害加成',
-        'Siphon Spirit':'灵力吸取',
-        'Siphon Magic':'偷取魔力',
-        'Siphon Health':'生命吸取',
-        'Ether Theft':'魔力回流',
-        'Penetrated Armor':'破甲',
         'Attack Crit Damage':'攻击爆击伤害',
         'Magic Accuracy':'魔法命中',
         'Counter-Parry':'反招架',
         'Attack Speed':'攻击速度',
         'Current Owner':'持有者',
-        'Ether Tap':'魔力回流',
-        'Elemental Strike':'属性攻击',
-        'Bleeding Wound':'流血',
-        'Lasts for':'持续',
-        'Coldproof':'抗寒',
-        'Darkproof':'驱暗',
-        'Elecproof':'绝缘',
-        'Fireproof':'耐热',
-        'Holyproof':'驱圣',
-        'Windproof':'防风',
-        'Condition':'耐久',
-        'Tradeable':'可交易',
-        'Untradeable':'不可交易',
-        'Soulbound':'灵魂绑定',
-        'Potency Tier':'潜能等级',
-        'Level':'装备等级',
         'Mitigation':'减伤',
         'Defense':'防御',
-        'Stunned':'眩晕',
-        'turns':'回合',
         'Burden':'负重',
         'Interference':'干涉',
-        'Burden':'负重',
+
+        'Proficiency':'熟练度加成',
+        '>Elemental ':'>元素 ',
+        'Divine':'神圣',
+        'Forbidden':'黑暗',
+        'Deprecating':'减益',
+        'Supportive':'增益',
+
+        'Primary Attributes':'属性加成',
         'Strength':'力量',
         'Dexterity':'灵巧',
         'Agility':'敏捷',
         'Endurance':'体质',
         'Intelligence':'智力',
         'Wisdom':'智慧',
-        'chance':'几率',
-        'Crushing':'敲击',
-        'Piercing':'穿刺',
-        'Slashing':'斩击',
-        'Damage':'伤害',
-        'Proficiency':'熟练度加成',
-        '>Elemental':'>元素',
-        'Divine':'神圣',
-        'Forbidden':'黑暗',
-        'Deprecating':'减益',
-        'Supportive':'增益',
-        'Fire Strike':'火焰冲击',
-        'Cold Strike':'冰霜冲击',
-        'Elec Strike':'闪电冲击',
-        'Wind Strike':'狂风冲击',
-        'Holy Strike':'神圣冲击',
-        'Dark Strike':'黑暗冲击',
-        'Void Strike':'虚空冲击',
-        'Void ':'虚空',
-        'points':'点',
-        'None':'无',
-        'turns':'回合',
-        'DOT':'持续伤害比例',
-        'None':'无',
 
-        //////////////////////////道具界属性
-        'Unassigned':'未确定',
+        'Upgrades and Enchantments':'强化与附魔',
+        'None':'无',
         'Physical':'物理',
         'Magical':'魔法',
+        'Damage':'伤害',
         'Hit Chance':'命中率',
         'Crit Chance':'暴击率',
+        'Bonus':'加成',
         'Capacitor':'魔力加成',
         'Juggernaut':'生命加成',
         'Butcher':'武器伤害加成',
@@ -704,6 +720,24 @@ function load(){
         'Penetrator':'反魔法抵抗',
         'Spellweaver':'高速咏唱',
         'Hollowforged':'虚空升华',
+
+        'Coldproof':'抗寒',
+        'Darkproof':'驱暗',
+        'Elecproof':'绝缘',
+        'Fireproof':'耐热',
+        'Holyproof':'驱圣',
+        'Windproof':'防风',
+
+        'Suffused Aether' : '弥漫的以太',
+        'Featherweight Charm' : '轻如鸿毛',
+        'Voidseeker\'s Blessing':'虚空探索者的祝福',
+
+        'Infused Flames':'火焰附魔',
+        'Infused Frost':'冰霜附魔',
+        'Infused Lightning':'雷电附魔',
+        'Infused Storms?':'风暴附魔',
+        'Infused Divinity':'神圣附魔',
+        'Infused Darkness':'黑暗附魔',
 
         ///////////////////////////////////////////武器种类
         // 单手武器类
@@ -723,8 +757,8 @@ function load(){
         //法杖
         'Staff':'法杖',
         //布甲
-        'Cap':'兜帽',
-        'Robe':'长袍',
+        'Cap ':'兜帽 ',
+        'Robe ':'长袍 ',
         'Gloves':'手套',
         'Pants':'短裤',
         'Shoes':'鞋',
@@ -750,19 +784,23 @@ function load(){
         'Kite Shield':'鸢盾',
         'Tower Shield':'塔盾',
         'Force Shield':'<span style=\"background:#ffa500\" >力场盾</span>',
+        'Shields?([^a-z])':'盾$1',
 
         ////////////////////////材质前缀////////////////////////
         //布甲
-        'Cotton ':'棉质</span><span style=\"background:#FFFFFF;color:#000000\" >(布)</span>',
+        'Cloth':'布',
+        'Cotton':'棉质</span><span style=\"background:#FFFFFF;color:#000000\" >(布)</span>',
         'Gossamer':'薄纱</span><span style=\"background:#FFFFFF;color:#000000\" >(布)</span>',
         'Silk' : '丝绸</span><span style=\"background:#FFFFFF;color:#000000\" >(布)</span>',
         'Phase':'<span style=\"background:#ffa500\" >相位</span><span style=\"background:#FFFFFF;color:#000000\" >(布)</span>',
         //轻甲
-        'Leather ':'皮革<span style=\"background:#666666;color:#FFFFFF\" >(轻)</span>',
+        '([^a-z])Light([^a-z])':'$1轻$2',
+        'Leather':'皮革<span style=\"background:#666666;color:#FFFFFF\" >(轻)</span>',
         'Kevlar':'凯夫拉<span style=\"background:#666666;color:#FFFFFF\" >(轻)</span>',
         'Dragon Hide' : '龙皮<span style=\"background:#666666;color:#FFFFFF\" >(轻)</span>',
         'Shade':'<span style=\"background:#ffa500\" >暗影</span><span style=\"background:#666666;color:#FFFFFF\" >(轻)</span>',
         //重甲
+        'Heavy':'重',
         'Chainmail' : '锁子甲<span style=\"background:#000000;color:#FFFFFF\" >(重)</span>',
         'Plate':'板甲<span style=\"background:#000000;color:#FFFFFF\" >(重)</span>',
         'Power':'<span style=\"background:#ffa500\" >动力</span><span style=\"background:#000000;color:#FFFFFF\" >(重)</span>',
@@ -779,25 +817,19 @@ function load(){
         'of the Arcanist':'奥术师',
         'of the Fleet':'迅捷之',
         'of the Fire-eater':'噬火者',
-        'Fire-eater':'噬火者',
         'of the Thunder-child':'雷之子',
         'of the Wind-waker':'风之杖',
+        'of the Frost-born':'冰人',
         'of the Spirit-ward':'灵魂护佑',
-        'Spirit-ward':'灵魂护佑',
+        'of the Thrice-blessed':'三重祝福',
         'of the Stone-skinned':'硬皮',
         'of Dampening':'抑制',
         'of Stoneskin':'石肤',
         'of Deflection':'偏转',
-        'of the Nimble':'灵敏',
-        'of Nimble':'灵敏',
-        'the Nimble':'灵敏',
-        'of the Barrier':'招架',
-        'of <b>the Barrier</b>':'<b>招架</b>',
-        'of <b>Protection</b>':'<b>物防</b>',
+        'of the Nimble':'招架',
+        'of the Barrier':'格挡',
         'of Protection':'物防',
         'of Warding':'魔防',
-        'of the Raccoon':'招架',
-        'of the Frost-born':'寒冰',
 
         'of the Ox' :  '牛（力量）',
         'of the Raccoon' :  '浣熊（灵巧）',
@@ -809,7 +841,6 @@ function load(){
         'of the Shielding Aura' :  '守护光环（魂抗）',
 
         ////////////////////////////////////////////////////武器后缀/////////////////////////////////
-        'of <b>Slaughter</b>':'<span style=\"background:#FF0000;color:#FFFFFF\" >杀戮</span>',
         'of Slaughter':'<span style=\"background:#FF0000;color:#FFFFFF\" >杀戮</span>',
         'of Swiftness':'加速',
         'of Balance':'平衡',
@@ -817,7 +848,6 @@ function load(){
         'of the Banshee':'女妖',
         'of the Illithid':'汲灵',
         'of the Vampire':'吸血鬼',
-        'of <b>Destruction</b>':'<span style=\"background:#9400d3;color:#FFFFFF\" >毁灭</span>',
         'of Destruction':'<span style=\"background:#9400d3;color:#FFFFFF\" >毁灭</span>',
         'of Surtr':'<span style=\"background:#f97c7c\" >苏尔特（火伤）</span>',
         'of Niflheim':'<span style=\"background:#94c2f5\" >尼芙菲姆（冰伤）</span>',
@@ -825,10 +855,6 @@ function load(){
         'of Freyr':'<span style=\"background:#7ff97c\" >弗瑞尔（风伤）</span>',
         'of Heimdall':'<span style=\"background:#ffffff\;color:#000000\" >海姆达（圣伤）</span>',
         'of Fenrir':'<span style=\"background:#000000\;color:#ffffff" >芬里尔（暗伤）</span>',
-        'of <b>Focus</b>':'<b>专注</b>',
-        'of <b>the Elementalist</b>':'<b>元素使</b>',
-        'of <b>the Heaven-sent</b>':'<b>天堂</b>',
-        'of <b>the Demon-fiend</b>':'<b>恶魔</b>',
         'of Focus':'专注',
         'of the Elementalist':'元素使',
         'of the Heaven-sent':'天堂',
@@ -836,7 +862,6 @@ function load(){
         'of the Earth-walker':'地行者',
         'of the Priestess':'牧师',
         'of the Curse-weaver':'咒术师',
-        'of the Thrice-blessed':'三重祝福',
 
         ///////////////武器或者防具属性/////////////////
         'Radiant':'<span style=\"background:#ffffff\;color:#000000" >✪魔光✪</span>',
@@ -862,11 +887,11 @@ function load(){
         'Demonic':'<span style=\"background:#000000\;color:#ffffff" >恶魔之</span>',
         'Ethereal':'<span style=\"background:#ffffff\;color:#5c5a5a" >虚空之</span>',
 
-        'Bronze' : '铜',
-        'Iron' : '铁',
-        'Silver' : '银',
-        'Steel' : '钢',
-        'Gold' : '金',
+        'Bronze ' : '铜 ',
+        'Iron ' : '铁 ',
+        'Silver ' : '银 ',
+        'Steel ' : '钢 ',
+        'Gold ' : '金 ',
         'Platinum' : '白金',
         'Titanium' : '钛',
         'Emerald' : '祖母绿',
@@ -878,16 +903,27 @@ function load(){
         'tipped' : '前端',
         'Astral' : '五芒星',
         'Quintessential' : '第五元素',
+
         /////////////////品质//////////
-        'Flimsy' : '薄弱',
-        'Crude':'<span style=\"background:#acacac\" >劣质</span>',
-        'Fair':'<span style=\"background:#c1c1c1\" >一般</span>',
-        'Average':'<span style=\"background:#dfdfdf\" >中等</span>',
-        'Superior':'<span style=\"background:#fbf9f9\" >上等</span>',
-        'Fine':'<span style=\"background:#b9ffb9\" >优质</span>',
+        'Flimsy ' : '薄弱 ',
+        'Crude ':'<span style=\"background:#acacac\" >劣质</span> ',
+        'Fair ':'<span style=\"background:#c1c1c1\" >一般</span> ',
+        'Average ':'<span style=\"background:#dfdfdf\" >中等</span> ',
+        'Superior ':'<span style=\"background:#fbf9f9\" >上等</span> ',
+        'Fine ':'<span style=\"background:#b9ffb9\" >优质</span> ',
         'Exquisite':'<span style=\"background:#d7e698\" >✧精良✧</span>',
         'Magnificent':'<span style=\"background:#a6daf6\" >☆史诗☆</span>',
         'Legendary':'<span style=\"background:#ffbbff\" >✪传奇✪</span>',
         'P(<[^<]+>\\s*)*e(<[^<]+>\\s*)*e(<[^<]+>\\s*)*r(<[^<]+>\\s*)*l(<[^<]+>\\s*)*e(<[^<]+>\\s*)*s(<[^<]+>\\s*)*s':'<span style=\"background:#ffd760\" >☯无双☯</span>',
+
+        /////////////////装备部位//////////
+        'Empty':'空',
+        'Main Hand':'主手',
+        'Off Hand':'副手',
+        'Helmet':'头盔',
+        'Body':'身体',
+        'Hands':'手部',
+        'Legs([^a-z])':'腿部$1',
+        'Feet([^a-z])':'脚部$1',
     };
 }

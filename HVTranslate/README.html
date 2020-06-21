@@ -40,25 +40,23 @@ td, h1, h2, h3, h4, h5, p, ul, ol, li {
     <p>
       <strong>本文件夹下脚本在HV 0.86版本下修改测试，不保证后续版本可用</strong>
     </p>
-    <h3 id="hv-v2020.05.24">HV 装备物品汉化 v2020.05.24 <a href="https://github.com/indefined/UserScripts/raw/master/HVTranslate/HV%20%E7%89%A9%E5%93%81%E8%A3%85%E5%A4%87%E6%B1%89%E5%8C%96.user.js">点击此处安装</a></h3>
+    <h3 id="hv-v2020.06.07">HV 装备物品汉化 v2020.06.07 <a href="https://github.com/indefined/UserScripts/raw/master/HVTranslate/HV%20%E7%89%A9%E5%93%81%E8%A3%85%E5%A4%87%E6%B1%89%E5%8C%96.user.js">点击此处安装</a></h3>
     <ul>
       <li>原贴吧<strong>物品汉化</strong>脚本，汉化物品、装备界面及论坛，带装备高亮/装备店隐藏锁定装备，会直接替换网页源码所以可能导致其它脚本冲突</li>
       <li>本脚本大致最初由 <a href="https://greasyfork.org/scripts/25986">ggxxsol</a> 创建，后由贴吧 <a href="https://tieba.baidu.com/p/4849863522">mbbdzz</a> 修改补充</li>
-      <li>内容由indefined大规模重构，优化了执行效率，去除了所有语法错误，增加了代码的可读性和可扩展性</li>
-      <li>重新添加实现翻译/原文切换功能，注意切换回原文可能会有意想不到的问题发生，同时使用其它脚本时切换会使大部分其它脚本功能失效</li>
-      <li>原则上没有修改其它脚本功能（指贴吧修改过后的版本），但由于重构规模较大，或许哪里会搞错了什么</li>
+      <li>由 <a href="https://github.com/indefined/UserScripts/tree/master/HVTranslate">indefined</a> 大规模重构，重新添加实现翻译/原文切换功能，提高了兼容性，但失去原脚本的后缀语序倒转功能和装备列表部分弹窗说明汉化</li>
       <li>如有同时使用其它汉化，需要先于其它汉化脚本运行才会生效</li>
-      <li>如与HVtoolBox同时使用，将脚本运行顺序置于HVtoolBox之前，如与其它脚本同时使用冲突，也可尝试调整脚本运行顺序，但不保证兼容</li>
-      <li>目前此脚本仅设置在装备仓库和装备商店及论坛启用（本脚本和其它脚本冲突概率较大，且其它汉化在下一个汉化脚本中全部包含）</li>
-      <li>如果有需要在其它页面使用参考后面脚本管理示例添加用户包含/匹配，或者自行添加排除不需要运行的网址</li>
+      <li>与HVtoolBox在大部分装备装备列表冲突会失去装备高亮功能；在物品仓库中会导致HVtoolBox部分物品功能无效；与Live Percentile Ranges在装备详情页冲突</li>
+      <li>如与其它脚本同时使用冲突，可尝试调整脚本运行顺序，但无法保证完全兼容</li>
+      <li>默认只在物品列表、装备店、论坛启用（其它页面汉化易冲突可使用下一个汉化脚本代替）</li>
+      <li>如果需要启用其它装备物品位置的汉化或者关闭某些页面的汉化可以参考后面脚本管理示例添加用户包含或者用户排除</li>
       <li>如果你要在论坛买东西，挑好东西之后最好切换回原文再复制内容，因为别人并不一定看得懂经过翻译过后的东西</li>
     </ul>
-    <h3 id="hentaiverse-v2020.05.24">Hentaiverse汉化 v2020.05.24 <a href="https://github.com/indefined/UserScripts/raw/master/HVTranslate/HentaiVerse%E6%B1%89%E5%8C%96.user.js">点击此处安装</a></h3>
+    <h3 id="hentaiverse-v2020.06.14">Hentaiverse汉化 v2020.06.14 <a href="https://github.com/indefined/UserScripts/raw/master/HVTranslate/HentaiVerse%E6%B1%89%E5%8C%96.user.js">点击此处安装</a></h3>
     <ul>
-      <li>原贴吧<strong>HV界面和其它汉化</strong>脚本，现除了战斗界面和未知的地方之外，应该达成了对整个HV的完全汉化，包括装备/物品/技能悬浮窗内的内容。</li>
+      <li>原贴吧<strong>HV界面和其它汉化</strong>脚本，现除了战斗界面和未知的地方之外，应该达成了对整个HV的完全汉化</li>
       <li>本脚本大致最初由 <a href="https://greasyfork.org/scripts/9680">ggxxsol</a> 创建，后由 <a href="https://greasyfork.org/zh-CN/scripts/2120">NeedXuyao</a> 和贴吧 <a href="https://tieba.baidu.com/p/4849863522">mbbdzz</a> 修改整合补充</li>
-      <li>indefined修改内容
-<ul><li>添加装备/物品/技能悬浮窗监听汉化实现，整合装备物品汉化说明，增加技能说明汉化</li><li>增加原文切换功能，对多数脚本兼容性较好（在基础功能兼容的前提下），但是仍可能有部分冲突</li><li>补充修复其它不和谐的翻译内容，当然因为文本量大难以全覆盖测试，错漏的地方肯定是会有的</li></ul></li>
+      <li>由 <a href="https://github.com/indefined/UserScripts/tree/master/HVTranslate">indefined</a> 添加装备/物品/技能悬浮窗汉化功能的实现及翻译，添加原文切换功能</li>
       <li>除了没有装备高亮和不能在论坛使用之外，本脚本完全包含上一个脚本所有汉化内容，可单独使用，与其它脚本的兼容性比上一个脚本高</li>
       <li>如与Live Percentile Ranges同时使用，将脚本运行顺序置于Live Percentile Ranges之后</li>
       <li>如有其它脚本共同运行冲突也可尝试调整脚本运行顺序，但无法保证全部兼容</li>

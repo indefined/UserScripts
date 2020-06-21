@@ -3,15 +3,15 @@
 // @namespace      hentaiverse.org
 // @author         ggxxsol & NeedXuyao & mbbdzz & indefined & etc.
 // @icon           https://e-hentai.org/favicon.ico
-// @description    整合HV装备物品、界面和其他部分的汉化，带原文切换功能
-// @notice         必须在Hentaiverse主菜单 CHARACTER→SETTINGS 勾选自定义字体(Use Custom Font)并在之后一行文本框中填上任意字体名称，拉到最下面Apply Changes才会生效
+// @description    基本完全汉化除了战斗界面之外整个Hentaiverse文本，包括装备物品、界面说明和弹窗提示的汉化，带原文切换功能
+// @notice         完整功能需要在Hentaiverse主菜单 CHARACTER→SETTINGS 勾选自定义字体(Use Custom Font)并在下一行文本框中填上任意字体名称，拉到最下面点击Apply Changes
+// @notice         和HVToolBox在物品仓库中有概率冲突，汉化过后部分物品HVToolBox的复选框无法工作且无法切换回原文
 // @notice         如与Live Percentile Ranges同时使用，将脚本运行顺序置于Live Percentile Ranges之后
-// @notice         如有其它脚本共同运行冲突也可尝试调整脚本运行顺序，但无法保证兼容
-// @notice         切换原文可能和其它脚本的功能产生冲突，比如同时使用HVToolBox时在物品商店和仓库中仓库栏物品将无法切回原文，因为该栏内容已经被HVToolBox修改过
+// @notice         如有其它脚本共同运行冲突也可尝试调整脚本运行顺序，但无法保证完全兼容
 // @include        *://hentaiverse.org/*
 // @include        *://alt.hentaiverse.org/*
 // @core           http://userscripts-mirror.org/scripts/show/41369
-// @version        2020.05.24
+// @version        2020.06.14
 // @grant none
 // ==/UserScript==
 (function () {
@@ -146,7 +146,7 @@
         'slashing' : '斩击',
         'health points' : '体力值',
         'magic points' : '魔法值',
-        'magic regen per tick' : '魔法恢复率/分',
+        'magic regen per tick' : '魔力恢复率/分',
         'spirit points' : '灵力值',
         'spirit regen per tick' : '灵力恢复率/分',
         'physical mitigation' : '物理减伤',
@@ -197,7 +197,7 @@
         '附魔ments' : '附魔',
         'Weapon' : '武器',
         '装备强化s and 装备附魔' : '装备强化与附魔',
-        '可用装备强化s' : '可用装备强化',
+        'Available 装备强化s' : '可用装备强化',
         'Show 装备强化s ' : 'Show Upgrades',
         'Show 装备附魔' : 'Show Enchantments',
         '装备重铸 Item' : 'Reforge Item',
@@ -327,6 +327,8 @@
         'Sent Mail' : '已发送邮件',
         'Subject' : '主题',
         'Sent' : '发送时间',
+        '< Prev' : '< 上一页',
+        'Next >' : '下一页 >',
         '/^Read$/' : '被阅读时间',
         'No New Mail' : '没有新邮件',
         'Welcome to MoogleMail. A Moogle approach to email.' : '欢迎来到莫古邮箱，这个邮箱可以发送e-mail',
@@ -339,12 +341,14 @@
         'You can optionally request payment for messages with attachments with the Credits on Delivery (货到付款金额（CoD）) setting after attaching at least one item. The receipient will have to pay the specified number of credits in order to remove the attachments from your message. To prevent misuse, a small fee is required to use this function unless you have the Postage Paid perk.' : '你可以为这些附件添加CoD（货到付款）功能。当然，至少要有一份附件以上的邮件才可以添加货到付款功能，货到付款功能会令收件人付出制定的金额后才能提取附件，为了防止滥用，这个功能每次会收取少量费用，除非你购买了hath能力“邮资已付”。',
         'Until the 货到付款金额（CoD） has been paid, the sender and the recipient can both choose to return the message. ' : '除非货到付款已经被收件人支付，否则发件人与收件人可以在任意时刻撤回或者拒收CoD邮件',
         'This allows the recepient to reject an unwanted message, and allows you to recover your items if the recipient does not accept it within a reasonable time.' : '这可以防止发出的邮件长时间得不到回应或者收到了不合理的CoD邮件的问题。',
-        'Note that unsent drafts will be deleted after one month, and sent messages will be deleted after one year. Any remaining attachments for a deleted message will be permanently lost.' : '请注意，邮件草稿将于1个月内自动删除，已发送的邮件在保留1年后也会自动删除，如果被删除的邮件里仍有未提取的附件，这将无法恢复。',
+        'Note that unsent drafts will be deleted after one month, and sent messages will be deleted after one year. Any remaining attachments for a deleted message will be permanently lost.' : '请注意，邮件草稿将于1个月内自动删除，已发送的邮件在保留1年后也会自动删除，如果被删除的邮件里仍有未提取的附件，它将永久丢失。',
         'According to your prices, COD should be' : '根据你的设置，本邮件的货到付款金额（CoD）为',
         'Current Funds:' : '目前拥有：',
         'Attach 装备' : '选择附件',
         'items attached' : '道具已选择',
         'Requested Payment on Delivery' : '货到付款设置',
+        'Your message has been discarded.' : '你的邮件信息已被丢弃。',
+        'Any attachments have been returned.' : '邮件中附带的附件已归还仓库。',
         'Your message has been sent.' : '邮件已发送',
         '/^To:?$/' : '收件人',
         '/^From:?$/' : '寄件人',
@@ -363,6 +367,7 @@
         '/^Collectable$/': '收藏品',
         '/^Monster Food$/': '怪物食物',
         '': '',
+        '/^All$/' : '全部',
         '/^Restoratives$/' : '回复品',
         '/^Infusions$/' : '魔药',
         '/^Scrolls$/' : '卷轴',
@@ -380,7 +385,6 @@
         'Spirit Potion' : '灵力药水',
         'Spirit Draught' : '灵力长效药',
         'Spirit Elixir' : '终极灵力药',
-        'Monster Chow' : '怪物饲料',
         'Last Elixir' : '终极秘药',
         'Energy Drink' : '能量饮料',
         'Soul Stone' : '灵魂石',
@@ -453,6 +457,7 @@
         'Crystal of Corruption' : '暗黑水晶',
         'Crystal of Quintessence' : '灵魂水晶',
 
+        'Monster Chow' : '怪物饲料',
         'Monster Edibles' : '怪物食品',
         'Monster Cuisine' : '怪物料理',
         'Happy Pills' : '快乐药丸',
@@ -712,7 +717,7 @@
         '' : '',
         'Select an equipment piece from the list to the left' : '从左侧列表选择一件装备',
         'then hit' : '然后点击',
-        'hit Repair ' : '点击下方的Repair Item按钮',
+        '然后点击 装备修理 ' : '点击下方的Repair Item按钮',
         'Item below to repair it' : '对装备进行修理或者点击Repair All修理左侧列表所有装备',
         'Requires:' : '需求:',
         'All equipment have a condition and a durability' : '所有装备都有耐久度的设定',
@@ -729,8 +734,8 @@
         'Forge 装备强化 Level' : '锻造等级',
         'Rank' : '评价',
         '物理 Damage' : '物理伤害',
-        'Hover over an upgrade to get a list of necessary' : '鼠标停留在升级项目上以查看升级需要的',
-        'to perform it.' : ' ',
+        'Hover over an upgrade to get a list of necessary' : '鼠标停留在升级项目上以查看升级需要的材料',
+        'Materials to perform it.' : ' ',
         'Effect:' : '效果:',
         'Base' : '基础',
         'Grants' : '获得',
@@ -758,12 +763,14 @@
         'below to permanently bind it to you. This will make it level as you do.' : '进行灵魂绑定 灵魂绑定一件装备后，这件装备会随你一起成长',
         'There is no way to break this bond outside of salvaging the item.' : '灵魂绑定无法被取消，除非你将装备分解',
         'below to reforge it.' : '进行装备重铸',
+        '/Fusing with the selected item will cost (\\d+) fragments\./' : '灵魂绑定所选装备需要 $1 个灵魂碎片',
         'Reforging an item will reset its potential to zero' : '装备重铸会将装备的潜能等级重置为0级',
         'which removes all of its unlocked potencies.' : '，同时清空装备的潜在能力',
         'you to start over and take another shot' : '你重新去装备界',
         'the item in the 道具界(Item World).' : '以取得你想要的潜在能力',
         'This costs one' : '根据装备的潜能等级，消耗等同于装备的潜能等级的',
         'unlocked potential' : '用于重铸',
+        '/Reforging the selected item will cost (\\d+) shards./' : '重铸所选装备需要消耗 $1 个重铸碎片。',
         'at getting your desired potencies from upgrading' : '升级你的装备',
         'permanently destroy the item in question.' : '这件装备',
         'The amount of scrap required to repair an item depends on its percentage-wise degradation' : '修复装备所需的材料取决于它的耐久消耗度',
@@ -939,7 +946,7 @@
         'Choose number to buy' : '输入购买数量',
         '/You hold ([\\d,]+) of/' : '你拥有 $1 /',
         'sold tickets' : '张已售出的彩票',
-        'Stock:' : '库存',
+        'Stock:' : '库存：',
         'Soul Fragment' : '灵魂碎片',
         'Blood Token' : '鲜血令牌',
         'Token of Blood' : '鲜血令牌',
@@ -1125,9 +1132,10 @@
         '/^Element$/' : '元素抗性',
         'Other stats' : '其他属性加成',
         'Powerlevel' : '战斗力',
-        'chow' : '饲料',
-        'edibles' : '食品',
-        'cuisine' : '料理',
+        'Happy Pill' : '快乐药丸',
+        '/Chows?/' : '饲料',
+        '/Edibles?/' : '食品',
+        '/Cuisines?/' : '料理',
         'Feed Tier' : '需喂食食品',
         'Scavenging' : '寻宝',
         'Fortitude' : '刚毅',
@@ -1159,6 +1167,8 @@
         '/^Damage$/' : '伤害类型',
         'Magical' : '魔法',
         'Physical' : '物理',
+        '/^Power$/' : '伤害',
+        '/^Cost$/' : '消耗',
         'Required Feed:' : '需求食物:',
         'Battles Won' : '战斗胜利次数',
         'Killing Blows' : '怪物击杀数',
@@ -1198,6 +1208,7 @@
         '(Future) 装备强化 paths and specializations' : '升级路线和特殊技能（未实装）',
         'Choose Melee Damage Type' : '选择近战伤害类型',
         'Chaos Upgrade' : '混沌强化',
+        '装备强化 Wi 日' : '升级需要',
         '空 Slot' : '空槽位',
         '- Click To Create' : '- 点击来创建一个怪物',
         'Gift Factor' : '送礼概率倍率',
@@ -1289,7 +1300,7 @@
         'Welcome to the Grindfest.' : '欢迎来到压榨界',
         'A Grindfest consists of up to ' : '压榨界包含',
         ' rounds of battle.' : '场连续且难度递增的战斗',
-        'Starting a Grindfest will consume 1 point of Stamina.' : '进入压榨界战斗会消耗1点体力',
+        'Starting a Grindfest will consume 1 point of Stamina.' : '进入压榨界战斗会消耗1点精力',
         'There is a small credit reward at the end,' : '完成全部的压榨界战斗',
         'if you make it all the way through.' : '可以获得5000C的奖励',
         'Welcome to the Portal to the 道具界(Item World).' : '欢迎来到道具界的传送门',
@@ -1410,7 +1421,7 @@
         'Mithril' : '秘银的（低重）',
         'Agile' : '俊敏的（加速）',
         'Zircon' : '锆石的（圣抗）',
-        'Frugal' : '节约的（节约）',
+        'Frugal' : '节约的（省魔）',
         'Jade' : '翡翠的（风抗）',
         'Cobalt' : '冰蓝的（冰抗）',
         'Ruby' : '红宝石（火抗）',
@@ -1418,11 +1429,11 @@
         'Savage' : '残暴的（暴伤）',
         'Shielding' : '盾化的（格挡）',
         //旧版前缀
-        'Bronze' : '铜',
-        'Iron' : '铁',
-        'Silver' : '银',
-        'Steel' : '钢',
-        'Gold' : '金',
+        'Bronze ' : '铜 ',
+        'Iron ' : '铁 ',
+        'Silver ' : '银 ',
+        'Steel ' : '钢 ',
+        'Gold ' : '金 ',
         'Platinum' : '白金',
         'Titanium' : '钛',
         'Emerald' : '祖母绿',
@@ -1520,7 +1531,7 @@
         'Crushing Damage' : '锤击伤害',
         'Piercing Damage' : '刺击伤害',
         'Slashing Damage' : '斩击伤害',
-        '(void)' : '（虚空冲击）',
+        'void' : '虚空',
         'Cold Strike' : '寒冰冲击',
         'Dark Strike' : '黑暗冲击',
         'Elec Strike' : '闪电冲击',
@@ -1560,7 +1571,8 @@
         'Counter-抵抗率' : '反抵抗率',
         '魔法 Crit' : '魔法暴击',
         '魔法 Damage' : '魔法伤害',
-        'Level Unassigned' : '等级 未确定',
+        'Level' : '等级',
+        'Unassigned' : '未确定',
         '布甲 Armor' : '布甲',
         '重甲 Armor' : '重甲',
         'Light Armor' : '轻甲',
@@ -1695,6 +1707,8 @@
 
         '' : '',
     ///////////////////////////////////////////////////////红字提示
+        'Name contains invalid characters.' : '名字包含不支持字符(仅支持英文和数字)',
+        '/Name must be between (\\d+) and (\\d+) characters\./' : '名字长度需要在$1至$2个字符之间',
         'Armor Damage' : '护甲受损',
         'Equipment is too high level to equip.' : '你的等级不足以装备这件装备',
         'This will permanently destroy the item': '此操作将会永久摧毁装备（其实分解24小时内可以在商店里买回，但是价格是10倍分解价或者至少10K，且装备会变成不可交易）',
@@ -1704,19 +1718,27 @@
         'Insufficient items.' : '道具不足',
         'You cannot enter the same arena twice in one day.' : '同一竞技场一天只能进入一次',
         'Weapon Damage' : '武器损坏',
+        'weapons damage' : '武器损坏',
         'Cannot reforge level zero items' : '不能重铸没有潜能等级的装备',
         'Cannot salvage locked or equipped items' : '不能分解上锁的装备',
         'Insufficient soul fragments.' : '灵魂断片不足',
-        'weapons damage' : '武器损坏',
+        'Cannot slot item - no free spaces.' : '无法携带物品，没有空余的物品槽。',
         'There are no items of that type available.' : '购买的物品库存不足',
         'The selected item does not have any potencies' : '选中的装备没有潜能等级',
         'You must at minimum specify a recipient and subject, kupo!' : '你必须至少设定一个收件人和主题！',
-        'Messaging yourself must be the ultimate form of social withdrawal, kupo! Seek help, kupo!' : '给自己发电子邮件是社交退缩的终极形式哦！',
+        'Messaging yourself must be the ultimate form of social withdrawal, kupo! Seek help, kupo!' : '给自己发邮件是社交退缩的终极形式哦！去找些别的乐子吧！',
+        'Invalid or missing recipient, kupo!' : '收件人不存在！',
         'Cannot equip the same item in two slots.' : '不能把相同的道具同时装备在主手与副手上',
+        'Name is too long (max 50 chars)' : '名字太长（最大50个字符，仅支持字母和数字和非特殊字符)',
         '装备 not found, kupo!' : '装备不存在！',
         'Item not found' : '物品不存在',
         '装备修理 armor' : '装备需要修理',
         'Snowflake and the moogles are relaxing on the beach. Check back later.' : '系统维护中，请稍后再来',
+        'Insufficient happy pills' : '快乐药丸不足',
+        'Insufficient 怪物饲料' : '怪物饲料不足',
+        'Insufficient 怪物食品' : '怪物食品不足',
+        'Insufficient 怪物料理' : '怪物料理不足',
+        'At full morale' : '情绪已满',
         'At full hunger' : '饥饿度已满',
         '' : '',
         'No such item' : '物品不存在',
@@ -1726,6 +1748,8 @@
         'given ability' : '适合该技能',
         '' : '',
         '' : '',
+        'Cannot opt out without buying a ticket first' : '你必须至少购买一张彩票才能决定不参与头奖争夺',
+        'No golden tickets to spend' : '你没有黄金彩票可以使用',
         '' : '',
         '' : '',
         '' : '',
@@ -1798,12 +1822,12 @@
         'fighting style' : '战斗风格时',
         'Proficiency-based Stat Modification' : '依照熟练度改变能力值',
         'For every ten points of' : '每10点',
-        'Proficiency, adds' : '熟练 增加',
+        'Proficiency, adds' : '熟练 获得',
         'Attack 基础 Damage' : '基础物理伤害',
         'Magic 基础 Damage' : '基础魔法伤害',
         'Attack Crit Chance' : '物理暴击几率',
         'Attack Accuracy' : '物理命中率',
-        'Cast Speed' : '咏唱速度',
+        'Magic Cast Speed' : '法术 咏唱速度',
         '' : '',
         '' : '',
         '' : '',
@@ -1947,7 +1971,9 @@
         ' or ' : ' 或者 ',
         ' of ' : ' ',
         '/ of$/' : '',
+        '/^[oO]f /' : '',
         ' the ' : ' ',
+        '/^The /' : '',
         '/ the$/i' : '',
         '' : '',
         '' : '',
@@ -1957,6 +1983,43 @@
 
 
 
+
+    var alertWords = {
+        //弹窗提示信息字典，全部以正则表达式书写，原文所有 . ? 转义为 \\. \\?
+        //本字典为弹窗提示专用，除了带有确认按钮的弹窗信息之外，其它文本翻译全部使用上面的字典
+        'Server communication failed: ' : '服务器通讯错误：',
+        'Are you sure you wish to purchase ([\\d,]+) equipment pieces? for ([\\d,]+) credits\\?' : '是否确认以 $2 Credits的价格购买 $1 件装备',
+        'Are you sure you wish to sell ([\\d,]+) equipment pieces? for ([\\d,]+) credits\\?' : '是否确认以 $2 Credits的价格出售 $1 件装备',
+        'Are you sure you wish to purchase ([\\d,]+) (.+) for ([\\d,]+) credits \\?' : '是否确认以 $3 Credits的价格购买 $1 件 $2',
+        'Are you sure you wish to sell ([\\d,]+) (.+) for ([\\d,]+) credits \\?' : '是否确认以 $3 Credits的价格出售 $1 件 $2',
+        'No item selected' : '没有选中物品',
+        'Are you sure you wish to offer Snowflake a ' : '是否确认向雪花女神献祭一个 ',
+        'You have attached ([\\d,]+) items?, and the CoD is set to ([\\d,]+) credits, kupo!' : '你在邮件中附加了 $1 个附件，并且设置了 $2 Credits的货到付款(CoD)，注意！',
+        'You have attached ([\\d,]+) items?, but you have not set a CoD, kupo! The attachments will be a gift, kupo!' : '你在邮件中附加了 $1 个附件，但是没有设置货到付款(CoD)，注意！你的附件将会被认为是礼物免费送出！',
+        'Sending it will cost you ([\\d,]+) credits, kupo!' : '发送本邮件将会收取你 $1 Credits 的费用！注意！',
+        'Are you sure you wish to send this message, kupo\\?' : '是否确认发送本邮件？',
+        'Are you sure you wish to discard this message, kupo\\?' : '是否确认丢弃本邮件信息？注意！',
+        'Removing the attachments will deduct ([\\d,]+) Credits from your account, kupo! Are you sure\\?' : '领取本邮件附件将会收取你 $1 Credits 货到付款(CoD)费用，是否确认？注意！',
+        'This will return the message to the sender, kupo! Are you sure\\?' : '此操作将会把邮件退还给发件人，是否确认？注意！',
+
+        'Enter a new name for this persona\\.' : '请输入一个新的用户名（1~20字符，仅支持英文和数字）',
+        'Are you sure you wish to create a new persona with the same attribute, slot, equipment and ability assignments as "(.+)"\\? This action is irreversible, and created personas cannot be deleted\\.' : '是否确认创建一个和 $1 相同属性、装备、技能的人格角色？注意此操作不可撤销且创建的角色无法删除！',
+        'Are you sure you wish to create a blank persona\\? This action is irreversible, and created personas cannot be deleted\\.' : '是否确认创建一个全新的人格角色？请注意此操作无法撤销且创建的角色无法删除！',
+        'Reseting this ability will cost ([\\d,]+) soul fragments?\\. Proceed\\?' : '重置该技能将消耗 $1 个灵魂碎片，是否执行？',
+        'Reseting this ability is free this time\\. Proceed\\?' : '本次重置技能免费(总计达到10次之后将消耗灵魂碎片)，是否执行？',
+        'This will reset ALL mastery and ability point assignments at a cost of ([\\d,]+) soul fragments?\\. Proceed\\?' : '此操作将重置所有技能点和已投放的精通点，本次重置将消耗 $1 个灵魂碎片。是否执行？',
+        'This will reset ALL mastery and ability point assignments\\. This time it is free\\. Proceed\\?' : '此操作将重置所有技能点和已投放的精通点，本次重置免费(下一次全部重置将消耗灵魂碎片)。是否执行？',
+        'Enter a new name for this monster\\.' : '请输入怪物的新名称（3~30字符，仅支持英文和数字）',
+        'Are you sure you wish to delete the monster (.+)?\\? This action cannot be reversed\\.' : '是否确认删除怪物 $1 ？ 此操作无法撤销！',
+        'Are you sure you wish to opt out of the grand prize drawing on this lottery\\? This is not reversible\\.' : '是否确认放弃本次彩票的头奖？此操作无法撤销',
+        'Are you sure you wish to start this Arena Challenge\\?' : '是否确认进入竞技场挑战？',
+        'Are you sure you wish to spend ([\\d,]+) tokens? to start this Arena Challenge\\?' : '是否确认消耗 $1 个令牌进入战场？',
+        'Are you sure you wish to enter the Ring of Blood\\?' : '是否确认进入浴血擂台挑战？',
+        'Are you sure you wish to spend ([\\d,]+) tokens? to enter the Ring of Blood\\?' : '是否消耗 $1 个鲜血令牌确认进入浴血擂台挑战？',
+        'Enter a name for this equipment.' : '请输入装备名称（最大50个字符，仅支持字母和数字和非特殊字符)',
+
+        'Are you sure you want to soulfuse this item\\? This will bind it to your level, but makes it untradeable\\.' : '是否确认灵魂绑定所选装备？该装备将会跟随你的等级成长并且变成不可交易。',
+    };
 
 
 
@@ -2014,38 +2077,6 @@
         }
     }
 
-    var list = [];
-    var translate = true;
-    var change;
-
-    function restore() {
-        for(var i of list) {
-            var temp = i.item.data;
-            i.item.data = i.data;
-            i.data = temp;
-        }
-        translate = !translate;
-        change.innerHTML = translate?'英':'中';
-    }
-    function initRestore() {
-        document.addEventListener('keydown',(ev)=>{
-            if(ev.altKey&&(ev.key=='a'||ev.key=='A')) {
-                restore();
-            }
-        });
-        if(change=document.getElementById('change-translate')) {
-            return change.addEventListener('click',restore);
-        }
-        change = document.createElement('div');
-        change.innerHTML = "英";
-        change.title = '点击切换翻译';
-        change.id = 'change-translate';
-        change.addEventListener('click',restore);
-        change.style.cssText = "cursor:pointer;z-index:1000;font-size: 16px;position:fixed; top:200px; left:0px; color: white;background : black";
-        document.body.appendChild(change);
-    }
-    initRestore();
-
     // function to do the replacement for xpath element
     function replace(xpath) {
         texts = document.evaluate(xpath, document, null, 6, null);
@@ -2063,15 +2094,77 @@
             }
         }
     }
+
+    //原文切换功能所需变量
+    var list = [], translated = true, changer;
+
+    //翻译网页全文
     replace('//body//text()[ normalize-space(.) != "" ]');
+
+    //监听需要的网页变化并对其内容进行翻译
     const mo = new MutationObserver((mutations,observer) => {
-        if(!translate) return;
+        if(!translated) return;
         if(mutations[0].target.style.visibility!='hidden') {
             replace(`//div[@id='${mutations[0].target.id}']//text()[ normalize-space(.) != "" ]`);
         }
     });
-    ['popup_box','ability_info'].forEach(id=>{
+    ['popup_box','ability_info','upgrade_text','forge_cost_div'].forEach(id=>{
         const box = document.getElementById(id);
-        if(box) mo.observe(box, {attributes:true,attributeFilter:['style']});
+        if(box) mo.observe(box, {childList:true});
     });
+
+
+    //原文切换功能
+    function restore() {
+        for(var i of list) {
+            var temp = i.item.data;
+            i.item.data = i.data;
+            i.data = temp;
+        }
+        translated = !translated;
+        changer.innerHTML = translated?'英':'中';
+    }
+    //初始化原文切换按钮
+    function initRestore() {
+        document.addEventListener('keydown',(ev)=>{
+            if(ev.altKey&&(ev.key=='a'||ev.key=='A')) {
+                restore();
+            }
+        });
+        if(changer=document.getElementById('change-translate')) {
+            return changer.addEventListener('click',restore);
+        }
+        changer = document.createElement('div');
+        changer.innerHTML = "英";
+        changer.title = '点击切换翻译';
+        changer.id = 'change-translate';
+        changer.addEventListener('click',restore);
+        changer.style.cssText = "cursor:pointer;z-index:1000;font-size: 16px;position:fixed; top:200px; left:0px; color: white;background : black";
+        document.body.appendChild(changer);
+    }
+    initRestore();
+
+
+    //翻译弹窗提示文本，采用独立的字典和独立的翻译方法，功能比较简单字典需要全部手工处理正则转义
+    var alertReg = {};
+    function translateAlert(txt) {
+        if (translated) {
+            for (var i in alertReg) {
+                txt = txt.replace(alertReg[i],i);
+            }
+        }
+        return txt;
+    }
+    //挟持浏览器弹窗方法并在弹窗之前先翻译文本
+    function hookAlertTranslate() {
+        var alertBk = window.alert, promptBk = window.prompt, confirmBk = window.confirm;
+        for (var i in alertWords) {
+            alertReg[alertWords[i]] = new RegExp(i);
+        }
+        window.alert = function(txt) {alertBk(translateAlert(txt))}
+        window.prompt = function(txt,value) {return promptBk(translateAlert(txt),value)}
+        window.confirm = function(txt) {return confirmBk(translateAlert(txt))}
+    }
+    hookAlertTranslate();
+
 }());
