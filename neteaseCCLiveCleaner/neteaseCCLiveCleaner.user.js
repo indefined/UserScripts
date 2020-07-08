@@ -2,7 +2,7 @@
 // @name         网易CC直播净化
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.1.9
+// @version      0.1.10
 // @description  自定义屏蔽CC直播HTML5网页大部分不想看到的碍眼特效和内容
 // @author       indefined
 // @match        *://cc.163.com/*
@@ -17,8 +17,17 @@
             title:'去除LOGO水印',
             style:`
 /*LOGO水印*/
-.video-watermask {
-    display: none;
+.video-watermark {
+    display: none !important;
+}
+`
+        },
+        noPiP:{
+            title:'去除小窗口播放',
+            style:`
+/*画中画小窗口按钮*/
+#pic-in-pic-btn {
+    display: none !important;
 }
 `
         },
