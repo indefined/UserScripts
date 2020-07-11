@@ -23,7 +23,7 @@
 // @exclude        *://*hentaiverse.org/?s=Forge*
 // @exclude        *://*hentaiverse.org/equip/*
 // @exclude        *://*hentaiverse.org/pages/showequip.php?*
-// @version      2020.06.07
+// @version      2020.06.24
 // ==/UserScript==
 
 if (document.location.href.match(/ss=iw/)&&!document.getElementById('item_pane'))return
@@ -191,7 +191,7 @@ function initRestore() {
     if(changer=document.getElementById('change-translate')) {
         return changer.addEventListener('click',restore);
     }
-    changer = document.createElement('div');
+    changer = document.createElement('span');
     changer.innerHTML = "英";
     changer.title = '点击切换翻译';
     changer.id = 'change-translate';

@@ -6,12 +6,12 @@
 // @description    基本完全汉化除了战斗界面之外整个Hentaiverse文本，包括装备物品、界面说明和弹窗提示的汉化，带原文切换功能
 // @notice         完整功能需要在Hentaiverse主菜单 CHARACTER→SETTINGS 勾选自定义字体(Use Custom Font)并在下一行文本框中填上任意字体名称，拉到最下面点击Apply Changes
 // @notice         和HVToolBox在物品仓库中有概率冲突，汉化过后部分物品HVToolBox的复选框无法工作且无法切换回原文
-// @notice         如与Live Percentile Ranges同时使用，将脚本运行顺序置于Live Percentile Ranges之后
+// @notice         如与Live Percentile Ranges同时使用，需要将脚本运行顺序置于Live Percentile Ranges之后，查询不同品质范围需要切换到英文状态
 // @notice         如有其它脚本共同运行冲突也可尝试调整脚本运行顺序，但无法保证完全兼容
 // @include        *://hentaiverse.org/*
 // @include        *://alt.hentaiverse.org/*
 // @core           http://userscripts-mirror.org/scripts/show/41369
-// @version        2020.06.14
+// @version        2020.07.04
 // @grant none
 // ==/UserScript==
 (function () {
@@ -83,6 +83,22 @@
         '' : '',
         'Bonus' : '加成',
 
+    ///////////////////////////////////////////////////////登陆界面
+        'You have to log on to access this game.' : '你必须登陆之后才能使用游戏功能',
+        'No account? ' : '还没有帐号？',
+        'Click here to create one' : '点击此处创建一个',
+        '. (It\'s free!)' : ' (不要钱的)',
+        'User:' : '用户:',
+        'Pass:' : '密码:',
+        '/^ or $/' : ' 或者 ',
+        'Register' : '注册',
+        'The HentaiVerse a free online game presented by ' : 'HentaiVerse是由E绅士呈现的一个免费在线游戏 ',
+        'E-Hentai.org - The Free Hentai Gallery System' : 'E-Hentai.org - 免费的绅士画廊',
+        '' : '',
+        'You must be logged on to visit the HentaiVerse.' : '你必须登陆之后才能访问HentaiVerse',
+        '' : '',
+        '' : '',
+        '' : '',
     ///////////////////////////////////////////////////////主界面
         'Character' : '角色',
         'Abilities' : '技能',
@@ -108,6 +124,7 @@
         'Enchant' : '装备附魔',
         'Equipment proficiency' : '武器/装备熟练度',
         'Magic proficiency' : '法杖/魔法熟练度',
+        'Unarmed' : '徒手',
         'One-handed' : '单手',
         'Two-handed' : '双手',
         'Dual wielding' : '双持',
@@ -727,6 +744,8 @@
         'therefore how often it needs to' : '你需要多久修理',
         'be repaired' : '一次装备',
         'Insufficient materials.' : '材料不足',
+        'Cannot upgrade item' : '无法升级',
+        'Cannot enchant item' : '无法附魔',
         'Available Upgrades' : '可用升级',
         'Upgrades and Enchantments' : '附魔与升级',
         'Select an item to see required repair materials.' : '选择一件装备以查看这件装备修复所需材料',
@@ -1716,15 +1735,22 @@
         'Item is already slotted.' : '只能携带一种同名药品',
         'Bid price must be at least' : '你的出价至少需要',
         'Insufficient items.' : '道具不足',
+        'Invalid or expired token' : '令牌无效或者已过期',
         'You cannot enter the same arena twice in one day.' : '同一竞技场一天只能进入一次',
         'Weapon Damage' : '武器损坏',
         'weapons damage' : '武器损坏',
         'Cannot reforge level zero items' : '不能重铸没有潜能等级的装备',
-        'Cannot salvage locked or equipped items' : '不能分解上锁的装备',
+        'Cannot reforge locked or equipped items' : '不能重铸上锁或者正在穿戴的装备',
+        'Cannot salvage locked or equipped items' : '不能分解上锁或者正在穿戴的装备',
         'Insufficient soul fragments.' : '灵魂断片不足',
         'Cannot slot item - no free spaces.' : '无法携带物品，没有空余的物品槽。',
         'There are no items of that type available.' : '购买的物品库存不足',
         'The selected item does not have any potencies' : '选中的装备没有潜能等级',
+        'You do not have enough credits for that.' : '你没有足够的 Credits 来执行操作！',
+        'Insufficient credits.' : 'Credits 不足',
+        'Insufficient credits, kupo!' : 'Credits 不足！',
+        'Insufficient hath, kupo!' : 'Hath 不足！',
+        'Insufficient items, kupo!' : '物品不足！',
         'You must at minimum specify a recipient and subject, kupo!' : '你必须至少设定一个收件人和主题！',
         'Messaging yourself must be the ultimate form of social withdrawal, kupo! Seek help, kupo!' : '给自己发邮件是社交退缩的终极形式哦！去找些别的乐子吧！',
         'Invalid or missing recipient, kupo!' : '收件人不存在！',
@@ -1738,6 +1764,8 @@
         'Insufficient 怪物饲料' : '怪物饲料不足',
         'Insufficient 怪物食品' : '怪物食品不足',
         'Insufficient 怪物料理' : '怪物料理不足',
+        'Insufficient tokens' : '令牌不足',
+        'Insufficient crystals' : '水晶不足',
         'At full morale' : '情绪已满',
         'At full hunger' : '饥饿度已满',
         '' : '',
@@ -1750,8 +1778,11 @@
         '' : '',
         'Cannot opt out without buying a ticket first' : '你必须至少购买一张彩票才能决定不参与头奖争夺',
         'No golden tickets to spend' : '你没有黄金彩票可以使用',
+        'Already opted out' : '操作已执行',
+        'Insufficient GP' : 'GP不足',
         '' : '',
         '' : '',
+        'Invalid reward class' : '所选奖励类型不可用',
         '' : '',
         '' : '',
         '' : '',
@@ -1801,7 +1832,7 @@
         '' : '',
         '' : '',
         //武器和装备技能
-        'when using only ' : '当你仅使用 ',
+        'when using only ' : '当你使用全套 ',
         'when using the ' : '当你使用 ',
         ', scaling with your proficiency' : '',
         'Increases your damage' : '增加你的物理伤害，',
@@ -1973,7 +2004,7 @@
         '/ of$/' : '',
         '/^[oO]f /' : '',
         ' the ' : ' ',
-        '/^The /' : '',
+        '/^[tT]he /' : '',
         '/ the$/i' : '',
         '' : '',
         '' : '',
@@ -2018,6 +2049,7 @@
         'Are you sure you wish to spend ([\\d,]+) tokens? to enter the Ring of Blood\\?' : '是否消耗 $1 个鲜血令牌确认进入浴血擂台挑战？',
         'Enter a name for this equipment.' : '请输入装备名称（最大50个字符，仅支持字母和数字和非特殊字符)',
 
+        'Are you sure you want to reforge this item\\? This will remove all potencies and reset its level to zero\\.' : '是否确认重铸所选装备？此操作将会移除该装备所有的已解锁潜能并将潜能等级重置为0。',
         'Are you sure you want to soulfuse this item\\? This will bind it to your level, but makes it untradeable\\.' : '是否确认灵魂绑定所选装备？该装备将会跟随你的等级成长并且变成不可交易。',
     };
 
@@ -2134,7 +2166,7 @@
         if(changer=document.getElementById('change-translate')) {
             return changer.addEventListener('click',restore);
         }
-        changer = document.createElement('div');
+        changer = document.createElement('span');
         changer.innerHTML = "英";
         changer.title = '点击切换翻译';
         changer.id = 'change-translate';
