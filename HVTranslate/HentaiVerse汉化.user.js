@@ -11,7 +11,7 @@
 // @include        *://hentaiverse.org/*
 // @include        *://alt.hentaiverse.org/*
 // @core           http://userscripts-mirror.org/scripts/show/41369
-// @version        2020.07.04
+// @version        2020.07.08
 // @grant none
 // ==/UserScript==
 (function () {
@@ -331,7 +331,7 @@
         'Empty' : '空',
         '' : '',
         '' : '',
-        'Mitigation Reduction' : '伤害减免',
+        'Mitigation Reduction' : '缓伤削减',
         'Damage Reduction' : '伤害减免',
         'Cure 加成' : '治疗加成',
         '' : '',
@@ -560,7 +560,7 @@
         'Some materials scavenged from fallen adventurers by a monster. Required to upgrade equipment bonuses to ' : '从怪物身上收集的材料，用于升级装备的',
         ' Magic Proficiency': '魔法熟练度',
         'Magical Base Damage': '基础魔法伤害',
-        'Physical Base Damage': '基础魔法伤害',
+        'Physical Base Damage': '基础物理伤害',
         'A small vial filled with a catalytic substance necessary for upgrading and repairing equipment in the forge. This is permanently consumed on use.' : '一个装着升级与修复装备必须的催化剂的小瓶子，每使用一次就会消耗一个',
         'When used with a weapon, this shard will temporarily imbue it with the' : '当用在一件装备上时，会临时给予装备',
         'When used with an equipment piece, this shard will temporarily imbue it with the' : '当用在一件装备上时，会临时给予装备',
@@ -1281,6 +1281,8 @@
         '/Resist$/' : '抵抗率',
         'Anti-' : '反',
         'You still have to give this monster a name to activate it' : '你依然需要为这个怪物命名以激活它',
+        '装备强化 消耗' : '强化消耗',
+        'Next upgrade available at powerlevel ' : '升级到下一级需要此怪物达到战斗力等级 ',
 
     ///////////////////////////////////////////////////////战斗
         'Cooldown' : '冷却中',
@@ -1769,6 +1771,7 @@
         'At full morale' : '情绪已满',
         'At full hunger' : '饥饿度已满',
         '' : '',
+        'Item has already been sold.' : '所选物品已售出',
         'No such item' : '物品不存在',
         'No longer available' : '已不存在',
         'Ability is already slotted' : '技能已装备中',
