@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.6.8
+// @version      0.6.9
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -105,7 +105,7 @@
                                 style: 'width: 86px;',
                                 className:'btn btn-change',
                                 innerHTML:'<i class="bilifont bili-icon_caozuo_huanyihuan"></i><span class="info">加载更多</span>',
-                                onclick:getRecommend
+                                onclick:()=>{ for(let i=0;i<setting.manualFreshCount;i++) getRecommend();}
                             },
                             {
                                 nodeType:'span',
@@ -139,7 +139,7 @@
                                 nodeType:'div',
                                 className:'read-push',style:'cursor:pointer;user-select: none;',
                                 innerHTML:'<i class="icon icon_read"></i><span class="info">加载更多</span>',
-                                onclick:getRecommend
+                                onclick:()=>{ for(let i=0;i<setting.manualFreshCount;i++) getRecommend();}
                             }
                         ]
                     }
@@ -657,6 +657,11 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
         historyLimit:isNaN(+GM_getValue('historyLimit'))?10:+GM_getValue('historyLimit'),
         pageLimit:+GM_getValue('pageLimit')||0,
         autoFreshCount:isNaN(+GM_getValue('autoFreshCount'))?1:+GM_getValue('autoFreshCount'),
+        manualFreshCount:(()=>{
+            var mfc = GM_getValue('manualFreshCount',1);
+            if (isNaN(mfc)||mfc<1) mfc = 1;
+            return mfc;
+        })(),
         boxHeight:+GM_getValue('boxHeight')||2,
         noScrollBar:!!GM_getValue('noScrollBar'),
         reduceHeight:!!GM_getValue('reduceHeight',0),
@@ -687,6 +692,11 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
         },
         setAutoFreshCount(count){
             GM_setValue('autoFreshCount',this.autoFreshCount = +count);
+        },
+        setManualFreshCount(target){
+            var count = +target.value;
+            if (count<1) count = target.value = 1;
+            GM_setValue('manualFreshCount',this.manualFreshCount = +count);
         },
         setBoxHeight(line){
             GM_setValue('boxHeight',this.boxHeight=+line);
@@ -819,6 +829,18 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                         {
                             nodeType:'div',style:'margin: 10px 0;',
                             childs: [
+                                '<label style="margin-right: 5px;">手动刷新页数:</label>',
+                                '<span style="margin-right: 5px;color:#00f" title="每次点击加载更多时加载的新推荐页数，每页10条">(?)</span>',
+                                {
+                                    nodeType:'input',type:'number',value:this.manualFreshCount,min:1,step:1,
+                                    onchange:({target})=>this.setManualFreshCount(target),
+                                    style:'width:50px'
+                                }
+                            ]
+                        },
+                        {
+                            nodeType:'div',style:'margin: 10px 0;',
+                            childs: [
                                 '<label style="margin-right: 5px;">显示推荐高度:</label>',
                                 '<span style="margin-right: 5px;color:#00f" title="显示推荐框的行数，超出的推荐内容会产生滚动条来容纳">(?)</span>',
                                 {
@@ -904,8 +926,8 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                             }
                             catch(e){reject(e)}
                         },
-                        onerror: e=>reject({msg:e.error,toString:()=>'请求接口错误'}),
-                        ontimeout: e=>reject({msg:e.error,toString:()=>'请求接口超时'})
+                        onerror: e=>reject({msg:e.error,status:e.status,toString:()=>'请求接口错误'}),
+                        ontimeout: e=>reject({msg:e.error,status:e.status,toString:()=>'请求接口超时'})
                     });
                 }).then(url=>new Promise((resolve,reject)=>{
                     GM_xmlhttpRequest({
@@ -921,8 +943,8 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                                 resolve();
                             }catch(e){reject(e)}
                         },
-                        onerror: e=>reject({msg:e.error,toString:()=>'获取授权错误'}),
-                        ontimeout: e=>reject({msg:e.error,toString:()=>'获取授权超时'})
+                        onerror: e=>reject({msg:e.error,status:e.status,toString:()=>'获取授权错误'}),
+                        ontimeout: e=>reject({msg:e.error,status:e.status,toString:()=>'获取授权超时'})
                     });
                 })).catch(error=> {
                     target.innerText = '获取授权';
