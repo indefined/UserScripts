@@ -2,7 +2,7 @@
 // @name         HTML5视频截图器
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.4.13
+// @version      0.4.14
 // @description  基于HTML5的简单原生视频截图，可控制快进/逐帧/视频调速，支持自定义快捷键
 // @author       indefined
 // @include      *://*
@@ -282,8 +282,20 @@
         if(video.currentTime<0) video.currentTime = 0;
     }
 
+    function isInView(v) {
+        if (!v) return false;
+        var vh = document.documentElement.clientHeight,
+            vw = document.documentElement.clientWidth,
+            br = v.getBoundingClientRect(),
+            h = br.height,
+            w = br.width,
+            vt = br.top,
+            vl = br.left;
+        return (h>0&&w>0&&vt>=0&&vt<vh&&vl>=0&&vl<vw);
+    }
+
     function videoDetech(){
-        videos = document.querySelectorAll('video');
+        videos = Array.from(document.querySelectorAll('video'));
         if (window!=top){
             top.postMessage({
                 action:'captureReport',
@@ -296,7 +308,14 @@
             while(selector.firstChild) selector.removeChild(selector.firstChild);
             appendVideo(videos);
             setTimeout(()=>{
-                if (selector.childNodes.length) return videoSelect(selector.value);
+                if (selector.childNodes.length) {
+                    //优先在顶层窗体找一个之前选中的视频或者正在播放的视频或者在视图中的视频，iframe里就不管了……
+                    var value = videos.findIndex(v=>v==video);
+                    if(value<0) value = videos.findIndex(v=>!v.paused);
+                    if(value<0) value = videos.findIndex(isInView);
+                    if(value<0) value = selector.value;
+                    return videoSelect(value);
+                }
                 toast('当前页面没有检测到HTML5视频');
             },100);
         }
@@ -489,7 +508,7 @@
             video = videoBk;
         }
     }
-    document.addEventListener('keydown',keyListener);
+    document.addEventListener('keydown',keyListener,true);
 
     //控制事件接收仅在iframe中执行
     if (window!=top) {
