@@ -2,7 +2,7 @@
 // @name        bilibili直播间工具
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.19.1
+// @version     0.5.20
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、硬币直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -456,8 +456,9 @@ body.fullscreen-fix div#gift-control-vm {
             const bottomPanel = helper.get('#chat-control-panel-vm .bottom-actions');
             this.oldMedalButton = bottomPanel.querySelector('.action-item.medal');
             this.oldTitleButton = bottomPanel.querySelector('.action-item.title');
-            this.medalButton = this.oldMedalButton.cloneNode(true);
+            this.medalButton = this.oldTitleButton.cloneNode(true);
             this.medalButton.dataset.name = 'medal';
+            this.medalButton.innerText = '勋';
             this.titleButton = this.oldTitleButton.cloneNode(true);
             this.titleButton.dataset.name = 'title';
             //对话框点击事件处理句柄
@@ -471,7 +472,23 @@ body.fullscreen-fix div#gift-control-vm {
             //样式
             helper.create('style',{
                 innerHTML:'#title-medal-dialog>div>div:nth-child(odd){background-color: #f1f2f4;}'
-                +'#title-medal-dialog #title-medal-selected-line {background: #e4f12699;}'
+                +'#title-medal-dialog .title-medal-selected-line{background: #e4f12699 !important;}'
+                +'#title-medal-dialog .fans-medal-item{cursor:pointer}'
+                +'#title-medal-dialog .fans-medal-item .label{width: 35px;}'
+                +'#title-medal-dialog .fans-medal-item.gray .label{background:#f1f2f4 !important}'
+                +'#title-medal-dialog .fans-medal-item.gray{border-color:#f1f2f4 !important}'
+                + (()=>{
+                    const colors = ['#61DDCB','#5896DE','#A068F1','#FF86B2','#f6be18'];
+                    let lvStyle = '';
+                    for (let lv=0;lv<colors.length;lv++) {
+                        for (let add=1;add<=4;add++) {
+                            lvStyle += `#title-medal-dialog .fans-medal-item.level-${lv*4+add}{border-color: ${colors[lv]}}`
+                                + `#title-medal-dialog .fans-medal-item.level-${lv*4+add} .label{background-color: ${colors[lv]}}`
+                                + `#title-medal-dialog .fans-medal-item.level-${lv*4+add} .level{color: ${colors[lv]}}`;
+                        }
+                    }
+                    return lvStyle;
+                })()
             },this.dialog);
             //对话框箭头
             this.dialogArraw = helper.create('div',{
@@ -489,12 +506,12 @@ body.fullscreen-fix div#gift-control-vm {
             if(setting.replaceMedalTitle) this.replaceToNew();
         },
         replaceToNew(){
-            helper.replace(this.oldMedalButton,this.medalButton);
             helper.replace(this.oldTitleButton,this.titleButton);
+            this.oldMedalButton.insertAdjacentElement('beforebegin',this.medalButton);
             document.body.addEventListener('click', this.handler);
         },
         replaceToOld(){
-            helper.replace(this.medalButton,this.oldMedalButton);
+            this.medalButton.parentNode.removeChild(this.medalButton);
             helper.replace(this.titleButton,this.oldTitleButton);
             document.body.removeEventListener('click', this.handler);
         },
@@ -583,17 +600,17 @@ body.fullscreen-fix div#gift-control-vm {
                 if (this.room.ANCHOR_UID==v.target_id) hasMedal = true;
                 const itemDiv = helper.create('div',{
                     style:'margin-top: 8px',
-                    id:v.status&&'title-medal-selected-line'||''
+                    className:v.status&&'title-medal-selected-line'||''
                 },this.dialogPanel);
                 helper.create('div',{
                     title:`主播:${v.uname}\r\n${v.status?'当前佩戴勋章，点击取消佩戴':'点击佩戴此'}勋章`,
                     innerHTML:`<div class="label"><span class="content">${v.medalName}</span></div><span class="level">${v.level}</span>`,
-                    className:`fans-medal-item v-middle pointer level-${v.level}`,
+                    className:`fans-medal-item v-middle level-${v.level} ${!v.is_lighted?'gray':''}`,
                     onclick:()=>{
                         this.doRequire(v.status?'//api.live.bilibili.com/i/ajaxCancelWear':`//api.live.bilibili.com/i/ajaxWearFansMedal?medal_id=${v.medal_id}`
                                        ,v.status?'取消佩戴勋章':'切换勋章');
-                        this.oldMedalButton.click()&this.oldMedalButton.click();
                         this.closeDialog();
+                        setTimeout(()=>this.oldMedalButton.click()&this.oldMedalButton.click(),200);
                     }
                 },itemDiv);
                 helper.create('span',{
@@ -605,7 +622,7 @@ body.fullscreen-fix div#gift-control-vm {
                 helper.create('a',{
                     style:'color:#999;min-width:50px',
                     href:`/${v.roomid}`,target:"_blank",className:"intimacy-text v-middle dp-i-block",
-                    title:`今日亲密度剩余${v.dayLimit-v.todayFeed}\r\n点击前往主播房间`,
+                    title:`今日亲密度上限剩余${v.dayLimit-v.todayFeed}\n点击前往主播房间`,
                     innerText:`${v.todayFeed}/${v.dayLimit}`
                 },itemDiv);
             });
