@@ -2,7 +2,7 @@
 // @name         HTML5视频截图器
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.4.14
+// @version      0.4.15
 // @description  基于HTML5的简单原生视频截图，可控制快进/逐帧/视频调速，支持自定义快捷键
 // @author       indefined
 // @include      *://*
@@ -489,7 +489,7 @@
         }
         else if (!hoverItem) return;
         let value;
-        if(value = Object.entries(config).find(([k,v])=>k!='active'&&v.key==key&&v.shiftKey==ev.shiftKey&&v.altKey==ev.altKey&&v.ctrlKey==ev.ctrlKey)){
+        if(value = Object.entries(config).find(([k,v])=>k!='active'&&v.key==key&&!v.shiftKey!=ev.shiftKey&&!v.altKey!=ev.altKey&&!v.ctrlKey!=ev.ctrlKey)){
             //阻止覆盖网页原有快捷键
             if (config.stopPropagation.checked) {
                 ev.stopPropagation();
