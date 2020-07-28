@@ -2,7 +2,7 @@
 // @name        bilibili直播间工具
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.21
+// @version     0.5.22
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、硬币直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -434,7 +434,7 @@ body.fullscreen-fix div#gift-control-vm {
             medal:{
                 name:'勋章',
                 link:'//link.bilibili.com/p/center/index#/user-center/wearing-center/my-medal',
-                dataUrl:'//api.live.bilibili.com/fans_medal/v1/FansMedal/get_list_in_room'
+                dataUrl:'//api.live.bilibili.com/i/api/medal?page=1&pageSize=1000'
             },
             title:{
                 name:'头衔',
@@ -592,11 +592,11 @@ body.fullscreen-fix div#gift-control-vm {
         },
         listMedal(data){
             let hasMedal = false;
-            if (data.code!=0||!data.data||!(data.data instanceof Array)) {
+            if (data.code!=0||!data.data||!(data.data.fansMedalList instanceof Array)) {
                 console.error(data);
                 throw(`查询勋章失败 code:${data.code}</br>${data.message}`);
             }
-            data.data.forEach((v)=>{
+            data.data.fansMedalList.forEach((v)=>{
                 if (this.room.ANCHOR_UID==v.target_id) hasMedal = true;
                 const itemDiv = helper.create('div',{
                     style:'margin-top: 8px',
@@ -623,7 +623,7 @@ body.fullscreen-fix div#gift-control-vm {
                 },itemDiv);
                 helper.create('a',{
                     style:'color:#999;min-width:50px',
-                    href:`/${v.room_id}`,target:"_blank",className:"intimacy-text v-middle dp-i-block",
+                    href:`/${v.room_id||v.roomid}`,target:"_blank",className:"intimacy-text v-middle dp-i-block",
                     title:`今日上限剩余${v.day_limit-v.today_feed}\n点击前往主播房间`,
                     innerText:`${v.today_feed}/${v.day_limit}`
                 },itemDiv);
@@ -638,7 +638,7 @@ body.fullscreen-fix div#gift-control-vm {
                     innerHTML:`<span style="border: 1.8px solid #c8c8c8;border-radius: 50%;border-color: #23ade5;">硬</span><span>20</span>`
                 },buyDiv);
             }
-            if (data.data.length==0) {
+            if (data.data.fansMedalList.length==0) {
                 helper.create('p',{
                     innerHTML:'<p data-v-17cf8b1e="" class="empty-hint-text">你还没有勋章哦～</p>'
                     +'<div data-v-17cf8b1e="" class="empty-image"></div>'
