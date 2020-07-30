@@ -2,7 +2,7 @@
 // @name        bilibili直播间工具
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.23
+// @version     0.5.24
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、硬币直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -474,7 +474,8 @@ body.fullscreen-fix div#gift-control-vm {
                 innerHTML:'#title-medal-dialog>div>div:nth-child(odd){background-color: #f1f2f4;}'
                 +'#title-medal-dialog .title-medal-selected-line{background: #e4f12699 !important;}'
                 +'#title-medal-dialog .fans-medal-item{cursor:pointer}'
-                +'#title-medal-dialog .fans-medal-item .label{width: 35px;}'
+                +'#title-medal-dialog .fans-medal-item .label{width: 35px;display: inline-block;text-align: center;padding: 0 3px;}'
+                +'#title-medal-dialog .fans-medal-item .level{display: inline-block;width: 16px;text-align: center;background:#fff}'
                 +'#title-medal-dialog .gray span.h-100.v-top{background:#c0c0c0 !important}'
                 //*//以下是旧版勋章样式，大概用不到了
                 +'#title-medal-dialog .fans-medal-item.gray .level{color:#c0c0c0}'
@@ -605,7 +606,7 @@ body.fullscreen-fix div#gift-control-vm {
                 helper.create('div',{
                     title:`主播:${v.target_name}\n${v.status?'当前佩戴勋章，点击取消佩戴':'点击佩戴此'}勋章${!v.is_lighted?'\n已熄灭，投喂金瓜子礼物或者小心心点亮':''}`,
                     style:`border-color: #${v.medal_color_border.toString(16)}`,
-                    innerHTML:`<div class="label" style="background-color:#${v.medal_color_start.toString(16)}"><span class="content">${v.medal_name}</span></div>`
+                    innerHTML:`<div class="label" style="background:linear-gradient(45deg, #${v.medal_color_start.toString(16)}, #${v.medal_color_end.toString(16)})"><span class="content">${v.medal_name}</span></div>`
                     +`<span class="level" style="color:#${v.medal_color_start.toString(16)}">${v.level}</span>`,
                     className:`fans-medal-item v-middle level-${v.level} ${!v.is_lighted?'gray':''}`,
                     onclick:()=>{
