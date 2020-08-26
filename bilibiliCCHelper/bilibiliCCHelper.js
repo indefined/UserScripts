@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.12
+// @version      0.5.13
 // @description  可以在B站加载外挂本地字幕、下载B站的CC字幕，旧版B站播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -517,7 +517,7 @@ fill-rule="evenodd"></path></svg></span>`,
         },
         saveSetting(){
             try{
-                const playerSetting = JSON.parse(localStorage.bilibili_player_settings);
+                const playerSetting = localStorage.bilibili_player_settings?JSON.parse(localStorage.bilibili_player_settings):{};
                 playerSetting.subtitle = this.setting;
                 localStorage.bilibili_player_settings = JSON.stringify(playerSetting);
             }catch(e){
@@ -720,8 +720,12 @@ fill-rule="evenodd"></path></svg></span>`,
         init(subtitle){
             this.subtitle = subtitle;
             this.selectedLan = undefined;
-            this.setting = JSON.parse(localStorage.bilibili_player_settings).subtitle;
-            if(!this.setting) {
+            try {
+                if (!localStorage.bilibili_player_settings) throw '当前播放器没有设置信息';
+                this.setting = JSON.parse(localStorage.bilibili_player_settings).subtitle;
+                if (!this.setting) throw '当前播放器没有字幕设置';
+            }catch (e) {
+                bilibiliCCHelper.toast('bilibili CC字幕助手读取设置出错,将使用默认设置:', e);
                 this.setting = {backgroundopacity: 0.5,color: 16777215,fontsize: 1,isclosed: false,scale: true,shadow: "0", position: 'bc'};
             }
             this.initUI();
