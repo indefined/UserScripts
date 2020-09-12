@@ -3,7 +3,7 @@
 // @namespace      hentaiverse.org
 // @author         indefined
 // @icon           https://hentaiverse.org/y/favicon.png
-// @description    汉化Hentaiverse里面的图片按钮，可能也会狗拿耗子顺带翻译一些表单按钮和文字，执行方式比较奇葩效率或者兼容性堪忧，慎用
+// @description    汉化Hentaiverse里面的图片按钮，执行方式比较奇葩效率或者兼容性堪忧，慎用
 // @notice         仅翻译带功能的按钮图片，也就是在设置中开启自定义字体之后剩下的图片，HV原始图片字体不会被翻译；默认不翻译战斗页面图片
 // @notice         由于兼容问题不同浏览器之间存在不同执行方式逻辑，有兴趣有一定基础的可以自己读一下代码注释
 // @include        *://hentaiverse.org/*
@@ -11,8 +11,7 @@
 // @exclude        *://*hentaiverse.org/y/*
 // @exclude        *://*hentaiverse.org/equip/*
 // @exclude        *://*hentaiverse.org/pages/showequip.php?*
-// @include        file:///D:/Datas/Downloads/*.htm*
-// @version        2020.07.08
+// @version        2020.08.22
 // @grant none
 // ==/UserScript==
 (function () {
@@ -158,6 +157,10 @@
             'active' : '/y/shops/repair.png',
             'disactive' : '/y/shops/repair_d.png'
         },{
+            'text' : '全部修复',
+            'active' : '/y/shops/repairall.png',
+            'disactive' : '/y/shops/repairall_d.png',
+        },{
             'text' : '分解选中装备',
             'active' : '/y/shops/salvage.png',
             'disactive' : '/y/shops/salvage_d.png'
@@ -184,13 +187,13 @@
             'active' : '/y/shops/2handed_on.png',
             'disactive' : '/y/shops/2handed_off.png'
         },{
-            'text' : '武器：盾牌',
-            'active' : '/y/shops/shield_on.png',
-            'disactive' : '/y/shops/shield_off.png'
-        },{
             'text' : '武器：法杖',
             'active' : '/y/shops/staff_on.png',
             'disactive' : '/y/shops/staff_off.png'
+        },{
+            'text' : '护甲：盾牌',
+            'active' : '/y/shops/shield_on.png',
+            'disactive' : '/y/shops/shield_off.png'
         },{
             'text' : '护甲：布甲',
             'active' : '/y/shops/acloth_on.png',
@@ -488,11 +491,6 @@
         },
 
         {
-            'text' : '提交自动采购任务',
-            'active' : '/y/shops/addbottask.png',
-        },
-
-        {
             'text' : '使用精神恢复剂',
             'active' : '/y/userestorative.png',
         },
@@ -501,8 +499,8 @@
             'text' : '返回选择装备',
             'active' : '/y/shops/equipselect.png',
         },{
-            'text' : '全部修复',
-            'active' : '/y/shops/repairall.png',
+            'text' : '提交自动采购任务',
+            'active' : '/y/shops/addbottask.png',
         },{
             'text' : '全部出售',
             'active' : '/y/shops/sellall.png',
@@ -534,8 +532,8 @@
                 'active' : '/y/battle/answer.png'
             },
             {
-                'text' :'小马图示例',
-                'active' : 'y/battle/ponychartbutton.png'
+                'text' :'名称参考',
+                'active' : '/y/battle/ponychartbutton.png'
             },
 
             {
@@ -559,11 +557,23 @@
                 'disactive' : '/y/m/Wiki.png'
             },
             {
-                'text' : '你必须至少购买一张彩票才能使用放弃头奖功能',
+                'text' : '精力充沛，你将获得+100%经验奖励',
+                'disactive' : '/y/s/sticon4.gif',
+            },
+            {
+                'text' : '精力正常，你既不会收到额外的奖励也不会受到惩罚',
+                'disactive' : '/y/s/sticon3.gif',
+            },
+            {
+                'text' : '精力耗竭，你将无法从怪物那里收到任何经验或者掉落，也无法获得熟练度奖励',
+                'disactive' : '/y/s/sticon1.gif',
+            },
+            {
+                'text' : '你必须至少购买一张彩票才能选择放弃头奖争夺',
                 'disactive' : '/y/shops/lottery_donotwant_d.png',
             },
             {
-                'text' : '你将不会参与本次头奖抽奖',
+                'text' : '你已经放弃参与本次彩票的头奖争夺',
                 'disactive' : '/y/shops/lottery_donotwant_s.png',
             }
         );
@@ -647,9 +657,27 @@
                         'disactive' : 'magic_support.png'
                     },
                     {
+                        'text' : '继续下一轮竞技场挑战',
+                        'active' : 'arenacontinue.png'
+                    },{
+                        'text' : '继续下一层压榨界挑战',
+                        'active' : 'grindfestcontinue.png'
+                    },{
+                        'text' : '深入下一层道具界挑战',
+                        'active' : 'itemworldcontinue.png'
+                    },{
                         'text' : '结束战斗',
                         'active' : 'finishbattle.png'
                     },
+                    //因为Monsterbation不刷新战斗页面，所以战斗翻译中也需要加入小马图的翻译
+                    {
+                        'text' :'回答',
+                        'active' : '/y/battle/answer.png'
+                    },{
+                        'text' :'名称参考',
+                        'active' : '/y/battle/ponychartbutton.png'
+                    },
+
                 ].map(item=>{
                     var txt = '';
                     if (item.disactive) txt += `img[src*="${item.disactive}"]{content:url(${word2img(item.text)})}`;
@@ -672,23 +700,15 @@
             );
         }
         else if (document.getElementById('riddlemaster')) {
-            //小马图引导，翻译小马图按钮图和两个提示文本
+            //小马图引导
             translateStyle.innerHTML = sessionStorage.riddleImgTranslate || (
                 sessionStorage.riddleImgTranslate = Object.entries({
                     'answer.png' : '回答',
-                    'ponychartbutton.png' : '小马图示例',
+                    'ponychartbutton.png' : '名称参考',
                 }).map(([key,value])=>{
                     return `img[src*="${key}"]{content:url(${activeWord2img(value)})}`;
                 }).join('\n')
             );
-            Object.entries({
-                '#riddletop>div>div':'请回答以下图片中小马的正确名称(输入A或B或C)',
-                '#riddletimer > div:nth-child(1) > div > div':'时间'
-            }).forEach(([k,v])=>{
-                if (document.querySelector(k)) {
-                    document.querySelector(k).innerText = v;
-                }
-            });
         }
         else {
             //不在战斗中，翻译其它图片内容
@@ -735,10 +755,6 @@
                     })
                 ].join('\n')
             );
-            //设置界面的按钮……只有这么一个东西需要单独汉化
-            if (document.querySelector('#settings_apply>input[value="Apply Changes"]')) {
-                document.querySelector('#settings_apply>input[value="Apply Changes"]').value = '确认更改';
-            }
         }
     }//图片翻译法END
 
@@ -836,7 +852,7 @@
                 'active' : '/y/battle/answer.png'
             },
             {
-                'text' :'小马图示例',
+                'text' :'名称参考',
                 'active' : '/y/battle/ponychartbutton.png'
             },
 
