@@ -2,7 +2,7 @@
 // @name        bilibili直播间工具
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.24
+// @version     0.5.25
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、硬币直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -565,8 +565,14 @@ body.fullscreen-fix div#gift-control-vm {
                 setTimeout(()=>{this.dialog.style='display:none;';},300);
             }
         },
-        doRequire(url,text){
-            return helper.xhr(url).then(data=>{
+        doRequire(url,text,data){
+            if (data) {
+                let token = document.cookie.match(/bili_jct=([0-9a-fA-F]{32})/);
+                if (!token) return helper.toast('找不到令牌');
+                data.csrf_token = data.csrf = token[1];
+                data.visit_id = '';
+            }
+            return helper.xhr(url,data).then(data=>{
                 helper.toast(`${text}${data.code==0?'成功':`失败 code ${data.code} ${data.message}`}`);
             }).catch(e=>{
                 helper.toast(`${text}出错${e}`)
@@ -576,19 +582,10 @@ body.fullscreen-fix div#gift-control-vm {
             if (!confirm(`是否确认使用${type=='silver'?'9900银瓜子':'20硬币'}购买本房间勋章？`)){
                 return;
             }
-            let token = document.cookie.match(/bili_jct=([0-9a-fA-F]{32})/);
-            if (!token) return helper.toast('找不到令牌');
-            token = token[1];
-            return helper.xhr(`//api.vc.bilibili.com/link_group/v1/member/buy_medal`,{
+            return this.doRequire(`//api.vc.bilibili.com/link_group/v1/member/buy_medal`, `购买勋章`, {
                 coin_type: type,
                 master_uid: this.room.ANCHOR_UID,
-                platform: 'android',
-                csrf_token: token,
-                csrf: token
-            }).then(data=>{
-                helper.toast(`购买勋章${data.code==0?'成功':`失败 code ${data.code} ${data.message}`}`);
-            }).catch(e=>{
-                helper.toast(`购买勋章出错${e}`)
+                platform: 'android'
             });
         },
         listMedal(data){
@@ -610,8 +607,8 @@ body.fullscreen-fix div#gift-control-vm {
                     +`<span class="level" style="color:#${v.medal_color_start.toString(16)}">${v.level}</span>`,
                     className:`fans-medal-item v-middle level-${v.level} ${!v.is_lighted?'gray':''}`,
                     onclick:()=>{
-                        this.doRequire(v.status?'//api.live.bilibili.com/i/ajaxCancelWear':`//api.live.bilibili.com/i/ajaxWearFansMedal?medal_id=${v.medal_id}`
-                                       ,v.status?'取消佩戴勋章':'切换勋章');
+                        if (v.status) this.doRequire('//api.live.bilibili.com/xlive/web-room/v1/fansMedal/take_off','取消佩戴勋章', {});
+                        else this.doRequire('//api.live.bilibili.com/xlive/web-room/v1/fansMedal/wear', '切换勋章', {medal_id: v.medal_id});
                         this.closeDialog();
                         setTimeout(()=>this.oldMedalButton&&this.oldMedalButton.click()&this.oldMedalButton.click(),200);
                     }
