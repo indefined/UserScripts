@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name           HV 图片汉化
+// @name           HV 图片按钮汉化
 // @namespace      hentaiverse.org
 // @author         indefined
 // @icon           https://hentaiverse.org/y/favicon.png
@@ -11,7 +11,7 @@
 // @exclude        *://*hentaiverse.org/y/*
 // @exclude        *://*hentaiverse.org/equip/*
 // @exclude        *://*hentaiverse.org/pages/showequip.php?*
-// @version        2020.08.22
+// @version        2020.10.07
 // @grant none
 // ==/UserScript==
 (function () {
@@ -625,6 +625,7 @@
         if (document.getElementById('pane_log')) {
             //战斗中，默认直接跳过不翻译战斗图片， 功能可用，但没什么意义……
             //想要的话也可以在控制台输入localStorage.translateBattle=true回车强制开启，delete localStorage.translateBattle删除标志则返回默认不开启
+            //战斗翻译开关标志位和hentaiverse汉化共用，意味着如果你安装了hentaiverse汉化20200922版本以上，双击战斗底部经验条会同步开关文字和图片汉化，但可能需要刷新页面才会生效
             if (!localStorage.translateBattle) return;
             translateStyle.innerHTML = sessionStorage.battleImgTranslate || (
                 sessionStorage.battleImgTranslate = [

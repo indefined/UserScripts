@@ -3,18 +3,22 @@
 // @namespace      hentaiverse.org
 // @author         indefined
 // @icon           https://hentaiverse.org/y/favicon.png
-// @description    仅对HV战斗说明框进行汉化
+// @description    仅对HV战斗说明框进行汉化。此脚本已完全合并到hentaiverse汉化，如无特殊需求不需要独立安装，此脚本后续可能会删除。
+// @notice         与20200922之后版本的hentaiverse汉化互斥，如果你已经安装了新版hentaiverse汉化脚本建议禁用或者删除此脚本然后双击战斗底部经验条开启战斗汉化
 // @include        *://hentaiverse.org/*
 // @include        *://alt.hentaiverse.org/*
 // @exclude        *://*hentaiverse.org/equip/*
 // @exclude        *://*hentaiverse.org/pages/showequip.php?*
 // @core           http://userscripts-mirror.org/scripts/show/41369
-// @version        2020.08.22
+// @version        2020.10.07
 // @grant none
 // ==/UserScript==
 (function () {
     'use strict';
     if (!document.getElementById('pane_log')) return;
+
+    if (!!document.getElementById('expholder').title) return; //检测到已经有另外的汉化脚本在运行则退出
+    document.getElementById('expholder').title = 'hv战斗汉化启动';
 
     /*
         NOTE:
@@ -490,6 +494,6 @@
     }
 
     init();
-    document.addEventListener('HVCounterReload', init);
+    document.addEventListener('HVReload', init);
     document.addEventListener('DOMContentLoaded', init);
 }());

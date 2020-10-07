@@ -16,13 +16,13 @@
 
 ## 脚本说明
 
-**本文件夹下脚本在HV 0.86版本下修改测试，不保证后续版本可用**
+**以下脚本在HV 0.86版本下修改测试，如果HV更新了版本可能无法保证正确运行**
 
-### HV 装备物品汉化 v2020.06.24 [点击此处安装](https://github.com/indefined/UserScripts/raw/master/HVTranslate/HV%20%E7%89%A9%E5%93%81%E8%A3%85%E5%A4%87%E6%B1%89%E5%8C%96.user.js)
+### HV 装备物品汉化 v2020.10.07 [点击此处安装](https://github.com/indefined/UserScripts/raw/master/HVTranslate/HV%20%E7%89%A9%E5%93%81%E8%A3%85%E5%A4%87%E6%B1%89%E5%8C%96.user.js)
 
 - 原贴吧**物品汉化**脚本，汉化物品、装备界面及论坛，带装备高亮/装备店隐藏锁定装备，会直接替换网页源码所以可能导致其它脚本冲突
 - 本脚本大致最初由 [ggxxsol](https://greasyfork.org/scripts/25986) 创建，后由贴吧 [mbbdzz](https://tieba.baidu.com/p/4849863522) 修改补充
-- 由 [indefined](https://github.com/indefined/UserScripts/tree/master/HVTranslate) 大规模重构，重新添加实现翻译/原文切换功能，提高了兼容性，但失去原脚本的后缀语序倒转功能和装备列表部分弹窗说明汉化
+- 由 [indefined](https://github.com/indefined/UserScripts/tree/master/HVTranslate) 大规模重构，提高了部分兼容性，但失去原脚本的装备后缀语序倒转功能和物品列表部分悬浮窗说明汉化
 - 如有同时使用其它汉化，需要先于其它汉化脚本运行才会生效
 - 与HVtoolBox在大部分装备装备列表冲突会失去装备高亮功能；在物品仓库中会导致HVtoolBox部分物品功能无效；与Live Percentile Ranges在装备详情页冲突
 - 如与其它脚本同时使用冲突，可尝试调整脚本运行顺序，但无法保证完全兼容
@@ -31,21 +31,32 @@
 - 如果你要在论坛买东西，挑好东西之后最好切换回原文再复制内容，因为别人并不一定看得懂经过翻译过后的东西
 
 
-### Hentaiverse汉化 v2020.07.04 [点击此处安装](https://github.com/indefined/UserScripts/raw/master/HVTranslate/HentaiVerse%E6%B1%89%E5%8C%96.user.js)
+### Hentaiverse汉化 v2020.10.07 [点击此处安装](https://github.com/indefined/UserScripts/raw/master/HVTranslate/HentaiVerse%E6%B1%89%E5%8C%96.user.js)
 
-- 原贴吧**HV界面和其它汉化**脚本，现除了战斗界面和未知的地方之外，应该达成了对整个HV的完全汉化
+- 原贴吧**HV界面和其它汉化**脚本，现已基本完成对整个hentaiverse的完全汉化
 - 本脚本大致最初由 [ggxxsol](https://greasyfork.org/scripts/9680) 创建，后由 [NeedXuyao](https://greasyfork.org/zh-CN/scripts/2120) 和贴吧 [mbbdzz](https://tieba.baidu.com/p/4849863522) 修改整合补充
 - 由 [indefined](https://github.com/indefined/UserScripts/tree/master/HVTranslate) 添加装备/物品/技能悬浮窗汉化功能的实现及翻译，添加原文切换功能
 - 除了没有装备高亮和不能在论坛使用之外，本脚本完全包含上一个脚本所有汉化内容，可单独使用，与其它脚本的兼容性比上一个脚本高
+- 此脚本已完全整合下方HV战斗汉化，**与独立的HV战斗汉化脚本互斥**，默认不开启，**如需开启在战斗界面中双击下方经验条**
 - 如与Live Percentile Ranges同时使用，需要将脚本运行顺序置于Live Percentile Ranges之后，查询不同品质范围需要切换到英文状态
 - 如有其它脚本共同运行冲突也可尝试调整脚本运行顺序，但无法保证全部兼容
 
 
-### HV 战斗汉化 v2020.04.13 [点击此处安装](https://github.com/indefined/UserScripts/raw/master/HVTranslate/HV%20%E6%88%98%E6%96%97%E6%B1%89%E5%8C%96.user.js)
+### HV 战斗汉化 v2020.10.07 [点击此处安装](https://github.com/indefined/UserScripts/raw/master/HVTranslate/HV%20%E6%88%98%E6%96%97%E6%B1%89%E5%8C%96.user.js)
 
+- **此脚本已完全合并到上方hentaiverse汉化，如无特殊需求不需要独立安装，此脚本后续可能会删除。**
 - 仅对战斗说明框进行汉化，除了少量比较少使用的药品和效果说明之外应该达成了对整个HV战斗说明的完全汉化
+- 与20200922之后版本的hentaiverse汉化互斥，如果你已经安装了新版hentaiverse汉化脚本建议禁用或者删除此脚本然后双击战斗底部经验条开启战斗汉化
 - 部分文本参考了HV物品汉化和 [圍紀實驗室 - 中文wiki](https://scratchpad.fandom.com/zh/wiki/Category:HentaiVerse)
 - 兼容Hentaiverse Monsterbation，原则上应该不会与其它脚本冲突
+
+
+### HV 图片按钮汉化 v2020.10.07 [点击此处安装](https://github.com/indefined/UserScripts/raw/master/HVTranslate/HV%20%E5%9B%BE%E7%89%87%E6%8C%89%E9%92%AE%E6%B1%89%E5%8C%96.user.js)
+
+- 仅翻译带功能的按钮图片，也就是在设置中开启自定义字体之后剩下的图片，HV原始图片字体不会被翻译
+- 执行逻辑和效率比较奇葩，对不同浏览器的兼容性很难说，建议按照自己需求决定是否安装
+- 由于兼容问题不同浏览器之间存在不同执行方式逻辑，有兴趣有一定基础的可以自己读一下代码注释
+- 默认不翻译战斗页面图片，如果你使用的是Chrome并且同时安装了新版本的hentaiverse汉化，双击战斗底部经验条会同步开关战斗文字和图片汉化（可能需要刷新）
 
 ### 关于脚本乱码
 
