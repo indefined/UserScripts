@@ -3,8 +3,6 @@ Bilibili替换旧版播放器
 
 [个人脚本仓库](https://github.com/indefined/UserScripts)
 
-[问题反馈到这里](https://github.com/indefined/UserScripts/issues)
-
 -------------------------
 ## [替换版](./bilibiliOldReplacePlayer.user.js)
 
@@ -12,7 +10,8 @@ Bilibili替换旧版播放器
 
 思路来自[这里](https://greasyfork.org/zh-CN/forum/discussion/68269/0/)
 
-原思路作者的脚本 [AV页](https://greasyfork.org/scripts/394296) [稍后再看页](https://greasyfork.org/scripts/394206)
+本文件夹下脚本仅为试验尝试，应该也不维护了，有需要的可以尝试一下原思路作者的脚本 [Bilibili 旧播放页](https://greasyfork.org/zh-CN/scripts/394296-bilibili-%E6%97%A7%E6%92%AD%E6%94%BE%E9%A1%B5
+) 写得应该挺完善的
 
 ![图片预览](./replace.jpg)
 
