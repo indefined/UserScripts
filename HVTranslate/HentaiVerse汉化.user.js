@@ -176,7 +176,7 @@ var words = {
         '/Are you sure you wish to start this Arena Challenge\\?/' : '是否确认进入竞技场挑战？',
         '/Are you sure you wish to spend ([\\d,]+) tokens? to start this Arena Challenge\\?/' : '是否确认消耗 $1 个令牌进入战场？',
         '/Are you sure you wish to enter the Ring of Blood\\?/' : '是否确认进入浴血擂台挑战？',
-        '/Are you sure you wish to spend ([\\d,]+) tokens? to enter the Ring of Blood\\?/' : '是否消耗 $1 个鲜血令牌确认进入浴血擂台挑战？',
+        '/Are you sure you wish to spend ([\\d,]+) tokens? to enter the Ring of Blood\\?/' : '是否确认消耗 $1 个鲜血令牌进入浴血擂台挑战？',
         '/Enter a name for this equipment\\./' : '请输入装备名称（最大50个字符，仅支持字母和数字和非特殊字符)',
 
         //直接写在onclick里的
@@ -198,6 +198,7 @@ var words = {
         'Insufficient do-overs.' : '下调数值超过每日限制',
         'Insufficient EXP.' : '可分配属性点不足',
 
+        'No such equipment' : '装备不存在',
         'Equipment is too high level to equip.' : '你无法穿戴比自己等级高的装备',
         'That item cannot be used as an offhand with that main weapon.' : '除非是太刀+脇差，否则不能在装备非单手武器的情况下在副手装备其他武器',
         'Cannot equip the same item in two slots.' : '不能把相同的装备同时穿戴在两个部位上',
@@ -1353,10 +1354,11 @@ var words = {
         'Featherweight Charm enchantment' : '轻如鸿毛 的附魔效果',
         'Voidseeker\'s Blessing enchantment' : '虚空探索者的祝福 的附魔效果',
         'Can be used to reset the unlocked potencies and experience of an equipment piece.' : '可以用于重置装备的潜能等级',
-        'These fragments can be used in the forge to permanently soulfuse an equipment piece to you, which will make it level as you do.' : '这个碎片可以将一件装备与你灵魂绑定，灵魂绑定的装备会随着你的等级一同成长。',
 
+        'These fragments can be used in the forge to permanently soulfuse an equipment piece to you, which will make it level as you do.' : '这个碎片可以将一件装备与你灵魂绑定，灵魂绑定的装备会随着你的等级一同成长。',
         'You can exchange this token for the chance to face a legendary monster by itself in the Ring of Blood.' : '你可以用这些令牌在浴血擂台里面换取与传奇怪物对阵的机会',
         'You can use this token to unlock monster slots in the Monster Lab, as well as to upgrade your monsters.' : '你可以用这些令牌开启额外的怪物实验室槽位，也可以升级你的怪物',
+        'Use this ticket on a lottery to add 100 tickets and double your effective ticket count. Will not increase effective count past 10% of the total tickets sold.' : '你可以使用这张彩券兑换100张当期彩票，并且让自己持有的彩票数量翻倍（效果在开奖时计算，最多不超过总奖池10%）',
 
         //怪物相关
         'You can fuse this crystal with a monster in the monster tab to increase its' : '你可以用这种水晶在怪物实验室里面为一个怪物提升它的',
@@ -1471,7 +1473,7 @@ var words = {
         'An ancient server-grade motherboard. Give to Snowflake to help reassemble the Legendary Precursor Servers.' : '古老的服务器级主板。交给雪花帮忙重组出传说中的旧世代服务器。(2015 复活节活动)',
         'An ancient server-grade processor module. Give to Snowflake to help reassemble the Legendary Precursor Servers.' : '古老的服务器级处理器模组。交给雪花帮忙重组出传说中的旧世代服务器。(2015 复活节活动)',
         'An ancient set of server-grade ECC RAM. Give to Snowflake to help reassemble the Legendary Precursor Servers.' : '古老的服务器级错误修正码内存。交给雪花帮忙重组出传说中的旧世代服务器。(2015 复活节活动)',
-        'An ancient 1U rack-mounted server chassis. Give to Snowflake to help reassemble the Legendary Precursor Servers.' : '古老的 1U 机架式服务器机壳。交给雪花帮忙重组出传说中的旧世代服务器。',
+        'An ancient 1U rack-mounted server chassis. Give to Snowflake to help reassemble the Legendary Precursor Servers.' : '古老的 1U 机架式服务器机壳。交给雪花帮忙重组出传说中的旧世代服务器。(2015 复活节活动)',
         'An ancient gigabit ethernet network card. Give to Snowflake to help reassemble the Legendary Precursor Servers.' : '古老的超高速以太网路卡。交给雪花帮忙重组出传说中的旧世代服务器。(2015 复活节活动)',
         'An ancient server-grade storage device. Give to Snowflake to help reassemble the Legendary Precursor Servers.' : '古老的服务器级储存装置。交给雪花帮忙重组出传说中的旧世代服务器。(2015 复活节活动)',
         'An ancient dual redundant power supply unit. Give to Snowflake to help reassemble the Legendary Precursor Servers.' : '古老的双冗馀电源供应单元。交给雪花帮忙重组出传说中的旧世代服务器。(2015 复活节活动)',
@@ -2008,9 +2010,9 @@ var words = {
         'No Bonus' : '无加成',
 
         'Font Engine' : '文字引擎',
-        'Here you can choose a custom font instead of the standard HentaiVerse font engine.' : '在这里你可以选择HV的默认的字体引擎',
+        'Here you can choose a custom font instead of the standard HentaiVerse font engine.' : '在这里你可以选择使用自定义字体代替HV的默认的字体引擎，',
+        'This mostly affects how fast pages will render and how pretty they will look.' : '这将大幅改善页面的加载速度以及页面显示的字体效果',
         'Use Custom Font (specify below - this font MUST be installed on your local system to work)' : '使用自定义字体（注意，所指定的字体必须已安装在本地系统中）',
-        'This mostly affects how fast pages will render and how pretty they will look.' : '这将大幅影响页面的加载速度以及页面显示的字体样式',
         'font-family' : '字体名称',
         'font-size' : '字体大小',
         'font-weight' : '字体深浅',
@@ -2044,6 +2046,7 @@ var words = {
         'Here you can set which spells will be automatically cast at the start of each battle' : '这里你可以选择在战斗中自动释放的法术',
         'Note that you have to unlock one or more of the Innate Arcana ' : '你必须在',
         'to use these.' : '中购买了Innate Arcana才可以使用这个功能',
+        'You do not have any autocast slots.' : '你现在还没有开放自动施法槽。（购买Innate Arcana之后可能会有一段时间延迟）',
         'If your MP decreases below 10%, the innate spells will dissipate. They will be recast when it goes back above 25%.' : '如果你的MP低于10%，你将无法维持自动施法，直到你的MP回复到25%以上',
         'Upkeep' : '维持法术需消耗',
         'MP/round' : '魔力/回合',
@@ -2330,7 +2333,7 @@ var words = {
         'Stock:' : '库存：',
         'The Weapon Lottery lets you spend GP on a chance to win the specific equipment piece shown on the left.' : '使用GP购买武器彩票有机会赢取“无双”武器',
         'Each lottery period lasts 24 hours. At midnight UTC, a drawing is held, and a new lottery period starts.' : '每期彩票发行期为24小时，武器彩票于协调世界时 0点 开奖，同时发行新一期彩票',
-        'In addition to normal tickets, you can also spend a Golden Lottery Ticket to add 100 tickets and double your effective ticket count at the time of drawing. This will not increase the effective ticket count past 10% of the total purchased tickets. Golden Lottery Tickets can only be acquired as a consolation prize from the lottery.' : '你可以使用黄金彩票券令自己获得100张彩票，或者让自己持有的彩票数量翻倍（效果在开奖时计算，最高不超过10%总售出彩票）。黄金彩票券只能通过购买彩票中奖获得。',
+        'In addition to normal tickets, you can also spend a Golden Lottery Ticket to add 100 tickets and double your effective ticket count at the time of drawing. This will not increase the effective ticket count past 10% of the total purchased tickets. Golden Lottery Tickets can only be acquired as a consolation prize from the lottery.' : '你也可以使用黄金彩票券兑换100张彩票，并且让自己持有的彩票数量翻倍（效果在开奖时计算，最高不超过10%总售出彩票）。黄金彩票券只能通过购买彩票中奖获得。',
         'The number of items granted by the 2nd-5th prize will increase with the size of the pot. You can only ever win one of the prizes no matter how many tickets you purchase.' : '2-5等奖的奖品数量取决于彩池的大小，无论你购买了多少注彩票，你只能中一个奖项，如果你不想要一等奖，目标只是2-5等奖的物品奖励，那么你可以点击一等奖下面的DO NOT WANT按钮，这会令你放弃赢得头奖的资格，增加你20%赢取2-5等奖的概率',
         'The Armor Lottery lets you spend GP on a chance to win the specific equipment piece shown on the left.' : '使用GP购买防具彩票有机会获得“无双”防具',
         'Each lottery period lasts 24 hours. At noon UTC, a drawing is held, and a new lottery period starts.' : '每期彩票持续24小时，防具彩票于协调世界时 12点 开奖，同时发行新一期彩票',
@@ -2958,7 +2961,7 @@ var words = {
     hookAlertTranslate();
 
     function start() {
-        console.time('hvtranslate');
+        //console.time('hvtranslate');
         if (!document.getElementById('textlog')) {
             translateAllText();
             translateElemTitle();
@@ -2976,7 +2979,7 @@ var words = {
                 translated = false;
             }
         }
-        console.timeEnd('hvtranslate');
+        //console.timeEnd('hvtranslate');
     }
 
     if (document.getElementById('expholder') && !!document.getElementById('expholder').title) return; //检测到已经有战斗汉化在运行则退出

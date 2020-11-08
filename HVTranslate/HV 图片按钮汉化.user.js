@@ -219,11 +219,11 @@
             'active' : '/y/shops/lottery_golden_a.png',
             'disactive' : '/y/shops/lottery_golden_d.png'
         },{
-            'text' : '下一个彩票>',
+            'text' : '下一期彩票>',
             'active' : '/y/shops/lottery_next_a.png',
             'disactive' : '/y/shops/lottery_next_d.png'
         },{
-            'text' : '<上一个彩票',
+            'text' : '<上一期彩票',
             'active' : '/y/shops/lottery_prev_a.png',
             'disactive' : '/y/shops/lottery_prev_d.png'
         },{
@@ -369,7 +369,7 @@
             'active' : '/y/monster/undead_a.png',
             'disactive' : '/y/monster/undead.png'
         },{
-            'text' : '锤击',
+            'text' : '敲击',
             'active' : '/y/monster/crsh_a.png',
             'disactive' : '/y/monster/crsh.png'
         },{
