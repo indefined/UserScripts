@@ -2,7 +2,7 @@
 // @name         网易CC直播净化
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.1.10
+// @version      0.1.11
 // @description  自定义屏蔽CC直播HTML5网页大部分不想看到的碍眼特效和内容
 // @author       indefined
 // @match        *://cc.163.com/*
@@ -241,6 +241,7 @@ div#advertising {
 /*右侧榜单区，平时折叠*/
 div#room-tabs {
     height: 40px;
+    min-height: unset !important;
 }
 #room-tabs>div>div:not(:first-child) {
     display: none !important;
