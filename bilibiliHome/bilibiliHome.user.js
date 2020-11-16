@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.6.9
+// @version      0.6.10
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -916,20 +916,36 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                 target.innerText = '获取中...';
                 target.style['pointer-events'] = 'none';
                 new Promise((resolve,reject)=>{
+                    let tip = '请求授权接口错误';
                     GM_xmlhttpRequest({
                         method: 'GET',timeout:10000,
                         url:'https://passport.bilibili.com/login/app/third?appkey=27eb53fc9058f8c3'
                         +'&api=https%3A%2F%2Fwww.mcbbs.net%2Ftemplate%2Fmcbbs%2Fimage%2Fspecial_photo_bg.png&sign=04224646d1fea004e79606d3b038c84a',
                         onload: res=> {
                             try{
-                                resolve(JSON.parse(res.response).data.confirm_uri)
+                                let data = JSON.parse(res.response);
+                                if (data.code||!data.data) {
+                                    reject({tip,msg:data.msg||data.message||data.code,data});
+                                }
+                                else if (!data.data.has_login) {
+                                    reject({tip,msg:'你必须登录B站之后才能使用授权',data});
+                                }
+                                else if (!data.data.confirm_uri) {
+                                    reject({tip,msg:'无法获得授权网址',data});
+                                }
+                                else {
+                                    resolve(data.data.confirm_uri);
+                                }
                             }
-                            catch(e){reject(e)}
+                            catch(e){
+                                reject({tip,msg:'返回数据异常:',data:res.response});
+                            }
                         },
-                        onerror: e=>reject({msg:e.error,status:e.status,toString:()=>'请求接口错误'}),
-                        ontimeout: e=>reject({msg:e.error,status:e.status,toString:()=>'请求接口超时'})
+                        onerror: e=>reject({tip,msg:e.error||e.status,data:e}),
+                        ontimeout: e=>reject({tip,msg:'请求超时',data:e})
                     });
                 }).then(url=>new Promise((resolve,reject)=>{
+                    let tip = '获取授权错误';
                     GM_xmlhttpRequest({
                         method: 'GET',url,timeout:10000,
                         onload: res=> {
@@ -939,16 +955,21 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                                     this.storageAccessKey(key[1]);
                                     tools.toast('获取授权成功');
                                     target.innerText = '删除授权';
+                                    resolve();
                                 }
-                                resolve();
-                            }catch(e){reject(e)}
+                                else {
+                                    reject({tip,msg:'没有获得匹配的密钥',data:res});
+                                }
+                            }catch(e){
+                                reject({tip,msg:'解析数据错误',data:e})
+                            }
                         },
-                        onerror: e=>reject({msg:e.error,status:e.status,toString:()=>'获取授权错误'}),
-                        ontimeout: e=>reject({msg:e.error,status:e.status,toString:()=>'获取授权超时'})
+                        onerror: e=>reject({tip,msg:e.error||e.status,data:e}),
+                        ontimeout: e=>reject({tip,msg:'请求超时',data:e})
                     });
                 })).catch(error=> {
                     target.innerText = '获取授权';
-                    tools.toast('获取授权失败:'+error,error);
+                    tools.toast(`${error.tip}:${error.msg}`,error);
                 }).then(()=>{
                     target.style['pointer-events'] = 'unset';
                 });

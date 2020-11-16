@@ -18,7 +18,7 @@ B站网页端添加APP首页推荐
 - 视频/弹幕预览
 - 全站排行榜
 
-![图片预览](https://greasyfork.org/system/screenshots/screenshots/000/015/605/original/preview.jpg)
+![图片预览](https://greasyfork.org/rails/active_storage/blobs/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBaXd0IiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--dbb03ca1a4335781c93150650b81702c3d7a336e/preview.jpg)
 
 -------------------------
 ## 授权说明
