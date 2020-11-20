@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.6.10
+// @version      0.6.11
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -491,6 +491,15 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
         const data = {1:{},2:{}};
         const loading = element.getLoadingDiv();
         const detail = {};
+        const arc_type = 1;//202010月左右全站全部排行失效，改为提供近期排行
+        /*
+        //删除日期选项
+        day = 3;
+        rankingAll.lastChild.style = tab.style = dropDown.style = 'display: none;';
+        rankingHead.insertAdjacentHTML('beforeend',`
+                <a href="//www.bilibili.com/v/popular/rank" target="_blank" class="more more-link" style="float: right;background: white;">
+                更多<i class="bilifont bili-icon_caozuo_qianwang"></i><i class="icon icon-arrow-r"></i></a>`);
+        */
         dropDown.firstChild.innerText = setting.rankingDays[day];
         element._s(dropDown.lastChild,{
             innerHTML:'',
@@ -608,7 +617,7 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
         //获取并缓存数据
         async function getData(type,day){
             if (data[type][day]) return data[type][day];
-            return fetch(`https://api.bilibili.com/x/web-interface/ranking?rid=0&day=${day}&type=${type}&arc_type=0`)
+            return fetch(`https://api.bilibili.com/x/web-interface/ranking?rid=0&day=${day}&type=${type}&arc_type=${arc_type}`)
                 .then(res=>res.json())
                 .then(list=>{
                 if (list.code!=0){
@@ -665,8 +674,12 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
         boxHeight:+GM_getValue('boxHeight')||2,
         noScrollBar:!!GM_getValue('noScrollBar'),
         reduceHeight:!!GM_getValue('reduceHeight',0),
-        rankingDays:{1:'昨天',3:'三日',7:'一周',30:'一月'},
-        rankingDay:GM_getValue('rankingDay',3),
+        rankingDays:{1:'昨天',3:'三日',7:'一周'},
+        rankingDay: (()=>{
+            var rd = GM_getValue('rankingDay',3);
+            if (rd!=1&&rd!=3&&rd!=7) rd = 3;
+            return rd;
+        })(),
         accessKey:GM_getValue('biliAppHomeKey'),
         storageAccessKey(key){
             if(key) {
@@ -770,7 +783,11 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                         {
                             nodeType:'div',style:'margin: 10px 0;',
                             childs: [
-                                '<label style="margin-right: 5px;">全站排行默认显示:</label>',
+                                '<label style="margin-right: 5px;">全站排行默认:</label>',
+                                `<span style="margin-right: 5px;color:#00f" title="${[
+                                    '2020年10月左右起B站不再提供可选日期全站总排行数据',
+                                    '脚本显示排行更改为近期全站投稿排行，因接口限制不再提供30日数据'
+                                ].join('\r\n')}">(?)</span>`,
                                 {
                                     nodeType:'select',
                                     style:'vertical-align: top',
