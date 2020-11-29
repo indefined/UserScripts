@@ -28,13 +28,13 @@ bilibili CC字幕工具
 -------------------------
 ## 功能预览
 
-![新版](https://greasyfork.org/system/screenshots/screenshots/000/014/323/original/newPlayer.jpg)
+![新版](https://greasyfork.org/rails/active_storage/blobs/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBclUzIiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--f55df6c370ac2682667683c652078cb9725597b6/newPlayer.jpg)
 
-![旧版](https://greasyfork.org/system/screenshots/screenshots/000/014/409/original/oldPlayer.jpg)
+![旧版](https://greasyfork.org/rails/active_storage/blobs/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBcmczIiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--a8c11789daf6c01e91b13d888d161da0cee2abaf/oldPlayer.jpg)
 
-![本地](https://greasyfork.org/system/screenshots/screenshots/000/014/446/original/local.jpg)
+![本地](https://greasyfork.org/rails/active_storage/blobs/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBcmszIiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--5d0e5f86db55f13e49213bdadbaf039abfef6855/local.jpg)
 
-![下载](https://greasyfork.org/system/screenshots/screenshots/000/014/325/original/download.jpg)
+![下载](https://greasyfork.org/rails/active_storage/blobs/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBcmMzIiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--0ca392a944dbbb03c264fbb4e5da71e8473c522e/download.jpg)
 
 -------------------------
 ## 兼容性
