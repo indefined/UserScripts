@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.17.1
+// @version      0.5.17.2
 // @description  可以在B站加载外挂本地字幕、下载B站的CC字幕，旧版B站播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -75,18 +75,18 @@
 0.938l-2.48,-2.48a1,1 0 0 0 -0.287,-1.958l-1.672,0l-1.328,-1.328l0,-0.672a1,1 0 0 1 1,-1l2,0a1,1 0 0 0 0,-2l-3,\
 0a2,2 0 0 0 -1.977,1.695l-5.195,-5.195z"/></svg>`,
         newDisableIcon:`
-<span class="bp-svgicon"><svg width="22" height="22" viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg">\
+<svg width="22" height="22" viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg">\
 <path d="M15.172 18H4a2 2 0 0 1-2-2V6c0-.34.084-.658.233-.938l-.425-.426a1 1 0 1 1 1.414-1.414l15.556 15.556a1 \
 1 0 0 1-1.414 1.414L15.172 18zM4.962 7.79C4.385 8.141 4 8.776 4 9.5v3a2 2 0 0 0 2 2h3a1 1 0 0 0 0-2H7a1 1 0 0 1\
 -1-1v-1a1 1 0 0 1 .713-.958L4.962 7.79zM6.828 4H18a2 2 0 0 1 2 2v10c0 .34-.084.658-.233.938l-2.48-2.48A1 1 0 0 \
 0 17 12.5h-1.672L14 11.172V10.5a1 1 0 0 1 1-1h2a1 1 0 0 0 0-2h-3a2 2 0 0 0-1.977 1.695L6.828 4z" fill="#fff" \
-fill-rule="evenodd"></path></svg></span>`,
+fill-rule="evenodd"></path></svg>`,
         newEnableIcon:`
-<span class="bp-svgicon"><svg width="22" height="22" viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg">\
+<svg width="22" height="22" viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg">\
 <path d="M4 4h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm5 5.5a1 1 0 1 0 0-2H6a2 \
 2 0 0 0-2 2v3a2 2 0 0 0 2 2h3a1 1 0 0 0 0-2H7a1 1 0 0 1-1-1v-1a1 1 0 0 1 1-1h2zm8 0a1 1 0 0 0 0-2h-3a2 \
 2 0 0 0-2 2v3a2 2 0 0 0 2 2h3a1 1 0 0 0 0-2h-2a1 1 0 0 1-1-1v-1a1 1 0 0 1 1-1h2z" fill="#fff" \
-fill-rule="evenodd"></path></svg></span>`,
+fill-rule="evenodd"></path></svg>`,
         createAs(nodeType,config,appendTo){
             const element = document.createElement(nodeType);
             config&&this.setAs(element,config);
@@ -820,7 +820,7 @@ fill-rule="evenodd"></path></svg></span>`,
             this.selectedLocal = false;
             this.iconBtn = elements.getAs('.bilibili-player-video-btn-subtitle');
             this.panel = elements.getAs('.bilibili-player-video-subtitle-setting-lan');
-            this.icon = this.iconBtn.querySelector('.bilibili-player-iconfont-subtitle');
+            this.icon = this.iconBtn.querySelector('.bilibili-player-iconfont-subtitle span');
             if(this.panel){
                 this.initUI();
                 //设置ID标记视频为已注入，防止二次初始化
