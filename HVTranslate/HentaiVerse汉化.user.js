@@ -12,7 +12,7 @@
 // @include        *://hentaiverse.org/*
 // @include        *://alt.hentaiverse.org/*
 // @core           http://userscripts-mirror.org/scripts/show/41369
-// @version        2020.10.07
+// @version        2020.11.30
 // @grant none
 // ==/UserScript==
 (function () {
@@ -2912,7 +2912,7 @@ var words = {
             const isDynamic = dynamicElem.includes(selector);
             const dict = value.map(buildDict).flat();
 
-            translateText(elem, dict, dynamic); //翻译文本
+            translateText(elem, dict, isDynamic); //翻译文本
             if (isDynamic) {
                 dynamicDict.set(elem, dict); //存储字典以备动态翻译使用
                 observer.observe(elem, {childList:true}); //监听翻译动态内容

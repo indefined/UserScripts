@@ -31,11 +31,11 @@
 - 如果你要在论坛买东西，挑好东西之后最好切换回原文再复制内容，因为别人并不一定看得懂经过翻译过后的东西
 
 
-### Hentaiverse汉化 v2020.10.07 [点击此处安装](https://github.com/indefined/UserScripts/raw/master/HVTranslate/HentaiVerse%E6%B1%89%E5%8C%96.user.js)
+### Hentaiverse汉化 v2020.11.30 [点击此处安装](https://github.com/indefined/UserScripts/raw/master/HVTranslate/HentaiVerse%E6%B1%89%E5%8C%96.user.js)
 
 - 原贴吧**HV界面和其它汉化**脚本，现已基本完成对整个hentaiverse的完全汉化
 - 本脚本大致最初由 [ggxxsol](https://greasyfork.org/scripts/9680) 创建，后由 [NeedXuyao](https://greasyfork.org/zh-CN/scripts/2120) 和贴吧 [mbbdzz](https://tieba.baidu.com/p/4849863522) 修改整合补充
-- 由 [indefined](https://github.com/indefined/UserScripts/tree/master/HVTranslate) 添加装备/物品/技能悬浮窗汉化功能的实现及翻译，添加原文切换功能
+- 由 [indefined](https://github.com/indefined/UserScripts/tree/master/HVTranslate) 添加装备/物品/技能悬浮窗汉化功能的实现及翻译，添加原文切换功能；[SukkaW](https://github.com/SukkaW) 重构优化
 - 除了没有装备高亮和不能在论坛使用之外，本脚本完全包含上一个脚本所有汉化内容，可单独使用，与其它脚本的兼容性比上一个脚本高
 - 此脚本已完全整合下方HV战斗汉化，**与独立的HV战斗汉化脚本互斥**，默认不开启，**如需开启在战斗界面中双击下方经验条**
 - 如与Live Percentile Ranges同时使用，需要将脚本运行顺序置于Live Percentile Ranges之后，查询不同品质范围需要切换到英文状态
