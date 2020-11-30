@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.17
+// @version      0.5.17.1
 // @description  可以在B站加载外挂本地字幕、下载B站的CC字幕，旧版B站播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -830,7 +830,7 @@ fill-rule="evenodd"></path></svg></span>`,
                 //强制显示新版播放器CC字幕按钮，不管视频有没有字幕，反正可以选择本地字幕
                 this.iconBtn.style = 'display:block';
                 //视频本身没有字幕时把按钮图标设置成关闭状态
-                //if(!this.hasSubtitles&&this.icon) this.icon.innerHTML = elements.newDisableIcon;
+                if(!this.hasSubtitles&&this.icon) this.icon.innerHTML = elements.newDisableIcon;
                 //设置ID标记视频为已注入，防止二次初始化
                 this.iconBtn.id = 'bilibili-player-subtitle-btn';
                 new MutationObserver((mutations,observer)=>{
