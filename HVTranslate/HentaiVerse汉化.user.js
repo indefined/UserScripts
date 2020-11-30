@@ -2764,11 +2764,9 @@ var words = {
     // translatedList格式：key:已翻译元素, value: 该元素已被翻译属性和原文键值对（目前没考虑无法直接用key赋值的属性）
     //原文切换功能
     function restoreTranslate() {
-        translatedList.forEach(function (data, elem){
+        translatedList.forEach((data, elem) => {
             for (var item in data) {
-                var temp = elem[item];
-                elem[item] = data[item];
-                data[item] = temp;
+                [elem[item], data[item]] = [data[item], elem[item]];
             }
         });
         translated = !translated;
@@ -2839,18 +2837,20 @@ var words = {
 
     // function to decide whether a parent tag will have its text replaced or not
     function isTagOk(tag) {
-        return tagsWhitelist.indexOf(tag) === -1;
+        return !tagsWhitelist.includes(tag);
     }
 
     //翻译用到的字典变量
-    var regexps = {}; //存储转换过的字典，key值和word字典对应分组名相同，value格式见下方buildDict;
+    const regexps = new Map(); //存储转换过的字典，key值和word字典对应分组名相同，value格式见下方buildDict;
 
     //转换字典，使用JoeSimmons的方法将字符串字典转换为带正则表达式的匹配数组
     function buildDict(group) {
-        if (regexps[group]) return regexps[group];
+        if (regexps.has(group)) return regexps.get(group);
+
         delete words[group][''];//删除空行
         var reg;
-        regexps[group] = Object.entries(words[group]).map(([word,value])=>{
+
+        const regexp = Object.entries(words[group]).map(([word,value])=>{
             if (reg = word.match(rIsRegexp)) {
                 reg = new RegExp(reg[1], 'g')
             } else {
@@ -2858,9 +2858,12 @@ var words = {
                     return fullMatch === '\\*' ? '*' : '[^ ]*';
                 }), 'g');
             }
-            return {reg: reg, value: value};
+            return {reg, value};
         });
-        return regexps[group];
+
+        regexps.set(group, regexp);
+
+        return regexp;
     }
 
     //执行查找的xpath表达式，查找目标元素下的所有文本
@@ -2902,15 +2905,15 @@ var words = {
             });
         });
         //遍历分组字典
-        for (var selector in dictsMap) {
-            var elem = document.body.querySelector(selector);
+        for (const [selector, value] of Object.entries(dictsMap)) {
+            const elem = document.body.querySelector(selector);
             if (!elem) continue;
-            var dynamic = dynamicElem.includes(selector),
-                //转换必要的翻译字典
-                dict = dictsMap[selector].map(buildDict).flat();
+
+            const isDynamic = dynamicElem.includes(selector);
+            const dict = value.map(buildDict).flat();
 
             translateText(elem, dict, dynamic); //翻译文本
-            if (dynamic) {
+            if (isDynamic) {
                 dynamicDict.set(elem, dict); //存储字典以备动态翻译使用
                 observer.observe(elem, {childList:true}); //监听翻译动态内容
             }
