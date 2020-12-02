@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BMoe2020
 // @namespace    indefined
-// @version      0.1.2
+// @version      0.1.2.1
 // @description  计(穷)算(举)2020年度动画大选实际票数
 // @author       indefined
 // @include      https://www.bilibili.com/blackboard/AOY2020.html*
@@ -31,6 +31,8 @@
     //new MutationObserver(console.log).observe(qa('.t-space-container.plat-section-space')[2], {childList:true, subtree:true})
     //qa('.t-space-container.plat-section-space')[2].insertAdjacentHTML('afterbegin', '<span id="start-culc" style="background: white;text-align: center;font-size: 50px;cursor: pointer;">计算</span>');
     //q('#start-culc').onclick = start;
+    qa('.t-space-container.plat-section-space')[2].insertAdjacentHTML('afterbegin', '<span id="clear-storage" style="background: white;text-align: center;font-size: 50px;cursor: pointer;">清理存储</span>');
+    q('#clear-storage').onclick = ()=>delete localStorage.bmoe2020;
     const timmer = setInterval(()=>{
         if (qa('.voted-container2').length==6){
             clearInterval(timmer);
@@ -75,7 +77,7 @@
             function checkTail() {
                 for (let i = votes.length-1; i> votes.length-10; i--) {
                     const remain = votes[i].value.toFixed(1)%1;
-                    if (remain>0.1&&remain<0.9) return false;
+                    if (remain>0.2&&remain<0.8) return false;
                 }
                 return true;
             }
