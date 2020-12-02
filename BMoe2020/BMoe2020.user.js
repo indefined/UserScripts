@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         BMoe2020
 // @namespace    indefined
-// @version      0.1
+// @version      0.1.1
 // @description  计(穷)算(举)2020年度动画大选实际票数
 // @author       indefined
-// @include      https://www.bilibili.com/blackboard/AOY2020.html
+// @include      https://www.bilibili.com/blackboard/AOY2020.html*
 // @grant        none
 // @run-at       document-idle
 // ==/UserScript==
@@ -52,8 +52,8 @@
                 vote.insertAdjacentElement('afterend',input);
                 return {percent, input};
             }).filter(i=>i);
-            const total = container.children[0].insertAdjacentElement('beforeend', document.createElement('span'));
             if (!votes.length) return;
+            const total = container.children[0].insertAdjacentElement('beforeend', document.createElement('span'));
             function show() {
                 votes.forEach(vote=>(vote.input.value = vote.value));
                 total.textContent = votes.reduce((a,b)=>(a+b.value),0) - votes[0].value;
@@ -80,7 +80,7 @@
             for (let t = datas[index][0]; t<150; t++) {
                 recount(tail.percent/t);
                 if (!checkTail()) continue;
-                const reduce = head.value/100;
+                const reduce = head.value/50;
                 head.value = Math.max(datas[index][1],Math.floor(head.value - reduce));
                 for (let k = 0; k<reduce*2; k++) {
                     recount(head.percent/head.value)
