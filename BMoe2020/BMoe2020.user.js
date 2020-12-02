@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BMoe2020
 // @namespace    indefined
-// @version      0.1.1
+// @version      0.1.2
 // @description  计(穷)算(举)2020年度动画大选实际票数
 // @author       indefined
 // @include      https://www.bilibili.com/blackboard/AOY2020.html*
@@ -39,7 +39,11 @@
     },1000);
     function start(){
         //this.remove();
-        const datas = JSON.parse(localStorage.bmoe2020||'[[1,1],[1,1],[1,1],[1,1],[1,1],[1,1]]');
+        let datas = JSON.parse(localStorage.bmoe2020||'[[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],2]');
+        if (datas[6]!=2) {
+            //增加一位判断数据版本，防止数据出错需要重置
+            datas = [[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],2];
+        }
         qa('.content-container').forEach((container,index)=>{
             //if (index>0) return;
             const votes = qa('.progress-container', container).map(vote=>{
@@ -62,14 +66,16 @@
                 votes.forEach(vote=>(vote.value = vote.percent/rate));
             }
             function checkHead() {
-                for (let i = 0; i< 10; i++) {
-                    if (votes[i].value.toFixed(1)%1) return false;
+                for (let i = 0; i< 20; i++) {
+                    const remain = votes[i].value.toFixed(1)%1;
+                    if (remain>0.2&&remain<0.8) return false;
                 }
                 return true;
             }
             function checkTail() {
                 for (let i = votes.length-1; i> votes.length-10; i--) {
-                    if (votes[i].value.toFixed(1)%1) return false;
+                    const remain = votes[i].value.toFixed(1)%1;
+                    if (remain>0.1&&remain<0.9) return false;
                 }
                 return true;
             }
