@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BMoe2020
 // @namespace    indefined
-// @version      0.1.3
+// @version      0.1.3.1
 // @description  计(穷)算(举)2020年度动画大选实际票数
 // @author       indefined
 // @include      https://www.bilibili.com/blackboard/AOY2020.html*
@@ -28,6 +28,9 @@
         document.execCommand('copy');
         document.body.removeChild(a);
     }
+    function save(datas) {
+        localStorage.bmoe2020 = JSON.stringify(datas);
+    }
     //new MutationObserver(console.log).observe(qa('.t-space-container.plat-section-space')[2], {childList:true, subtree:true})
     //qa('.t-space-container.plat-section-space')[2].insertAdjacentHTML('afterbegin', '<span id="start-culc" style="background: white;text-align: center;font-size: 50px;cursor: pointer;">计算</span>');
     //q('#start-culc').onclick = start;
@@ -42,7 +45,7 @@
     function start(){
         //this.remove();
         let datas = JSON.parse(localStorage.bmoe2020||'[[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],3]');
-        if (datas[6]!=2) {
+        if (datas[6]!=3) {
             //增加一位判断数据版本，防止数据出错需要重置
             datas = [[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],3];
         }
@@ -103,7 +106,7 @@
             }
             show();
             container.children[0].onclick = ()=>copy(votes.map(v=>`${v.input.nextElementSibling.textContent}\t${v.input.previousSibling.textContent}\t${v.value.toFixed(1)}\t${v.input.previousSibling.querySelector('span.progress-line').style.width}`).join('\r\n'));
-            localStorage.bmoe2020 = JSON.stringify(datas);
         });
+        save(datas);
     }
 })();
