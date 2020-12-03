@@ -16,7 +16,7 @@ B站网页端添加APP首页推荐
 - 添加/撤销稍后再看
 - 不喜欢/撤销不喜欢
 - 视频/弹幕预览
-- 全站排行榜
+- 全站排行榜(20201203开始旧版全站排行接口全部失效，已换用新版接口并删除日期选项)
 
 ![图片预览](https://greasyfork.org/rails/active_storage/blobs/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBaXd0IiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--dbb03ca1a4335781c93150650b81702c3d7a336e/preview.jpg)
 

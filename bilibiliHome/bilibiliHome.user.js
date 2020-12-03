@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.6.11
+// @version      0.6.12
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -492,14 +492,13 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
         const loading = element.getLoadingDiv();
         const detail = {};
         const arc_type = 1;//202010月左右全站全部排行失效，改为提供近期排行
-        /*
-        //删除日期选项
-        day = 3;
+        //*
+        //20121203旧排行彻底失效，删除日期选项
         rankingAll.lastChild.style = tab.style = dropDown.style = 'display: none;';
         rankingHead.insertAdjacentHTML('beforeend',`
                 <a href="//www.bilibili.com/v/popular/rank" target="_blank" class="more more-link" style="float: right;background: white;">
                 更多<i class="bilifont bili-icon_caozuo_qianwang"></i><i class="icon icon-arrow-r"></i></a>`);
-        */
+        //*/
         dropDown.firstChild.innerText = setting.rankingDays[day];
         element._s(dropDown.lastChild,{
             innerHTML:'',
@@ -617,7 +616,8 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
         //获取并缓存数据
         async function getData(type,day){
             if (data[type][day]) return data[type][day];
-            return fetch(`https://api.bilibili.com/x/web-interface/ranking?rid=0&day=${day}&type=${type}&arc_type=${arc_type}`)
+            //20121203旧排行彻底失效，删除日期选项
+            return fetch('https://api.bilibili.com/x/web-interface/ranking/v2?rid=0&type=all')
                 .then(res=>res.json())
                 .then(list=>{
                 if (list.code!=0){
@@ -780,6 +780,7 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                                 onclick:()=>document.body.removeChild(this.dialog)
                             }]
                         },
+                        /*
                         {
                             nodeType:'div',style:'margin: 10px 0;',
                             childs: [
@@ -799,6 +800,7 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                                 }
                             ]
                         },
+                        */
                         {
                             nodeType:'div',style:'margin: 10px 0;',
                             childs: [
