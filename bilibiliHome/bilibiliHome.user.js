@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.6.12
+// @version      0.6.12.1
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -564,15 +564,15 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                                 style:'display: inline-block;vertical-align: top;width: 130px;margin-left:3px',
                                 childs:[
                                     '<span class="name"><i class="icon bilifont bili-icon_xinxi_UPzhu" style="background-position: -282px -154px;"></i>'+
-                                    `<a href="//space.bilibili.com/${data.mid}/" target="_blank" title="${data.author}">${data.author}</a></span>`,
+                                    `<a href="//space.bilibili.com/${data.owner&&data.owner.mid||data.mid}/" target="_blank" title="${data.owner&&data.owner.name||data.author}">${data.owner&&data.owner.name||data.author}</a></span>`,
                                     '<span class="play"><i class="icon bilifont bili-icon_shipin_bofangshu"></i>'+
-                                    `<span title="${data.play}">${tools.formatNumber(data.play)}</span></span>`,
+                                    `<span title="${data.play}">${tools.formatNumber(data.stat&&data.stat.view||data.play)}</span></span>`,
                                     '<span class="danmu"><i class="icon bilifont bili-icon_shipin_danmushu"></i>'+
-                                    `<span title="${data.video_review}">${tools.formatNumber(data.video_review)}</span></span>`,
+                                    `<span title="${data.stat&&data.stat.danmaku||data.video_review}">${tools.formatNumber(data.stat&&data.stat.danmaku||data.video_review)}</span></span>`,
                                     '<span class="coin"><i class="icon bilifont bili-icon_shipin_yingbishu"></i>'+
-                                    `<span title="${data.coins}">${tools.formatNumber(data.coins)}</span></span>`,
-                                    `<span>时长:<span style="vertical-align: top;" title="${tools.formatNumber(data.duration)}">${tools.formatNumber(data.duration)}</span>`,
-                                    `<span>综合评分:<span style="vertical-align: top;" title="${data.pts}">${tools.formatNumber(data.pts)}</span></span>`,
+                                    `<span title="${data.stat&&data.stat.coin||data.coins}">${tools.formatNumber(data.stat&&data.stat.coin||data.coins)}</span></span>`,
+                                    `<span>时长:<span style="vertical-align: top;" title="${tools.formatNumber(data.duration,'time')}">${tools.formatNumber(data.duration,'time')}</span>`,
+                                    `<span>综合评分:<span style="vertical-align: top;" title="${data.score||data.pts}">${tools.formatNumber(data.score||data.pts)}</span></span>`,
                                 ]
                             },
                         ]
@@ -596,11 +596,11 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                         {
                             nodeType:'a', target:"_blank",
                             href:`/video/av${itemData.aid}/`,
-                            title:`${itemData.title}\r\n播放:${itemData.play} ${itemData.duration}`,
+                            title:`${itemData.title}\r\n播放:${itemData.stat&&itemData.stat.view||itemData.play} ${tools.formatNumber(itemData.duration, 'time')}`,
                             className:'ri-info-wrap clearfix',
                             childs:[
                                 (i==0?`<div class="lazy-img ri-preview"><img src="${itemData.pic.split(':')[1]}@72w_45h.${tools.imgType}"></div>`:''),
-                                `<div class="ri-detail"><p class="ri-title">${itemData.title}</p><p class="ri-point">综合评分：${tools.formatNumber(itemData.pts)}</p></div>`,
+                                `<div class="ri-detail"><p class="ri-title">${itemData.title}</p><p class="ri-point">综合评分：${tools.formatNumber(itemData.score||itemData.pts)}</p></div>`,
                                 (i==0?{
                                     nodeType:'div',title:'添加到稍后再看',
                                     dataset:{aid:itemData.aid},className:"watch-later-trigger w-later",
