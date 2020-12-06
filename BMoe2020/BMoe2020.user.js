@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BMoe2020
 // @namespace    indefined
-// @version      0.1.4
+// @version      0.1.5
 // @description  计(穷)算(举)2020年度动画大选实际票数
 // @author       indefined
 // @include      https://www.bilibili.com/blackboard/AOY2020.html*
@@ -75,6 +75,7 @@
                 return true;
             }
             function checkTail() {
+                //尾校验在数值大时可行性很低
                 for (let i = votes.length-1; i> votes.length-10; i--) {
                     const remain = votes[i].value.toFixed(1)%1;
                     if (remain>0.2&&remain<0.8) return false;
@@ -92,12 +93,17 @@
                 if (diff==0) continue;
                 min = Math.min(min, diff);
             }
-            //以最小票差为1算最低票不超过percent/min，为防止误差*2
-            for (let t = datas[index][0]; t<tail.percent/min*2; t++) {
-                recount(t/tail.percent);
-                if (!checkTail()) continue;
-                console.log(index, 'tail', t);
-                const reduce = head.value/50;
+            //测试以最低票计算误差不超过3%，约（0.04*最低票*最高票）计算消耗，票值高时效率很低，有保存之前票值的话计算消耗能低很多
+            //以最小票差计算测试达到11%+的误差，约（0.1*最低票差*最高票）计算消耗，从1票开始算效率高于最低票计算，当最低票差大时计算效率很低
+            for (let t = 1; t<50; t++) {
+                //当粗算最高票低于前保存值0.8时票差+1，省得白算
+                if (100/min*t<.8*datas[index][1]) {
+                    console.log(index, 'pass', t);
+                    continue;
+                }
+                recount(t/min);
+                console.log(index, t, +min.toFixed(4));
+                const reduce = head.value/10;
                 head.value = Math.max(datas[index][1],Math.floor(head.value - reduce));
                 for (let k = 0; k<reduce*2; k++) {
                     recount(head.value/head.percent)
