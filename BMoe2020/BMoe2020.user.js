@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BMoe2020
 // @namespace    indefined
-// @version      0.1.5
+// @version      0.1.6
 // @description  计(穷)算(举)2020年度动画大选实际票数
 // @author       indefined
 // @include      https://www.bilibili.com/blackboard/AOY2020.html*
@@ -38,10 +38,10 @@
     qa('.t-space-container.plat-section-space')[2].insertAdjacentHTML('afterbegin', '<span id="clear-storage" style="background: white;text-align: center;font-size: 50px;cursor: pointer;margin-left: 140px;" title="如果出现票数倍数错误，点击重置并刷新页面重试">重置票数存储</span>');
     q('#clear-storage').onclick = ()=>delete localStorage.bmoe2020;
 
-    let datas = JSON.parse(localStorage.bmoe2020||'[[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],3]');
-    if (datas[6]!=3) {
+    let datas = JSON.parse(localStorage.bmoe2020||'');
+    if (datas[6]!=6) {
         //增加一位判断数据版本，防止数据出错需要重置
-        datas = [[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],3];
+        datas = [[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],6];
     }
     const timmer = setInterval(()=>{
         qa('.content-container').forEach((container,index)=>{
@@ -69,7 +69,7 @@
             }
             function checkHead() {
                 for (let i = 0; i< 20; i++) {
-                    const remain = votes[i].value.toFixed(1)%1;
+                    const remain = votes[i].value%1;
                     if (remain>0.2&&remain<0.8) return false;
                 }
                 return true;
@@ -77,7 +77,7 @@
             function checkTail() {
                 //尾校验在数值大时可行性很低
                 for (let i = votes.length-1; i> votes.length-10; i--) {
-                    const remain = votes[i].value.toFixed(1)%1;
+                    const remain = votes[i].value%1;
                     if (remain>0.2&&remain<0.8) return false;
                 }
                 return true;
@@ -103,9 +103,10 @@
                 }
                 recount(t/min);
                 console.log(index, t, +min.toFixed(4));
-                const reduce = head.value/10;
+                const reduce = head.value/5;
                 head.value = Math.max(datas[index][1],Math.floor(head.value - reduce));
                 for (let k = 0; k<reduce*2; k++) {
+                    if (head.value%1e6<0.2||1e6-head.value%1e6<0.2) continue; //排除百万整数值，在6位精度下该值一定能算出整数
                     recount(head.value/head.percent)
                     if (checkHead()) {
                         finsh = true;
