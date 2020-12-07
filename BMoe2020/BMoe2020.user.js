@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BMoe2020
 // @namespace    indefined
-// @version      0.1.6
+// @version      0.1.6.1
 // @description  计(穷)算(举)2020年度动画大选实际票数
 // @author       indefined
 // @include      https://www.bilibili.com/blackboard/AOY2020.html*
@@ -38,7 +38,7 @@
     qa('.t-space-container.plat-section-space')[2].insertAdjacentHTML('afterbegin', '<span id="clear-storage" style="background: white;text-align: center;font-size: 50px;cursor: pointer;margin-left: 140px;" title="如果出现票数倍数错误，点击重置并刷新页面重试">重置票数存储</span>');
     q('#clear-storage').onclick = ()=>delete localStorage.bmoe2020;
 
-    let datas = JSON.parse(localStorage.bmoe2020||'');
+    let datas = JSON.parse(localStorage.bmoe2020||'[]');
     if (datas[6]!=6) {
         //增加一位判断数据版本，防止数据出错需要重置
         datas = [[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],6];
