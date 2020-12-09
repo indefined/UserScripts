@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BMoe2020
 // @namespace    indefined
-// @version      0.1.6.1
+// @version      0.1.7
 // @description  计(穷)算(举)2020年度动画大选实际票数
 // @author       indefined
 // @include      https://www.bilibili.com/blackboard/AOY2020.html*
@@ -39,9 +39,9 @@
     q('#clear-storage').onclick = ()=>delete localStorage.bmoe2020;
 
     let datas = JSON.parse(localStorage.bmoe2020||'[]');
-    if (datas[6]!=6) {
+    if (datas[6]!=7) {
         //增加一位判断数据版本，防止数据出错需要重置
-        datas = [[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],6];
+        datas = [[99,260247],[31,77392],[36,119900],[84,81535],[66,140128],[95,60899],7];
     }
     const timmer = setInterval(()=>{
         qa('.content-container').forEach((container,index)=>{
@@ -64,21 +64,14 @@
                 votes.forEach(vote=>(vote.input.value = vote.value));
                 total.textContent = (votes.reduce((a,b)=>(a+b.value),0) - votes[0].value).toLocaleString();
             }
-            function recount(total) {
-                votes.forEach(vote=>(vote.value = vote.percent*total));
-            }
-            function checkHead() {
-                for (let i = 0; i< 20; i++) {
-                    const remain = votes[i].value%1;
-                    if (remain>0.2&&remain<0.8) return false;
-                }
-                return true;
-            }
-            function checkTail() {
-                //尾校验在数值大时可行性很低
-                for (let i = votes.length-1; i> votes.length-10; i--) {
-                    const remain = votes[i].value%1;
-                    if (remain>0.2&&remain<0.8) return false;
+            function recount(total, verify) {
+                let count = 0;
+                for (const vote of votes) {
+                    vote.value = vote.percent*total
+                    if (verify&&count++<20) {
+                        const remain = vote.value%1;
+                        if (remain>0.2&&remain<0.8) return false;
+                    }
                 }
                 return true;
             }
@@ -86,39 +79,34 @@
             const tail = votes[votes.length-1],
                   head = votes[1];
             let finsh = false;
-            let min = 1;
-            //计算最小票差
+            let minP = 1;
+            //计算最小票差百分比
             for (let i = (votes.length/2).toFixed(0); i<votes.length-1; i++) {
                 let diff = votes[i-1].percent - votes[i].percent;
                 if (diff==0) continue;
-                min = Math.min(min, diff);
+                minP = Math.min(minP, diff);
             }
-            //测试以最低票计算误差不超过3%，约（0.04*最低票*最高票）计算消耗，票值高时效率很低，有保存之前票值的话计算消耗能低很多
-            //以最小票差计算测试达到11%+的误差，约（0.1*最低票差*最高票）计算消耗，从1票开始算效率高于最低票计算，当最低票差大时计算效率很低
-            for (let t = 1; t<50; t++) {
-                //当粗算最高票低于前保存值0.8时票差+1，省得白算
-                if (100/min*t<.8*datas[index][1]) {
-                    console.log(index, 'pass', t);
-                    continue;
+            //最小票差误差可以达到一半(0.000001/0.000002)，50%偏差分割穷举范围会重叠，直接进行无条件穷举效率反而更高
+            let minT = 1;
+            while (100*minT/minP<.5*datas[index][1]) {
+                //50%最大误差算，最小票差计算出来的结果不可能低于保存值50%
+                console.log(index, 'pass', minT, minP);
+                minT++;
+            }
+
+            let min = +(Math.max(datas[index][1], 100*minT/minP/2)).toFixed(0); //保存值或最小票反推一半中的大值作为起始
+            if (min%1e6==0) min++; //排除百万整数值，在6位精度下该值一定能算出整数
+            const max = +(100*minT/minP*50).toFixed(0); //以50票最小票差计算作为最大值……可以说是相当离谱一个值了，以当前20+W计算如果全部不命中会卡好几秒钟
+            console.log(index, +minP.toFixed(4), minT, min, max)
+            for (let value=min; value<max; value++) {
+                if (recount(value/head.percent, true)) {
+                    finsh = true;
+                    datas[index] = [+tail.value.toFixed(0), +head.value.toFixed(0)];
+                    console.log(index, minT, value, value-min)
+                    save(datas);
+                    show();
+                    break;
                 }
-                recount(t/min);
-                console.log(index, t, +min.toFixed(4));
-                const reduce = head.value/5;
-                head.value = Math.max(datas[index][1],Math.floor(head.value - reduce));
-                for (let k = 0; k<reduce*2; k++) {
-                    if (head.value%1e6<0.2||1e6-head.value%1e6<0.2) continue; //排除百万整数值，在6位精度下该值一定能算出整数
-                    recount(head.value/head.percent)
-                    if (checkHead()) {
-                        finsh = true;
-                        datas[index] = [tail.value.toFixed(0), head.value.toFixed(0)];
-                        console.log(index, t, k)
-                        save(datas);
-                        show();
-                        break;
-                    }
-                    head.value += 1;
-                }
-                if (finsh) break;
             }
             console.timeEnd(index);
             container.children[0].onclick = ()=>copy(votes.map(v=>`${v.input.nextElementSibling.textContent}\t${v.input.previousSibling.textContent}\t${v.value.toFixed(1)}\t${v.input.previousSibling.querySelector('span.progress-line').style.width}`).join('\r\n'));
