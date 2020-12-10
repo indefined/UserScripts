@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         BMoe2020
 // @namespace    indefined
-// @version      0.1.7
-// @description  计(穷)算(举)2020年度动画大选实际票数
+// @version      0.1.8
+// @description  （已失效）计(穷)算(举)2020年度动画大选实际票数
 // @author       indefined
 // @include      https://www.bilibili.com/blackboard/AOY2020.html*
 // @grant        none
@@ -34,9 +34,14 @@
     //new MutationObserver(console.log).observe(qa('.t-space-container.plat-section-space')[2], {childList:true, subtree:true})
     //qa('.t-space-container.plat-section-space')[2].insertAdjacentHTML('afterbegin', '<span id="start-culc" style="background: white;text-align: center;font-size: 50px;cursor: pointer;">计算</span>');
     //q('#start-culc').onclick = start;
-    document.head.insertAdjacentHTML('beforeend', '<style>.voted-progress>input[type="number"] {width: 90px;}</style>');
-    qa('.t-space-container.plat-section-space')[2].insertAdjacentHTML('afterbegin', '<span id="clear-storage" style="background: white;text-align: center;font-size: 50px;cursor: pointer;margin-left: 140px;" title="如果出现票数倍数错误，点击重置并刷新页面重试">重置票数存储</span>');
+
+    qa('.t-space-container.plat-section-space')[2].insertAdjacentHTML('afterbegin', '<div id="clear-storage" style="background: white;font-size: 20px;cursor: pointer;">由于B站提供的比例精度下调低于目前最大票位数，脚本已无法计算有效数值。<br>请根据需求删除脚本或者等待后续是否有更新<br>在删除脚本前可点击此标签清空票数存储</div>');
+
+    //document.head.insertAdjacentHTML('beforeend', '<style>.voted-progress>input[type="number"] {width: 90px;}</style>');
+    //qa('.t-space-container.plat-section-space')[2].insertAdjacentHTML('afterbegin', '<span id="clear-storage" style="background: white;text-align: center;font-size: 50px;cursor: pointer;margin-left: 140px;" title="如果出现票数倍数错误，点击重置并刷新页面重试">重置票数存储</span>');
     q('#clear-storage').onclick = ()=>delete localStorage.bmoe2020;
+
+    return;
 
     let datas = JSON.parse(localStorage.bmoe2020||'[]');
     if (datas[6]!=7) {
@@ -70,7 +75,9 @@
                     vote.value = vote.percent*total
                     if (verify&&count++<20) {
                         const remain = vote.value%1;
-                        if (remain>0.2&&remain<0.8) return false;
+                        if (remain>0.2&&remain<0.8) return false; //可正确验证出来的数据上限可能达不到最高有效精度上限的60%
+                        //另一种傻缺验证法，反过来计算比例相同，可验证的数据上限大概能达到最高精度上限80%以上，但是计算量更高
+                        //if ((vote.value.toFixed(0)/votes[0].value).toFixed(4)!=vote.percent) return false;
                     }
                 }
                 return true;
@@ -95,8 +102,7 @@
             }
 
             let min = +(Math.max(datas[index][1], 100*minT/minP/2)).toFixed(0); //保存值或最小票反推一半中的大值作为起始
-            if (min%1e6==0) min++; //排除百万整数值，在6位精度下该值一定能算出整数
-            const max = +(100*minT/minP*50).toFixed(0); //以50票最小票差计算作为最大值……可以说是相当离谱一个值了，以当前20+W计算如果全部不命中会卡好几秒钟
+            const max = 1e6; //6位精度最大只能计算到100W
             console.log(index, +minP.toFixed(4), minT, min, max)
             for (let value=min; value<max; value++) {
                 if (recount(value/head.percent, true)) {
