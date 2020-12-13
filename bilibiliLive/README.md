@@ -26,7 +26,7 @@ bilibili直播间工具
 -------------------------
 ## 功能预览
 
-![设置](https://greasyfork.org/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBbFF0IiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--719753457d431069fe03eb36c0b037484cfee208/blivePlus.fullScreen.jpg)
+![设置](https://github.com/indefined/UserScripts/raw/master/bilibiliLive/setting.jpg)
 
 ![礼物包裹](https://greasyfork.org/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBbEl0IiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--68b45739503dfedbdcf2c7ae4a36e4d22aa0aafa/blivePlus.normal.jpg)
 

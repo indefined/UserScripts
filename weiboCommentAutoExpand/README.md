@@ -24,7 +24,7 @@
   - **注意直接复制此行代码浏览器会把`javascript:`删掉，所以自己需要手动输入前面的`javascript:`**
   - 输入之后按回车键页面会刷新生效，如果没有生效或者跳到搜索请检查是否输入正确 **（特别注意`:`冒号需要在半角英文状态下输入）**
 
-![预览](https://greasyfork.org/system/screenshots/screenshots/000/020/676/original/preview.jpg)
+![预览](https://greasyfork.org/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBaEZNIiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--c2765697b0b404fe5fdc3ca2a4c349c439b19448/preview.jpg)
 
 -------------------------
 ## 问题说明

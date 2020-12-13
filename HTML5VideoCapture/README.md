@@ -19,14 +19,14 @@ HTML5视频截图器
 - jpg截图压缩并自动下载(适用于部分视频和浏览器)
 - 快捷键支持
 
-![功能界面](https://greasyfork.org/system/screenshots/screenshots/000/017/198/original/HTML5VideoCapture.capture.jpg)
+![功能界面](https://github.com/indefined/UserScripts/raw/master/HTML5VideoCapture/HTML5VideoCapture.capture.jpg)
 
 ## 使用说明
 
 - 脚本启动：使用脚本管理器（目前确认Tampermonkey、Violentmonkey可用）安装脚本
   - 方法1：使用快捷键启动，默认为`ctrl+alt+a`，打开工具栏后可自行设置快捷键和作用范围
   - 方法2：在脚本管理器按钮上点击‘启用HTML5视频截图器’打开工具栏
-  - ![脚本启动](https://greasyfork.org/system/screenshots/screenshots/000/011/875/original/HTML5VideoCapture.TM.jpg) ![脚本启动](https://greasyfork.org/system/screenshots/screenshots/000/011/876/original/HTML5VideoCapture.VM.jpg)
+  - ![脚本启动](https://greasyfork.org/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBblF2IiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--8414179b5dff97d233ceba2617d7038a00109290/HTML5VideoCapture.TM.jpg) ![脚本启动](https://greasyfork.org/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBblV2IiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--37bf37504c27ce1fcbc1c36e4b6aeaf43f9a00ab/HTML5VideoCapture.VM.jpg)
 
 - 视频识别
   - 工具栏启动会自动检测网页中存在的HTML5视频并选中第一个视频作为操作对象

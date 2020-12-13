@@ -12,7 +12,7 @@
 -------------------------
 ## 功能预览
 
-![预览](https://greasyfork.org/system/screenshots/screenshots/000/015/035/original/preview.jpg)
+![预览](https://greasyfork.org/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBdmc1IiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--95bd9a410c9d17bc7b1a57dbfdf87cff96335f12/preview.jpg)
 
 -------------------------
 ## 使用说明
