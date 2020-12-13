@@ -2,7 +2,7 @@
 // @name        bilibili直播间工具
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.25
+// @version     0.5.26
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、硬币直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -679,8 +679,8 @@ body.fullscreen-fix div#gift-control-vm {
                 helper.create('span',{
                     style:`color:${outOfDate?'#f00':'#29abe1'};border:1px solid #a068f1;border-radius:3px;cursor:pointer;padding:3px;`,
                     onclick: ()=>{
-                        this.doRequire(v.status?`//api.live.bilibili.com/i/ajaxCancelWearTitle`:`//api.live.bilibili.com/appUser/wearTitle?title=${v.title}`
-                                       ,`${v.status?'取消佩戴':'切换'}头衔`);
+                        if (v.status) this.doRequire('//api.live.bilibili.com/xlive/web-ucenter/v1/user_title/CancelTitle','取消佩戴头衔', {});
+                        else this.doRequire('//api.live.bilibili.com/appUser/wearTitle', '切换头衔', {title: v.title});
                         this.closeDialog();
                     },
                     className:'v-middle dp-i-block',

@@ -26,18 +26,18 @@ bilibili直播间工具
 -------------------------
 ## 功能预览
 
-![设置](https://github.com/indefined/UserScripts/raw/master/bilibiliLive/setting.jpg)
+![设置](https://greasyfork.org/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBbFF0IiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--719753457d431069fe03eb36c0b037484cfee208/blivePlus.fullScreen.jpg)
 
-![礼物包裹](https://greasyfork.org/system/screenshots/screenshots/000/012/707/original/blivePlus.normal.jpg)
+![礼物包裹](https://greasyfork.org/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBbEl0IiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--68b45739503dfedbdcf2c7ae4a36e4d22aa0aafa/blivePlus.normal.jpg)
 
-![勋章](https://greasyfork.org/system/screenshots/screenshots/000/012/708/original/blivePlus.medal.jpg)
-![头衔](https://greasyfork.org/system/screenshots/screenshots/000/011/234/original/blivePlus.title.png)
+![勋章](https://github.com/indefined/UserScripts/raw/master/bilibiliLive/blivePlus.medal.jpg)
+![头衔](https://greasyfork.org/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBa290IiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--9240b36de90450152e369ed4b7dcd3d183373f78/blivePlus.title.png)
 
 鼠标悬停勋章头衔列表各部分上会显示更多提示信息
 
-![全屏](https://greasyfork.org/system/screenshots/screenshots/000/012/709/original/blivePlus.fullScreen.jpg)
+![全屏](https://greasyfork.org/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBbFF0IiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--719753457d431069fe03eb36c0b037484cfee208/blivePlus.fullScreen.jpg)
 
-![视频标题](https://greasyfork.org/system/screenshots/screenshots/000/011/236/original/blivePlus.videoTitle.png)
+![视频标题](https://greasyfork.org/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBa3d0IiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--ecdef3a579a578ee61667071e1fdbef8df4c38ef/blivePlus.videoTitle.png)
 
 -------------------------
 ## 兼容性
