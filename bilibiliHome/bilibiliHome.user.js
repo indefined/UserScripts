@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.6.12.1
+// @version      0.6.12.2
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -471,7 +471,8 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
 .icon{background-position:-282px -90px}.video-info-module .v-data .danmu .icon{background-position:-282px -218px}.video-info-module
 .v-data .star .icon{background-position:-282px -346px}.video-info-module .v-data .coin .icon{background-position:-282px -410px}
 </style>
-<header class="rank-head rank-header"><h3 class="name">排行</h3><div class="bili-tab rank-tab"><div class="bili-tab-item on">全部</div><div class="bili-tab-item">原创</div></div>
+<header class="rank-head rank-header" style="margin-bottom: 16px !important;"><h3 class="name">排行</h3>
+<div class="bili-tab rank-tab"><div class="bili-tab-item on">全部</div><div class="bili-tab-item">原创</div></div>
 <div class="bili-dropdown rank-dropdown"><span class="selected">三日</span><i class="icon icon-arrow-down"></i>
 <ul class="dropdown-list"><li class="dropdown-item" style="display: none;">三日</li><li class="dropdown-item">一周</li></ul></div></header>
 <div class="rank-list-wrap"><ul class="rank-list hot-list"><li class="state"><div class="b-loading"></div></li></ul><ul class="rank-list origin-list">
@@ -566,7 +567,7 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                                     '<span class="name"><i class="icon bilifont bili-icon_xinxi_UPzhu" style="background-position: -282px -154px;"></i>'+
                                     `<a href="//space.bilibili.com/${data.owner&&data.owner.mid||data.mid}/" target="_blank" title="${data.owner&&data.owner.name||data.author}">${data.owner&&data.owner.name||data.author}</a></span>`,
                                     '<span class="play"><i class="icon bilifont bili-icon_shipin_bofangshu"></i>'+
-                                    `<span title="${data.play}">${tools.formatNumber(data.stat&&data.stat.view||data.play)}</span></span>`,
+                                    `<span title="${data.stat&&data.stat.view||data.play}">${tools.formatNumber(data.stat&&data.stat.view||data.play)}</span></span>`,
                                     '<span class="danmu"><i class="icon bilifont bili-icon_shipin_danmushu"></i>'+
                                     `<span title="${data.stat&&data.stat.danmaku||data.video_review}">${tools.formatNumber(data.stat&&data.stat.danmaku||data.video_review)}</span></span>`,
                                     '<span class="coin"><i class="icon bilifont bili-icon_shipin_yingbishu"></i>'+
