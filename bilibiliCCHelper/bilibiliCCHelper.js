@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.17.2
+// @version      0.5.18
 // @description  可以在B站加载外挂本地字幕、下载B站的CC字幕，旧版B站播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -915,28 +915,18 @@ fill-rule="evenodd"></path></svg>`,
             this.datas = {close:{body:[]},local:{body:[]}};
             decoder.data = undefined;
             if(!window.cid||(!window.aid&&!window.bvid)) return;
-            return fetch(`//api.bilibili.com/x/player.so?id=cid:${this.cid}${this.aid?`&aid=${this.aid}`:`&bvid=${this.bvid}`}`).then(res=>{
+            return fetch(`//api.bilibili.com/x/player/v2?cid=${this.cid}${this.aid?`&aid=${this.aid}`:`&bvid=${this.bvid}`}`).then(res=>{
                 if (res.status==200) {
-                    return res.text().then(data=>data.match(/(?:<subtitle>)(.+)(?:<\/subtitle>)/)).then(match=>{
-                        if(!match) throw('无法读取本视频字幕配置');
-                        this.subtitle = JSON.parse(match[1]);
+                    return res.json().then(ret=>{
+                        if(ret.code!=0||!ret.data||!ret.data.subtitle) throw('读取视频字幕配置错误:'+ret.code+ret.message);
+                        this.subtitle = ret.data.subtitle;
                         this.subtitle.count = this.subtitle.subtitles.length;
                         this.subtitle.subtitles.push({lan:'close',lan_doc:'关闭'},{lan:'local',lan_doc:'本地字幕'});
                         return this.subtitle;
                     });
                 }
                 else {
-                    return fetch(`//api.bilibili.com/x/v2/dm/view?${this.aid?`aid=${this.aid}`:`bvid=${this.bvid}`}&oid=${this.cid}&type=1`).then(res=>{
-                        return res.json()
-                    }).then(ret=>{
-                        if (ret.code!=0) throw('无法读取本视频APP字幕配置'+ret.message);
-                        this.subtitle = ret.data && ret.data.subtitle || {subtitles:[]};
-                        this.subtitle.count = this.subtitle.subtitles.length;
-                        this.subtitle.subtitles.forEach(item=>(item.subtitle_url = item.subtitle_url.replace(/https?:\/\//,'//')))
-                        this.subtitle.subtitles.push({lan:'close',lan_doc:'关闭'},{lan:'local',lan_doc:'本地字幕'});
-                        this.subtitle.allow_submit = false;
-                        return this.subtitle;
-                    });
+                    throw('请求字幕配置失败:'+res.statusText);
                 }
             })
         },
