@@ -2,7 +2,7 @@
 // @name        bilibili直播间工具
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.29
+// @version     0.5.30
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、硬币直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -883,15 +883,17 @@ body.fullscreen-fix div#gift-control-vm {
             }
         })();
         const settingBtn = helper.get('.bilibili-live-player-video-controller .setting'),
-              button = settingBtn&&settingBtn.cloneNode(true),
-              panel = helper.create('div',{
-                  className:"panel setting-panel",
-                  style: 'width: max-content;display: none;'
-              },button),
+              //button = settingBtn&&settingBtn.cloneNode(true),
               settingPanel = helper.create('div',{
                   className: 'player-type',
-                  innerHTML:`<div>直播间助手设置</div><style>.blive-setting-btn:hover .panel.setting-panel{display: block!important}<.style>`,
-              },panel);
+                  style: 'padding-top: 5px;line-height: 14px;',
+                  innerHTML:`<div>直播间助手设置</div>`,
+              });
+        if (!settingBtn) return;
+        new MutationObserver(mutations=>{
+            const panel = settingBtn.querySelector('.panel');
+            panel && panel.appendChild(settingPanel);
+        }).observe(settingBtn, {childList:true});
         for(const key in this.settingInfos){
             if(this.settings[key]==undefined) this.settings[key] = true;
             const item = helper.create('div',{className:'blpui-checkbox-container'},settingPanel);
@@ -906,14 +908,6 @@ body.fullscreen-fix div#gift-control-vm {
                 className:'blpui-checkbox-span no-select',
                 innerText:this.settingInfos[key].name
             },item).setAttribute('for',key);
-        }
-        if (settingBtn) {
-            button.insertAdjacentElement('afterbegin', panel);
-            helper.set(button, {
-                className: 'blive-setting-btn',
-                style: 'position: relative;'
-            });
-            settingBtn.insertAdjacentElement('afterend', button);
         }
     },
 
