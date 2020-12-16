@@ -2,7 +2,7 @@
 // @name        bilibili直播间工具
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.26
+// @version     0.5.28
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、硬币直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -220,13 +220,24 @@ body.fullscreen-fix div#gift-control-vm {
     bottom: unset;
 }
 
-.bilibili-live-player-video-controller-content .right-action.p-absolute{
+.live-web-player-controller .right-action.p-absolute{
     position: relative!important;
     display: inline-block!important;
     vertical-align: super;
     float: right;
 }
-
+.live-web-player-controller .chat-input-ctnr.p-relative>div,
+.live-web-player-controller .right-action.p-absolute {
+    height: 26px;
+}
+.live-web-player-controller .chat-input-ctnr,
+.live-web-player-controller .right-action.p-absolute {
+    margin-top: 11px;
+}
+.live-web-player-controller .chat-input {
+    height: 24px;
+    padding: 2px 8px 2px;
+}
 /*放在礼物栏上的全屏弹幕发送框*/
 .bilibili-live-player-video-controller .gift-control-panel .chat-input-ctnr{
     display: inline-block!important;
@@ -234,6 +245,10 @@ body.fullscreen-fix div#gift-control-vm {
     width:300px;
     margin-right: 5px;
     margin-top: 0px;
+}
+
+.bilibili-live-player-video-controller .chat-input-ctnr.p-relative>div {
+    float: left;
 }
 
 .bilibili-live-player-video-controller .gift-control-panel .right-action.p-absolute{
@@ -290,7 +305,7 @@ body.fullscreen-fix div#gift-control-vm {
             }
             this.playerPanel = helper.get('.bilibili-live-player.relative');
             this.screenPanel = helper.get('.bilibili-live-player-video-controller');
-            this.controller = helper.get('.bilibili-live-player-video-controller-content');
+            this.controller = helper.get('.control-area .right-area');
             this.inputPanel = helper.get('div.chat-input-ctnr.p-relative');
             this.titlePanel = helper.get('div.normal-mode');
             this.controlPanel = this.inputPanel.parentNode;
@@ -454,12 +469,19 @@ body.fullscreen-fix div#gift-control-vm {
         init(setting){
             //各种按钮
             const bottomPanel = helper.get('#chat-control-panel-vm .bottom-actions');
-            this.oldMedalButton = bottomPanel.querySelector('.action-item.medal');
+            this.container = helper.get('#chat-control-panel-vm .left-action') || bottomPanel;
+            this.oldMedalButton = helper.get('#chat-control-panel-vm .medal-item-margin');
+            //this.oldMedalButton = bottomPanel.querySelector('.action-item.medal');
             this.oldTitleButton = bottomPanel.querySelector('.action-item.title');
-            this.medalButton = this.oldTitleButton.cloneNode(true);
+            this.medalButton = helper.create('div', {
+                style: "display: inline-block;height: 16px;width: 16px;background: blue;text-align: center;color: white;cursor: pointer;font-size: 12px;line-height:16px; margin: 0 1px;",
+                innerText: '勋',
+            });
+            this.titleButton = helper.create('div', {
+                style: "display: inline-block;height: 16px;width: 16px;background: #f76e9e;text-align: center;color: white;cursor: pointer;font-size: 12px;line-height:16px; margin: 0 1px;",
+                innerText: '衔',
+            });
             this.medalButton.dataset.name = 'medal';
-            this.medalButton.innerText = '勋';
-            this.titleButton = this.oldTitleButton.cloneNode(true);
             this.titleButton.dataset.name = 'title';
             //对话框点击事件处理句柄
             this.handler = (e)=>this.handleDialog(e.target);
@@ -504,13 +526,14 @@ body.fullscreen-fix div#gift-control-vm {
             if(setting.replaceMedalTitle) this.replaceToNew();
         },
         replaceToNew(){
-            helper.replace(this.oldTitleButton,this.titleButton);
-            this.titleButton.parentNode.insertAdjacentElement('afterbegin',this.medalButton);
+            this.container.appendChild(this.medalButton);
+            this.oldTitleButton && helper.replace(this.oldTitleButton, this.titleButton) || this.container.appendChild(this.titleButton);
             document.body.addEventListener('click', this.handler);
         },
         replaceToOld(){
-            this.medalButton.parentNode.removeChild(this.medalButton);
-            helper.replace(this.titleButton,this.oldTitleButton);
+            this.container.contains(this.medalButton)&&this.container.removeChild(this.medalButton);
+            this.oldTitleButton && helper.replace(this.titleButton, this.oldTitleButton) ||
+                (this.container.contains(this.titleButton)&&this.container.removeChild(this.titleButton));
             document.body.removeEventListener('click', this.handler);
         },
         handleDialog(target){
@@ -610,7 +633,7 @@ body.fullscreen-fix div#gift-control-vm {
                         if (v.status) this.doRequire('//api.live.bilibili.com/xlive/web-room/v1/fansMedal/take_off','取消佩戴勋章', {});
                         else this.doRequire('//api.live.bilibili.com/xlive/web-room/v1/fansMedal/wear', '切换勋章', {medal_id: v.medal_id});
                         this.closeDialog();
-                        setTimeout(()=>this.oldMedalButton&&this.oldMedalButton.click()&this.oldMedalButton.click(),200);
+                        setTimeout(()=>this.oldMedalButton&&this.oldMedalButton.click()&setTimeout(()=>this.oldMedalButton.click()),200);
                     }
                 },itemDiv);
                 helper.create('span',{
@@ -661,6 +684,7 @@ body.fullscreen-fix div#gift-control-vm {
             }
             data.data.list.forEach((v)=>{
                 const lvMax = v.level.length&&v.level[v.level.length-1],
+                      unLimit = v.expire_time == "0000-00-00 00:00:00",
                       outOfDate = (new Date(v.expire_time)-Date.now())/1000/60/60/24<4;
                 const itemDiv = helper.create('div',{style: 'margin-top: 12px',className:v.status?'title-medal-selected-line':''},this.dialogPanel);
                 helper.create('a',{
@@ -677,14 +701,15 @@ body.fullscreen-fix div#gift-control-vm {
                     innerHTML:`<span class="dp-i-block h-100 v-top" style="width: ${lvMax?v.score/lvMax*100:100}%;background-color: #23ade5;"></span>`
                 },itemDiv);
                 helper.create('span',{
-                    style:`color:${outOfDate?'#f00':'#29abe1'};border:1px solid #a068f1;border-radius:3px;cursor:pointer;padding:3px;`,
+                    style:`color:${outOfDate?'#f00':unLimit?'#c0c0c0':'#29abe1'};border:1px solid ${unLimit?'#c0c0c0':'#a068f1'};border-radius:3px;cursor:pointer;padding:3px;`,
                     onclick: ()=>{
+                        //if (unLimit) return;
                         if (v.status) this.doRequire('//api.live.bilibili.com/xlive/web-ucenter/v1/user_title/CancelTitle','取消佩戴头衔', {});
                         else this.doRequire('//api.live.bilibili.com/appUser/wearTitle', '切换头衔', {title: v.title});
                         this.closeDialog();
                     },
                     className:'v-middle dp-i-block',
-                    title:`头衔过期时间${v.expire_time}\r\n点击${v.status?'取消佩戴':'佩戴'}`,
+                    title:unLimit?'不可佩戴':`可佩戴时间至${v.expire_time}\r\n点击${v.status?'取消佩戴':'佩戴'}`,
                     innerText:v.status?'取消':'佩戴'
                 },itemDiv);
             });
@@ -700,8 +725,9 @@ body.fullscreen-fix div#gift-control-vm {
     otherGift:{
         init (settings){
             const bottomPanel = helper.get('#chat-control-panel-vm .bottom-actions');
-            this.panel = bottomPanel.firstElementChild;
-            this.newGift = helper.set(bottomPanel.querySelector('.action-item.title').cloneNode(),{
+            this.panel = bottomPanel.querySelector('.left-action')|| bottomPanel;
+            this.newGift = helper.create('div', {
+                style: "display: inline-block;height: 16px;width: 16px;background: pink;text-align: center;color: white;cursor: pointer;font-size: 12px;line-height: 16px; margin: 0 1px;",
                 innerText:'礼',
                 title:'其它礼物'
             });
@@ -856,21 +882,22 @@ body.fullscreen-fix div#gift-control-vm {
                 return {};
             }
         })();
-        const button = helper.get('.bilibili-live-player-video-controller-block-btn'),
+        const settingBtn = helper.get('.bilibili-live-player-video-controller .setting'),
+              button = settingBtn&&settingBtn.cloneNode(true),
+              panel = helper.create('div',{
+                  className:"panel setting-panel",
+                  style: 'width: max-content;display: none;'
+              },button),
               settingPanel = helper.create('div',{
-                  className:"bilibili-live-player-video-controller-hide-danmaku-container t-left",
-                  innerHTML:`<div>直播间助手设置</div>`,
-              },button);
-        helper.create('style',{
-            innerHTML:`.bilibili-live-player-video-controller-block-btn:hover .bilibili-live-player-video-controller-hide-danmaku-container\
-                  {padding: 10px 15px;overflow: visible;height: auto;visibility: visible;}`
-        },settingPanel);
+                  className: 'player-type',
+                  innerHTML:`<div>直播间助手设置</div><style>.blive-setting-btn:hover .panel.setting-panel{display: block!important}<.style>`,
+              },panel);
         for(const key in this.settingInfos){
             if(this.settings[key]==undefined) this.settings[key] = true;
             const item = helper.create('div',{className:'blpui-checkbox-container'},settingPanel);
             helper.create('input',{
                 type:'checkbox',
-                className:'blpui-checkbox',
+                className:'player-type',
                 id:key,
                 checked:this.settings[key],
                 onchange:({target})=>this.changeSetting(target)
@@ -879,6 +906,14 @@ body.fullscreen-fix div#gift-control-vm {
                 className:'blpui-checkbox-span no-select',
                 innerText:this.settingInfos[key].name
             },item).setAttribute('for',key);
+        }
+        if (settingBtn) {
+            button.insertAdjacentElement('afterbegin', panel);
+            helper.set(button, {
+                className: 'blive-setting-btn',
+                style: 'position: relative;'
+            });
+            settingBtn.insertAdjacentElement('afterend', button);
         }
     },
 
