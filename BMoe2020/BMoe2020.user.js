@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BMoe2020
 // @namespace    indefined
-// @version      0.1.8
+// @version      0.1.9
 // @description  （已失效）计(穷)算(举)2020年度动画大选实际票数
 // @author       indefined
 // @include      https://www.bilibili.com/blackboard/AOY2020.html*
@@ -13,6 +13,8 @@
     'use strict';
     if (!document.querySelector('.t-background-image')||window.__inject) return;
     window.__inject = true;
+    if (localStorage.bmoe2020) delete localStorage.bmoe2020;
+    return;
 
     function qa(selector, parent){
         return Array.from((parent||document.body).querySelectorAll(selector));
