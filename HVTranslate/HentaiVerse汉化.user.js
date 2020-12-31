@@ -6,13 +6,13 @@
 // @description    基本完全汉化整个Hentaiverse文本，包括装备物品、界面说明和弹窗提示的汉化，带原文切换功能
 // @notice         本脚本已完全整合HV战斗汉化功能，与独立的HV战斗汉化脚本互斥，默认不开启，如需开启在战斗界面中双击下方经验条
 // @notice         完整功能需要在Hentaiverse主菜单 CHARACTER→SETTINGS 勾选自定义字体(Use Custom Font)并在下一行文本框中填上任意字体名称，拉到最下面点击Apply Changes
-// @notice         和HVToolBox在物品仓库中有概率冲突，汉化过后部分物品HVToolBox的复选框无法工作且无法切换回原文
+// @notice         和HVToolBox1.0.7以前版本在物品仓库中有概率冲突，请更新到1.0.7或更新版并将汉化运行顺序放在HVToolBox之后
 // @notice         如与Live Percentile Ranges同时使用，需要将脚本运行顺序置于Live Percentile Ranges之后，查询不同品质范围需要切换到英文状态
 // @notice         如有其它脚本共同运行冲突也可尝试调整脚本运行顺序，但无法保证完全兼容
 // @include        *://hentaiverse.org/*
 // @include        *://alt.hentaiverse.org/*
 // @core           http://userscripts-mirror.org/scripts/show/41369
-// @version        2020.11.30
+// @version        2020.12.31
 // @grant none
 // ==/UserScript==
 (function () {
@@ -264,6 +264,7 @@ var words = {
         'Insufficient hath, kupo!' : 'Hath 不足，咕波！',
         'No amount specified, kupo!' : '没有指定数量，咕波！',
         'That item cannot be attached, kupo!' : '所选物品无法邮寄，咕波！',
+        'Mail does not exist, kupo!' : '邮件不存在，咕波！',
         'Cannot set CoD without attachments, kupo!' : '你必须至少附带一件附件才能设置货到付款(CoD)，咕波！',
         'You cannot afford the postage, kupo!' : '你负担不起邮资，咕波！(没有购买hath能力“邮资已付”时每发一封邮件10C手续费，且设置CoD时会有额外的费用)',
         'You must at minimum specify a recipient and subject, kupo!' : '你必须至少设定一个收件人和主题，咕波！',
@@ -1254,6 +1255,7 @@ var words = {
         'Mysterious Tooth' : '神秘的牙齿(等级8)', // 2017 圣诞节
         'Delicate Flower' : '娇嫩的花朵(等级8)', // 2018 圣诞节
         'Iron Heart' : '钢铁之心(等级8)', // 2019 圣诞节
+        'Annoying Gun' : '烦人的枪(等级8)', //2020 圣诞节
 
         //复活节奖杯
         'Rainbow Egg' : '彩虹蛋(等级8)', //  2011 复活节
@@ -1513,6 +1515,7 @@ var words = {
         'This tooth is very mysterious.' : '这个牙齿非常的神秘(2017 圣诞节)',
         'A very fragile flower. While you would leave it at home rather than take it into battle, handing it to Snowflake for safekeeping seems like the better choice.' : '一朵非常脆弱的花。虽然你宁愿把它留在家里也不愿带入战斗，但把它交给雪花保管似乎是更好的选择。(2018 圣诞节)',
         'A heart, made of iron. While it was capable of protecting you from damage once, it seems to have been spent already. You should give it to Snowflake.' : '一颗钢铁制作的心。在它曾经可用时它可以保护你免受一次伤害，但它现在似乎已经被用过了。你应该把它给雪花。(2019 圣诞节)',
+        'A precursor smartgun with autonomous aiming and talking functionality. The name "Skippy" is crudely painted on its side. It seems broken in more ways than one.' : '一把拥有自动瞄准和说话功能的旧世界智能枪。其名称"Skippy"粗犷地喷涂在侧面。它似乎不止一个地方坏了(2020 圣诞节)',
 
         'A badge inscribed with your RealPervert identity. Regardless of whether you fell for it or not, you got this for participating in the 2011 April Fools thread.' : '一个刻着你的实名变态身份的胸章。无论你是否信以为真，你参与了 2011 年愚人节主题就会得到这个。',
         'A 1/10th scale collectible figure of Raptor Jesus. Consolitory prize for those who did not ascend during the May 2011 Rapture.' : '猛禽耶稣的 1/10 比例缩放公仔。给 2011 年 5 月被提发生期间没被送到天上的人开个安慰价格。',
@@ -2327,6 +2330,7 @@ var words = {
         'TBD' : '暂未开奖',
         'You currently have' : '你目前拥有',
         'Each ticket costs' : '购买一张彩票将花费',
+        'You already spent a Golden Lottery Ticket.' : '你已经使用了一张黄金彩票券',
         'Choose number to buy' : '输入购买数量',
         '/You hold ([\\d,]+) of/' : '你拥有 $1 /',
         'sold tickets' : '张已售出的彩票',

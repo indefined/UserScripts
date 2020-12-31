@@ -5,8 +5,8 @@
 // @description  汉化物品、装备界面及论坛，带装备高亮/装备店隐藏锁定装备，带翻译原文切换功能，会直接替换网页源码所以可能导致其它脚本冲突
 // @notice       此修改版大幅度乱重构了原有脚本执行逻辑，对其它脚本的兼容性有一定提升，但丢失原脚本装备后缀语序倒转功能和部分物品弹窗说明汉化
 // @notice       如有同时使用其它汉化，需要先于其它汉化脚本运行才会生效
-// @notice       与HVtoolBox在大部分装备列表冲突会失去装备高亮功能；在物品仓库中会导致HVtoolBox部分物品功能无效；与Live Percentile Ranges在装备详情页冲突
-// @notice       如与其它脚本同时使用冲突，可尝试调整脚本运行顺序，但无法保证完全兼容
+// @notice       与HVtoolBox1.0.7以前版本在大部分装备列表冲突会失去装备高亮功能,在物品仓库中会导致HVtoolBox部分物品功能无效；与Live Percentile Ranges在装备详情页冲突
+// @notice       更新HVtoolBox到1.0.7或更新版并将汉化脚本运行顺序放在HVtoolBox后可解决兼容问题，如与其它脚本同时使用冲突，可尝试调整脚本运行顺序，但无法保证完全兼容
 // @notice       默认只在物品列表、装备店、论坛启用，如需包含其它装备物品页面汉化可在脚本管理器设置中将原始排除添加为用户包含或者将下方对应@exclude改为@match
 // @notice       如果你要在论坛买东西，挑好东西之后最好切换到原文再复制内容，因为别人并不一定看得懂经过翻译过后的东西
 // @icon         https://hentaiverse.org/y/favicon.png
@@ -24,7 +24,8 @@
 // @exclude        *://*hentaiverse.org/?s=Forge*
 // @exclude        *://*hentaiverse.org/equip/*
 // @exclude        *://*hentaiverse.org/pages/showequip.php?*
-// @version      2020.08.22
+// @match        *://hvmarket.xyz/*
+// @version      2020.12.31
 // ==/UserScript==
 
 if (document.location.href.match(/ss=iw/)&&!document.getElementById('item_pane'))return
@@ -52,6 +53,7 @@ function main(){
         'Forge&ss=',        //锻造10
         'Bazaar&ss=mm',     //邮件11
         'equip',            //装备页12
+        'hvmarket.xyz',     //hvmarket13
     ];
     for(i=0;i<lklist.length;i++){
         if(document.location.href.match(lklist[i])){
@@ -195,6 +197,10 @@ function main(){
         case 12: //装备属性页
             translateEquips(document.querySelector('#showequip>div'));//装备名
             translateEquipsInfo(document.querySelector('#equip_extended'));//装备详细信息
+            break;
+
+        case 13: //hvmarket
+            Array.from(document.querySelectorAll('td>a[title]')).forEach(translateItems);
             break;
 
         default: //没有匹配命中需要翻译的网页
@@ -447,6 +453,7 @@ function loadItems(){
         'Mysterious Tooth' : '神秘的牙齿(等级8)', // 2017 圣诞节
         'Delicate Flower' : '娇嫩的花朵(等级8)', // 2018 圣诞节
         'Iron Heart' : '钢铁之心(等级8)', // 2019 圣诞节
+        'Annoying Gun' : '烦人的枪(等级8)', //2020 圣诞节
 
         //复活节奖杯
         'Rainbow Egg' : '彩虹蛋(等级8)', //  2011 复活节
