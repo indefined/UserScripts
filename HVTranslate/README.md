@@ -14,6 +14,10 @@
 
 3. 按照下面脚本说明选择安装需要的脚本
 
+### 注意：
+- 大部分情况下汉化脚本需要运行在其它脚本后面才不会有冲突，**简单说的你需要先安装其它脚本再安装汉化**
+- 先装了汉化脚本导致冲突可以按照最后的[管理脚本示例](#管理脚本示例)调整，**如果你不知道怎么调，删掉汉化再重新安装大概可以解决**
+
 ## 脚本说明
 
 **以下脚本在HV 0.86版本下修改测试，如果HV更新了版本可能无法保证正确运行**
@@ -31,7 +35,7 @@
 - 如果你要在论坛买东西，挑好东西之后最好切换回原文再复制内容，因为别人并不一定看得懂经过翻译过后的东西
 
 
-### Hentaiverse汉化 v2020.12.31 [点击此处安装](https://github.com/indefined/UserScripts/raw/master/HVTranslate/HentaiVerse%E6%B1%89%E5%8C%96.user.js)
+### Hentaiverse汉化 v2021.01.03 [点击此处安装](https://github.com/indefined/UserScripts/raw/master/HVTranslate/HentaiVerse%E6%B1%89%E5%8C%96.user.js)
 
 - 原贴吧**HV界面和其它汉化**脚本，现已基本完成对整个hentaiverse的完全汉化
 - 本脚本大致最初由 [ggxxsol](https://greasyfork.org/scripts/9680) 创建，后由 [NeedXuyao](https://greasyfork.org/zh-CN/scripts/2120) 和贴吧 [mbbdzz](https://tieba.baidu.com/p/4849863522) 修改整合补充

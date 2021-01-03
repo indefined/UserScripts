@@ -12,7 +12,7 @@
 // @include        *://hentaiverse.org/*
 // @include        *://alt.hentaiverse.org/*
 // @core           http://userscripts-mirror.org/scripts/show/41369
-// @version        2020.12.31
+// @version        2021.01.03
 // @grant none
 // ==/UserScript==
 (function () {
@@ -2871,13 +2871,13 @@ var words = {
     }
 
     //执行查找的xpath表达式，查找目标元素下的所有文本
-    var pathExpre = new XPathEvaluator().createExpression('.//text()[ normalize-space(.) != "" ]');
+    var pathExpre = new XPathEvaluator().createExpression('.//text()[ normalize-space(.) != "" ]', null);
     // 翻译文本，使用指定字典对指定元素下的所有文字进行翻译
     // elem: 待翻译的页面元素, dict: 使用的翻译字典, dynamic: 是否动态元素
     // 动态元素将不会检查内容直接翻译，且不会保存切换原文，因为内容一旦变化就没有意义了
     function translateText(elem, dict, dynamic) {
         if (!elem || !dict) return;
-        var texts = pathExpre.evaluate(elem, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE);
+        var texts = pathExpre.evaluate(elem, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
         for (var i = 0, text; text = texts.snapshotItem(i); i += 1) {
             //console.log(text.parentNode.tagName)
             if (dynamic || isTagOk(text.parentNode.tagName) ) {
