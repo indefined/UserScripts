@@ -8,10 +8,9 @@
 // @notice         由于兼容问题不同浏览器之间存在不同执行方式逻辑，有兴趣有一定基础的可以自己读一下代码注释
 // @include        *://hentaiverse.org/*
 // @include        *://alt.hentaiverse.org/*
-// @exclude        *://*hentaiverse.org/y/*
-// @exclude        *://*hentaiverse.org/equip/*
-// @exclude        *://*hentaiverse.org/pages/showequip.php?*
-// @version        2020.10.07
+// @exclude        *://*hentaiverse.org/*equip/*
+// @exclude        *://*hentaiverse.org/*pages/showequip.php?*
+// @version        2021.01.20
 // @grant none
 // ==/UserScript==
 (function () {
@@ -579,7 +578,7 @@
         );
         Array.from(document.querySelectorAll('img')).forEach(img=>{
             var src = img.getAttribute('src');
-            const item = imgWords.find(i=>src==i.active||src==i.disactive)
+            const item = imgWords.find(i=>src.includes(i.active)||src.includes(i.disactive))
             if (item) img.title = item.text;
         });
         return;//注释译法不提供原文切换功能，毕竟图片仍然显示为英文在非悬停状态下注释并不会被显示，同时也不依赖其它变量，直接此处返回结束整个翻译方法
@@ -776,6 +775,7 @@
                 '.image2block {display: inline;font: bold 15px 微软雅黑; padding: 1px 5px; color:#202020}',
                 '.image2block.active {text-shadow: 2px 2px 2px #EFD34F; color:#5C0D11}',
                 '.image2block.title {font-size: 18px; padding: 0px 30px;}',
+                '.image2block.no-padding {padding: 0px}',
                 '.image2block.red {color:#ff0000}',
                 ...Object.entries({
                     '.msl>div:nth-child(5)>div' : '饥饿',
@@ -799,15 +799,15 @@
          * item: 翻译字典，带active/disactive/style属性
         */
         function getClassName(src, item) {
-            return 'image2block ' + (src==item.active?'active ':'') + (item.style || '');
+            return 'image2block ' + (src.includes(item.active)?'active ':'') + (item.style || '');
         }
         //图片替换为文字元素核心方法
         function replaceImg2Word(img) {
             var src = img.getAttribute('src');
-            var item = imgWords.find(i=>src==i.active||src==i.disactive);
+            var item = imgWords.find(i=>src.includes(i.active)||src.includes(i.disactive));
             if (!item) return;
             var div = document.createElement('div');
-            div.innerHTML = item.text;
+            div.textContent = item.text;
             if (img.onclick) {
                 div.setAttribute('onclick',img.getAttribute('onclick'));
             }
@@ -847,7 +847,14 @@
         }
 
         //将通用字典之外的特殊图片一起扔进去统一翻译……
-        imgWords.push(
+        //使用unshift方法从头部塞入内容优先于默认字典
+        imgWords.unshift(
+            {
+                'text' : '开始挑战',
+                'active' : '/y/arena/startchallenge.png',
+                'disactive' : '/y/arena/startchallenge_d.png',
+                'style' : 'no-padding', //按钮在表格中需要去除常规边界
+            },
             {
                 'text' :'回答',
                 'active' : '/y/battle/answer.png'

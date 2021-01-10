@@ -6,13 +6,13 @@
 // @description    基本完全汉化整个Hentaiverse文本，包括装备物品、界面说明和弹窗提示的汉化，带原文切换功能
 // @notice         本脚本已完全整合HV战斗汉化功能，与独立的HV战斗汉化脚本互斥，默认不开启，如需开启在战斗界面中双击下方经验条
 // @notice         完整功能需要在Hentaiverse主菜单 CHARACTER→SETTINGS 勾选自定义字体(Use Custom Font)并在下一行文本框中填上任意字体名称，拉到最下面点击Apply Changes
-// @notice         和HVToolBox1.0.7以前版本在物品仓库中有概率冲突，请更新到1.0.7或更新版并将汉化运行顺序放在HVToolBox之后
+// @notice         和HVToolBox1.0.7以前版本在物品仓库中冲突，使用请更新到新版HVToolBox并将汉化运行顺序放在HVToolBox之后
 // @notice         如与Live Percentile Ranges同时使用，需要将脚本运行顺序置于Live Percentile Ranges之后，查询不同品质范围需要切换到英文状态
 // @notice         如有其它脚本共同运行冲突也可尝试调整脚本运行顺序，但无法保证完全兼容
 // @include        *://hentaiverse.org/*
 // @include        *://alt.hentaiverse.org/*
 // @core           http://userscripts-mirror.org/scripts/show/41369
-// @version        2021.01.03
+// @version        2021.01.20
 // @grant none
 // ==/UserScript==
 (function () {
@@ -40,12 +40,13 @@
         '#itshop_outer' : ['items', 'artifact'], //物品商店
         '#eqshop_outer' : ['equipsName'], //装备商店
         '#itembot_outer' : ['itemBot', 'items', 'artifact'], //采购机器人
-        '#settings_outer' : ['settings', 'skills', 'difficulty'], //设置页面
+        '#settings_outer' : ['settings', 'skills', 'difficulty', 'equipsName'], //设置页面
         '#monstercreate_right' : ['monsterCreate'], //创建怪物信息，由于此面板被怪物实验室包含，实际也使用到了下一行的字典
         '#monster_outer' : ['monsterLabs'], //怪物实验室
         '#upgrade_text' : ['monsterLabs', 'items'], //怪物实验室的升级强化需求提示，需要监听动态翻译
         '#shrine_left' : ['artifact'], //祭坛左侧物品列表
         '#shrine_right' : ['shrine'], //祭坛右侧说明
+        '#shrine_offertext' : ['artifact', 'shrine'], //祭坛献祭物品动态说明，需要动态监听
         '#mmail_outer' : ['mm'], //邮件
         '#mmail_attachlist' : ['items', 'artifact', 'equipsName'], //邮件附件列表
         '#mmail_attachitem' : ['items', 'artifact'], //写邮件附带物品列表
@@ -61,6 +62,7 @@
         '#showequip' : ['equipsName'], //独立装备信息页，装备信息已经由上面翻译只需要翻译装备名
         '#arena_list' : ['battle', 'difficulty'], //AR/ROB战斗列表
         '#arena_tokens' : ['battle'], //ROB的底部令牌提示
+        '#towerstart' : ['battle', 'difficulty'], //TW战斗模式入场提示
         '#grindfest' : ['battle'], //GF战斗提示
         '#itemworld_left' : ['equipsName'], //IW左侧装备列表
         '#itemworld_right' : ['battle'], //IW右侧战斗提示
@@ -81,6 +83,7 @@
         '#ability_info', //技能说明悬浮窗
         '#upgrade_text', //怪物实验室强化动态文字
         '#forge_cost_div', //装备修复、拆解、魂绑、重铸右侧的动态提示文本
+        '#shrine_offertext', //祭坛献祭动态说明文字
 
         '#infopane', //战斗提示信息面板
         '#table_skills', //战斗技能列表
@@ -116,7 +119,6 @@ var words = {
     //已知现缺：
         // trains：缺：新陈代谢、激励、解离症；未校对：酩酊
         // itemInfos：缺：无价的明朝瓷器、七叶幸运草、幸运兔脚；未校对：格鲁、彩虹蛋、彩绘蛋、神秘宝盒、真-变态胸章
-        // battling：未校对：提神、带劲效果、以太窃取、灵力窃取、焚烧的灵魂、鲜美的灵魂效果
 
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -153,7 +155,7 @@ var words = {
         '/Are you sure you wish to purchase ([\\d,]+) (.+) for ([\\d,]+) credits \\?/' : '是否确认以 $3 Credits的价格购买 $1 件 $2',
         '/Are you sure you wish to sell ([\\d,]+) (.+) for ([\\d,]+) credits \\?/' : '是否确认以 $3 Credits的价格出售 $1 件 $2',
         'No item selected' : '没有选中物品',
-        'Are you sure you wish to offer Snowflake a ' : '是否确认向雪花女神献祭一个 ',
+        '/Are you sure you wish to offer Snowflake a?/' : '是否确认向雪花女神献祭 ',
         '/You have attached ([\\d,]+) items?, and the CoD is set to ([\\d,]+) credits, kupo!/' : '你在邮件中附加了 $1 个附件，并且设置了 $2 Credits的货到付款(CoD)，注意！',
         '/You have attached ([\\d,]+) items?, but you have not set a CoD, kupo! The attachments will be a gift, kupo!/' : '你在邮件中附加了 $1 个附件，但是没有设置货到付款(CoD)，注意！你的附件将会被认为是礼物免费送出！',
         '/Sending it will cost you ([\\d,]+) credits, kupo!/' : '发送本邮件将会收取你 $1 Credits 的费用！注意！',
@@ -195,6 +197,7 @@ var words = {
         'Name contains invalid characters.' : '名字包含不支持字符(仅支持英文和数字)',
         '/Name must be between (\\d+) and (\\d+) characters\./' : '名字长度需要在$1至$2个字符之间',
         'Requested persona does not exist' : '所选人格角色不存在',
+        'You cannot currently create more personas' : '你当前已经没有空余的角色槽可以创建新人格。',
         'Insufficient do-overs.' : '下调数值超过每日限制',
         'Insufficient EXP.' : '可分配属性点不足',
 
@@ -202,6 +205,7 @@ var words = {
         'Equipment is too high level to equip.' : '你无法穿戴比自己等级高的装备',
         'That item cannot be used as an offhand with that main weapon.' : '除非是太刀+脇差，否则不能在装备非单手武器的情况下在副手装备其他武器',
         'Cannot equip the same item in two slots.' : '不能把相同的装备同时穿戴在两个部位上',
+        '/Equipment (\\d+) is currently equipped/' : '装备 $1 当前正在穿戴',
         'Cannot slot item - no free spaces.' : '无法携带物品 - 没有空余的物品槽。',
         'Can only slot consumables' : '你只能携带战斗消耗品',
         'Item is already slotted.' : '只能携带一种同名物品',
@@ -261,10 +265,12 @@ var words = {
         'Insufficient items, kupo!' : '物品不足，咕波！',
         'Equipment not found, kupo!' : '装备不存在，咕波！',
         'Insufficient credits, kupo!' : 'Credits 不足，咕波！',
+        'CoD must be at least 10 credits, kupo!' : '货到付款(CoD)至少需要设置 10 Credits，咕波！',
         'Insufficient hath, kupo!' : 'Hath 不足，咕波！',
         'No amount specified, kupo!' : '没有指定数量，咕波！',
         'That item cannot be attached, kupo!' : '所选物品无法邮寄，咕波！',
         'Mail does not exist, kupo!' : '邮件不存在，咕波！',
+        'You need to be a donator to attach items, kupo!' : '你需要捐助e绅士才可以在异世界邮局添加附件，咕波！',
         'Cannot set CoD without attachments, kupo!' : '你必须至少附带一件附件才能设置货到付款(CoD)，咕波！',
         'You cannot afford the postage, kupo!' : '你负担不起邮资，咕波！(没有购买hath能力“邮资已付”时每发一封邮件10C手续费，且设置CoD时会有额外的费用)',
         'You must at minimum specify a recipient and subject, kupo!' : '你必须至少设定一个收件人和主题，咕波！',
@@ -275,6 +281,7 @@ var words = {
 
         'Invalid reward class' : '所选奖励类型不可用',
         'No such item' : '物品不存在',
+        'You do not have enough of that trophy' : '你没有足够的奖杯执行此次献祭',
         'Snowflake has blessed you with some of her power!' : '雪花女神用她的力量祝福了你！',
         'Your strength' : '你的力量',
         'Your dexterity' : '你的灵巧',
@@ -286,6 +293,8 @@ var words = {
         'Follower peerless granted!' : '获得雪花信徒的无双奖励！',
         'Snowflake has blessed you with an item!' : '雪花女神祝福了你！',
         'Received' : '获得了',
+        'Sold it for' : '已自动出售获得',
+        'Salvaged it for' : '已自动拆解获得',
         'Hit Space Bar to offer another item like this.' : '按空格键可以重复执行上一个相同的献祭',
         //献祭收到的装备使用equipsName字典
 
@@ -301,6 +310,8 @@ var words = {
         'You cannot enter the same arena twice in one day.' : '同一竞技场一天只能进入一次',
         'You cannot enter the Item World while exhausted.' : '你无法在精力耗竭时进入道具界',
         'You cannot start a Grindfest while exhausted.' : '你无法在精力耗竭时进入压榨界',
+        'Item is already max level' : '装备等级已满',
+        'Cannot fight in equipped items' : '正在佩戴的装备无法进入道具界中',
 
         'Cannot reforge level zero items' : '不能重铸潜能等级为0的装备',
         'Cannot reforge locked or equipped items' : '不能重铸上锁或者正在穿戴的装备',
@@ -313,6 +324,7 @@ var words = {
         'Cannot upgrade item' : '无法升级',
         'Cannot enchant item' : '无法附魔',
         'Salvaged' : '分解获得',
+        'Returned' : '返还强化材料',
         'Item not found' : '物品不存在',
 
     },
@@ -347,10 +359,11 @@ var words = {
         'Item Shop Bot' : '采购机器人',
         'Monster Lab' : '怪物实验室',
         'The Shrine' : '雪花祭坛',
-        'MoogleMail' : '邮箱',
+        'MoogleMail' : '莫古利邮局',
         'Weapon Lottery' : '武器彩票',
         'Armor Lottery' : '防具彩票',
         'The Arena' : '竞技场(The Arena)',
+        'The Tower' : '塔楼(The Tower)',
         'Ring of Blood' : '浴血擂台(Ring of Blood)',
         'GrindFest' : '压榨界(GrindFest)',
         'Item World' : '道具界(Item World)',
@@ -363,24 +376,33 @@ var words = {
         'Stamina:' : '精力:',
         'Check Attributes' : '检查属性点分配！',
         'Check Abilities' : '检查技能！',
+        'Check attributes' : '检查属性点分配！',
+        'Check abilities' : '检查技能！',
         'Check equipment' : '检查装备！',
         'Repair armor' : '护甲需要修理！',
         'Repair weapon' : '武器需要修理！',
         'Armor Damage' : '护甲损坏！',
         'Weapon Damage' : '武器损坏！',
         //'Next:' : '距离升级还差', //与HVUtils获取等级经验冲突
+
+        '/^Isekai$/' : '异世界',
+        'Currently playing on Isekai' : '你当前在异世界模式下',
+        'Click to switch to Persistent' : '点击切换到传统恒定世界模式',
+        '/^Persistent$/' : '恒定世界',
+        'Currently playing on Persistent' : '你当前在传统恒定世界模式下',
+        'Click to switch to Isekai' : '点击切换到异世界模式',
     },
 
     ///////////////////////////////////////////////////////难度名
     // 包括上方主菜单导航栏等多个地方用到，姑且独立出来做一块方便统一管理……吧
     difficulty: {
-        'Normal' : '普通 XP1C1',
-        'Hard' : '困难 XP2C1.25',
-        'Nightmare' : '噩梦 XP4C1.5',
-        'Hell' : '地狱 XP7C1.75',
-        'Nintendo' : '任天堂 XP10C2.2',
-        'IWBTH' : 'I wanna XP15C3',
-        'PFUDOR' : '彩虹小马 XP20C3',
+        'Normal' : '普通 X1',
+        'Hard' : '困难 X2',
+        'Nightmare' : '噩梦 X4',
+        'Hell' : '地狱 X7',
+        'Nintendo' : '任天堂 X10',
+        'IWBTH' : 'I Wanna X15',
+        'PFUDOR' : '彩虹小马 X20',
     },
 
     ///////////////////////////////////////////////////////主界面和切换装备左侧栏
@@ -462,7 +484,7 @@ var words = {
 
         'Vitals' : '状态值相关',
         'health points' : '体力值',
-        'magic points' : '魔法值',
+        'magic points' : '魔力值',
         'magic regen per tick' : '魔力恢复率/分',
         'spirit points' : '灵力值',
         'spirit regen per tick' : '灵力恢复率/分',
@@ -592,7 +614,7 @@ var words = {
         'Light Acc' : '轻甲套命中率加成',
         'Light Crit' : '轻甲套暴击率加成',
         'Light Speed' : '轻甲套攻速加成',
-        'Light HP/MP' : '轻甲套生命/魔法值加成',
+        'Light HP/MP' : '轻甲套生命/魔力值加成',
         '1H Accuracy' : '单手流命中率加成',
         '1H Block' : '单手流格挡率加成',
         '2H Accuracy' : '双手流命中率加成',
@@ -725,7 +747,7 @@ var words = {
         'Light Armor':'轻甲',
         'Heavy Armor':'重甲',
 
-        'Proficiency, adds' : '熟练 获得',
+        'Proficiency, adds' : '熟练度 获得',
         'Attack Base Damage' : '基础物理伤害',
         'Magic Base Damage' : '基础魔法伤害',
         'Attack Crit Chance' : '物理暴击几率',
@@ -785,8 +807,8 @@ var words = {
         'Increase the duration and power of the Slow spell. Higher levels also increase the number of targets affected per cast.' : '增加“缓慢”咒语的持续回合数与效果。高等级也增加每次施放影响的目标数。	',
         'Increases the amount of health drained by the Drain spell.' : '增加“枯竭”咒语的生命枯竭速率。	',
         'Decreases the cooldown and cast time on the Drain spell.' : '缩短“枯竭”咒语的冷却时间和施放时间。	',
-        'Augment the Drain spell with the ability to inflict Ether Theft on any target afflicted with Soul Fire.' : '此技能扩充“枯竭”咒语的能力，可对任何受焚烧的灵魂折磨的目标强加以太吸窃效果。',
-        'Augment the Drain spell with the ability to inflict Spirit Theft on any target afflicted with Ripened Soul.' : '此技能扩充“枯竭”咒语的能力，可对任何受鲜美的灵魂折磨的目标强加灵力吸窃效果。',
+        'Augment the Drain spell with the ability to inflict Ether Theft on any target afflicted with Soul Fire.' : '此技能扩充“枯竭”咒语的能力，可对任何受焚烧的灵魂(圣特殊效果)折磨的目标强加以太吸窃效果。',
+        'Augment the Drain spell with the ability to inflict Spirit Theft on any target afflicted with Ripened Soul.' : '此技能扩充“枯竭”咒语的能力，可对任何受鲜美的灵魂(暗特殊效果)折磨的目标强加灵力吸窃效果。',
         'Action Speed Modification' : '行动速度变化',
         'Added special effect: Ether Theft' : '附加特殊效果：以太窃取',
         'Added special effect: Spirit Theft' : '附加特殊效果：灵力窃取',
@@ -903,27 +925,27 @@ var words = {
         '/^Disintegrate$/' : '瓦解(Ⅱ)',
         '/^Ragnarok$/' : '诸神黄昏(Ⅲ)',
 
-        '/^Drain$/' : '枯竭',
-        '/^Slow$/' : '缓慢',
-        '/^Weaken$/' : '虚弱',
-        '/^Silence$/' : '沉默',
-        '/^Sleep$/' : '沉眠',
-        '/^Confuse$/' : '混乱',
-        '/^Imperil$/' : '陷危',
-        '/^Blind$/' : '致盲',
-        '/^MagNet$/' : '魔磁网',
+        '/^Drain$/' : '枯竭[D]',
+        '/^Slow$/' : '缓慢[D]',
+        '/^Weaken$/' : '虚弱[D]',
+        '/^Silence$/' : '沉默[D]',
+        '/^Sleep$/' : '沉眠[D]',
+        '/^Confuse$/' : '混乱[D]',
+        '/^Imperil$/' : '陷危[D]',
+        '/^Blind$/' : '致盲[D]',
+        '/^MagNet$/' : '魔磁网[D]',
 
-        '/^Cure$/' : '治疗',
-        '/^Regen$/' : '细胞活化',
-        '/^Full-Cure$/' : '完全治愈',
-        '/^Haste$/' : '急速',
-        '/^Protection$/' : '守护',
-        '/^Shadow Veil$/' : '影纱',
-        '/^Absorb$/' : '吸收',
-        '/^Spark of Life$/' : '生命火花',
-        '/^Arcane Focus$/' : '奥术集成',
-        '/^Heartseeker$/' : '穿心',
-        '/^Spirit Shield$/' : '灵力盾',
+        '/^Cure$/' : '治疗[S]',
+        '/^Regen$/' : '细胞活化[S]',
+        '/^Full-Cure$/' : '完全治愈[S]',
+        '/^Haste$/' : '急速[S]',
+        '/^Protection$/' : '守护[S]',
+        '/^Shadow Veil$/' : '影纱[S]',
+        '/^Absorb$/' : '吸收[S]',
+        '/^Spark of Life$/' : '生命火花[S]',
+        '/^Arcane Focus$/' : '奥术集成[S]',
+        '/^Heartseeker$/' : '穿心[S]',
+        '/^Spirit Shield$/' : '灵力盾[S]',
     },
 
 
@@ -1043,7 +1065,7 @@ var words = {
         'Binding of Heimdall':  '粘合剂 圣属性咒语伤害',
         'Binding of Fenrir':  '粘合剂 暗属性咒语伤害',
         'Binding of Dampening':  '粘合剂 敲击减伤',
-        'Binding of Stoneskin':  '粘合剂 砍击减伤',
+        'Binding of Stoneskin':  '粘合剂 斩击减伤',
         'Binding of Deflection':  '粘合剂 刺击减伤',
         'Binding of the Fire-eater':  '粘合剂 火属性减伤',
         'Binding of the Frost-born':  '粘合剂 冰属性减伤',
@@ -1099,7 +1121,7 @@ var words = {
         'Holy Hand Grenade of Antioch' : '安提阿的神圣手榴弹(等级2)',
         'Mithra\'s Flower' : '猫人族的花(等级2)',
         'Dalek Voicebox' : '戴立克音箱(等级2)',
-        'Lock of Blue Hair' : '一绺蓝发(等级3)',
+        'Lock of Blue Hair' : '一绺蓝发(等级2)',
         'Bunny-Girl Costume' : '兔女郎装(等级3)',
         'Hinamatsuri Doll' : '雏人形(等级3)',
         'Broken Glasses' : '破碎的眼镜(等级3)',
@@ -1113,6 +1135,7 @@ var words = {
         'Silver Coupon' : '银礼券(等级5)',
         'Gold Coupon' : '黄金礼券(等级7)',
         'Platinum Coupon' : '白金礼券(等级8)',
+        'Peerless Voucher' : '无双必得券',
 
         //旧旧古董
         'Priceless Ming Vase' : '无价的明朝瓷器',
@@ -1276,7 +1299,7 @@ var words = {
         'Abstract Wire Sculpture' : '抽象线雕(等级8)', // 2018 复活节
         'Assorted Coins' : '什锦硬币(等级7)', // 2019 复活节
         'Coin Collector\'s Guide' : '硬币收藏家指南(等级8)', // 2019 复活节
-        'Shrine Fortune' : '神社财富(等级7)', // 2020 复活节
+        'Shrine Fortune' : '神社灵签(等级7)', // 2020起复活节
         'Plague Mask' : '瘟疫面具(等级8)', // 2020 复活节
 
     },
@@ -1307,8 +1330,8 @@ var words = {
         'Fully restores all vitals, and grants long-lasting restoration effects.' : '状态全满,产生所有回复药水的效果.',
         'Restores 10 points of Stamina, up to the maximum of 99. When used in battle, also boosts Overcharge and Spirit by 10% for ten turns.' : '恢复10点精力，但不超过99，战斗中使用时每回合增加10%的灵力和斗气.',
         'Restores 5 points of Stamina, up to the maximum of 99. When used in battle, also boosts Overcharge and Spirit by 10% for five turns.' : '恢复5点精力，但不超过99，战斗中使用时每回合增加10%的灵力和斗气.',
-        'There are three flowers in a vase. The third flower is green.' : '花瓶中有三朵花，第三朵是绿色的。（出处：玩偶特工） 战斗中使用时持续50回合物理/魔法 伤害、命中、暴击率、回避、抵抗率大幅提升+25%。',
-        'It is time to kick ass and chew bubble-gum... and here is some gum.' : '该是嚼著泡泡糖收拾他们的时候了…这里有一些泡泡糖。(出处：极度空间) 战斗中使用时，持续50回合攻击和咒语伤害大幅提升+100%，必定命中且必定暴击，同时每回合补充 20% 基础魔力与基础生命值。',
+        'There are three flowers in a vase. The third flower is green.' : '花瓶中有三朵花，第三朵是绿色的(玩偶特工)。战斗中使用时持续50回合物理/魔法 伤害、命中、暴击率、回避、抵抗率大幅提升+25%。',
+        'It is time to kick ass and chew bubble-gum... and here is some gum.' : '该是嚼著泡泡糖收拾他们的时候了…这里有一些泡泡糖(极度空间)。战斗中使用时持续50回合攻击和咒语伤害大幅提升+100%，必定命中且必定暴击',
         'You gain +25% resistance to Fire elemental attacks and do 25% more damage with Fire magicks.' : '你获得 +25% 的火系魔法耐性且获得 25% 的额外火系魔法伤害。',
         'You gain +25% resistance to Cold elemental attacks and do 25% more damage with Cold magicks.' : '你获得 +25% 的冰冷魔法耐性且获得 25% 的额外冰系魔法伤害。',
         'You gain +25% resistance to Elec elemental attacks and do 25% more damage with Elec magicks.' : '你获得 +25% 的雷系魔法耐性且获得 25% 的额外雷系魔法伤害。',
@@ -1537,7 +1560,7 @@ var words = {
         'An abstract rendition of "Clippy", believed to be the precursor patron saint of spelling errors. [2018 Easter Event]' : '一个“Office助手”表达，被认为是拼写错误的先驱守护神。[2018 复活节活动]',
         'A small selection of assorted collectable precursor coins. [2019 Easter Event]' : '一小部分精选的各种收藏品旧币。[2019 复活节活动]',
         'A first-edition signed copy of "Coping With Change", considered by most numismatists to be *the* authoritative guide to collecting coins. [2019 Easter Event]' : '《应对变化》的初版签名版，被大多数钱币学家视为收集硬币的权威指南。[2019 复活节活动]',
-        'A special kind of omikuji that does not actually tell your fortune, but will instead directly grant you some if you offer it to Snowflake.' : '一种特殊的御签，它并不会实际告诉你命运，但是如果你把它献祭给雪花或许会直接换到一些东西。[2020 复活节活动]',
+        'A special kind of omikuji that does not actually tell your fortune, but will instead directly grant you some if you offer it to Snowflake.' : '一种特殊的神签，它并不会实际告诉你命运，但是如果你把它献祭给雪花可以直接交换一些东西。[2020起复活节活动]',
         'A precursor beak-shaped mask filled with fragrant herbs, said to protect the wearer from disease and miasma but probably doesn\'t. [2020 Easter Event]' : '一种充满香草药的喙状前体面具，据说可以保护佩戴者免受疾病和瘴气的侵害，但实际可能并不能。[2020 复活节活动]',
 
 
@@ -1558,7 +1581,7 @@ var words = {
         'Flimsy' : '薄弱',
         'Crude' : '劣等',
         'Fair' : '一般',
-        'Average ' : '中等 ',
+        'Average' : '中等',
         'Superior' : '上等',
         '/^Fine /' : '优秀 ',
         'Exquisite' : '✧精良✧',
@@ -1651,7 +1674,7 @@ var words = {
         'Shielding' : '盾化的（格挡）',
         //旧版前缀
         ' Shield ' : ' 盾化的（格挡） ', //旧版的盾化前缀和盾一模一样……前面已经充分排除其它带盾的应该没问题吧……
-        'Bronze ' : '铜',
+        'Bronze' : '铜',
         'Iron' : '铁',
         'Silver' : '银',
         'Steel' : '钢',
@@ -1808,9 +1831,8 @@ var words = {
         'Magic Accuracy':'魔法命中',
         'Counter-Parry':'反招架',
         'Attack Speed':'攻击速度',
-        'Current Owner':'持有者',
-        'Mitigation':'减伤',
-        'Defense':'防御',
+        'MP Bonus':'魔力加成',
+        'HP Bonus':'体力加成',
         'Burden':'负重',
         'Interference':'干涉',
 
@@ -1834,9 +1856,12 @@ var words = {
         'Physical':'物理',
         'Magical':'魔法',
         'Damage':'伤害',
+        'Defense':'防御',
+        'Mitigation':'减伤',
         'Hit Chance':'命中率',
         'Crit Chance':'暴击率',
         'Bonus':'加成',
+
         'Capacitor':'魔力加成',
         'Juggernaut':'生命加成',
         'Butcher':'武器伤害加成',
@@ -1873,7 +1898,8 @@ var words = {
     upgrades: {
         'Forge Upgrade Level' : '锻造等级',
         'Rank' : '水准',
-        'Novice' : '入门',
+        'Beginner' : '入门',
+        'Novice' : '初心者',
         'Apprentice' : '学徒',
         'Journeyman' : '熟练工',
         'Artisan' : '工匠',
@@ -1889,7 +1915,7 @@ var words = {
         'Everything is fully repaired.' : '该标签页下的所有装备已全部修复',
 
         'Select an equipment piece from the list to the left\nthen hit Show Upgrades below to show a list over\nstats that can be upgraded.' : '从左侧列表选择一件装备，然后点击下方 Show Upgrades 查看可用强化。',
-        'Upgrades allow you to spend materials to boost\nthe stats of your equipment. Upgrades require\na binding that correspond to the stats you\nwish to upgrade and some materials that\ncorrespond to the gear you are upgrading.\nA catalyst item of a tier corresponding to\nthe equipment quality and upgrade level will\nalso be needed.' : '装备强化允许你使用各种素材来加强你的装备属性。每一级强化都需要根据装备品质、材质和强化等级消耗对应级别的材料和催化剂，当你强化一个属性超过5级之后每一级强化还需要消耗一个对应属性的粘合剂。',
+        'Upgrades allow you to spend materials to boost\nthe stats of your equipment. Upgrades require\na binding that correspond to the stats you\nwish to upgrade and some materials that\ncorrespond to the gear you are upgrading.\nA catalyst item of a tier corresponding to\nthe equipment quality and upgrade level will\nalso be needed.' : '装备强化允许你使用各种素材来加强你的装备属性。每一级强化都需要根据装备品质、材质和强化等级消耗对应级别的材料和催化剂，当你强化一个属性超过5级之后每一级强化还需要消耗一个对应属性的粘合剂(异世界模式不需要粘合剂)',
         'Rare equipment types will also require a special\ncomponent to upgrade. This component is only\nneeded to increase the highest stat - if you\npreviously spent five of them to increase a stat\nto Level 5 then every other stat can be increased\nto Level 5 without spending any additional rare\ncomponents.' : '强化稀有装备还需要额外花费特殊素材，特殊素材只需要在一项上花费即可。打个比方 - 如果你已经将一项强化升级到5级并使用了5个特殊素材，那么将其他项目强化提升到5级就不需要花费额外的特殊素材了，只有继续将一项强化升级为6级时才需要再消耗1个特殊素材。',
         'Leveling equipment to its highest potential by \nupgrading it or leveling it in the Item World\nwill also unlock the ability to give it a custom\nname from this screen.' : '强化也将使装备获得一定的潜经验值用于升级该装备潜能等级，当你通过道具界或者强化使当一件装备达到它的最高潜能等级后，你可以随意在强化界面修改装备的显示名称。',
 
@@ -1899,6 +1925,7 @@ var words = {
 
         'Select an equipment piece from the list to the left\nthen hit Salvage Item below to salvage it. This will\npermanently destroy the item in question.' : '从左侧列表选择一件装备，然后点击下方 Salvage Item 分解装备。此操作将会永久摧毁装备。',
         'You have a chance to get some forge upgrading\nmaterials when you salvage an item. The type\ndepends on the kind of item salvaged while the\ntier depends on the quality of the item as well\nas a random chance. At the very least you will\nreceive some scrap that can be used to repair\nother items.' : '你有机会通过分解装备获得一些用于装备升级的材料。分解出的素材种类取决于被分解装备的类型与品质，分解获得的材料数量也有一定的随机波动。但至少，你可以获得用各种废料素材来修理其他装备。',
+        'You have a chance to get some forge upgrading\nmaterials when you salvage an item. The type\ndepends on the kind of item salvaged while the\ntier depends on the quality of the item as well\nas a random chance. At the very least you will\nreceive some scrap that can be used to repair\nother items.' : '你有机会通过分解装备获得一些用于装备升级的材料。分解出的素材种类取决于被分解装备的类型与品质，现在上等及以上装备分解你会获得一个对应品质的强化素材，中等及以下装备可以获得一些对应的废料用来修理其他装备，稀有装备类型分解还可以获得一些能量元。', //0.87变更，作为对照上原文保留
         'If an equipment piece has been upgraded in the\nforge then salvaging it will return 90% of the\nmaterials spent upgrading it. Catalyst items\ncannot be recovered this way.' : '分解一件被强化过的装备会返还 90% 的强化材料。催化剂无法通过分解装备回收。',
 
         'Select an equipment piece from the list to the left\nthen hit Reforge Item below to reforge it.' : '从左侧列表选择一件装备，然后点击下方 Reforge Item 按钮重铸它。',
@@ -1906,6 +1933,7 @@ var words = {
         'This costs one Amnesia Shard for every level of\nunlocked potential.' : '重铸一件装备将消耗等同于该装备已解锁潜能等级的重铸碎片。',
 
         'Select an equipment piece from the list to the left then hit Soulfuse Item below to permanently bind it to you. This will make it level as you do. There is no way to break this bond outside of salvaging the item.' : '从左侧列表选择一件装备，然后点击下方 Soulfuse Item 将该装备与你进行永久绑定。灵魂绑定之后该装备会跟随你的等级一起成长。除非你将装备分解否则没有其它办法可以解除绑定状态。',
+        'Select an equipment piece from the list to the left then hit Soulfuse Item below to permanently bind it to you. This will make it level as you do. There is no way to break this bond, but the item can still be salvaged or sold.' : '从左侧列表选择一件装备，然后点击下方 Soulfuse Item 将该装备与你进行永久绑定。灵魂绑定之后该装备会跟随你的等级一起成长。此绑定无法解除，但是装备仍然可以被拆解或者出售给系统店。',
         'The cost for soulfusing with an item depends both on your level and how many levels below you the item is.' : '灵魂绑定消耗的碎片数量取决于装备的品质以及该装备比你高出的等级数。',
         'You cannot soulfuse items that have a gear level higher than 100 above your current level. Right now, you can soulfuse equipment up to level' : '你不能灵魂绑定高于自己100级的装备，也就是说, 你目前可以灵魂绑定的最高装备等级是',
 
@@ -1979,12 +2007,12 @@ var words = {
         //难度名称使用独立的difficulty字典
         'EXP Mod' : '经验倍率',
         'Balanced Fun' : '平衡而有趣',
-        'Somewhat Tricky' : '有些棘手',
-        'Pretty Tough' : '确实挺难的',
-        'Even Tougher' : '还能更难("传奇"/"无双"品质开始掉落)',
-        'Old School' : '像老红白机游戏一样无情(装备掉落最低品质为"中等")',
-        'I Wanna Be The Hentai' : 'hentai之路',
-        'Smiles' : '微笑 :-)(掉落装备最低品质为"上等")',
+        'Somewhat Tricky' : '有些棘手(1.25倍Credits掉落)',
+        'Pretty Tough' : '确实挺难的(1.5倍Credits掉落)',
+        'Even Tougher' : '还能更难(1.75倍Credits掉落，开始有概率掉落"传奇"/"无双"装备)',
+        'Old School' : '像老红白机游戏一样无情(2.2倍Credits掉落，装备掉落最低品质为"中等")',
+        'I Wanna Be The Hentai' : '我要成为大Hentai(3倍Credits掉落)',
+        'Smiles' : '微笑 :-)(3倍Credits掉落，掉落装备最低品质为"上等")',
 
         'Display Title' : '称号选择',
         'Here you can choose which of your available titles that will be displayed below your level and on the forums.' : '在这里可以选择你的称号，称号会在你的等级下方以及游戏论坛中显示',
@@ -2014,8 +2042,8 @@ var words = {
 
         'Font Engine' : '文字引擎',
         'Here you can choose a custom font instead of the standard HentaiVerse font engine.' : '在这里你可以选择使用自定义字体代替HV的默认的字体引擎，',
-        'This mostly affects how fast pages will render and how pretty they will look.' : '这将大幅改善页面的加载速度以及页面显示的字体效果',
-        'Use Custom Font (specify below - this font MUST be installed on your local system to work)' : '使用自定义字体（注意，所指定的字体必须已安装在本地系统中）',
+        'This mostly affects how fast pages will render and how pretty they will look.' : '这将大幅改善页面的加载速度以及页面显示的字体效果。为了更好的使用脚本及完全汉化其它内容，你必须设置自定义字体',
+        'Use Custom Font (specify below - this font MUST be installed on your local system to work)' : '使用自定义字体（下方字体名称必填，所指定的字体如果本地系统内没有安装会自动使用其它字体替代）',
         'font-family' : '字体名称',
         'font-size' : '字体大小',
         'font-weight' : '字体深浅',
@@ -2040,20 +2068,38 @@ var words = {
         'Standard' : '预设',
         'Utilitarian' : '通常',
 
+        'Shrine Trophy Upgrades' : '献祭奖杯升级',
+        'By default, as you gain levels, Snowflake will start accepting more lower-tier trophies for a higher-trophy roll in the Shrine. You can override this behavior here.' : '默认情况下，雪花女神将随着你等级的提升自动接受你将多个低等级奖杯升级成高等级奖杯进行献祭，你可以在下面更改覆盖默认设置。（奖杯升级是叠加的，意味着32个等级2奖杯可以升级成1个等级5奖杯）',
+        'Use Default' : '使用默认（跟随等级自动提升，200级时升级到等级3，300级时升级到等级4，400级时升级到等级5）',
+        'Upgrade to Tier 3' : '升级到等级3（献祭时4个等级2奖杯升级为一个等级3奖杯，提升品质同时献祭价值提升为1.1倍）',
+        'Upgrade to Tier 4' : '升级到等级4（献祭时2个等级3奖杯升级为一个等级4奖杯，提升品质同时献祭价值提升为1.2倍）',
+        'Upgrade to Tier 5' : '升级到等级5（献祭时4个等级4奖杯升级为一个等级5奖杯，提升品质同时献祭价值提升为1.3倍）',
+        'Do Not Upgrade' : '不升级',
+
         'Quickbar Slots' : '快捷栏',
-        'Here you can set up which spells will appear on the battle screen quickbar.' : '这里你可以设定战斗中的法术快捷栏',
+        'Here you can set up which spells will appear on the battle screen quickbar.' : '这里你可以设定战斗中的技能法术快捷栏',
         //技能法术名称使用独立的skills字典
         'Not Assigned' : '未设置',
 
         'Auto-Cast Slots' : '自动施法',
         'Here you can set which spells will be automatically cast at the start of each battle' : '这里你可以选择在战斗中自动释放的法术',
         'Note that you have to unlock one or more of the Innate Arcana ' : '你必须在',
-        'to use these.' : '中购买了Innate Arcana才可以使用这个功能',
+        'to use these.' : '中购买了Innate Arcana才可以使用这个功能（异世界模式下自动解锁所有自动施法槽）',
         'You do not have any autocast slots.' : '你现在还没有开放自动施法槽。（购买Innate Arcana之后可能会有一段时间延迟）',
         'If your MP decreases below 10%, the innate spells will dissipate. They will be recast when it goes back above 25%.' : '如果你的MP低于10%，你将无法维持自动施法，直到你的MP回复到25%以上',
         'Upkeep' : '维持法术需消耗',
         'MP/round' : '魔力/回合',
         'Autocast' : '自动施法槽',
+
+        'Auto-Sell / Auto-Salvage' : '自动出售/自动拆解',
+        'If you want to automatically dump junk equipment on the closest travelling salesmoogle or break it down into parts, you can do so here. ' : '如果你打算自动把垃圾装备就近出售给路过的商人或者将其拆解成零件，你可以这这里设置。',
+        'All equipment of the specified qualify and below will be automatically sold or turned in to salvage. ' : '所有你所指定品质及以下的装备将会在获得时被自动出售或者分解。',
+        'If a dropped equipment qualifies for both sell and salvage, the action with the lowest required quality will be taken.' : '如果某类装备同时设置了自动出售和自动拆解品质，那么其中设置较低一个将优先执行（比如：你设置了棉质护甲自动出售精良品质和自动拆解史诗品质时，精良以下将被出售，史诗品质将被拆解）',
+        'No Auto-Sell' : '不自动出售',
+        '/^Sell (\\w+)$/' : '自动出售 $1 或更低品质',
+        'No Auto-Salvage' : '不自动拆解',
+        '/^Salvage (\\w+)$/' : '自动拆解 $1 或更低品质',
+        '/ Armor$/' : ' 护甲',
     },
 
 
@@ -2087,6 +2133,8 @@ var words = {
         'Trophies can be exchanged for a piece of equipment.' : '奖杯可以兑换一件指定类型的装备',
         'The qualify and tier of the item depends on the trophy you offer. ' : '获取的装备品质基于所献祭奖杯的等级而骰动。',
         'You can select the major class of the item being granted from the list below.' : '在下方选择你想获取的装备类型。',
+        'Offering ' : '献祭 ',
+        '/need (\\d+) more/' : '还需要额外 $1 个以升级献祭',
         'You have handed in' : '你有总价值',
         'worth of trophies' : '的奖杯献祭记录',
         'Collectibles can be exchanged for a random selection of bindings and materials.' : '献祭一个收藏品可以获得随机种类的 1 个黏合剂和 1-3 个高阶基本素材',
@@ -2281,11 +2329,17 @@ var words = {
         '< Prev' : '< 上一页',
         'Next >' : '下一页 >',
         'No New Mail' : '没有新邮件',
+        'Attaching items on Isekai is restricted to donators.' : '异世界模式下给邮件添加附件功能仅限捐赠玩家。',
+        'Attachments also cannot be sent for the last month of each season.' : '同时在每个赛季最后一个月将无法发送附件。',
         'Welcome to MoogleMail. A Moogle approach to email.' : '欢迎来到莫古利邮务，莫古利将为你传送邮件。',
         'From here you can send messages and items to other people in the HentaiVerse, kupo!' : '在这里你可以向其他HV玩家传送信息和物品，咕波！',
-        'You can click the buttons above to attach items, equipment, credits or hath to this message. Up to 10 different things can be attached to each message.' : '你可以点击上面的按钮为编写的邮件添加附件，包括道具，装备，Credit，Hath。一封邮件最多可添加10件附件。',
+        'You can click the buttons above to attach items, equipment, credits or hath to this message. ' : '你可以点击上面的按钮为此邮件添加道具、装备、Credit、Hath附件。',
+        'You can click the buttons above to attach items or equipment to this message. ' : '你可以点击上面的按钮为此邮件添加道具、装备附件。',
+        'Up to 10 different things can be attached to each message.' : '一封邮件最多可添加10件附件。',
         'You can optionally request payment for messages with attachments with the Credits on Delivery (CoD) setting after attaching at least one item. ' : '当你为一封邮件添加至少一个附件之后，你可以为邮件设置货到付款(CoD)功能。',
-        'The receipient will have to pay the specified number of credits in order to remove the attachments from your message. To prevent misuse, a small fee is required to use this function unless you have the Postage Paid perk.' : 'CoD 功能会令收件人在提取附件时向你支付指定数额的Credits，为了防止滥用，这个功能每次会收取少量费用，除非你购买了Hath能力“邮资已付”。',
+        'The receipient will have to pay the specified number of credits in order to remove the attachments from your message. ': 'CoD 功能会令收件人在提取附件时向你支付指定数额的Credits。',
+        'To prevent misuse, a small fee is required to use this function unless you have the Postage Paid perk.' : '为了防止滥用，这个功能每次会收取少量费用，除非你购买了Hath能力“邮资已付”。',
+        'To prevent misuse, a fee is required to use this function unless you have the Postage Paid perk.' : '为了防止滥用，这个功能每次会收取一定费用，除非你购买了Hath能力“邮资已付”。',
         'Until the CoD has been paid, the sender and the recipient can both choose to return the message. ' : '除非货到付款(CoD)已经被收件人支付，否则发件人与收件人可以在任意时刻撤回或者拒收CoD邮件。',
         'This allows the recepient to reject an unwanted message, and allows you to recover your items if the recipient does not accept it within a reasonable time.' : '这可以防止发出的邮件长时间得不到回应或者收到了不合理的CoD邮件的问题。',
         'Note that unsent drafts will be deleted after one month, and sent messages will be deleted after one year. Any remaining attachments for a deleted message will be permanently lost.' : '请注意，邮件草稿将于1个月后自动删除，已发送的邮件在保留1年后也会自动删除，如果被删除的邮件里仍有未提取的附件，它将永久丢失。',
@@ -2404,6 +2458,19 @@ var words = {
         'tokens of blood.' : '块鲜血令牌',
         'token of blood.' : '块鲜血令牌',
 
+        'The Tower is an Isekai-Only battle mode where the goal is to get as high as possible before the end of the season. ' : '塔楼(The Tower)是异世界独有的战斗模式，目标是在每个赛季结束前尽可能获得更高的排位。',
+        'Ranking high in this mode at the end of the season will provide you with some permanent bonuses on HV Persistent.' : '塔楼天梯以半年为一个赛季周期，每年冬夏至日赛季结束异世界将会重置。在塔楼下取得高排位将在每个赛季结束后获得一些传统世界模式的永久奖励。',
+        'The difficulty and monster level in this battle mode is locked to each floor. Difficulty will increase every five floors, and monster level will increase by 10 per floor.' : '塔楼模式的战斗难度和怪物等级与对应层级锁定，和你的设置和自身等级无关。战斗难度将每5层提升一次，怪物等级将每层提升10级。',
+        'Your Ranking: ' : '你的排名: ',
+        'Unranked' : '没有排名',
+        '1st' : '1',
+        '2nd' : '2',
+        '3rd' : '3',
+        '/(\\d)th/' : '$1',
+        'Current Floor:' : '当前层级:',
+        'Monster Level' : '怪物等级',
+        'Daily Attempts: ' : '今日挑战: ',
+
         'Welcome to the Grindfest.' : '欢迎来到压榨界',
         'A Grindfest consists of up to 1000 rounds of battle.' : '压榨界包含1000场连续且难度递增的战斗',
         'Starting a Grindfest will consume 1 point of Stamina.' : '进入压榨界战斗会消耗1点精力',
@@ -2428,11 +2495,6 @@ var words = {
 
     ///////////////////////////////////////////////////////正在战斗页面
     battling: {
-    // 待验证语句：
-        // 1. 恢复剂部分的提神、带劲效果（ED/咖啡因/泡泡糖/花瓶效果）
-        // 2. 以太窃取、灵力窃取
-        // 3. 焚烧的灵魂、鲜美的灵魂
-
     ///////////////////////////////////////////////////////战斗行动
         '/^Attack$/' : '攻击',
         '/^Defend$/' : '防御',
@@ -2546,7 +2608,7 @@ var words = {
         'Restores 10 points of Stamina, up to the maximum of 99. When used in battle, also boosts Overcharge and Spirit by 10% for ten turns.' : '恢复10点精力，但不超过99，每回合增加10%的灵力和斗气.',
         'Restores 5 points of Stamina, up to the maximum of 99. When used in battle, also boosts Overcharge and Spirit by 10% for five turns.' : '恢复5点精力，但不超过99，每回合增加10%的灵力和斗气.',
         'There are three flowers in a vase. The third flower is green.' : '你的物理/魔法 伤害、命中、暴击率、回避、抵抗率大幅提升+25%，持续50回合。',
-        'It is time to kick ass and chew bubble-gum... and here is some gum.' : '你的攻击和咒语伤害大幅提升+100%。必定命中且必定暴击。同时每回合补充 20% 基础魔力与基础生命值，持续50回合。',
+        'It is time to kick ass and chew bubble-gum... and here is some gum.' : '你的攻击和咒语伤害大幅提升+100%。必定命中且必定暴击，持续50回合。',
         'You gain +25% resistance to Fire elemental attacks and do 25% more damage with Fire magicks.' : '你获得 +25% 的火系魔法耐性且获得 25% 的额外火系魔法伤害。',
         'You gain +25% resistance to Cold elemental attacks and do 25% more damage with Cold magicks.' : '你获得 +25% 的冰冷魔法耐性且获得 25% 的额外冰系魔法伤害。',
         'You gain +25% resistance to Elec elemental attacks and do 25% more damage with Elec magicks.' : '你获得 +25% 的雷系魔法耐性且获得 25% 的额外雷系魔法伤害。',
@@ -2638,11 +2700,13 @@ var words = {
         'The Spirit Restorative is refreshing your spirit.' : '灵力恢复剂正在提升你的灵力',
         'The Health Restorative is regenerating your body.' : '体力恢复剂正在再生你的体力',
         'The Mana Restorative is replenishing your magic reserves.' : '魔力恢复剂正在补给你的魔力',
+        'Your attacks and spells deal twice as much damage for a short time, will always hit, and will always land critical hits.' : '你的攻击和咒语伤害短暂大幅提升。必定命中且必定暴击。',
+        'Your attack/magic rating, attack/magic hit/crit chance and evade/resist chance increases significantly for a short time.' : '你的物理/魔法 伤害、命中、暴击率、回避、抵抗率短暂大幅提升。',
         'Your attacks and spells deal significantly more damage for a short time, will always hit, and will always land critical hits. Also replenishes 20% of base mana and health per turn.' : '你的攻击和咒语伤害短暂大幅提升。必定命中且必定暴击。同时每回合补充 20% 基础魔力与基础生命值。',
         'Your attack/magic damage, attack/magic hit/crit chance, and evade/resist chance increases significantly for a short time.' : '你的物理/魔法 伤害、命中、暴击率、回避、抵抗率短暂大幅提升。',
 
         //卷轴
-        '(Scroll]' : '[卷轴]',
+        '(Scroll' : '(卷轴',
         'Increases Action Speed by' : '增加行动速度',
         'Absorbs all damage taken by' : '吸收所有伤害的',
         'Increases evasion by' : '增加闪避率',
@@ -2664,16 +2728,16 @@ var words = {
         'You are cloaked in the power of darkness.' : '你披上了黑暗的力量。',
 
         //BUFF的效果
-        '/^Regen$/' : '细胞活化',
-        '/^Protection$/' : '守护',
-        '/^Spirit Shield$/' : '灵力盾',
-        '/^Hastened$/' : '疾速',
-        '/^Shadow Veil$/' : '影纱',
+        '/^Regen$/' : '细胞活化[S]',
+        '/^Protection$/' : '守护[S]',
+        '/^Spirit Shield$/' : '灵力盾[S]',
+        '/^Shadow Veil$/' : '影纱[S]',
+        '/^Hastened$/' : '疾速[S]',
         '/^Absorbing Ward$/' : '吸收结界',
-        '/^Spark of Life$/' : '生命火花',
-        '/^Cloak of the Fallen$/' : '陨落的披风',
-        '/^Heartseeker$/' : '穿心',
-        '/^Arcane Focus$/' : '奥术集成',
+        '/^Spark of Life$/' : '生命火花[S]',
+        '/^Cloak of the Fallen$/' : '陨落的披风[S]',
+        '/^Heartseeker$/' : '穿心[S]',
+        '/^Arcane Focus$/' : '奥术集成[S]',
         'The holy effects of the spell are restoring your body.' : '神奇的细胞再生效果正在恢复你的身体',
         'Places a shield effect on the target, absorbing' : '对目标施加护盾效果，吸收所有攻击',
         'of the damage from all attacks.' : '的伤害值。',

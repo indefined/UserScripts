@@ -4,28 +4,19 @@
 // @author       ggxxsol & mbbdzz & indefined & etc.
 // @description  汉化物品、装备界面及论坛，带装备高亮/装备店隐藏锁定装备，带翻译原文切换功能，会直接替换网页源码所以可能导致其它脚本冲突
 // @notice       此修改版大幅度乱重构了原有脚本执行逻辑，对其它脚本的兼容性有一定提升，但丢失原脚本装备后缀语序倒转功能和部分物品弹窗说明汉化
-// @notice       如有同时使用其它汉化，需要先于其它汉化脚本运行才会生效
-// @notice       与HVtoolBox1.0.7以前版本在大部分装备列表冲突会失去装备高亮功能,在物品仓库中会导致HVtoolBox部分物品功能无效；与Live Percentile Ranges在装备详情页冲突
-// @notice       更新HVtoolBox到1.0.7或更新版并将汉化脚本运行顺序放在HVtoolBox后可解决兼容问题，如与其它脚本同时使用冲突，可尝试调整脚本运行顺序，但无法保证完全兼容
-// @notice       默认只在物品列表、装备店、论坛启用，如需包含其它装备物品页面汉化可在脚本管理器设置中将原始排除添加为用户包含或者将下方对应@exclude改为@match
+// @notice       如有同时使用其它汉化，需要先于其它汉化脚本安装运行才会生效
+// @notice       与HVtoolBox1.0.7以前版本在大部分装备列表冲突会失去装备高亮功能,在物品仓库中会导致HVtoolBox部分物品功能无效，请更新到新版并将汉化脚本运行顺序放在HVtoolBox后
+// @notice       与Live Percentile Ranges在装备详情页冲突，默认不在装备信息页启用，如需包含可在脚本管理器设置中将原始排除添加为用户包含或者将下方对应@exclude改为@include
+// @notice       如与其它脚本同时使用冲突，可尝试调整脚本运行顺序，但无法保证完全兼容，或者将冲突的页面链接添加用户排除(@exclude)
 // @notice       如果你要在论坛买东西，挑好东西之后最好切换到原文再复制内容，因为别人并不一定看得懂经过翻译过后的东西
 // @icon         https://hentaiverse.org/y/favicon.png
-// @exclude        *://*hentaiverse.org/?s=Character&ss=in*
-// @match        *://*hentaiverse.org/?s=Bazaar&ss=is*
-// @exclude        *://*hentaiverse.org/?s=Character&ss=eq*
-// @match        *://*hentaiverse.org/?s=Bazaar&ss=es*
-// @match        *://*hentaiverse.org/?s=Bazaar&ss=ss*
-// @exclude        *://*hentaiverse.org/?s=Bazaar&ss=mm*
-// @match        *://*hentaiverse.org/?s=Character&ss=it*
-// @exclude        *://*hentaiverse.org/?s=Battle&ss=iw*
-// @match        *://forums.e-hentai.org/*showtopic=*
-// @match        *://*hentaiverse.org/?s=Bazaar&ss=lt*
-// @match        *://*hentaiverse.org/?s=Bazaar&ss=la*
-// @exclude        *://*hentaiverse.org/?s=Forge*
-// @exclude        *://*hentaiverse.org/equip/*
-// @exclude        *://*hentaiverse.org/pages/showequip.php?*
-// @match        *://hvmarket.xyz/*
-// @version      2020.12.31
+// @include      *://hentaiverse.org/*
+// @include      *://alt.hentaiverse.org/*
+// @exclude      *://*hentaiverse.org/*equip/*
+// @exclude      *://*hentaiverse.org/*pages/showequip.php?*
+// @include      *://forums.e-hentai.org/*showtopic=*
+// @include      *://hvmarket.xyz/*
+// @version      2021.01.20
 // ==/UserScript==
 
 if (document.location.href.match(/ss=iw/)&&!document.getElementById('item_pane'))return
@@ -336,7 +327,7 @@ function loadItems(){
         'Binding of Heimdall':  '粘合剂 圣属性咒语伤害',
         'Binding of Fenrir':  '粘合剂 暗属性咒语伤害',
         'Binding of Dampening':  '粘合剂 敲击减伤',
-        'Binding of Stoneskin':  '粘合剂 砍击减伤',
+        'Binding of Stoneskin':  '粘合剂 斩击减伤',
         'Binding of Deflection':  '粘合剂 刺击减伤',
         'Binding of the Fire-eater':  '粘合剂 火属性减伤',
         'Binding of the Frost-born':  '粘合剂 冰属性减伤',
@@ -418,7 +409,7 @@ function loadItems(){
         'Mithra\'s Flower' : '猫人族的花(等级2)',
         'Holy Hand Grenade of Antioch' : '安提阿的神圣手榴弹(等级2)',
         'Dalek Voicebox' : '戴立克音箱(等级2)',
-        'Lock of Blue Hair' : '一绺蓝发(等级3)',
+        'Lock of Blue Hair' : '一绺蓝发(等级2)',
         'Bunny-Girl Costume' : '兔女郎装(等级3)',
         'Hinamatsuri Doll' : '雏人形(等级3)',
         'Broken Glasses' : '破碎的眼镜(等级3)',
@@ -431,6 +422,7 @@ function loadItems(){
         'Silver Coupon' : '银礼券(等级5)',
         'Gold Coupon' : '黄金礼券(等级7)',
         'Platinum Coupon' : '白金礼券(等级8)',
+        'Peerless Voucher' : '无双必得券',
 
         //特殊奖杯
         'Mysterious Box' : '神秘宝盒(等级9)', // 在‘训练：技能推广’调整价格后赠予某些玩家。
@@ -474,7 +466,7 @@ function loadItems(){
         'Abstract Wire Sculpture' : '抽象线雕(等级8)', // 2018 复活节
         'Assorted Coins' : '什锦硬币(等级7)', // 2019 复活节
         'Coin Collector\'s Guide' : '硬币收藏家指南(等级8)', // 2019 复活节
-        'Shrine Fortune' : '神社财富(等级7)', // 2020 复活节
+        'Shrine Fortune' : '神社灵签(等级7)', // 2020 起复活节
         'Plague Mask' : '瘟疫面具(等级8)', // 2020 复活节
 
 
@@ -738,7 +730,7 @@ function loadItems(){
         'Holy Spell Damage' : '(神圣法术伤害)',
         'Dark Spell Damage' : '(黑暗法术伤害)',
         'Crushing Mitigation' : '(敲击减伤)',
-        'Slashing Mitigation' : '(砍击减伤)',
+        'Slashing Mitigation' : '(斩击减伤)',
         'Piercing Mitigation' : '(刺击减伤)',
         'Fire Mitigation' : '(火焰减伤)',
         'Cold Mitigation' : '(冰霜减伤)',
@@ -807,6 +799,7 @@ function loadEquipsInfo(){
         'Cloth Armor':'布甲',
         'Light Armor':'轻甲',
         'Heavy Armor':'重甲',
+        'Current Owner':'持有者',
 
         'Condition:':'耐久:',
         'Untradeable':'不可交易',
@@ -828,7 +821,8 @@ function loadEquipsInfo(){
         'Lasts for':'持续',
         'chance - ':'几率 - ',
         ' turns':' 回合',
-        ' turn':' 回合',
+        ' turn<':' 回合<',
+        ' turn /':' 回合 /',
         'points drained':'点吸取量',
         'base drain':'基础吸取量',
         'DOT':'持续伤害比例',
@@ -876,9 +870,8 @@ function loadEquipsInfo(){
         'Magic Accuracy':'魔法命中',
         'Counter-Parry':'反招架',
         'Attack Speed':'攻击速度',
-        'Current Owner':'持有者',
-        'Mitigation':'减伤',
-        'Defense':'防御',
+        'MP Bonus':'魔力加成',
+        'HP Bonus':'体力加成',
         'Burden':'负重',
         'Interference':'干涉',
 
@@ -902,9 +895,13 @@ function loadEquipsInfo(){
         'Physical':'物理',
         'Magical':'魔法',
         'Damage':'伤害',
+        'Defense':'防御',
+        'Mitigation':'减伤',
         'Hit Chance':'命中率',
         'Crit Chance':'暴击率',
-        'Bonus':'加成',
+        'Bonus Lv':'加成 Lv',
+        'Bonus<':'加成<',
+
         'Capacitor':'魔力加成',
         'Juggernaut':'生命加成',
         'Butcher':'武器伤害加成',
@@ -996,9 +993,9 @@ function loadEquips(){
 
         ////////////////////////材质前缀////////////////////////
         //布甲
-        'Cotton':'棉质</span><span style=\"background:#FFFFFF;color:#000000\" >(布)</span>',
-        'Gossamer':'*薄纱</span><span style=\"background:#FFFFFF;color:#000000\" >(布)</span>',
-        'Silk' : '*丝绸</span><span style=\"background:#FFFFFF;color:#000000\" >(布)</span>',
+        'Cotton':'棉质<span style=\"background:#FFFFFF;color:#000000\" >(布)</span>',
+        'Gossamer':'*薄纱<span style=\"background:#FFFFFF;color:#000000\" >(布)</span>',
+        'Silk' : '*丝绸<span style=\"background:#FFFFFF;color:#000000\" >(布)</span>',
         'Phase':'<span style=\"background:#ffa500\" >相位</span><span style=\"background:#FFFFFF;color:#000000\" >(布)</span>',
         //轻甲
         'Leather':'皮革<span style=\"background:#666666;color:#FFFFFF\" >(轻)</span>',
@@ -1017,10 +1014,10 @@ function loadEquips(){
         'Katalox':'铁木',
 
         ///////////////////////////////////////////防具后缀////////////////////////////////////////////
-        'of Negation':'否定之',
+        'of Negation':'否定',
         'of the Shadowdancer':'影舞者',
         'of the Arcanist':'奥术师',
-        'of the Fleet':'迅捷之',
+        'of the Fleet':'迅捷',
         'of the Fire-eater':'噬火者',
         'of the Thunder-child':'雷之子',
         'of the Wind-waker':'风之杖',
@@ -1143,7 +1140,7 @@ function loadEquips(){
         'Two-Handed':'双手',
         'One Handed':'单手',
         'Two Handed':'双手',
-        'Weapon':'武器',
+        'Weapons?':'武器',
         '法杖s':'法杖',
         'Shields?([^a-z])':'盾$1',
         'Cloth Armor':'布甲',

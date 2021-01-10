@@ -3,14 +3,15 @@
 // @namespace      hentaiverse.org
 // @author         indefined
 // @icon           https://hentaiverse.org/y/favicon.png
-// @description    仅对HV战斗说明框进行汉化。此脚本已完全合并到hentaiverse汉化，如无特殊需求不需要独立安装，此脚本后续可能会删除。
+// @description    仅对HV战斗说明框进行汉化。此脚本已完全合并到hentaiverse汉化，如无特殊需求不需要独立安装。
 // @notice         与20200922之后版本的hentaiverse汉化互斥，如果你已经安装了新版hentaiverse汉化脚本建议禁用或者删除此脚本然后双击战斗底部经验条开启战斗汉化
+// @notice         此脚本最后一次更新在2021.01.20 HV 0.87维护后校对部分翻译，后续将不再提供维护支持。
 // @include        *://hentaiverse.org/*
 // @include        *://alt.hentaiverse.org/*
 // @exclude        *://*hentaiverse.org/equip/*
 // @exclude        *://*hentaiverse.org/pages/showequip.php?*
 // @core           http://userscripts-mirror.org/scripts/show/41369
-// @version        2020.10.07
+// @version        2021.01.20
 // @grant none
 // ==/UserScript==
 (function () {
@@ -37,11 +38,6 @@
     // 字典语法: '原文' : '翻译之后的句子',
         //原文部分带*号将被视为通配，匹配真正*号时使用\\*代替*
         //原文以/开头和结尾的为正则表达式，在这个脚本里多用来做全词匹配
-
-    // 待验证语句：
-        // 1. 恢复剂部分的提神、带劲效果（ED/咖啡因/泡泡糖/花瓶效果）
-        // 2. 以太窃取、灵力窃取
-        // 3. 焚烧的灵魂、鲜美的灵魂
 
     ///////////////////////////////////////////////////////战斗行动
         '/^Attack$/' : '攻击',
@@ -212,7 +208,7 @@
         'Restores 10 points of Stamina, up to the maximum of 99. When used in battle, also boosts Overcharge and Spirit by 10% for ten turns.' : '恢复10点精力，但不超过99，每回合增加10%的灵力和斗气.',
         'Restores 5 points of Stamina, up to the maximum of 99. When used in battle, also boosts Overcharge and Spirit by 10% for five turns.' : '恢复5点精力，但不超过99，每回合增加10%的灵力和斗气.',
         'There are three flowers in a vase. The third flower is green.' : '你的物理/魔法 伤害、命中、暴击率、回避、抵抗率大幅提升+25%，持续50回合。',
-        'It is time to kick ass and chew bubble-gum... and here is some gum.' : '你的攻击和咒语伤害大幅提升+100%。必定命中且必定暴击。同时每回合补充 20% 基础魔力与基础生命值，持续50回合。',
+        'It is time to kick ass and chew bubble-gum... and here is some gum.' : '你的攻击和咒语伤害大幅提升+100%。必定命中且必定暴击。',
         'You gain +25% resistance to Fire elemental attacks and do 25% more damage with Fire magicks.' : '你获得 +25% 的火系魔法耐性且获得 25% 的额外火系魔法伤害。',
         'You gain +25% resistance to Cold elemental attacks and do 25% more damage with Cold magicks.' : '你获得 +25% 的冰冷魔法耐性且获得 25% 的额外冰系魔法伤害。',
         'You gain +25% resistance to Elec elemental attacks and do 25% more damage with Elec magicks.' : '你获得 +25% 的雷系魔法耐性且获得 25% 的额外雷系魔法伤害。',
@@ -304,11 +300,13 @@
         'The Spirit Restorative is refreshing your spirit.' : '灵力恢复剂正在提升你的灵力',
         'The Health Restorative is regenerating your body.' : '体力恢复剂正在再生你的体力',
         'The Mana Restorative is replenishing your magic reserves.' : '魔力恢复剂正在补给你的魔力',
+        'Your attacks and spells deal twice as much damage for a short time, will always hit, and will always land critical hits.' : '你的攻击和咒语伤害短暂大幅提升。必定命中且必定暴击。', //2021.01.20验证的原文
+        'Your attack/magic rating, attack/magic hit/crit chance and evade/resist chance increases significantly for a short time.' : '你的物理/魔法 伤害、命中、暴击率、回避、抵抗率短暂大幅提升。', //2021.01.20验证的原文
         'Your attacks and spells deal significantly more damage for a short time, will always hit, and will always land critical hits. Also replenishes 20% of base mana and health per turn.' : '你的攻击和咒语伤害短暂大幅提升。必定命中且必定暴击。同时每回合补充 20% 基础魔力与基础生命值。',
         'Your attack/magic damage, attack/magic hit/crit chance, and evade/resist chance increases significantly for a short time.' : '你的物理/魔法 伤害、命中、暴击率、回避、抵抗率短暂大幅提升。',
 
         //卷轴
-        '(Scroll]' : '[卷轴]',
+        '(Scroll' : '(卷轴',
         'Increases Action Speed by' : '增加行动速度',
         'Absorbs all damage taken by' : '吸收所有伤害的',
         'Increases evasion by' : '增加闪避率',
