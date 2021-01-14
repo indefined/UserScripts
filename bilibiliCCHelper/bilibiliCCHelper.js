@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.20.1
+// @version      0.5.21
 // @description  可以在B站加载外挂本地字幕、下载B站的CC字幕，旧版B站播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -149,6 +149,26 @@ fill-rule="evenodd"></path></svg>`,
             },appendTo).setAttribute('for',config.id);
         }
     };
+
+    function fetch(url) {
+        return new Promise((resolve, reject) => {
+            const req = new XMLHttpRequest();
+            req.onreadystatechange = ()=> {
+                if (req.readyState === 4) {
+                    resolve({
+                        status: req.status,
+                        statusText: req.statusText,
+                        body: req.response,
+                        json: ()=>Promise.resolve(JSON.parse(req.responseText)),
+                        text: ()=>Promise.resolve(req.responseText)
+                    });
+                }
+            };
+            req.onerror = reject;
+            req.open('GET', url);
+            req.send();
+        });
+    }
 
     //编码器，用于将B站BCC字幕编码为常见字幕格式下载
     const encoder = {
