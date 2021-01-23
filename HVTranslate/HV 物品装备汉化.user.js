@@ -2,7 +2,7 @@
 // @name         HV 物品装备汉化
 // @namespace    hentaiverse.org
 // @author       ggxxsol & mbbdzz & indefined & etc.
-// @description  汉化物品、装备界面及论坛，带装备高亮/装备店隐藏锁定装备，带翻译原文切换功能，会直接替换网页源码所以可能导致其它脚本冲突
+// @description  汉化Hentaiverse及EH论坛、HVMarket内的物品、装备及装备属性，带装备高亮/装备店隐藏锁定装备，带翻译原文切换功能，会直接替换网页源码所以可能导致其它脚本冲突
 // @notice       此修改版大幅度乱重构了原有脚本执行逻辑，对其它脚本的兼容性有一定提升，但丢失原脚本装备后缀语序倒转功能和部分物品弹窗说明汉化
 // @notice       如有同时使用其它汉化，需要先于其它汉化脚本安装运行才会生效
 // @notice       与HVtoolBox1.0.7以前版本在大部分装备列表冲突会失去装备高亮功能,在物品仓库中会导致HVtoolBox部分物品功能无效，请更新到新版并将汉化脚本运行顺序放在HVtoolBox后

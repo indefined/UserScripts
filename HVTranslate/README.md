@@ -24,9 +24,9 @@
 
 ### HV 装备物品汉化 v2021.01.20 [点击此处安装](https://github.com/indefined/UserScripts/raw/master/HVTranslate/HV%20%E7%89%A9%E5%93%81%E8%A3%85%E5%A4%87%E6%B1%89%E5%8C%96.user.js)
 
-- 基于贴吧**物品汉化**脚本修改，汉化物品、装备界面及论坛，带装备高亮/装备店隐藏锁定装备，会直接替换网页源码所以可能导致其它脚本冲突
+- 基于贴吧**物品汉化**脚本修改，汉化Hentaiverse、EH论坛、HVMarket内的物品、装备及装备属性，带装备高亮/装备店隐藏锁定装备，会直接替换网页源码所以可能导致其它脚本冲突
 - 本脚本大致最初由 [ggxxsol](https://greasyfork.org/scripts/25986) 创建，后由贴吧 [mbbdzz](https://tieba.baidu.com/p/4849863522) 修改补充
-- 由 [indefined](https://github.com/indefined/UserScripts/tree/master/HVTranslate) 大规模重构，提高了对其它脚本的兼容性，但失去原脚本的装备后缀语序倒转功能和物品列表部分悬浮窗说明汉化
+- 由 [indefined](https://github.com/indefined/UserScripts/tree/master/HVTranslate) 大规模重构，提高了对其它脚本的兼容性及运行效果，但失去原脚本的装备后缀语序倒转功能和物品列表部分悬浮窗说明汉化
 - 如有同时使用其它汉化，需要先于其它汉化脚本安装运行才会生效
 - 与HVtoolBox1.0.7以前版本在大部分装备列表冲突会失去装备高亮功能，请更新到新版HVToolBox并将汉化脚本运行顺序放在HVtoolBox后
 - 与Live Percentile Ranges在装备详情页冲突，默认不在装备信息页启用，如需包含可在脚本管理器设置中将原始排除添加为用户包含或者将脚本内@exclude改为@include
