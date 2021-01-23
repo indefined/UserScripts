@@ -156,9 +156,10 @@ fill-rule="evenodd"></path></svg>`,
             req.onreadystatechange = ()=> {
                 if (req.readyState === 4) {
                     resolve({
+                        ok: req.status>=200&&req.status<=299,
                         status: req.status,
                         statusText: req.statusText,
-                        body: req.response,
+                        body: new ReadableStream(req.response),
                         json: ()=>Promise.resolve(JSON.parse(req.responseText)),
                         text: ()=>Promise.resolve(req.responseText)
                     });
