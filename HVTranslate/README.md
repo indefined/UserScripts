@@ -50,7 +50,7 @@
 - **HV战斗汉化已完全合并到上方hentaiverse汉化，如无特殊需求不需要独立安装**
 - 战斗汉化仅对战斗说明框进行汉化，独立战斗汉化脚本无原文切换功能，如需关闭汉化请禁用或者删除脚本
 - 如果你已经安装了新版hentaiverse汉化脚本建议禁用或者删除独立战斗汉化并双击战斗底部经验条开启战斗汉化。
-- **2020.01.20版本之后不再提供独立的战斗汉化脚本更新维护，之后如有修改将直接更新在Hentaiverse汉化内。如有特殊需求请前往查看最后一个[历史版本](https://github.com/indefined/UserScripts/raw/master/HVTranslate/HV%20%E6%88%98%E6%96%97%E6%B1%89%E5%8C%96.user.js) 。**
+- **2020.01.20版本之后不再提供独立的战斗汉化脚本更新维护，之后如有修改将直接更新在Hentaiverse汉化内。如有特殊需求请前往查看最后一个[历史版本](https://github.com/indefined/UserScripts/blob/85706d53f170e0bd11f65f98795ef9431eb36954/HVTranslate/HV%20%E6%88%98%E6%96%97%E6%B1%89%E5%8C%96.user.js) 。**
 
 
 ### HV 图片按钮汉化 v2021.01.20 [点击此处安装](https://github.com/indefined/UserScripts/raw/master/HVTranslate/HV%20%E5%9B%BE%E7%89%87%E6%8C%89%E9%92%AE%E6%B1%89%E5%8C%96.user.js)
