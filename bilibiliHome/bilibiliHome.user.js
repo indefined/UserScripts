@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.6.12.2
+// @version      0.6.13
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -297,7 +297,7 @@
                             `<a href="${data.goto=='av'?`/video/av${data.param}`:data.uri}" target="_blank">`
                             + `<img src="${data.cover}@216w_122h_1c_100q.${tools.imgType}"><div class="count">`
                             + `<div class="left"><span><i class="bilifont bili-icon_shipin_bofangshu"></i>${tools.formatNumber(data.play)}</span>`
-                            +(data.like&&`<span><i class="bilifont bili-icon_shipin_dianzanshu"></i>${data.like}</span></div>`||'</div>')
+                            +(data.like&&`<span><i class="bilifont bili-icon_shipin_dianzanshu"></i>${tools.formatNumber(data.like)}</span></div>`||'</div>')
                             + `<div class="right"><span>${data.duration&&tools.formatNumber(data.duration,'time')||''}</span></div></div></a>`,
                             `<div class="cover-preview-module van-framepreview"></div>`,
                             `<div class="danmu-module van-danmu"></div>`,
@@ -657,7 +657,11 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
         };
         [].forEach.call(dropDown.lastChild.childNodes,c => {c.onclick = update;});
         tab.lastChild.addEventListener('mouseover',update);
-        update({target:[].find.call(dropDown.lastChild.childNodes,n=>n.dataset.day==day)});
+        if (setting.noRanking) {
+            document.getElementById('ranking-all').style = 'display: none';
+        } else {
+            update({target:[].find.call(dropDown.lastChild.childNodes,n=>n.dataset.day==day)});
+        }
     }
 
     //设置，包含设置变量以及设置窗口和对应的方法
@@ -681,6 +685,16 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
             if (rd!=1&&rd!=3&&rd!=7) rd = 3;
             return rd;
         })(),
+        noRanking: GM_getValue('noRanking'),
+        setNoRanking(value){
+            GM_setValue('noRanking', value);
+            if (value) {
+                document.getElementById('ranking-all').style = 'display: none';
+            } else {
+                document.getElementById('ranking-all').style = 'display: block';
+                document.querySelector(`#ranking-all .dropdown-item[data-day="${this.rankingDay}"]`).click();
+            }
+        },
         accessKey:GM_getValue('biliAppHomeKey'),
         storageAccessKey(key){
             if(key) {
@@ -878,6 +892,18 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                                 {
                                     nodeType:'input',type:'checkbox',checked:this.reduceHeight,
                                     onchange:({target})=>this.setReduceHeight(target.checked),
+                                    style:'vertical-align: bottom',
+                                },
+                            ]
+                        },
+                        {
+                            nodeType:'div',style:'margin: 10px 0;',
+                            childs: [
+                                '<label style="margin-right: 5px;">不显示排行榜:</label>',
+                                '<span style="margin-right: 5px;color:#00f" title="勾选此项将不显示全站排行榜，但是右侧会存在空白">(?)</span>',
+                                {
+                                    nodeType:'input',type:'checkbox',checked:this.noRanking,
+                                    onchange:({target})=>this.setNoRanking(target.checked),
                                     style:'vertical-align: bottom',
                                 },
                             ]
