@@ -359,12 +359,18 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
                 }
             }
             else{
-                const target = helper.get('.web-player-round-title') || helper.get('.bilibili-live-player-video-round-title'),
-                      match = target&&target.innerText.match(/((av\d+)|(bv[a-zA-Z0-9]+)).+(P(\d+))+?/i);
-                match&&helper.set(this.title,{
-                    innerText:match[1],
-                    href:`//www.bilibili.com/video/${match[1]}${match[5]&&match[5]!=1&&`?p=${match[5]}`||''}`
-                },titlePanel);
+                const roomid = document.URL.match('[0-9]+')[0];
+                helper.xhr('https://api.live.bilibili.com/room/v1/Room/room_init?id='+roomid)
+                  .then(roominfo => {
+                          roominfo.data && helper.xhr('https://api.live.bilibili.com/live/getRoundPlayVideo?room_id='+roominfo.data.room_id+'?type=flv')
+                          .then(resp => 
+                          {
+                            console.log(resp.data);
+                            resp.data.bvid && helper.set(this.title, 
+                              {innerText: resp.data.bvid,
+                                href:`${resp.data.bvid_url}?p=${resp.data.pid}`}, titlePanel);
+                          });
+                  });
             }
         },
         //全屏礼物面板调整
