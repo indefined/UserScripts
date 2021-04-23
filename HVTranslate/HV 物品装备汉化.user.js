@@ -22,67 +22,68 @@
 
 if (document.location.href.match(/ss=iw/)&&!document.getElementById('item_pane'))return
 if (document.getElementById('riddlemaster')||document.getElementById('textlog')) return;
-var dictThread, regThread;
-var items, equips, equipsInfo;
-var regItems, regEquips, regEquipsInfo;
-var list = [], translated = true, changer;
+
+// 切换原文使用的变量
+var translatedList = new Map(), translated = true, changer;
+
+// 物品字典、装备字典、装备属性字典、额外内容字典，提供给translate方法第二参数做翻译字典
+// 可以调用对应translateItems/translateEquips/translateEquipsInfo/translateExtra方法直接翻译页面元素
+// 否则需要先调用loadItems/loadEquips/loadEquipsInfo/loadExtra加载对应字典之后才能使用translate方法
+var dictItems, dictEquips, dictEquipsInfo, dictExtra;
 
 main();//执行汉化
 
 function main(){
-    var location,i;
-    var itemdiv,equipdiv;
     var lklist = [
-        'Character&ss=in',  //装备仓库0
-        'Bazaar&ss=is',     //道具店1
-        'Character&ss=eq',  //更换装备2
-        'Bazaar&ss=es',     //装备店3
-        'Bazaar&ss=ss',     //祭坛4
-        'Character&ss=it',  //道具仓库5
-        'Battle&ss=iw',     //iw汉化6
-        'showtopic=',       //论坛汉化7
-        'Bazaar&ss=lt',     //武器彩票8
-        'Bazaar&ss=la',     //防具彩票9
-        'Forge&ss=',        //锻造10
-        'Bazaar&ss=mm',     //邮件11
-        'equip',            //装备页12
-        'hvmarket.xyz',     //hvmarket13
+        'Bazaar&ss=ib', //采购机器人0
+        'Bazaar&ss=is', //道具店1
+        'Character&ss=it', //道具仓库2
+        'Bazaar&ss=ss', //祭坛3
+        'Character&ss=in', //装备仓库4
+        'Character&ss=eq', //更换装备5
+        'Battle&ss=iw', //iw 6
+        'Bazaar&ss=es', //装备店7
+        'showtopic=', //论坛汉化8
+        'Forge&ss=', //锻造9
+        'Bazaar&ss=mm', //邮件10
+        'Bazaar&ss=lt', //武器彩票11
+        'Bazaar&ss=la', //防具彩票12
+        'equip', //装备属性页13
+        'hvmarket.xyz', //hvmarket14
     ];
-    for(i=0;i<lklist.length;i++){
-        if(document.location.href.match(lklist[i])){
-            location = i;
+    var location;
+    for(location = 0; location < lklist.length; location++){
+        // 匹配当前网址位置，lklist里面的网址顺序和下面case对应，更改顺序需要同时更改case
+        if(document.location.href.match(lklist[location])){
             break;
         }
     }
 
-    if (i == lklist.length) {
-        //没有有匹配命中需要翻译的页面
-        return;
-    }
-
-    initRestore();//原文切换按钮
-
     switch (location){
-        case 0: //装备仓库
-        case 2: //更换装备页
+        case 0: //采购机器人
+            translateItems('#bot_item');
+            /* eslint-disable-next-line */// 右侧已提交采购列表跳入下方物品列表等同处理
+        case 1: //道具店
+        case 2: //道具仓库
+        case 3: //祭坛
+            /*//在这一行前面加//可以同时汉化部分物品悬浮窗说明，但是与HVToolbox冲突
+            translateItems(".itemlist>tbody>tr>td");
+            translateItems(".sa>div:last-child");
+            /*///下面两行只会翻译物品名称
+            translateItems(".itemlist>tbody>tr>td>div");
+            translateItems(".sa>div:last-child>div");
+            //*/
+            break;
+
+        case 4: //装备仓库
+        case 5: //更换装备页
         case 6: //iw
             translateEquipsList();
             break;
 
-        case 1: //道具店1
-        case 4: //祭坛4
-        case 5: //道具仓库5
-            /*//在这一行前面加//可以同时汉化部分物品悬浮窗说明，但是与HVToolbox冲突
-            Array.from(document.querySelectorAll(".itemlist>tbody>tr>td")).forEach(translateItems);
-            Array.from(document.querySelectorAll(".sa>div:last-child")).forEach(translateItems);
-            /*///下面两行只会翻译物品名称
-            Array.from(document.querySelectorAll(".itemlist>tbody>tr>td>div")).forEach(translateItems);
-            Array.from(document.querySelectorAll(".sa>div:last-child>div")).forEach(translateItems);
-            //*/
-            break;
-
-        case 3: //装备店3
+        case 7: //装备店
             translateEquipsList();
+            var equipdiv, i;
             var equhide = document.createElement('span');
             equhide.style.cssText = "cursor: pointer;z-index: 1000;font-size: 16px;position: fixed;top: 180px;left: 0px;color: red;background: black;user-select: none;";
             try{
@@ -122,97 +123,98 @@ function main(){
             document.body.appendChild(equhide);
             break;
 
-        case 7: //论坛
+        case 8: //论坛
+            initRestore(); //原文切换按钮
             if (!+localStorage.comfimTranslateAlert) {
                 //切换原文强提示
                 changer.style.width = "1em";
+                changer.style.cursor = "help";
                 changer.textContent = "点击切换到原文再复制内容";
-                changer.title = "论坛购物务必切换回原文再复制，因为别人不一定能看懂翻译过的东西\n如果不想一直看到整句提示可以按住Ctrl双击切换按钮";
+                changer.title = "论坛购物务必切换回原文再复制，因为别人不一定能看懂翻译过的东西\n如果不想每次看到整句提示可以按住Ctrl双击切换按钮";
             }
             changer.ondblclick = function(ev){ev.ctrlKey && (localStorage.comfimTranslateAlert = +!+localStorage.comfimTranslateAlert)}
 
             loadItems(); //加载道具字典
             loadEquipsInfo(); //加载装备信息字典
             loadEquips(); //加载装备字典
-            loadThreadDict(); //加载额外的论坛翻译字典
+            loadExtra(); //加载额外的论坛翻译字典
             var links = []; //用于暂存避免翻译的链接
             Array.from(document.getElementsByClassName('postcolor')).forEach(post=>{
                 let html = post.innerHTML;
-                list.push({item:post, html}); //保存原内容
+                translatedList.set(post, html); //保存原内容
                 //下面一行内容为去除论坛发帖格式，对当前脚本汉化逻辑没有用处，如果想要去除的话删除下一行前面的//
                 //html = html.replace(/<span [^>]+>[^>]+>/g,"").replace(/<!--[/]?color[^>]+>/g,"").replace(/<[/]*b>/g,"")
                 html = html.replace(/(href|src)=".+?"/g, src=>{
                     links.push(src);
                     return 'HTRANSLATE_PLACEHOLDER_' + (links.length - 1); // 去除掉网页中的链接并暂存起来防止错误翻译
                 });
-                for (var i in items){
-                    html = html.replace(regItems[i], items[i]); //翻译物品
-                }
-                for (let i in equipsInfo){
-                    html = html.replace(regEquipsInfo[i], equipsInfo[i]); //翻译装备属性
-                }
-                for (let i in equips){
-                    html = html.replace(regEquips[i], equips[i]); //翻译装备名
-                }
-                for (let i in dictThread){
-                    html = html.replace(regThread[i], dictThread[i]); //论坛专用修复字典
-                }
+                html = translate(html, dictItems); //翻译物品
+                html = translate(html, dictEquipsInfo); //翻译装备属性
+                html = translate(html, dictEquips); //翻译装备名
+                html = translate(html, dictExtra); //翻译论坛额外内容
                 html = html.replace(/HTRANSLATE_PLACEHOLDER_(\d+)/g, (match, p1)=>{
                     return links[p1]; // 还原备份的原网页中链接
                 });
                 post.innerHTML = html;
             });
+            return; //此处直接结束翻译方法，其它case结束后会检查是否有原文需要切换，论坛原文切换已经默认执行
             break;
 
-        case 8: //武器彩卷
-        case 9: //防具彩卷
-            translateEquips(document.querySelector("#lottery_eqname"));
-            translateEquipsInfo(document.querySelector("#lottery_eqstat"));
-            break;
-
-        case 10: //锻造
+        case 9: //锻造
             if (document.querySelector('#equip_extended')) {
                 //左侧装备名
-                Array.from(document.querySelectorAll('#showequip>div:not([id])')).forEach(translateEquips);
+                translateEquips("#leftpane>div:not([id])");
                 //左侧的装备详细面板
-                translateEquipsInfo(document.querySelector('#equip_extended'));
+                translateEquipsInfo('#equip_extended');
                 //右侧可强化项目
-                Array.from(document.querySelectorAll('#rightpane>div tr[onmouseover]>td:first-child>.fc2')).forEach(translateEquipsInfo);
+                translateEquipsInfo('#rightpane>div tr[onmouseover]>td:first-child>.fc2');
                 //强化项目的说明文字
-                Array.from(document.querySelectorAll('#rightpane>div[id^="costpane"]>div :first-child>.fc2')).forEach(translateEquipsInfo);
+                translateEquipsInfo('#rightpane>div[id^="costpane"]>div :first-child>.fc2');
                 //强化所需材料
-                Array.from(document.querySelectorAll('#rightpane>div[id^="costpane"]>table :first-child>.fc2')).forEach(translateItems);
+                translateItems('#rightpane>div[id^="costpane"]>table :first-child>.fc2');
             }
             else {
                 translateEquipsList();
             }
             break;
 
-        case 11: //邮件
-            Array.from(document.querySelectorAll('div[onmouseover*="equips"]')).forEach(translateEquips);//装备附件
-            Array.from(document.querySelectorAll('div[onmouseover*="show_item"]')).forEach(translateItems);//物品附件
+        case 10: //邮件
+            translateEquips('div[onmouseover*="equips"]');//装备附件
+            translateItems('div[onmouseover*="show_item"]');//物品附件
             break;
 
-        case 12: //装备属性页
-            Array.from(document.querySelectorAll('#showequip>div:not([id])')).forEach(translateEquips);//装备名
-            translateEquipsInfo(document.querySelector('#equip_extended'));//装备详细信息
+        case 11: //武器彩卷
+        case 12: //防具彩卷
+            translateEquips("#lottery_eqname");
+            translateEquipsInfo("#lottery_eqstat");
             break;
 
-        case 13: //hvmarket
-            Array.from(document.querySelectorAll('td>a[title]')).forEach(translateItems);
+        case 13: //装备属性页
+            translateEquips('#showequip>div:not([id])');//装备名
+            translateEquipsInfo('#equip_extended');//装备详细信息
+            break;
+
+        case 14: //hvmarket
+            translateItems('td:nth-child(2)>a'); //物品列表
+            translateExtra('div.cs'); //物品分类
+            translateItems('.main_content>h1'); //购买页面标头
+            translateItems('h2.exch'); //购买页面的购买描述
             break;
 
         default: //没有匹配命中需要翻译的网页
             break;
     }
+
+    if (translatedList.size) {
+        initRestore();//原文切换按钮
+    }
 }
 
 //原文切换
 function restore() {
-    for(var i of list) {
-        var temp = i.item.innerHTML;
-        i.item.innerHTML = i.html;
-        i.html = temp;
+    for(var elem of translatedList) {
+        translatedList.set(elem[0], elem[0].innerHTML);
+        elem[0].innerHTML = elem[1];
     }
     translated = !translated;
     changer.innerHTML = translated?'英':'中';
@@ -235,59 +237,69 @@ function initRestore() {
     document.body.appendChild(changer);
 }
 
-//翻译Hentaiverse内装备列表
-function translateEquipsList(){
-    Array.from(document.querySelectorAll(".equiplist div[id^='e'][onmouseover]")).forEach(translateEquips);
-    Array.from(document.querySelectorAll(".hvut-eq-h5")).forEach(translateEquips);
-    Array.from(document.querySelectorAll(".eqb>div")).forEach(translateEquips);
+/**
+ * 核心翻译方法
+ * 参数 target: 待翻译的页面元素或者字符串，如果是页面元素会保存原文并翻译整个元素内部，否则直接翻译字符串
+ * 参数 dicts: 翻译字典，一个Map，key值为匹配表达式，value为翻译结果。
+ */
+function translate(target, dicts) {
+    if (!target || !dicts) return;
+    let html, isElem = target instanceof Element;
+    if (isElem) {
+        html = target.innerHTML;
+        if (!translatedList.has(target)) translatedList.set(target, html); //保存原文
+    }
+    else html = target;
+    for (var dict of dicts){ //遍历字典并翻译
+        html = html.replace(dict[0], dict[1]);
+    }
+    if (isElem) {
+        target.innerHTML = html;
+        return target;
+    }
+    else return html;
 }
 
-//翻译装备名
-function translateEquips(div){
-    if(!div) return;
-    if (!regEquips) loadEquips();//加载字典
-    if(!list.find(i=>i.item==div)) {//保存原文以备切换
-        list.push({item:div,html:div.innerHTML});
-    }
-    //遍历字典并替换翻译
-    var repTo = div.innerHTML;
-    for (var i in equips){
-        repTo = repTo.replace(regEquips[i], equips[i]);
-    }
-    div.innerHTML = repTo;
+//翻译Hentaiverse内装备列表
+function translateEquipsList(){
+    translateEquips(".equiplist div[id^='e'][onmouseover]");
+    translateEquips(".hvut-eq-h5");
+    translateEquips(".eqb>div");
+}
+
+//翻译装备名。参数: 待翻译的页面元素css选择器
+function translateEquips(selector){
+    if(!selector) return;
+    if (!dictEquips) loadEquips();//加载字典
+    //查找页面元素并调用翻译
+    Array.from(document.querySelectorAll(selector)).forEach(elem=>translate(elem, dictEquips));
 }
 
 //翻译装备属性信息
-function translateEquipsInfo(div){
-    if(!div) return;
-    if (!regEquipsInfo) loadEquipsInfo();
-    if(!list.find(i=>i.item==div)) {
-        list.push({item:div,html:div.innerHTML});
-    }
-    var repTo = div.innerHTML;
-    for (var i in equipsInfo){
-        repTo = repTo.replace(regEquipsInfo[i], equipsInfo[i]);
-    }
-    div.innerHTML = repTo;
+function translateEquipsInfo(selector){
+    if(!selector) return;
+    if (!dictEquipsInfo) loadEquipsInfo();
+    Array.from(document.querySelectorAll(selector)).forEach(elem=>translate(elem, dictEquipsInfo));
 }
 
 //翻译物品
-function translateItems(div){
-    if(!div) return;
-    if (!regItems) loadItems();
-    if(!list.find(i=>i.item==div)) {
-        list.push({item:div,html:div.innerHTML});
-    }
-    var repTo = div.innerHTML;
-    for (var i in items){
-        repTo = repTo.replace(regItems[i], items[i]);
-    }
-    div.innerHTML = repTo;
+function translateItems(selector){
+    if(!selector) return;
+    if (!dictItems) loadItems();
+    Array.from(document.querySelectorAll(selector)).forEach(elem=>translate(elem, dictItems));
+}
+
+//翻译额外内容
+function translateExtra(selector){
+    if(!selector) return;
+    if (!dictExtra) loadExtra();
+    Array.from(document.querySelectorAll(selector)).forEach(elem=>translate(elem, dictExtra));
 }
 
 function loadItems(){
+    if (dictItems) return dictItems;
     //道具字典
-    items = {
+    var items = {
         //道具翻译
         'Health Potion' : '体力药水',
         'Health Draught' : '体力长效药',
@@ -775,15 +787,17 @@ function loadItems(){
         "'Collectable'" : "'收藏品'",
     };
 
-    regItems = {};
+    dictItems = new Map();
     for(var i in items) {
-        regItems[i] = new RegExp(i,'g');
+        dictItems.set(new RegExp(i,'g'), items[i]);
     }
+    return dictItems;
 };
 
 function loadEquipsInfo(){
+    if (dictEquipsInfo) return dictEquipsInfo;
     //装备信息字典
-    equipsInfo = {
+    var equipsInfo = {
         /////////////////////////////////装备属性
         'One-handed Weapon':'单手武器',
         'Two-handed Weapon':'双手武器',
@@ -927,15 +941,17 @@ function loadEquipsInfo(){
 
     };
 
-    regEquipsInfo = {};
+    dictEquipsInfo = new Map();
     for(var k in equipsInfo) {
-        regEquipsInfo[k] = new RegExp(k,'g');
+        dictEquipsInfo.set(RegExp(k,'g'), equipsInfo[k]);
     }
+    return dictEquipsInfo;
 }
 
 function loadEquips(){
+    if (dictEquips) return dictEquips;
     //装备名
-    equips = {
+    var equips = {
         ///////////////////////////////////////////武器种类
         // 单手武器类
         'Dagger':'*匕首（单）',
@@ -1128,18 +1144,19 @@ function loadEquips(){
         'Current Owner':'持有者',
     };
 
-    regEquips = {};
+    dictEquips = new Map();
     for(var j in equips) {
         //此处弱化忽略词典里的of/the/-连词大小写匹配，同时将装备名中所有空格替换为为混沌的通配，忽略单词之间的所有纯HTML代码
         //这将忽略论坛里给装备名增加的颜色格式代码从而使翻译可以正确进行，同时装备信息页中被换行截断的装备名也会被正确拼接
         var vj = j.replace(/of (the )?/,'([oO]f )?([tT]he )?').replace(/-./,function(k){return '-['+k[1]+k[1].toUpperCase()+']'}).replace(/\s(.)/g,'\\s*(<[^<]+>\\s*)*$1');
-        regEquips[j] = new RegExp(vj,'g');
+        dictEquips.set(new RegExp(vj,'g'), equips[j]);
     }
+    return dictEquips;
 }
 
 //论坛用的额外内容字典
-function loadThreadDict() {
-    dictThread = {
+function loadExtra() {
+    var dict = {
         ///////////////装备类型，论坛用的
         'One-handed':'单手',
         'Two-handed':'双手',
@@ -1198,8 +1215,8 @@ function loadThreadDict() {
         'Arcane 专注' : 'Arcane Focus',
         'Spirit 盾' : 'Spirit Shield',
     };
-    regThread = {};
-    for (var i in dictThread) {
-        regThread[i] = new RegExp(i,'g');
+    dictExtra = new Map();
+    for (var i in dict) {
+        dictExtra.set(new RegExp(i,'g'), dict[i]);
     }
 }
