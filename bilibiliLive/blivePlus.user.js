@@ -2,7 +2,7 @@
 // @name        bilibili直播间工具
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.34
+// @version     0.5.35
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、硬币直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -882,13 +882,16 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
                 return {};
             }
         })();
-        const controller = helper.get('.web-player-controller-wrap') || helper.get('.bilibili-live-player-video-controller'),
-              settingPanel = helper.create('div',{
+        for(const key in this.settingInfos){
+            if(this.settings[key]==undefined) this.settings[key] = true;
+        }
+        const controller = helper.get('.web-player-controller-wrap') || helper.get('.bilibili-live-player-video-controller');
+        if (!controller) return;
+        const settingPanel = helper.create('div',{
                   className: 'player-type',
                   style: 'padding-top: 5px;line-height: 14px;',
                   innerHTML:`<div>直播间助手设置</div>`,
               });
-        if (!controller) return;
         new MutationObserver(mutations=>{
             //return console.log(mutations);
             mutations.forEach(mutation=>{
@@ -899,7 +902,6 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
         }).observe(controller, {childList:true, subtree:true});
         helper.create('style',{innerHTML:'.setting-panel{width:max-content!important}'}, document.head);
         for(const key in this.settingInfos){
-            if(this.settings[key]==undefined) this.settings[key] = true;
             const item = helper.create('div',{className:'blpui-checkbox-container'},settingPanel);
             helper.create('input',{
                 type:'checkbox',
