@@ -2,15 +2,16 @@
 // @name           HV 图片按钮汉化
 // @namespace      hentaiverse.org
 // @author         indefined
+// @downloadURL    https://sleazyfork.org/scripts/425529/code/script.user.js
 // @icon           https://hentaiverse.org/y/favicon.png
-// @description    汉化Hentaiverse里面的图片按钮，执行方式比较奇葩效率或者兼容性堪忧，慎用
+// @description    汉化Hentaiverse里面的图片按钮，执行方式比较奇葩，执行效率可能不高，不同浏览器翻译效果可能存在差异
 // @notice         仅翻译带功能的按钮图片，也就是在设置中开启自定义字体之后剩下的图片，HV原始图片字体不会被翻译；默认不翻译战斗页面图片
-// @notice         由于兼容问题不同浏览器之间存在不同执行方式逻辑，有兴趣有一定基础的可以自己读一下代码注释
+// @notice         由于兼容和效率问题，Chromium内核浏览器使用替换图片方式进行翻译，其它浏览器则使用文字替换，想更改翻译方式有一定基础可以自己读一下代码注释
 // @include        *://hentaiverse.org/*
 // @include        *://alt.hentaiverse.org/*
 // @exclude        *://*hentaiverse.org/*equip/*
 // @exclude        *://*hentaiverse.org/*pages/showequip.php?*
-// @version        2021.01.20
+// @version        2021.04.25
 // @grant none
 // ==/UserScript==
 (function () {

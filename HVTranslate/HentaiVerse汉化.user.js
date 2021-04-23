@@ -3,8 +3,9 @@
 // @namespace      hentaiverse.org
 // @author         ggxxsol & NeedXuyao & mbbdzz & indefined & etc.
 // @icon           https://hentaiverse.org/y/favicon.png
+// @downloadURL    https://sleazyfork.org/scripts/404118/code/HentaiVerse%E6%B1%89%E5%8C%96.user.js
 // @description    基本完全汉化整个Hentaiverse文本，包括装备物品、界面说明和弹窗提示的汉化，带原文切换功能
-// @notice         本脚本已完全整合HV战斗汉化功能，与独立的HV战斗汉化脚本互斥，默认不开启，如需开启在战斗界面中双击下方经验条
+// @notice         本脚本已完全整合HV战斗汉化功能，与独立的HV战斗汉化脚本互斥，默认不开启，如需开启战斗汉化在战斗界面中双击下方经验条
 // @notice         完整功能需要在Hentaiverse主菜单 CHARACTER→SETTINGS 勾选自定义字体(Use Custom Font)并在下一行文本框中填上任意字体名称，拉到最下面点击Apply Changes
 // @notice         和HVToolBox1.0.7以前版本在物品仓库中冲突，使用请更新到新版HVToolBox并将汉化运行顺序放在HVToolBox之后
 // @notice         如与Live Percentile Ranges同时使用，需要将脚本运行顺序置于Live Percentile Ranges之后，查询不同品质范围需要切换到英文状态
@@ -12,7 +13,7 @@
 // @include        *://hentaiverse.org/*
 // @include        *://alt.hentaiverse.org/*
 // @core           http://userscripts-mirror.org/scripts/show/41369
-// @version        2021.01.20
+// @version        2021.04.25
 // @grant none
 // ==/UserScript==
 (function () {
@@ -94,7 +95,7 @@
 
 
 
-//翻译字典，内部分割为多个部分，名称对应上述所指字典名称，翻译内容必须写入正确的部分才会生效
+//翻译字典，内部分割为多个部分，每部分名称对应上述所指字典名称，翻译内容必须写入正确的部分才会生效
 //除非上面字典分区中被指派到同一个翻译部分，否则各个部分之间互相独立，必要时有些翻译词条也会重复出现在多个部分中（这样比同时使用多个部分字典更有效率）
 var words = {
     /*
@@ -226,6 +227,7 @@ var words = {
         'Insufficient mastery points' : '支配点不足',
         'Ability cannot be increased further' : '你已经将该技能升级满了！',
         'No such ability' : '你没有获得该技能',
+        'Level requirements not met' : '你还没有到达解锁该技能要求的等级',
 
         'There are no items of that type available.' : '购买的物品库存不足',
         'Item has already been sold.' : '所选物品已售出',
@@ -265,6 +267,7 @@ var words = {
         'Insufficient items, kupo!' : '物品不足，咕波！',
         'Equipment not found, kupo!' : '装备不存在，咕波！',
         'Insufficient credits, kupo!' : 'Credits 不足，咕波！',
+        'The mail moogle cannot carry more than 10 items at a time, kupo!' : '每封邮件最多只能添加10个附件，咕波！',
         'CoD must be at least 10 credits, kupo!' : '货到付款(CoD)至少需要设置 10 Credits，咕波！',
         'Insufficient hath, kupo!' : 'Hath 不足，咕波！',
         'No amount specified, kupo!' : '没有指定数量，咕波！',
@@ -278,6 +281,8 @@ var words = {
         'Messaging yourself must be the ultimate form of social withdrawal, kupo! Seek help, kupo!' : '给自己发邮件是社交退缩的终极形式，咕波！去找些别的乐子吧，咕波！',
         'Mail cannot be returned, kupo!' : '此邮件已无法退回，咕波！',
         'Message has no attachment, kupo!' : '此邮件没有附件，咕波！',
+        'Received Paid CoD' : '收到CoD收货支付款',
+        'was added to your balance.' : '已添加到你的余额。',
 
         'Invalid reward class' : '所选奖励类型不可用',
         'No such item' : '物品不存在',
@@ -316,6 +321,7 @@ var words = {
         'Cannot reforge level zero items' : '不能重铸潜能等级为0的装备',
         'Cannot reforge locked or equipped items' : '不能重铸上锁或者正在穿戴的装备',
         'Cannot salvage locked or equipped items' : '不能分解上锁或者正在穿戴的装备',
+        'No base salvage could be extracted.' : '重复拆解已经拆解过的装备不再获得基础材料',
         'Insufficient materials.' : '材料不足',
         'Insufficient soul fragments.' : '灵魂碎片不足',
         'Insufficient amnesia shards.' : '重铸碎片不足',
@@ -479,7 +485,7 @@ var words = {
 
         'Magical Attack' : '魔法攻击相关',
         'magic base damage' : '魔法基础攻击力',
-        'mana cost modifier' : '魔法消耗修正',
+        'mana cost modifier' : '魔力消耗修正',
         'cast speed bonus' : '施法速度加成',
 
         'Vitals' : '状态值相关',
@@ -567,6 +573,7 @@ var words = {
         'Improved Monster Morale Drain' : '怪物士气不易降低（每一级推测为5%的效果，满级降低50%下降速度）',
         'Base Loot Drop Chance' : '基础掉落几率（发生掉落的基础概率为10%，一级提升0.05%基础掉落率，满级提升2.5%基础掉落率）',
         'Base Rare Drop Chance' : '基础物品掉落稀有度（提升稀有物品装备的掉落率）',
+        'Base Rare Equipment Chance' : '基础稀有装备率（提升稀有装备的掉落率）',
         'Base Equipment Drop Chance' : '基础装备掉落率（装备基础掉落率2.5%，一级提升0.05%基础掉落率，满级提升2.5%基础掉落率）',
         'Base Artifact Drop Chance' : '基础文物掉落率（古董基础掉落率0.2%，一级提升0.02%基础掉落率，满级提升0.2%基础掉落率）',
         'Battle Scroll Slots' : '卷轴携带数',
@@ -734,7 +741,7 @@ var words = {
         'light armor, ':'轻甲 时，',
         'heavy armor, ':'重甲 时，',
         'fighting style' : '战斗风格时',
-        'scaling with your proficiency.' : '',
+        'scaling with your proficiency.' : '与你的熟练度成比例增加。',
         'Proficiency-based Stat Modification' : '依照熟练度改变能力值',
         'For every ten points of' : '每10点',
         'One-Handed' : '单手',
@@ -842,10 +849,10 @@ var words = {
         'Base Health Regen' : '基础体力/回合',
         'Evade' : '闪避率',
 
-        'Flame Spikes' : '火焰刺盾',
-        'Frost Spikes' : '寒冰刺盾',
-        'Shock Spikes' : '闪电刺盾',
-        'Storm Spikes' : '风暴刺盾',
+        'Flame Spikes' : '火焰刺盾(火状态使怪物-10%伤害/-25%冰抗性)',
+        'Frost Spikes' : '寒冰刺盾(冰状态使怪物-10%速度/-25%风抗性)',
+        'Shock Spikes' : '闪电刺盾(雷状态使怪物-10%回避/抵抗/-25%火抗性)',
+        'Storm Spikes' : '风暴刺盾(风状态使怪物-10%命中/-25%雷抗性)',
         'Fire Mitigation' : '火焰减伤',
         'Cold Mitigation' : '冰霜减伤',
         'Elec Mitigation' : '闪电减伤',
@@ -975,7 +982,7 @@ var words = {
     ///////////////////////////////////////////////////////物品
     //出于整洁和效率考虑，普通物品列表不包含文物奖杯
     items: {
-        'Item Inventory' : '所有物品',
+        'Item Inventory' : '物品仓库',
         'Battle Slots' : '战斗携带品',
         'Your Inventory' : '你的物品',
         'Store Inventory' : '商店物品',
@@ -1135,7 +1142,7 @@ var words = {
         'Silver Coupon' : '银礼券(等级5)',
         'Gold Coupon' : '黄金礼券(等级7)',
         'Platinum Coupon' : '白金礼券(等级8)',
-        'Peerless Voucher' : '无双必得券',
+        'Peerless Voucher' : '无双凭证',
 
         //旧旧古董
         'Priceless Ming Vase' : '无价的明朝瓷器',
@@ -1255,52 +1262,58 @@ var words = {
         'Hoarded Dried Pasta' : '库存的干面',
         'Hoarded Canned Goods' : '库存的罐头',
         'Hoarded Powdered Milk' : '库存的奶粉',
+        //2021
+        'Red Vaccine Vial' : '红色疫苗瓶',
+        'Orange Vaccine Vial' : '橙色疫苗瓶',
+        'Yellow Vaccine Vial' : '黄色疫苗瓶',
+        'Green Vaccine Vial' : '绿色疫苗瓶',
+        'Blue Vaccine Vial' : '蓝色疫苗瓶',
+        'Indigo Vaccine Vial' : '靛色疫苗瓶',
+        'Violet Vaccine Vial' : '紫色疫苗瓶',
 
 
-        //特殊奖杯
+        //节日及特殊奖杯
         'Mysterious Box' : '神秘宝盒(等级9)', // 在‘训练：技能推广’调整价格后赠予某些玩家。
         'Solstice Gift' : '冬至赠礼(等级7)', //  2009 冬至
         'Stocking Stuffers' : '圣诞袜小礼物(等级7)', // 2009年以来每年圣诞节礼物。
         'Tenbora\'s Box' : '天菠拉的盒子(等级9)', // 年度榜单或者年度活动奖品
+        'Shimmering Present' : '微光闪动的礼品(等级8)', //  2010 圣诞节
         'Potato Battery' : '马铃薯电池(等级7)', // 《传送门 2》发售日
         'RealPervert Badge' : '真-变态胸章(等级7)', // 2011 愚人节
-        'Raptor Jesus' : '猛禽耶稣(等级7)', //  哈罗德·康平的被提预言
-        'Festival Coupon' : '节日礼券(等级7)', //2020起收获节（中秋？）
-
-        //圣诞节奖杯
-        'Shimmering Present' : '微光闪动的礼品(等级8)', //  2010 圣诞节
-        'Gift Pony' : '礼品小马(等级8)', // 2011 圣诞节
-        'Fire Keeper Soul' : '防火女的灵魂(等级8)', // 2012 圣诞节
-        'Six-Lock Box' : '六道锁盒子(等级8)', // 2013 圣诞节
-        'Reindeer Antlers' : '驯鹿鹿角(等级8)', // 2014 圣诞节
-        'Heart Locket' : '心型盒坠(等级8)', // 2015 圣诞节
-        'Dinosaur Egg' : '恐龙蛋(等级8)', // 2016 圣诞节
-        'Mysterious Tooth' : '神秘的牙齿(等级8)', // 2017 圣诞节
-        'Delicate Flower' : '娇嫩的花朵(等级8)', // 2018 圣诞节
-        'Iron Heart' : '钢铁之心(等级8)', // 2019 圣诞节
-        'Annoying Gun' : '烦人的枪(等级8)', //2020 圣诞节
-
-        //复活节奖杯
         'Rainbow Egg' : '彩虹蛋(等级8)', //  2011 复活节
         'Colored Egg' : '彩绘蛋(等级7)', //  2011 复活节
+        'Raptor Jesus' : '猛禽耶稣(等级7)', //  哈罗德·康平的被提预言
+        'Gift Pony' : '礼品小马(等级8)', // 2011 圣诞节
         'Faux Rainbow Mane Cap' : '人造彩虹鬃毛帽(等级8)', //  2012 复活节
         'Pegasopolis Emblem' : '天马族徽(等级7)', // 2012 复活节
+        'Fire Keeper Soul' : '防火女的灵魂(等级8)', // 2012 圣诞节
         'Crystalline Galanthus' : '结晶雪花莲(等级8)', // 2013 复活节
         'Sense of Self-Satisfaction' : '自我满足感(等级7)', // 2013 复活节
+        'Six-Lock Box' : '六道锁盒子(等级8)', // 2013 圣诞节
         'Golden One-Bit Coin' : '金色一比特硬币(等级8)', // 2014 复活节
         'USB ASIC Miner' : '随身型特定应用积体电路挖矿机(等级7)', // 2014 复活节
+        'Reindeer Antlers' : '驯鹿鹿角(等级8)', // 2014 圣诞节
         'Ancient Porn Stash' : '古老的色情隐藏档案(等级8)', // 2015 复活节
         'VPS Hosting Coupon' : '虚拟专用服务器代管优惠券(等级7)', // 2015 复活节
+        'Heart Locket' : '心型盒坠(等级8)', // 2015 圣诞节
         'Holographic Rainbow Projector' : '全像式彩虹投影机(等级8)', // 2016 复活节
         'Pot of Gold' : '黄金罐(等级7)', // 2016 复活节
+        'Dinosaur Egg' : '恐龙蛋(等级8)', // 2016 圣诞节
         'Precursor Smoothie Blender' : '旧世界冰沙机(等级8)', // 2017 复活节
         'Rainbow Smoothie' : '彩虹冰沙(等级7)', // 2017 复活节
+        'Mysterious Tooth' : '神秘的牙齿(等级8)', // 2017 圣诞节
         'Grammar Nazi Armband' : '语法纳粹臂章(等级7)', // 2018 复活节
         'Abstract Wire Sculpture' : '抽象线雕(等级8)', // 2018 复活节
+        'Delicate Flower' : '娇嫩的花朵(等级8)', // 2018 圣诞节
         'Assorted Coins' : '什锦硬币(等级7)', // 2019 复活节
         'Coin Collector\'s Guide' : '硬币收藏家指南(等级8)', // 2019 复活节
+        'Iron Heart' : '钢铁之心(等级8)', // 2019 圣诞节
         'Shrine Fortune' : '神社灵签(等级7)', // 2020起复活节
         'Plague Mask' : '瘟疫面具(等级8)', // 2020 复活节
+        'Festival Coupon' : '节日礼券(等级7)', //2020起收获节（中秋？）
+        'Annoying Gun' : '烦人的枪(等级8)', //2020 圣诞节
+        'Vaccine Certificate' : '疫苗证明(等级8)', //2021 复活节
+
 
     },
 
@@ -1328,8 +1341,8 @@ var words = {
         'Instantly restores a moderate amount of spirit.' : '立刻回复50%的基础SP.',
         'Fully restores spirit, and grants a long-lasting spirit restoration effect.' : 'SP全满,持续100回合回复1%的基础SP.',
         'Fully restores all vitals, and grants long-lasting restoration effects.' : '状态全满,产生所有回复药水的效果.',
-        'Restores 10 points of Stamina, up to the maximum of 99. When used in battle, also boosts Overcharge and Spirit by 10% for ten turns.' : '恢复10点精力，但不超过99，战斗中使用时每回合增加10%的灵力和斗气.',
-        'Restores 5 points of Stamina, up to the maximum of 99. When used in battle, also boosts Overcharge and Spirit by 10% for five turns.' : '恢复5点精力，但不超过99，战斗中使用时每回合增加10%的灵力和斗气.',
+        'Restores 10 points of Stamina, up to the maximum of 99. When used in battle, also boosts Overcharge and Spirit by 10% for ten turns.' : '恢复10点精力，但不超过99。如果在战斗中使用，除恢复精力外附带持续10回合增加10%灵力和斗气.',
+        'Restores 5 points of Stamina, up to the maximum of 99. When used in battle, also boosts Overcharge and Spirit by 10% for five turns.' : '恢复5点精力，但不超过99。如果在战斗中使用，除恢复精力外附带持续5回合增加10%灵力和斗气.',
         'There are three flowers in a vase. The third flower is green.' : '花瓶中有三朵花，第三朵是绿色的(玩偶特工)。战斗中使用时持续50回合物理/魔法 伤害、命中、暴击率、回避、抵抗率大幅提升+25%。',
         'It is time to kick ass and chew bubble-gum... and here is some gum.' : '该是嚼著泡泡糖收拾他们的时候了…这里有一些泡泡糖(极度空间)。战斗中使用时持续50回合攻击和咒语伤害大幅提升+100%，必定命中且必定暴击',
         'You gain +25% resistance to Fire elemental attacks and do 25% more damage with Fire magicks.' : '你获得 +25% 的火系魔法耐性且获得 25% 的额外火系魔法伤害。',
@@ -1420,6 +1433,7 @@ var words = {
         'Given to you by Yuki when you defeated her. She looked better without them anyway.' : '击败长门有希后获得的眼镜。她不戴眼镜时看起来好多了。',
         'An Invisible Pink Unicorn Horn taken from the Invisible Pink Unicorn. It doesn\'t weigh anything and has the consistency of air, but you\'re quite sure it\'s real.' : '从隐形粉红独角兽头上取下来的隐形粉红色的角，它很像空气一样轻，几乎没有重量，但是你很确定它是真实存在的',
         'A nutritious pasta-based appendage from the Flying Spaghetti Monster.' : '一条用飞行意大利面怪物身上的面团做成的营养附肢。',
+        'A voucher for a free soulbound Peerless equipment piece of your choice. Given to you personally by Snowflake for your devout worship and continued offerings.' : '一张可以根据你的选择兑换一件免费灵魂绑定无双装备的凭证。由雪花女神亲自交给你的虔诚崇拜和持续献祭奖励。',
 
         //小马
         'A 1/10th scale figurine of Twilight Sparkle, the cutest, smartest, all-around best pony. According to Pinkie Pie, anyway.' : 'NO.1 暮光闪闪的 1/10 比例缩放公仔。最可爱、最聪明，最全能的小马。(根据萍琪的说法，嗯…) ',
@@ -1518,15 +1532,18 @@ var words = {
         'Apparantly a very common error to make. Give it to Snowflake.' : '显然是一个非常常见的错误。把它交给雪花。(2018 复活节活动)',
         'A suprisingly common mistake. Give it to Snowflake.' : '一个令人惊讶的普遍错误。把它交给雪花。(2018 复活节活动)',
         'A deprecated category button scattered by the 2019 Easter Event. Give it to Snowflake.' : '2019复活节活动时散落的已被弃用类别按钮。把它交给雪花。',
-        'Some hoarded supplies from the 2020 Easter Event. Give it to Snowflake for redistribution.' : '2020复活节活动时囤积的一些物资。把它们交给雪花重新分配。',
+        'Some hoarded supplies from the 2020 Easter Event. Give it to Snowflake for redistribution.' : '2020复活节活动时囤积的一些物资。把它交给雪花重新分配。',
+        'The label is faded, but you can barely make out the letters' : '标签已经褪色了，但是你勉强认出了一些字母', //-s-ra--eca、-f-zer、-ode--a、J--s-n、-ov-vax、-put--V、Co--de--a
+        'Give it to Snowflake for analysis.' : '把它交给雪花分析。(2021 复活节活动)',
 
         //旧奖杯。未校对：彩虹蛋、彩绘蛋、神秘宝盒、真-变态胸章
         'One of only 57 limited edition boxes filled with spent ability points. You\'re not quite sure when you picked this up, but something tells you to hang onto it.' : '57 个限量版盒子的其中一个，里面放满了用过的技能点。你很犹豫是否要捡起它，但有个声音告诉你要紧抓住它不放。',
         'These gifts were handed out for the 2009 Winter Solstice. It appears to be sealed shut, so you will need to make Snowflake open it.' : '这些礼物在 2009 年冬至发放。看来这似乎是密封包装，所以你需要请雪花来打开它。',
         'You found these in your Xmas stocking when you woke up. Maybe Snowflake will give you something for them.' : '你醒来时在你的圣诞袜里发现这些东西。说不定雪花会跟你交换礼物。(2009年以来每年圣诞节礼物)',
+        'You found this junk in your Xmas stocking when you woke up. Maybe Snowflake will give you something useful in exchange.' : '你醒来时在你的圣诞袜里发现这个垃圾。把它交给雪花或许她会给你一些好东西作为交换。(2009年以来每年圣诞节礼物)', //0.87更新
         'This box is said to contain an item of immense power. You should get Snowflake to open it.' : '传说此盒子封印了一件拥有巨大力量的装备。你应该找雪花来打开它。(年度榜单或者年度活动奖品)',
         'You happened upon this item when you somehow found time to play HV on the gamiest day of the year. It is attached to some strange mechanism.' : '在今年鸟最多的日子，当你不知怎的抓到时间刷 HV 时意外发现这个东西。它和一些奇怪的机械装置接在一起。(《传送门 2》发售纪念)',
-        'A coupon which was handled to you by a festival moogle during the Loot and Harvest Festival. Offer it to Snowflake for some bonus loot.' : '一个在丰收节日期间由节日莫古利送给你的礼券。把它交给雪花可以交换额外的战利品。',
+        'A coupon which was handled to you by a festival moogle during the Loot and Harvest Festival. Offer it to Snowflake for some bonus loot.' : '一个在战利与丰收节日期间由节日莫古利送给你的礼券。把它交给雪花可以交换额外的战利品。[2020起收获节活动]',
 
         'A gift for the 2010 Winter Celebrations. Its surface has a mysterious sheen which seems to bend light in strange ways. You will need to make Snowflake open it.' : '2010 年冬天的庆祝活动的礼物。它的表面呈现不可思议的光泽，看样子是用奇妙的方式反射光线。你需要请雪花来打开它。',
         'If you look it in the mouth, some evil fate may befall you. Hand it to Snowflake instead, and she might give you a little something.' : '如果你检查马嘴，某些恶运可能会降临到你身上。相反地，把它牵给雪花，她会给你一些别的。(2011 圣诞节)',
@@ -1562,6 +1579,7 @@ var words = {
         'A first-edition signed copy of "Coping With Change", considered by most numismatists to be *the* authoritative guide to collecting coins. [2019 Easter Event]' : '《应对变化》的初版签名版，被大多数钱币学家视为收集硬币的权威指南。[2019 复活节活动]',
         'A special kind of omikuji that does not actually tell your fortune, but will instead directly grant you some if you offer it to Snowflake.' : '一种特殊的神签，它并不会实际告诉你命运，但是如果你把它献祭给雪花可以直接交换一些东西。[2020起复活节活动]',
         'A precursor beak-shaped mask filled with fragrant herbs, said to protect the wearer from disease and miasma but probably doesn\'t. [2020 Easter Event]' : '一种充满香草药的喙状前体面具，据说可以保护佩戴者免受疾病和瘴气的侵害，但实际可能并不能。[2020 复活节活动]',
+        'A paper certifying that the holder was recently vaccinated from some ancient disease. It expired centuries ago and only has historic value. [2021 Easter Event]' : '一张证明持有者最近接种过某种远古疾病疫苗的文件。它已经在好几个世纪前过期，仅具有历史价值。[2021 复活节活动]',
 
 
     },
@@ -1581,7 +1599,7 @@ var words = {
         'Flimsy' : '薄弱',
         'Crude' : '劣等',
         'Fair' : '一般',
-        'Average' : '中等',
+        'Average ' : '中等 ',
         'Superior' : '上等',
         '/^Fine /' : '优秀 ',
         'Exquisite' : '✧精良✧',
@@ -1634,7 +1652,7 @@ var words = {
         'Hauberk' : '装甲',
         'Chausses' : '裤',
         //护甲部位
-        'Cap' : '帽',
+        'Cap ' : '帽 ',
         'Robe' : '长袍',
         'Breastplate' : '护胸',
         'Cuirass' : '胸甲',
@@ -1917,16 +1935,16 @@ var words = {
         'Select an equipment piece from the list to the left\nthen hit Show Upgrades below to show a list over\nstats that can be upgraded.' : '从左侧列表选择一件装备，然后点击下方 Show Upgrades 查看可用强化。',
         'Upgrades allow you to spend materials to boost\nthe stats of your equipment. Upgrades require\na binding that correspond to the stats you\nwish to upgrade and some materials that\ncorrespond to the gear you are upgrading.\nA catalyst item of a tier corresponding to\nthe equipment quality and upgrade level will\nalso be needed.' : '装备强化允许你使用各种素材来加强你的装备属性。每一级强化都需要根据装备品质、材质和强化等级消耗对应级别的材料和催化剂，当你强化一个属性超过5级之后每一级强化还需要消耗一个对应属性的粘合剂(异世界模式不需要粘合剂)',
         'Rare equipment types will also require a special\ncomponent to upgrade. This component is only\nneeded to increase the highest stat - if you\npreviously spent five of them to increase a stat\nto Level 5 then every other stat can be increased\nto Level 5 without spending any additional rare\ncomponents.' : '强化稀有装备还需要额外花费特殊素材，特殊素材只需要在一项上花费即可。打个比方 - 如果你已经将一项强化升级到5级并使用了5个特殊素材，那么将其他项目强化提升到5级就不需要花费额外的特殊素材了，只有继续将一项强化升级为6级时才需要再消耗1个特殊素材。',
-        'Leveling equipment to its highest potential by \nupgrading it or leveling it in the Item World\nwill also unlock the ability to give it a custom\nname from this screen.' : '强化也将使装备获得一定的潜经验值用于升级该装备潜能等级，当你通过道具界或者强化使当一件装备达到它的最高潜能等级后，你可以随意在强化界面修改装备的显示名称。',
+        'Leveling equipment to its highest potential by \nupgrading it or leveling it in the Item World\nwill also unlock the ability to give it a custom\nname from this screen.' : '强化也将使装备获得一定的潜经验值用于升级该装备潜能等级，当你通过道具界或者强化使一件装备达到它的最高潜能等级后，你可以随意在强化界面修改装备的显示名称。',
 
         'Select an equipment piece from the list to the left\nthen hit Show Enchantments below to show a list\nof upgrades that can be applied.' : '从左侧列表选择一件装备，然后点击下方 Show Enchantments 按钮查看可用附魔。',
         'Every enchantment requires a consumable item\nto activate. The effect wears off after a\ncertain number of minutes real-time but can\nbe extended indefinitely by applying the same\nenchantment multiple times.' : '每种附魔都需要消耗附魔道具。附魔存在有效时间，以现实时间精确到分种计算，超过有效时间之后附魔就会失效。你可以通过多次重复同一个附魔来延长附魔有效时间。',
         'Enchantments will also wear off immediately\nif the item is sold or sent through MoogleMail.' : '附魔效果在装备售出或寄出后会立即失效。',
 
-        'Select an equipment piece from the list to the left\nthen hit Salvage Item below to salvage it. This will\npermanently destroy the item in question.' : '从左侧列表选择一件装备，然后点击下方 Salvage Item 分解装备。此操作将会永久摧毁装备。',
+        'Select an equipment piece from the list to the left\nthen hit Salvage Item below to salvage it. This will\npermanently destroy the item in question.' : '从左侧列表选择一件装备，然后点击下方 Salvage Item 分解装备。此操作将会永久摧毁装备（其实分解24小时内可以在商店里买回，但是价格是5倍正常价或者至少10K，且装备潜能等级会被重置并会变成不可交易）',
         'You have a chance to get some forge upgrading\nmaterials when you salvage an item. The type\ndepends on the kind of item salvaged while the\ntier depends on the quality of the item as well\nas a random chance. At the very least you will\nreceive some scrap that can be used to repair\nother items.' : '你有机会通过分解装备获得一些用于装备升级的材料。分解出的素材种类取决于被分解装备的类型与品质，分解获得的材料数量也有一定的随机波动。但至少，你可以获得用各种废料素材来修理其他装备。',
-        'You have a chance to get some forge upgrading\nmaterials when you salvage an item. The type\ndepends on the kind of item salvaged while the\ntier depends on the quality of the item as well\nas a random chance. At the very least you will\nreceive some scrap that can be used to repair\nother items.' : '你有机会通过分解装备获得一些用于装备升级的材料。分解出的素材种类取决于被分解装备的类型与品质，现在上等及以上装备分解你会获得一个对应品质的强化素材，中等及以下装备可以获得一些对应的废料用来修理其他装备，稀有装备类型分解还可以获得一些能量元。', //0.87变更，作为对照上原文保留
-        'If an equipment piece has been upgraded in the\nforge then salvaging it will return 90% of the\nmaterials spent upgrading it. Catalyst items\ncannot be recovered this way.' : '分解一件被强化过的装备会返还 90% 的强化材料。催化剂无法通过分解装备回收。',
+        'You have a chance to get some forge upgrading\nmaterials when you salvage an item. The type\ndepends on the kind of item salvaged while the\ntier depends on the quality of the item as well\nas a random chance. At the very least you will\nreceive some scrap that can be used to repair\nother items.' : '分解装备可以获得一些素材用于强化或者修复装备。分解出的素材种类取决于被分解装备的类型与品质，现在上等及以上装备分解你会获得对应品质的强化素材，中等或更差的装备分解可以获得一些对应的废料用来修理其他装备，稀有装备类型分解还可以获得一些能量元。每件装备现在只能获得一次基础分解素材，也就是说如果你分解一件装备之后再次从商店购买回来分解将无法再次得到上述素材。', //0.87变更，作为对照上原文保留
+        'If an equipment piece has been upgraded in the\nforge then salvaging it will return 90% of the\nmaterials spent upgrading it. Catalyst items\ncannot be recovered this way.' : '分解一件被强化过的装备会返还 90% 使用的强化材料。催化剂无法通过分解装备回收。',
 
         'Select an equipment piece from the list to the left\nthen hit Reforge Item below to reforge it.' : '从左侧列表选择一件装备，然后点击下方 Reforge Item 按钮重铸它。',
         'Reforging an item will reset its potential to zero\nwhich removes all of its unlocked potencies. This\nallows you to start over and take another shot\nat getting your desired potencies from upgrading\nor leveling the item in the Item World.' : '重铸一件装备会将该装备的潜能等级重置为0，同时清空该装备所有已解锁的潜能，这使你可以去道具界重新尝试解锁你想要的潜能。',
@@ -1941,12 +1959,13 @@ var words = {
         'Amnesia Shards' : '重铸碎片',
         'Soul Fragments' : '灵魂碎片',
         '/Fusing with the selected item will cost (\\d+) fragments\./' : '灵魂绑定所选装备需要 $1 个灵魂碎片',
-        '/Reforging the selected item will cost (\\d+) shards./' : '重铸所选装备需要消耗 $1 个重铸碎片。',
+        '/Reforging the selected item will cost (\\d+) shards?./' : '重铸所选装备需要消耗 $1 个重铸碎片。',
         'The selected item does not have any potencies' : '选中的装备没有潜能等级',
-        'This will permanently destroy the item': '此操作将会永久摧毁装备（其实分解24小时内可以在商店里买回，但是价格是5倍正常价或者至少10K，且装备会变成不可交易）',
+        'This will permanently destroy the item': '此操作将会永久摧毁装备',
 
         'Available Upgrades' : '可用强化',
         //可强化和附魔项目使用equipsInfo字典
+        'At max upgrade level' : '已到达锻造等级上限',
         'Hover over an upgrade to get a list of necessary' : '鼠标停留在升级项目上以查看升级需要的材料',
         'Required items for next upgrade tier' : '提升到下级所需材料',
         //强化和附魔所需材料使用items字典
@@ -1969,7 +1988,7 @@ var words = {
         'It also greatly increases your chance to hit.' : '且增加你 50% 物理命中（双持效果不可叠加）',
 
         'This enchantment will temporarily suffuse your' : '将武器用以太附魔',
-        'Weapon with a powerful aether flux. This reduces' : '这将降低你10%魔法消耗',
+        'Weapon with a powerful aether flux. This reduces' : '这将降低你10%魔力消耗',
         'The drain on your magic reserves when casting' : '以及增加50%的魔法命中',
         'Spells. It will also let you land spells on your' : '双持效果不可叠加',
         'Opponents with a higher rate of success.' : '',
@@ -2131,7 +2150,7 @@ var words = {
         'to any primary stat. This increases by one for every tenth level. ' : '点属性奖励，这个阈值每10级会提升1点。',
         'Gaining primary stats in this way will not increase how much EXP your next point costs.' : '利用这种方式获得的主属性提升不会增加你的加点消耗。',
         'Trophies can be exchanged for a piece of equipment.' : '奖杯可以兑换一件指定类型的装备',
-        'The qualify and tier of the item depends on the trophy you offer. ' : '获取的装备品质基于所献祭奖杯的等级而骰动。',
+        'The quality and tier of the item depends on the trophy you offer. ' : '获取的装备品质基于所献祭奖杯的等级而骰动。',
         'You can select the major class of the item being granted from the list below.' : '在下方选择你想获取的装备类型。',
         'Offering ' : '献祭 ',
         '/need (\\d+) more/' : '还需要额外 $1 个以升级献祭',
@@ -2339,7 +2358,8 @@ var words = {
         'You can optionally request payment for messages with attachments with the Credits on Delivery (CoD) setting after attaching at least one item. ' : '当你为一封邮件添加至少一个附件之后，你可以为邮件设置货到付款(CoD)功能。',
         'The receipient will have to pay the specified number of credits in order to remove the attachments from your message. ': 'CoD 功能会令收件人在提取附件时向你支付指定数额的Credits。',
         'To prevent misuse, a small fee is required to use this function unless you have the Postage Paid perk.' : '为了防止滥用，这个功能每次会收取少量费用，除非你购买了Hath能力“邮资已付”。',
-        'To prevent misuse, a fee is required to use this function unless you have the Postage Paid perk.' : '为了防止滥用，这个功能每次会收取一定费用，除非你购买了Hath能力“邮资已付”。',
+        'To prevent misuse, a fee is required to use this function' : '为了防止滥用，这个功能每次会收取一些费用',
+        ' unless you have the Postage Paid perk.' : '，除非你购买了Hath能力“邮资已付”。',
         'Until the CoD has been paid, the sender and the recipient can both choose to return the message. ' : '除非货到付款(CoD)已经被收件人支付，否则发件人与收件人可以在任意时刻撤回或者拒收CoD邮件。',
         'This allows the recepient to reject an unwanted message, and allows you to recover your items if the recipient does not accept it within a reasonable time.' : '这可以防止发出的邮件长时间得不到回应或者收到了不合理的CoD邮件的问题。',
         'Note that unsent drafts will be deleted after one month, and sent messages will be deleted after one year. Any remaining attachments for a deleted message will be permanently lost.' : '请注意，邮件草稿将于1个月后自动删除，已发送的邮件在保留1年后也会自动删除，如果被删除的邮件里仍有未提取的附件，它将永久丢失。',
@@ -2701,7 +2721,7 @@ var words = {
         'The Health Restorative is regenerating your body.' : '体力恢复剂正在再生你的体力',
         'The Mana Restorative is replenishing your magic reserves.' : '魔力恢复剂正在补给你的魔力',
         'Your attacks and spells deal twice as much damage for a short time, will always hit, and will always land critical hits.' : '你的攻击和咒语伤害短暂大幅提升。必定命中且必定暴击。',
-        'Your attack/magic rating, attack/magic hit/crit chance and evade/resist chance increases significantly for a short time.' : '你的物理/魔法 伤害、命中、暴击率、回避、抵抗率短暂大幅提升。',
+        'Your attack/magic rating, attack/magic hit/crit chance and evade/resist chance increases significantly for a short time.' : '你的物理/魔法 伤害、命中、暴击率、回避、抵抗率短暂大幅提升。', //20210120验证，以下两条为WIKI内容暂保留
         'Your attacks and spells deal significantly more damage for a short time, will always hit, and will always land critical hits. Also replenishes 20% of base mana and health per turn.' : '你的攻击和咒语伤害短暂大幅提升。必定命中且必定暴击。同时每回合补充 20% 基础魔力与基础生命值。',
         'Your attack/magic damage, attack/magic hit/crit chance, and evade/resist chance increases significantly for a short time.' : '你的物理/魔法 伤害、命中、暴击率、回避、抵抗率短暂大幅提升。',
 

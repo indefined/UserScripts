@@ -10,7 +10,7 @@
 
 2. 前往 [Hentaiverse设置](https://hentaiverse.org/?s=Character&ss=se#settings_cfont) 勾选自定义字体(Use Custom Font), 在字体名称(font-family)框内填上任意字体名称，并拉到最下面点击确认更改(Apply Changes)
 
-  - ![设置字体](https://github.com/indefined/UserScripts/raw/master/HVTranslate/settings.jpg)
+  - ![设置字体](https://greasyfork.s3.us-east-2.amazonaws.com/yc4unv6vcyxg38ifqcq75y5x4sum)
 
 3. 按照下面脚本说明选择安装需要的脚本
 
@@ -22,24 +22,24 @@
 
 **注：HV 0.87于2021年1月上线，请更新到2021.01以后版本以获得新版支持。2020或更早版本在HV 0.86版本下修改测试**
 
-### HV 装备物品汉化 v2021.01.20 [点击此处安装](https://github.com/indefined/UserScripts/raw/master/HVTranslate/HV%20%E7%89%A9%E5%93%81%E8%A3%85%E5%A4%87%E6%B1%89%E5%8C%96.user.js)
+### HV 装备物品汉化 v2021.04.25 [点击此处安装](https://sleazyfork.org/scripts/404119/code/install.user.js)
 
-- 基于贴吧**物品汉化**脚本修改，汉化Hentaiverse、EH论坛、HVMarket内的物品、装备及装备属性，带装备高亮/装备店隐藏锁定装备，会直接替换网页源码所以可能导致其它脚本冲突
+- 基于原**HV物品汉化**脚本修改，汉化Hentaiverse、EH论坛、HVMarket内的物品、装备及装备属性，带装备高亮/装备店隐藏锁定装备
+- **如有同时使用其它汉化，需要先于其它汉化脚本安装运行才会生效**
+- **<font color="red">如果要在论坛买卖装备物品，挑好东西之后务必切换回原文再复制内容，因为别人并不一定看得懂经过翻译过后的东西</font>**
 - 本脚本大致最初由 [ggxxsol](https://greasyfork.org/scripts/25986) 创建，后由贴吧 [mbbdzz](https://tieba.baidu.com/p/4849863522) 修改补充
 - 由 [indefined](https://github.com/indefined/UserScripts/tree/master/HVTranslate) 大规模重构，提高了对其它脚本的兼容性及运行效果，但失去原脚本的装备后缀语序倒转功能和物品列表部分悬浮窗说明汉化
-- 如有同时使用其它汉化，需要先于其它汉化脚本安装运行才会生效
 - 与HVtoolBox1.0.7以前版本在大部分装备列表冲突会失去装备高亮功能，请更新到新版HVToolBox并将汉化脚本运行顺序放在HVtoolBox后
 - 与Live Percentile Ranges在装备详情页冲突，默认不在装备信息页启用，如需包含可在脚本管理器设置中将原始排除添加为用户包含或者将脚本内@exclude改为@include
 - 如与其它脚本同时使用冲突，可尝试调整脚本运行顺序，但无法保证完全兼容，或者将冲突的页面链接添加用户排除(@exclude)
-- 如果你要在论坛买东西，挑好东西之后最好切换回原文再复制内容，因为别人并不一定看得懂经过翻译过后的东西
 
 
-### Hentaiverse汉化 v2021.01.20 [点击此处安装](https://github.com/indefined/UserScripts/raw/master/HVTranslate/HentaiVerse%E6%B1%89%E5%8C%96.user.js)
+### Hentaiverse汉化 v2021.04.25 [点击此处安装](https://sleazyfork.org/scripts/404118/code/HentaiVerse%E6%B1%89%E5%8C%96.user.js)
 
 - 基于贴吧**HV界面和其它汉化**脚本修改，现已基本完成除了战斗日志之外整个hentaiverse的完全汉化。除了没有装备高亮和不能在论坛使用之外，本脚本完全包含上一个脚本所有汉化内容，可单独使用
 - 本脚本大致最初由 [dodying](https://github.com/dodying/UserJs/blob/master/modify/hvTranslator.user.js) 及 [ggxxsol](https://greasyfork.org/scripts/9680) 创建，后由 [NeedXuyao](https://greasyfork.org/zh-CN/scripts/2120) 和贴吧 [mbbdzz](https://tieba.baidu.com/p/4849863522) 修改整合补充
 - 由 [indefined](https://github.com/indefined/UserScripts/tree/master/HVTranslate) 重构添加动态汉化和原文切换功能并补充剩余翻译，[SukkaW](https://github.com/SukkaW) 重构优化
-- 整合HV战斗汉化(仅汉化战斗说明不包含战斗日志)，**与独立的HV战斗汉化脚本互斥**，默认不开启，**双击战斗界面下方经验条可开启战斗汉化**
+- 整合HV战斗汉化(仅汉化战斗说明不包含战斗日志)，默认不开启，**双击战斗界面下方经验条可开启战斗汉化**
 - 和HVToolBox1.0.7以前版本在物品仓库中冲突，请更新到新版HVToolBox并将汉化运行顺序放在HVToolBox之后
 - 如与Live Percentile Ranges同时使用，需要将脚本运行顺序置于Live Percentile Ranges之后，查询不同品质范围需要切换到英文状态
 - 如有其它脚本共同运行冲突也可尝试调整脚本运行顺序，但无法保证全部兼容
@@ -47,13 +47,12 @@
 
 ### HV 战斗汉化
 
-- **HV战斗汉化已完全合并到上方hentaiverse汉化，如无特殊需求不需要独立安装**
-- 战斗汉化仅对战斗说明框进行汉化，独立战斗汉化脚本无原文切换功能，如需关闭汉化请禁用或者删除脚本
+- **HV战斗汉化已完全合并到上方hentaiverse汉化，旧版独立战斗汉化脚本将不再维护**
+- 战斗汉化仅对战斗说明框进行汉化。旧版独立战斗汉化脚本无原文切换功能，如需关闭汉化请禁用或者删除脚本
+- **独立的HV战斗汉化脚本与新版Hentaiverse汉化脚本互斥，同时安装仅先运行的会生效**
 - 如果你已经安装了新版hentaiverse汉化脚本建议禁用或者删除独立战斗汉化并双击战斗底部经验条开启战斗汉化。
-- **2020.01.20版本之后不再提供独立的战斗汉化脚本更新维护，之后如有修改将直接更新在Hentaiverse汉化内。如有特殊需求请前往查看最后一个[历史版本](https://github.com/indefined/UserScripts/blob/85706d53f170e0bd11f65f98795ef9431eb36954/HVTranslate/HV%20%E6%88%98%E6%96%97%E6%B1%89%E5%8C%96.user.js) 。**
 
-
-### HV 图片按钮汉化 v2021.01.20 [点击此处安装](https://github.com/indefined/UserScripts/raw/master/HVTranslate/HV%20%E5%9B%BE%E7%89%87%E6%8C%89%E9%92%AE%E6%B1%89%E5%8C%96.user.js)
+### HV 图片按钮汉化 v2021.04.25 [点击此处安装](https://sleazyfork.org/scripts/425529/code/install.user.js)
 
 - 仅翻译带功能的按钮图片，也就是在设置中开启自定义字体之后剩下的图片，HV原始图片字体不会被翻译
 - 执行逻辑和效率比较奇葩，对不同浏览器的兼容性很难说，建议按照自己需求决定是否安装
@@ -62,10 +61,7 @@
 
 ### 关于脚本乱码
 
-- 使用上方链接直接在线安装一般不会导致乱码，并且有新版本时会收到自动更新
-  - 注意：如果你在线安装了脚本，那么在编辑器中更改的内容会在下一次自动更新中被覆盖
-  - 但是设置中更改的内容不会被覆盖
-  - 如果不想接收新版本更新，参照下方第二张图取消勾选检查更新
+- 使用上方链接直接在线安装一般不会导致乱码
 - 如果你将汉化脚本下载到本地安装，不要将脚本直接拉到浏览器中
   1. 在脚本管理器中点击新建脚本，或者点击乱码的脚本修改编辑脚本
   2. 将新建脚本或者乱码的脚本全部内容清空
@@ -73,12 +69,17 @@
 
 ### 管理脚本示例
 
+如果你在线安装了脚本，或者使用20210404以后版本的脚本，有新版本时正常会收到自动更新
+  - 注意：如果启用了自动更新那么在编辑器中更改的内容会在下一次自动更新中被覆盖
+  - 但是设置中更改的内容不会被覆盖
+  - 如果不想接收新版本更新，参照下方第二张图取消勾选检查更新
+
 以Tampermonkey为例
 
-![管理脚本](https://github.com/indefined/UserScripts/raw/master/HVTranslate/manage1.jpg)
+![管理脚本](https://greasyfork.s3.us-east-2.amazonaws.com/vufm3rw70vioa7gjwcvwmwcn7hiw)
 
 
-![管理脚本](https://github.com/indefined/UserScripts/raw/master/HVTranslate/manage2.jpg)
+![管理脚本](https://greasyfork.s3.us-east-2.amazonaws.com/a2trse178td4v1f77y1k9uhpxm7m)
 
 ## License
 

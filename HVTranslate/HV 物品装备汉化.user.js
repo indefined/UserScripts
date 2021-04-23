@@ -2,10 +2,11 @@
 // @name         HV 物品装备汉化
 // @namespace    hentaiverse.org
 // @author       ggxxsol & mbbdzz & indefined & etc.
-// @description  汉化Hentaiverse及EH论坛、HVMarket内的物品、装备及装备属性，带装备高亮/装备店隐藏锁定装备，带翻译原文切换功能，会直接替换网页源码所以可能导致其它脚本冲突
-// @notice       此修改版大幅度乱重构了原有脚本执行逻辑，对其它脚本的兼容性有一定提升，但丢失原脚本装备后缀语序倒转功能和部分物品弹窗说明汉化
+// @downloadURL  https://sleazyfork.org/scripts/404119/code/script.user.js
+// @description  汉化Hentaiverse及EH论坛、HVMarket内的物品、装备及装备属性，带装备高亮/装备店隐藏锁定装备，带翻译原文切换功能。论坛购物请切换到英文原文再复制内容
+// @notice       此修改版大幅度乱重构了原有脚本执行逻辑，翻译效果和兼容性有一定提升，但失去原脚本装备后缀语序倒转功能和部分物品悬浮窗窗说明汉化
 // @notice       如有同时使用其它汉化，需要先于其它汉化脚本安装运行才会生效
-// @notice       与HVtoolBox1.0.7以前版本在大部分装备列表冲突会失去装备高亮功能,在物品仓库中会导致HVtoolBox部分物品功能无效，请更新到新版并将汉化脚本运行顺序放在HVtoolBox后
+// @notice       与HVtoolBox1.0.7以前版本在大部分装备列表和物品仓库冲突，如需同时使用请更新到新版HVtoolBox并将汉化脚本运行顺序放在HVtoolBox后
 // @notice       与Live Percentile Ranges在装备详情页冲突，默认不在装备信息页启用，如需包含可在脚本管理器设置中将原始排除添加为用户包含或者将下方对应@exclude改为@include
 // @notice       如与其它脚本同时使用冲突，可尝试调整脚本运行顺序，但无法保证完全兼容，或者将冲突的页面链接添加用户排除(@exclude)
 // @notice       如果你要在论坛买东西，挑好东西之后最好切换到原文再复制内容，因为别人并不一定看得懂经过翻译过后的东西
@@ -16,11 +17,12 @@
 // @exclude      *://*hentaiverse.org/*pages/showequip.php?*
 // @include      *://forums.e-hentai.org/*showtopic=*
 // @include      *://hvmarket.xyz/*
-// @version      2021.01.20
+// @version      2021.04.25
 // ==/UserScript==
 
 if (document.location.href.match(/ss=iw/)&&!document.getElementById('item_pane'))return
 if (document.getElementById('riddlemaster')||document.getElementById('textlog')) return;
+var dictThread, regThread;
 var items, equips, equipsInfo;
 var regItems, regEquips, regEquipsInfo;
 var list = [], translated = true, changer;
@@ -62,17 +64,13 @@ function main(){
 
     switch (location){
         case 0: //装备仓库
+        case 2: //更换装备页
+        case 6: //iw
             translateEquipsList();
             break;
 
         case 1: //道具店1
-            /*//在这一行前面加//可以同时汉化部分物品悬浮窗说明，但是与HVToolbox冲突
-            Array.from(document.querySelectorAll(".itemlist>tbody>tr>td")).forEach(translateItems);
-            /*///下面一行只会翻译物品名称
-            Array.from(document.querySelectorAll(".itemlist>tbody>tr>td>div")).forEach(translateItems);
-            //*/
-            break;
-
+        case 4: //祭坛4
         case 5: //道具仓库5
             /*//在这一行前面加//可以同时汉化部分物品悬浮窗说明，但是与HVToolbox冲突
             Array.from(document.querySelectorAll(".itemlist>tbody>tr>td")).forEach(translateItems);
@@ -81,11 +79,6 @@ function main(){
             Array.from(document.querySelectorAll(".itemlist>tbody>tr>td>div")).forEach(translateItems);
             Array.from(document.querySelectorAll(".sa>div:last-child>div")).forEach(translateItems);
             //*/
-            break;
-
-        case 2: //更换装备页2
-            translateEquipsList();
-            Array.from(document.querySelectorAll(".eqb>div")).forEach(translateEquips);
             break;
 
         case 3: //装备店3
@@ -129,31 +122,46 @@ function main(){
             document.body.appendChild(equhide);
             break;
 
-        case 4: // 祭坛4
-            /*//在此前面加//可以同时汉化部分物品悬浮窗说明，但是与HVToolbox冲突
-            Array.from(document.querySelectorAll(".itemlist>tbody>tr>td")).forEach(translateItems);
-            /*///下一行只会翻译物品名称
-            Array.from(document.querySelectorAll(".itemlist>tbody>tr>td>div")).forEach(translateItems);
-            //*/
-            break;
-
-        case 6: // iw
-            translateEquipsList();
-            break;
-
         case 7: //论坛
-            equipdiv = document.getElementsByClassName('postcolor');
-            for (var ii=0; ii<equipdiv.length ; ii++ ){
-                var tempequipment = equipdiv[ii];
-                /*以下几行内容为去除论坛格式，对当前脚本汉化逻辑帮助不大，如果想要开启的话在这一行前面加//
-                tempequipment.innerHTML=tempequipment.innerHTML.replace(/<span [^>]+>[^>]+>/g,"")
-                tempequipment.innerHTML=tempequipment.innerHTML.replace(/<!--[/]?color[^>]+>/g,"")
-                tempequipment.innerHTML=tempequipment.innerHTML.replace(/<[/]*b>/g,"")
-                //*/
-                translateItems(tempequipment);
-                translateEquipsInfo(tempequipment); //此行翻译论坛里的装备属性信息等，不需要的话在前面加//
-                translateEquips(tempequipment);
+            if (!+localStorage.comfimTranslateAlert) {
+                //切换原文强提示
+                changer.style.width = "1em";
+                changer.textContent = "点击切换到原文再复制内容";
+                changer.title = "论坛购物务必切换回原文再复制，因为别人不一定能看懂翻译过的东西\n如果不想一直看到整句提示可以按住Ctrl双击切换按钮";
             }
+            changer.ondblclick = function(ev){ev.ctrlKey && (localStorage.comfimTranslateAlert = +!+localStorage.comfimTranslateAlert)}
+
+            loadItems(); //加载道具字典
+            loadEquipsInfo(); //加载装备信息字典
+            loadEquips(); //加载装备字典
+            loadThreadDict(); //加载额外的论坛翻译字典
+            var links = []; //用于暂存避免翻译的链接
+            Array.from(document.getElementsByClassName('postcolor')).forEach(post=>{
+                let html = post.innerHTML;
+                list.push({item:post, html}); //保存原内容
+                //下面一行内容为去除论坛发帖格式，对当前脚本汉化逻辑没有用处，如果想要去除的话删除下一行前面的//
+                //html = html.replace(/<span [^>]+>[^>]+>/g,"").replace(/<!--[/]?color[^>]+>/g,"").replace(/<[/]*b>/g,"")
+                html = html.replace(/(href|src)=".+?"/g, src=>{
+                    links.push(src);
+                    return 'HTRANSLATE_PLACEHOLDER_' + (links.length - 1); // 去除掉网页中的链接并暂存起来防止错误翻译
+                });
+                for (var i in items){
+                    html = html.replace(regItems[i], items[i]); //翻译物品
+                }
+                for (let i in equipsInfo){
+                    html = html.replace(regEquipsInfo[i], equipsInfo[i]); //翻译装备属性
+                }
+                for (let i in equips){
+                    html = html.replace(regEquips[i], equips[i]); //翻译装备名
+                }
+                for (let i in dictThread){
+                    html = html.replace(regThread[i], dictThread[i]); //论坛专用修复字典
+                }
+                html = html.replace(/HTRANSLATE_PLACEHOLDER_(\d+)/g, (match, p1)=>{
+                    return links[p1]; // 还原备份的原网页中链接
+                });
+                post.innerHTML = html;
+            });
             break;
 
         case 8: //武器彩卷
@@ -165,7 +173,7 @@ function main(){
         case 10: //锻造
             if (document.querySelector('#equip_extended')) {
                 //左侧装备名
-                translateEquips(document.querySelector("#leftpane>div"));
+                Array.from(document.querySelectorAll('#showequip>div:not([id])')).forEach(translateEquips);
                 //左侧的装备详细面板
                 translateEquipsInfo(document.querySelector('#equip_extended'));
                 //右侧可强化项目
@@ -186,7 +194,7 @@ function main(){
             break;
 
         case 12: //装备属性页
-            translateEquips(document.querySelector('#showequip>div'));//装备名
+            Array.from(document.querySelectorAll('#showequip>div:not([id])')).forEach(translateEquips);//装备名
             translateEquipsInfo(document.querySelector('#equip_extended'));//装备详细信息
             break;
 
@@ -227,13 +235,14 @@ function initRestore() {
     document.body.appendChild(changer);
 }
 
-//翻译装备列表
+//翻译Hentaiverse内装备列表
 function translateEquipsList(){
     Array.from(document.querySelectorAll(".equiplist div[id^='e'][onmouseover]")).forEach(translateEquips);
     Array.from(document.querySelectorAll(".hvut-eq-h5")).forEach(translateEquips);
+    Array.from(document.querySelectorAll(".eqb>div")).forEach(translateEquips);
 }
 
-//翻译装备
+//翻译装备名
 function translateEquips(div){
     if(!div) return;
     if (!regEquips) loadEquips();//加载字典
@@ -248,7 +257,7 @@ function translateEquips(div){
     div.innerHTML = repTo;
 }
 
-//翻译装备信息
+//翻译装备属性信息
 function translateEquipsInfo(div){
     if(!div) return;
     if (!regEquipsInfo) loadEquipsInfo();
@@ -422,52 +431,50 @@ function loadItems(){
         'Silver Coupon' : '银礼券(等级5)',
         'Gold Coupon' : '黄金礼券(等级7)',
         'Platinum Coupon' : '白金礼券(等级8)',
-        'Peerless Voucher' : '无双必得券',
+        'Peerless Voucher' : '无双凭证',
 
-        //特殊奖杯
+
+        //节日及特殊奖杯
         'Mysterious Box' : '神秘宝盒(等级9)', // 在‘训练：技能推广’调整价格后赠予某些玩家。
         'Solstice Gift' : '冬至赠礼(等级7)', //  2009 冬至
         'Stocking Stuffers' : '圣诞袜小礼物(等级7)', // 2009年以来每年圣诞节礼物。
         'Tenbora\'s Box' : '天菠拉的盒子(等级9)', // 年度榜单或者年度活动奖品
+        'Shimmering Present' : '微光闪动的礼品(等级8)', //  2010 圣诞节
         'Potato Battery' : '马铃薯电池(等级7)', // 《传送门 2》发售日
         'RealPervert Badge' : '真-变态胸章(等级7)', // 2011 愚人节
-        'Raptor Jesus' : '猛禽耶稣(等级7)', //  哈罗德·康平的被提预言
-        'Festival Coupon' : '节日礼券(等级7)', //2020起收获节（中秋？）
-
-        //圣诞节奖杯
-        'Shimmering Present' : '微光闪动的礼品(等级8)', //  2010 圣诞节
-        'Gift Pony' : '礼品小马(等级8)', // 2011 圣诞节
-        'Fire Keeper Soul' : '防火女的灵魂(等级8)', // 2012 圣诞节
-        'Six-Lock Box' : '六道锁盒子(等级8)', // 2013 圣诞节
-        'Reindeer Antlers' : '驯鹿鹿角(等级8)', // 2014 圣诞节
-        'Heart Locket' : '心型盒坠(等级8)', // 2015 圣诞节
-        'Dinosaur Egg' : '恐龙蛋(等级8)', // 2016 圣诞节
-        'Mysterious Tooth' : '神秘的牙齿(等级8)', // 2017 圣诞节
-        'Delicate Flower' : '娇嫩的花朵(等级8)', // 2018 圣诞节
-        'Iron Heart' : '钢铁之心(等级8)', // 2019 圣诞节
-        'Annoying Gun' : '烦人的枪(等级8)', //2020 圣诞节
-
-        //复活节奖杯
         'Rainbow Egg' : '彩虹蛋(等级8)', //  2011 复活节
         'Colored Egg' : '彩绘蛋(等级7)', //  2011 复活节
+        'Raptor Jesus' : '猛禽耶稣(等级7)', //  哈罗德·康平的被提预言
+        'Gift Pony' : '礼品小马(等级8)', // 2011 圣诞节
         'Faux Rainbow Mane Cap' : '人造彩虹鬃毛帽(等级8)', //  2012 复活节
         'Pegasopolis Emblem' : '天马族徽(等级7)', // 2012 复活节
+        'Fire Keeper Soul' : '防火女的灵魂(等级8)', // 2012 圣诞节
         'Crystalline Galanthus' : '结晶雪花莲(等级8)', // 2013 复活节
         'Sense of Self-Satisfaction' : '自我满足感(等级7)', // 2013 复活节
+        'Six-Lock Box' : '六道锁盒子(等级8)', // 2013 圣诞节
         'Golden One-Bit Coin' : '金色一比特硬币(等级8)', // 2014 复活节
         'USB ASIC Miner' : '随身型特定应用积体电路挖矿机(等级7)', // 2014 复活节
+        'Reindeer Antlers' : '驯鹿鹿角(等级8)', // 2014 圣诞节
         'Ancient Porn Stash' : '古老的色情隐藏档案(等级8)', // 2015 复活节
         'VPS Hosting Coupon' : '虚拟专用服务器代管优惠券(等级7)', // 2015 复活节
+        'Heart Locket' : '心型盒坠(等级8)', // 2015 圣诞节
         'Holographic Rainbow Projector' : '全像式彩虹投影机(等级8)', // 2016 复活节
         'Pot of Gold' : '黄金罐(等级7)', // 2016 复活节
+        'Dinosaur Egg' : '恐龙蛋(等级8)', // 2016 圣诞节
         'Precursor Smoothie Blender' : '旧世界冰沙机(等级8)', // 2017 复活节
         'Rainbow Smoothie' : '彩虹冰沙(等级7)', // 2017 复活节
+        'Mysterious Tooth' : '神秘的牙齿(等级8)', // 2017 圣诞节
         'Grammar Nazi Armband' : '语法纳粹臂章(等级7)', // 2018 复活节
         'Abstract Wire Sculpture' : '抽象线雕(等级8)', // 2018 复活节
+        'Delicate Flower' : '娇嫩的花朵(等级8)', // 2018 圣诞节
         'Assorted Coins' : '什锦硬币(等级7)', // 2019 复活节
         'Coin Collector\'s Guide' : '硬币收藏家指南(等级8)', // 2019 复活节
-        'Shrine Fortune' : '神社灵签(等级7)', // 2020 起复活节
+        'Iron Heart' : '钢铁之心(等级8)', // 2019 圣诞节
+        'Shrine Fortune' : '神社灵签(等级7)', // 2020起复活节
         'Plague Mask' : '瘟疫面具(等级8)', // 2020 复活节
+        'Festival Coupon' : '节日礼券(等级7)', //2020起收获节（中秋？）
+        'Annoying Gun' : '烦人的枪(等级8)', //2020 圣诞节
+        'Vaccine Certificate' : '疫苗证明(等级8)', //2021 复活节
 
 
         //旧旧古董
@@ -588,6 +595,14 @@ function loadItems(){
         'Hoarded Dried Pasta' : '库存的干面',
         'Hoarded Canned Goods' : '库存的罐头',
         'Hoarded Powdered Milk' : '库存的奶粉',
+        //2021
+        'Red Vaccine Vial' : '红色疫苗瓶',
+        'Orange Vaccine Vial' : '橙色疫苗瓶',
+        'Yellow Vaccine Vial' : '黄色疫苗瓶',
+        'Green Vaccine Vial' : '绿色疫苗瓶',
+        'Blue Vaccine Vial' : '蓝色疫苗瓶',
+        'Indigo Vaccine Vial' : '靛色疫苗瓶',
+        'Violet Vaccine Vial' : '紫色疫苗瓶',
 
 
 
@@ -749,37 +764,15 @@ function loadItems(){
         'Physical Crit Chance' : '(物理暴击率)',
         'Magical Crit Chance' : '(魔法暴击率)',
 
-        //照顾论坛的材料列表，为了避免误翻译到装备名，皮革和布料只匹配复数（完整物品名字上面有）
-        'Leathers': '皮革',
-        'Clothes': '布料',
-        'Metals?': '金属',
-        'Woods?': '木头',
-        'Scraps?': '废料',
-        'Low-Grade': '低级',
-        'Mid-Grade': '中级',
-        'High-Grade': '高级',
-
-        //物品类型，带问号的都是照顾论坛多写少写一个s
-        'Tokens' : '令牌',
-        'Token\'' : '令牌\'',
-        'Consumables?' : '消耗品',
-        'Crystal Packs?' : '水晶包',
-        'Crystals' : '水晶',
-        'Crystal\'' : '水晶\'',
-        'Catalysts' : '催化剂',
-        'Artifacts?' : '文物',
-        'Materials?' : '材料',
-        'Potions' : '药品',
-        'Trophy|Trophies' : '奖杯',
-        'Monster Foods?|Foods?' : '怪物食品',
-        'Shards?': '碎片',
-        'Infusions?' : '魔药',
-        'Scrolls?' : '卷轴',
-        'Bindings?' : '粘合剂',
-        'Restoratives?' : '回复品',
-        'Specials?' : '特殊',
-        'Pony Figurines?|Figurines' : '小马公仔',
-        'Collectables?' : '收藏品',
+        //物品类型，悬浮窗onmouseover参数自带一层单引号
+        "'Consumable'" : "'消耗品'",
+        "'Crystal'" : "'水晶'",
+        "'Monster Food'" : "'怪物食品'",
+        "'Token'" : "'令牌'",
+        "'Trophy'" : "'奖杯'",
+        "'Artifact'" : "'文物'",
+        "'Material'" : "'材料'",
+        "'Collectable'" : "'收藏品'",
     };
 
     regItems = {};
@@ -799,7 +792,6 @@ function loadEquipsInfo(){
         'Cloth Armor':'布甲',
         'Light Armor':'轻甲',
         'Heavy Armor':'重甲',
-        'Current Owner':'持有者',
 
         'Condition:':'耐久:',
         'Untradeable':'不可交易',
@@ -1121,7 +1113,7 @@ function loadEquips(){
         'Exquisite':'<span style=\"background:#d7e698\" >✧精良✧</span>',
         'Magnificent':'<span style=\"background:#a6daf6\" >☆史诗☆</span>',
         'Legendary':'<span style=\"background:#ffbbff\" >✪传奇✪</span>',
-        'P(<[^<]+>\\s*)*e(<[^<]+>\\s*)*e(<[^<]+>\\s*)*r(<[^<]+>\\s*)*l(<[^<]+>\\s*)*e(<[^<]+>\\s*)*s(<[^<]+>\\s*)*s':'<span style=\"background:#ffd760\" >☯无双☯</span>',
+        'Peerless':'<span style=\"background:#ffd760\" >☯无双☯</span>',
 
         /////////////////装备部位，更换装备列表用的//////////
         'Empty':'空',
@@ -1130,9 +1122,24 @@ function loadEquips(){
         'Helmet':'头盔',
         'Body':'身体',
         'Hands':'手部',
-        'Legs([^a-z])':'腿部$1',
-        'Feet([^a-z])':'脚部$1',
+        'Legs(\\W)':'腿部$1',
+        'Feet(\\W)':'脚部$1',
 
+        'Current Owner':'持有者',
+    };
+
+    regEquips = {};
+    for(var j in equips) {
+        //此处弱化忽略词典里的of/the/-连词大小写匹配，同时将装备名中所有空格替换为为混沌的通配，忽略单词之间的所有纯HTML代码
+        //这将忽略论坛里给装备名增加的颜色格式代码从而使翻译可以正确进行，同时装备信息页中被换行截断的装备名也会被正确拼接
+        var vj = j.replace(/of (the )?/,'([oO]f )?([tT]he )?').replace(/-./,function(k){return '-['+k[1]+k[1].toUpperCase()+']'}).replace(/\s(.)/g,'\\s*(<[^<]+>\\s*)*$1');
+        regEquips[j] = new RegExp(vj,'g');
+    }
+}
+
+//论坛用的额外内容字典
+function loadThreadDict() {
+    dictThread = {
         ///////////////装备类型，论坛用的
         'One-handed':'单手',
         'Two-handed':'双手',
@@ -1149,13 +1156,50 @@ function loadEquips(){
         'Cloth':'布',
         '([^a-z])Light([^a-z])':'$1轻$2',
         'Heavy':'重',
-    };
+        //论坛里的彩虹无双品质名
+        'P(<[^<]+>)+e(<[^<]+>)+e(<[^<]+>)+r(<[^<]+>)+l(<[^<]+>)+e(<[^<]+>)+s(<[^<]+>)+s':'<span style=\"background:#ffd760\" >☯无双☯</span>',
 
-    regEquips = {};
-    for(var j in equips) {
-        //此处将装备后缀中所有的of/the替换为混沌的通配，忽略of/the和后缀之间的所有纯HTML代码
-        //这将忽略论坛里给of/the之间增加的颜色格式代码从而使翻译可以正确进行，同时独立装备页中被换行截断的装备名也会被正确拼接
-        var vj = j.replace(/^of the /,'([Oo]f\\s*(<[^<]+>\\s*)*)?([Tt]he\\s*(<[^<]+>\\s*)*\\s*)?').replace(/^of /,'([Oo]f\\s*(<[^<]+>\\s*)*)?');
-        regEquips[j] = new RegExp(vj,'g');
+        //照顾论坛的材料列表，为了避免误翻译到装备名，皮革和布料只匹配复数（完整物品名字物品字典里有）
+        'Leathers': '皮革',
+        'Clothes': '布料',
+        'Metals?': '金属',
+        'Woods?': '木头',
+        'Scraps?': '废料',
+        'Low-Grade': '低级',
+        'Mid-Grade': '中级',
+        'High-Grade': '高级',
+        //物品类型
+        'Tokens' : '令牌',
+        'Consumables?' : '消耗品',
+        'Crystals' : '水晶',
+        'Artifacts?' : '文物',
+        'Materials?' : '材料',
+        'Trophy' : '奖杯',
+        'Monster Foods?|Foods?' : '怪物食品',
+        'Monster Lab' : '怪物实验室',
+        'Repair' : '维修',
+        'Forge' : '锻造',
+        'Obsolete' : '过时',
+        'Collectables?' : '收藏品',
+        'Crystal Packs?' : '水晶包',
+        'Catalysts' : '催化剂',
+        'Potions' : '药品',
+        'Trophies' : '奖杯',
+        'Shards?': '碎片',
+        'Infusions?' : '魔药',
+        'Scrolls?' : '卷轴',
+        'Bindings?' : '粘合剂',
+        'Restoratives?' : '回复品',
+        'Specials?' : '特殊',
+        'Pony Figurines?|Figurines' : '小马公仔',
+        //修正一些论坛误翻译的东西
+        '黑暗 Descent' : 'Dark Descent',
+        '生命加成 Santa' : 'Juggernaut Santa',
+        'Arcane 专注' : 'Arcane Focus',
+        'Spirit 盾' : 'Spirit Shield',
+    };
+    regThread = {};
+    for (var i in dictThread) {
+        regThread[i] = new RegExp(i,'g');
     }
 }
