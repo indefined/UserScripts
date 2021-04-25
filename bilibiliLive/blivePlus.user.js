@@ -2,7 +2,7 @@
 // @name        bilibili直播间工具
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.35
+// @version     0.5.36
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、硬币直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -772,33 +772,30 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
             this.newGift.lastChild.style.display = 'none';
             const target = this.gifts[index];
             const sendPanel = helper.create('div',{
-                className : 'bilibili-live-player-gfs-give-float',
-                style:"position:fixed;",
+                style:"position: fixed;top: 0px;bottom: 0px;left: 0px;right: 0px;background: rgba(0, 0, 0, 0.4);z-index: 10000;",
                 innerHTML : `
-                <div class="bilibili-live-player-gfs-give-wrap">
-                    <div class="bilibili-live-player-gfs-give-close"></div>
-                    <h2>赠送礼物</h2>
-                    <div class="clearfix">
-                        <div class="bilibili-live-player-gfs-give-gif" style="background-image: url(${target[this.imgType]})"></div>
-                        <div class="bilibili-live-player-gfs-give-info">
-                            <div class="bilibili-live-player-gfs-give-name">${target.name}</div>
-                            <div class="bilibili-live-player-gfs-give-cost">
-                                <div class="bilibili-live-player-gfs-give-cost-gold">
-                                <i></i><span>${target.price}</span></div></div>
-                        </div>
-                    </div>
-                    <p class="gift-info-desc" data-v-33a72392="">${target.desc}</p>
+                <div style="width: 298px;right: 0px;left: 0px;position: absolute;padding: 20px;background: rgb(255, 255, 255);
+                    border-radius: 8px;margin: auto;transform: translate(0px, 50%);box-sizing: content-box;">
+                    <h2 style="font-size: 20px;color: rgb(79, 193, 233);font-weight: 400;padding-bottom: 10px;margin: 0;">赠送礼物
+                    <span style="float: right;cursor: pointer;font-size: 15px;" class="bilibili-live-player-gfs-give-close">Ｘ</span></h2>
                     <div>
-                        <span>选择：</span>
-                        <div class="bilibili-live-player-gfs-give-type">
-                            <label class="bilibili-live-player-gfs-give-type-silver">
-                                <input name="send_gift_type" type="radio" value="gold" checked>金瓜子
-                                <input name="send_gift_type" type="radio" value="silver">银瓜子
-                            </label></div>
+                        <div style="background-image: url(${target[this.imgType]});width: 72px;height: 72px;background-size: cover;display: inline-block;"></div>
+                        <div class="bilibili-live-player-gfs-give-info" style="display: inline-block;vertical-align: top;">
+                            <span>${target.name}</span>
+                            <span class="bilibili-live-player-gfs-give-cost-gold"><i data-v-13895867="" class="svg-icon gold-seed v-middle"></i><span>${target.price}</span></span>
+                        <p class="gift-info-desc" data-v-33a72392="" style="margin-top: 4px;color: #666;max-width: 215px;">${target.desc}</p></div>
                     </div>
-                    <div>
-                        <input class="bilibili-live-player-gfs-give-counter" type="text" value="${num}" placeholder="赠送数量">
-                        <button class="bilibili-live-player-gfs-give-confirm">赠送</button>
+                    <div style="border-top: 1px solid #f0f0f0;padding-top: 10px;margin-top: 10px;">
+                        <label>
+                            <span>选择：</span>
+                            <input name="send_gift_type" type="radio" value="gold" checked id="send_gold" style="vertical-align: text-top;margin: 0 2px;"><label for="send_gold">金瓜子</label>
+                            <input name="send_gift_type" type="radio" value="silver" id="send_silver" style="vertical-align: text-top;margin: 0 2px;"><label for="send_silver">银瓜子</label>
+                        </label>
+                        <input class="bilibili-live-player-gfs-give-counter" type="text" value="1" placeholder="赠送数量" style="width: 50px;box-sizing: border-box;margin: 0 10px;
+                            border-color: #d0d7dd;vertical-align: bottom;text-align: center;height: 24px;padding: 2px 8px;line-height: 25px;
+                            border: 1px solid #aaa;border-radius: 4px;background-color: #fff;outline: none;">
+                        <button class="bilibili-live-player-gfs-give-confirm" style="position: relative;box-sizing: border-box;line-height: 1;min-width: 0;width: 60px;
+                            height: 24px;background-color: #23ade5;color: #fff;font-size: 14px;border: 0;border-radius: 4px;cursor: pointer;outline: none;overflow: hidden;">赠送</button>
                     </div>
                 </div>`
             },document.body);
@@ -837,7 +834,7 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
                 }
                 const list = document.createElement('div');
                 const items = document.createElement('div');
-                items.innerHTML = '<div data-v-ec1c3b2e="" class="tv"><div data-v-4df82965="" data-v-ec1c3b2e="" role="progress" class="link-progress-tv"></div></div>';
+                items.innerHTML = '<div data-v-ec1c3b2e="" class="tv" style="height:100px"><div data-v-4df82965="" data-v-ec1c3b2e="" role="progress" class="link-progress-tv"></div></div>';
                 list.className = 'common-popup-wrap t-left';
                 list.style = 'position: absolute;width: 276px;bottom: 30px;left: 0px;cursor: auto;animation:scale-in-ease 0.4s;transform-origin: 90px bottom 0px;';
                 list.innerHTML = `<div style="position: absolute;left: ${target.offsetLeft+3}px;top: 100%;width: 0;height: 0;border-left: 4px solid transparent;
