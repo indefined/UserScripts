@@ -2,7 +2,7 @@
 // @name        bilibili直播间工具
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.36
+// @version     0.5.37
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、硬币直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -70,6 +70,7 @@ const helper = {
         document.body.appendChild(toast);
         setTimeout(()=>document.body.removeChild(toast),3000);
     },
+    roomInfo:typeof(unsafeWindow)!="undefined"?unsafeWindow.BilibiliLive:window.BilibiliLive,
     isFirefox:navigator.userAgent.indexOf('Firefox')!=-1
 };
 
@@ -193,12 +194,20 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
 }
 
 #live-player #gift-control-vm {
-    background: rgba(0, 0, 0, 0.7)!important;
+    background: none!important;
     position: relative!important;
     width: 100%!important;
     border: none!important;
     border-radius: 0!important;
     height: unset!important;
+}
+
+/*控制栏背景现在分离了，礼物栏放在控制栏上后会挤掉原来背景，补上*/
+.web-player-controller-wrap {
+    background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.7));
+}
+.web-player-controller-wrap>:first-child{
+    height: 56px;
 }
 
 /*直接放在控制栏上的全屏发送框*/
@@ -233,7 +242,13 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
 }
 .live-web-player-controller .chat-input-ctnr,
 .live-web-player-controller .right-action.p-absolute {
-    margin-top: 11px;
+    margin: 5px 0;
+}
+.live-web-player-controller .input-limit-hint {
+    line-height: 12px;
+}
+.live-web-player-controller .right-action>button{
+    height: 25px;
 }
 .live-web-player-controller .chat-input {
     height: 24px;
@@ -305,9 +320,9 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
                 this.giftPackage.id = 'giftPackage';
                 this.giftPackageContainer = this.giftPackage.parentNode;
             }
-            this.screenPanel = helper.get('.web-player-controller-wrap') || helper.get('.bilibili-live-player-video-controller');
+            this.controllerPanel = helper.get('.web-player-controller-wrap+.web-player-controller-wrap');
             this.inputPanel = helper.get('div.chat-input-ctnr.p-relative');
-            this.controlPanel = this.inputPanel.parentNode;
+            this.chatControlPanel = this.inputPanel.parentNode;
             this.bottomPanel = this.inputPanel.nextSibling;
             this.sendButton = this.bottomPanel.lastChild;
             this.title = helper.create('a',{
@@ -326,7 +341,7 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
                     }
                 }
             });
-            this.fullScreenObserver = new MutationObserver(mutations => this.handleFullScreenPanel());
+            this.controllerObserver = new MutationObserver(mutations => this.handlerControllerPanel());
         },
         //礼物包裹
         updateGiftPackage(){
@@ -349,6 +364,11 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
                 }
             }
         },
+        getRoomID() {
+            if (helper.roomInfo) return Promise.resolve(helper.roomInfo.ROOMID);
+            const roomid = document.URL.match('[0-9]+')[0];
+            return helper.xhr('https://api.live.bilibili.com/room/v1/Room/room_init?id='+roomid).then(roominfo =>roominfo.data && roominfo.data.room_id);
+        },
         //轮播链接
         updateVideoLink(){
             const titlePanel = helper.get('div.normal-mode');
@@ -358,32 +378,30 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
                 }
             }
             else{
-                const roomid = document.URL.match('[0-9]+')[0];
-                helper.xhr('https://api.live.bilibili.com/room/v1/Room/room_init?id='+roomid)
-                  .then(roominfo => {
-                          roominfo.data && helper.xhr('https://api.live.bilibili.com/live/getRoundPlayVideo?room_id='+roominfo.data.room_id+'?type=flv')
-                          .then(resp => {
-                            console.log(resp.data);
-                            resp.data.bvid && helper.set(this.title, {
-                                innerText: resp.data.bvid,
-                                href:`${resp.data.bvid_url}?p=${resp.data.pid}`
-                            }, titlePanel);
-                          });
-                  });
-            }
+                this.getRoomID().then(id=> {
+                    if (!id) return;
+                    helper.xhr('https://api.live.bilibili.com/live/getRoundPlayVideo?room_id='+id+'?type=flv').then(resp => {
+                        console.log(resp.data);
+                        resp.data.bvid && helper.set(this.title, {
+                            innerText: resp.data.bvid,
+                            href:`${resp.data.bvid_url}?p=${resp.data.pid}`
+                        }, titlePanel);
+                    });
+                });
+        }
         },
         //全屏礼物面板调整
-        handleFullScreenPanel(){
+        handlerControllerPanel(){
             const className = document.body.className,
-                  status = !className ? 'normal' : className.includes('player-full-win') && !className.includes('hide-aside-area')?
+                  status = !className ?
+                  'normal' : className.includes('player-full-win') && !className.includes('hide-aside-area') ?
                   'web-fullscreen' : className.includes('full') ?
                   'fullscreen' : 'normal';
-            if (!this.screenPanel){}
-            else if((status=='normal'||!this.settings.fullScreenPanel)&&this.screenPanel.contains(this.toolBar)){
+            if((status=='normal'||!this.settings.fullScreenPanel)&&this.controllerPanel.contains(this.toolBar)){
                 this.leftContainer.appendChild(this.toolBar);
             }
-            else if (status!='normal'&&this.settings.fullScreenPanel&&!this.screenPanel.contains(this.toolBar)){
-                this.screenPanel.appendChild(this.toolBar);
+            else if (status!='normal'&&this.settings.fullScreenPanel&&!this.controllerPanel.contains(this.toolBar)){
+                this.controllerPanel.appendChild(this.toolBar);
             }
             if (status=='fullscreen'&&this.settings.fullScreenChat){
                 if(this.settings.chatInGiftPanel&&this.settings.fullScreenPanel&&!this.giftPanel.contains(this.sendButton)){
@@ -397,12 +415,12 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
                     controller.appendChild(this.inputPanel);
                 }
             }else if((status!='fullscreen'||!this.settings.fullScreenChat)&&!this.bottomPanel.contains(this.sendButton)){
-                this.controlPanel.insertBefore(this.inputPanel,this.bottomPanel);
+                this.chatControlPanel.insertBefore(this.inputPanel,this.bottomPanel);
                 this.bottomPanel.appendChild(this.sendButton);
             }
         },
         update(item,value){
-            if(!this.screenPanel) return;
+            if(!this.controllerPanel) return;
             if(item=='showVideoLink') {
                 this.updateVideoLink();
             }
@@ -410,20 +428,20 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
                 return this.updateGiftPackage();
             }
             else if(item=='fullScreenPanel'||item=='fullScreenChat'||item=='chatInGiftPanel') {
-                this.handleFullScreenPanel();
+                this.handlerControllerPanel();
             }
             this.titleObserver.disconnect();
             if(this.settings.showVideoLink) {
                 this.titleObserver.observe(helper.get('#live-player'), {childList:true});
             }
-            this.fullScreenObserver.disconnect();
+            this.controllerObserver.disconnect();
             if(this.settings.fullScreenPanel||this.settings.fullScreenChat){
-                this.fullScreenObserver.observe(document.body,{
+                this.controllerObserver.observe(document.body,{
                     attributes: true,
                     attributeOldValue: true,
                     attributeFilter: ['class']
                 });
-                this.fullScreenObserver.observe(this.screenPanel, {childList:true});
+                this.controllerObserver.observe(this.controllerPanel, {childList:true});
             }
         },
         init(settings){
@@ -438,7 +456,7 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
 
     //勋章/头衔扩展
     advancedSwitcher:{
-        room:typeof(unsafeWindow)!="undefined"?unsafeWindow.BilibiliLive:window.BilibiliLive,
+        room:helper.roomInfo,
         titleInfos:undefined,
         oldMedalButton:undefined,
         oldTitleButton:undefined,
@@ -882,7 +900,7 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
         for(const key in this.settingInfos){
             if(this.settings[key]==undefined) this.settings[key] = true;
         }
-        const controller = helper.get('.web-player-controller-wrap') || helper.get('.bilibili-live-player-video-controller');
+        const controller = helper.get('.web-player-controller-wrap+.web-player-controller-wrap');
         if (!controller) return;
         const settingPanel = helper.create('div',{
                   className: 'player-type',
@@ -891,13 +909,15 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
               });
         new MutationObserver(mutations=>{
             //return console.log(mutations);
-            mutations.forEach(mutation=>{
-                mutation.addedNodes.forEach((panel)=>{
-                    panel.classList && panel.classList.contains('setting-panel') && panel.appendChild(settingPanel);
-                })
-            })
+            for (const mutation of mutations) {
+                for (const panel of mutation.addedNodes) {
+                    if (panel.classList && panel.classList.contains('danmaku-control')) {
+                        return panel.appendChild(settingPanel);
+                    }
+                }
+            }
         }).observe(controller, {childList:true, subtree:true});
-        helper.create('style',{innerHTML:'.setting-panel{width:max-content!important}'}, document.head);
+        //helper.create('style',{innerHTML:'.setting-panel{width:max-content!important}'}, document.head);
         for(const key in this.settingInfos){
             const item = helper.create('div',{className:'blpui-checkbox-container'},settingPanel);
             helper.create('input',{
