@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.6.13
+// @version      0.6.14
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -671,6 +671,11 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
         historyLimit:isNaN(+GM_getValue('historyLimit'))?10:+GM_getValue('historyLimit'),
         pageLimit:+GM_getValue('pageLimit')||0,
         autoFreshCount:isNaN(+GM_getValue('autoFreshCount'))?1:+GM_getValue('autoFreshCount'),
+        hotkey: (()=>{
+            let key = GM_getValue('hotkey');
+            if (!key) return '';
+            return key;
+        })(),
         manualFreshCount:(()=>{
             var mfc = GM_getValue('manualFreshCount',1);
             if (isNaN(mfc)||mfc<1) mfc = 1;
@@ -737,6 +742,29 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
         setReduceHeight(status){
             GM_setValue('reduceHeight',this.reduceHeight=+status);
             this.setStyle();
+        },
+        setHotkey(ev){
+            ev.preventDefault();
+            const key = ev.key;
+            if(key=='Backspace' || key == 'Delete' || key == ' ') {
+                this.hotkey = ev.target.value = '';
+                if (this.freshHotkey) document.removeEventListener('keydown', this.freshHotkey);
+            }
+            else {
+                this.hotkey = ev.target.value = ev.key.toUpperCase();
+                if (!this.freshHotkey) document.addEventListener('keydown', this.freshHotkey = ev=>this.freshHotkeyHandler(ev));
+            }
+            GM_setValue('hotkey', this.hotkey);
+        },
+        freshHotkeyHandler(ev) {
+            if (ev.target instanceof HTMLInputElement) return;
+            if (ev.key.toUpperCase() == this.hotkey) {
+                document.querySelector('#bili_report_douga .btn-change > i').click();
+            }
+        },
+        init(){
+            this.setStyle();
+            if (!!this.hotkey) document.addEventListener('keydown', this.freshHotkey = ev=>this.freshHotkeyHandler(ev));
         },
         setStyle(){
             if(!this.styleDiv) {
@@ -880,6 +908,18 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                                 {
                                     nodeType:'input',type:'number',value:this.boxHeight,min:2,step:2,
                                     onchange:({target})=>this.setBoxHeight(+target.value),
+                                    style:'width:50px'
+                                }
+                            ]
+                        },
+                        {
+                            nodeType:'div',style:'margin: 10px 0;',
+                            childs: [
+                                '<label style="margin-right: 5px;">刷新快捷键:</label>',
+                                '<span style="margin-right: 5px;color:#00f" title="设置一个加载更多的快捷键，如果为空则关闭">(?)</span>',
+                                {
+                                    nodeType:'input',value:this.hotkey,
+                                    onkeydown:ev => this.setHotkey(ev),
                                     style:'width:50px'
                                 }
                             ]
@@ -1236,7 +1276,7 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
     function init() {
         if (document.querySelector('.international-home')) element.isNew = true;;
         try{
-            setting.setStyle();
+            setting.init();
             InitRecommend();
             window.addEventListener("beforeunload", ()=>setting.saveHistory());
             InitRanking();
