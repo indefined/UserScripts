@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.6.14
+// @version      0.6.14.1
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -748,7 +748,7 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
             const key = ev.key;
             if(key=='Backspace' || key == 'Delete' || key == ' ') {
                 this.hotkey = ev.target.value = '';
-                if (this.freshHotkey) document.removeEventListener('keydown', this.freshHotkey);
+                if (this.freshHotkey) this.freshHotkey = document.removeEventListener('keydown', this.freshHotkey);
             }
             else {
                 this.hotkey = ev.target.value = ev.key.toUpperCase();
