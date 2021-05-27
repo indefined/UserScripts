@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.6.14.1
+// @version      0.6.15
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -700,6 +700,11 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                 document.querySelector(`#ranking-all .dropdown-item[data-day="${this.rankingDay}"]`).click();
             }
         },
+        forceWidth: GM_getValue('forceWidth'),
+        setForceWidth(value){
+            GM_setValue('forceWidth', this.forceWidth = value);
+            this.setStyle();
+        },
         accessKey:GM_getValue('biliAppHomeKey'),
         storageAccessKey(key){
             if(key) {
@@ -773,9 +778,10 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                     parent:document.head
                 });
             }
+            let html = '';
             if(this.noScrollBar) {
                 //不显示滚动条情况下，将内层容器宽度设置为比外层宽度多一个滚动条，则滚动条位置会溢出被遮挡
-                this.styleDiv.innerHTML = '#ranking-all .rank-list-wrap{width:calc(200% + 40px)}'
+                html += '#ranking-all .rank-list-wrap{width:calc(200% + 40px)}'
                     + '#ranking-all .rank-list-wrap.show-origin{margin-left:calc(-100% - 20px)}'
                     ;
                 //左侧推荐容器本同理，但因为新版弹性布局如果没有滚动条内容会伸展到超出可视范围，需针对设置
@@ -783,13 +789,13 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
             else {
                 //显示滚动条情况下，排行榜容器维持原样式，内层容器自带滚动条。
                 //左侧推荐容器将内层高度设置为弹性，则外层容器固定高度下如果内容超出会显示滚动条。
-                this.styleDiv.innerHTML = '#recommend #recommend-list{height:unset!important;}';
+                html += '#recommend #recommend-list{height:unset!important;}';
             }
 
             const reduceHeight = this.reduceHeight? ' - 12px' : '';
             //设置推荐容器宽高
             if (element.isNew) {
-                this.styleDiv.innerHTML +=
+                html +=
                     `#recommend  .storey-box, #ranking-all ul.rank-list{height:calc(404px / 2 * ${this.boxHeight} ${reduceHeight})}`
                     + `@media screen and (max-width: 1438px) { #recommend  .storey-box, #ranking-all ul.rank-list{height:calc(364px / 2 * ${this.boxHeight} ${reduceHeight})} }`;
                 if(this.setListWidth) {
@@ -799,10 +805,76 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
             }
             else {
                 //旧版因为固定间隔布局的原因，无论滚动条在内还是在外是否显示均需要维持比外层多一个滚动条宽度
-                this.styleDiv.innerHTML += `#recommend  .storey-box {height:calc(336px / 2 * ${this.boxHeight}${reduceHeight})}`
+                html += `#recommend  .storey-box {height:calc(336px / 2 * ${this.boxHeight}${reduceHeight})}`
                     + `#ranking-all ul.rank-list{height:calc(336px / 2 * ${this.boxHeight}${reduceHeight} - 16px)}`
                     + '#recommend #recommend-list{width:calc(100% + 20px)!important;}';
             }
+            if (this.forceWidth) {
+                //强制加宽低分辨率
+                html += `
+@media screen and (max-width: 1654px) {
+    .b-footer-wrap .zone-list-box .live-card:nth-child(n+9):nth-child(-n+10),
+    .b-footer-wrap .zone-list-box .video-card-common:nth-child(n+9):nth-child(-n+10),
+    .b-wrap .zone-list-box .live-card:nth-child(n+9):nth-child(-n+10),
+    .b-wrap .zone-list-box .video-card-common:nth-child(n+9):nth-child(-n+10),
+    .b-footer-wrap .manga-list-box .manga-card:nth-child(n+9):nth-child(-n+10),
+    .b-wrap .manga-list-box .manga-card:nth-child(n+9):nth-child(-n+10),
+    .b-footer-wrap .extension .video-card-common:nth-child(5),
+    .b-wrap .extension .video-card-common:nth-child(5),
+    .b-footer-wrap .rcmd-box-wrap>.rcmd-box .video-card-reco:nth-child(n+7):nth-child(-n+8),
+    .b-wrap .rcmd-box-wrap>.rcmd-box .video-card-reco:nth-child(n+7):nth-child(-n+8),
+    .b-footer-wrap .recommend-box .video-card-reco:nth-child(n+7):nth-child(-n+8),
+    .b-wrap .recommend-box .video-card-reco:nth-child(n+7):nth-child(-n+8){
+        display:block !important;
+    }
+    .b-wrap .rcmd-box-wrap>.rcmd-box {
+        width: 690px !important;
+    }
+    .b-footer-wrap .recommend-box, .b-wrap .recommend-box {
+        width: 717px !important;
+    }
+    .b-footer-wrap .extension, .b-wrap .extension,
+    .b-footer-wrap .zone-list-box, .b-wrap .zone-list-box,
+    .b-footer-wrap .manga-list-box, .b-wrap .manga-list-box {
+        width: 880px !important;
+    }
+    .b-footer-wrap .elevator, .b-wrap .elevator {
+        margin-left: 602px !important;
+    }
+    .b-footer-wrap .zone-list-box .time-line-card, .b-wrap .zone-list-box .time-line-card {
+        width: 210px !important;
+        margin: 0 5px 13px 0!important;
+    }
+    .b-wrap {
+        width: 1150px !important;
+    }
+    .b-footer-wrap .zone-list-box .article-card, .b-wrap .zone-list-box .article-card {
+        width: 440px;
+    }
+    .van-popper[x-placement^=top] {
+        top: 208px !important;
+    }
+    .van-popper[x-placement^=top] .popper__arrow {
+        top: -6px;
+        border-width: 6px !important;
+        border-color: transparent !important;
+        border-bottom-color: #ebeef5 !important;
+        border-top-width: 0 !important;
+    }
+    .van-popper[x-placement^=top] .popper__arrow:after {
+        bottom: 3px;
+        top: 1px;
+    }
+    .van-popper[x-placement^=top] .popper__arrow:after {
+        border-top-color: transparent !important;
+        border-bottom-color: #fff;
+        border-top-width: 0 !important;
+        border-bottom-width: 6px !important;
+    }
+}
+`;
+            }
+            this.styleDiv.innerHTML = html;
         },
         show(){
             if(this.dialog) return document.body.appendChild(this.dialog);
@@ -812,8 +884,9 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                 style:'position: fixed;top: 0;bottom: 0;left: 0;right: 0;background: rgba(0,0,0,0.4);z-index: 10000;',
                 childs:[{
                     nodeType:'div',
-                    style:'width:200px;right:0;left:0;position:absolute;padding:20px;background:#fff;border-radius:8px;margin:auto;transform:translate(0,50%);box-sizing:content-box',
+                    style:'width:400px;right:0;left:0;position:absolute;padding:20px;background:#fff;border-radius:8px;margin:auto;transform:translate(0,50%);box-sizing:content-box',
                     childs:[
+                        '<style>div#biliAppHomeSetting>div>div { display: inline-block; width: 200px; }</style>',
                         {
                             nodeType:'h2',innerText:'APP首页推荐设置',
                             style:"font-size: 20px;color: #4fc1e9;font-weight: 400;",
@@ -963,6 +1036,18 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                         {
                             nodeType:'div',style:'margin: 10px 0;',
                             childs: [
+                                '<label style="margin-right: 5px;">低分辨率加宽:</label>',
+                                '<span style="margin-right: 5px;color:#00f" title="勾选此项将把1654px分辨率以下显示整体强制加宽到每行5个推荐，效果和副作用未知，自行尝试">(?)</span>',
+                                {
+                                    nodeType:'input',type:'checkbox',checked:this.forceWidth,
+                                    onchange:({target})=>this.setForceWidth(target.checked),
+                                    style:'vertical-align: bottom',
+                                },
+                            ]
+                        },
+                        {
+                            nodeType:'div',style:'margin: 10px 0;',
+                            childs: [
                                 '<label style="margin-right: 5px;">APP接口授权:</label>',
                                 `<span style="margin-right: 5px;color:#00f" title="${[
                                     '目前获取根据个人观看喜好的APP首页数据和提交定制不喜欢的视频需要获取授权key。',
@@ -1001,35 +1086,28 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
             else {
                 target.innerText = '获取中...';
                 target.style['pointer-events'] = 'none';
-                new Promise((resolve,reject)=>{
-                    let tip = '请求授权接口错误';
-                    GM_xmlhttpRequest({
-                        method: 'GET',timeout:10000,
-                        url:'https://passport.bilibili.com/login/app/third?appkey=27eb53fc9058f8c3'
-                        +'&api=https%3A%2F%2Fwww.mcbbs.net%2Ftemplate%2Fmcbbs%2Fimage%2Fspecial_photo_bg.png&sign=04224646d1fea004e79606d3b038c84a',
-                        onload: res=> {
-                            try{
-                                let data = JSON.parse(res.response);
-                                if (data.code||!data.data) {
-                                    reject({tip,msg:data.msg||data.message||data.code,data});
-                                }
-                                else if (!data.data.has_login) {
-                                    reject({tip,msg:'你必须登录B站之后才能使用授权',data});
-                                }
-                                else if (!data.data.confirm_uri) {
-                                    reject({tip,msg:'无法获得授权网址',data});
-                                }
-                                else {
-                                    resolve(data.data.confirm_uri);
-                                }
-                            }
-                            catch(e){
-                                reject({tip,msg:'返回数据异常:',data:res.response});
-                            }
-                        },
-                        onerror: e=>reject({tip,msg:e.error||e.status,data:e}),
-                        ontimeout: e=>reject({tip,msg:'请求超时',data:e})
+                let tip = '请求授权接口错误';
+                fetch('https://passport.bilibili.com/login/app/third?appkey=27eb53fc9058f8c3'
+                      +'&api=https%3A%2F%2Fwww.mcbbs.net%2Ftemplate%2Fmcbbs%2Fimage%2Fspecial_photo_bg.png&sign=04224646d1fea004e79606d3b038c84a',{
+                    method:'GET',
+                    credentials: 'include',
+                }).then(res=>{
+                    return res.json().catch(e=>{
+                        throw ({tip,msg:'返回数据异常:',data:res})
                     });
+                }).then(data=>{
+                    if (data.code||!data.data) {
+                        throw({tip,msg:data.msg||data.message||data.code,data});
+                    }
+                    else if (!data.data.has_login) {
+                        throw({tip,msg:'你必须登录B站之后才能使用授权',data});
+                    }
+                    else if (!data.data.confirm_uri) {
+                        throw({tip,msg:'无法获得授权网址',data});
+                    }
+                    else {
+                        return data.data.confirm_uri;
+                    }
                 }).then(url=>new Promise((resolve,reject)=>{
                     let tip = '获取授权错误';
                     GM_xmlhttpRequest({
