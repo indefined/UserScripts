@@ -1,11 +1,12 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.6.15.1
+// @version      0.6.16
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
 // @match        *://www.bilibili.com/*
+// @include      https://www.mcbbs.net/template/mcbbs/image/special_photo_bg.png?*
 // @license      MIT
 // @connect      app.bilibili.com
 // @connect      api.bilibili.com
@@ -21,6 +22,11 @@
 
 (function() {
     'use strict';
+    if (location.href.startsWith('https://www.mcbbs.net/template/mcbbs/image/special_photo_bg.png?')) {
+        //用于获取授权
+        window.stop();
+        return window.top.postMessage(location.href, 'https://www.bilibili.com');
+    }
 
     const style = `<style>
 #recommend .video-card-common {
@@ -1110,26 +1116,30 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                     }
                 }).then(url=>new Promise((resolve,reject)=>{
                     let tip = '获取授权错误';
-                    GM_xmlhttpRequest({
-                        method: 'GET',url,timeout:10000,
-                        onload: res=> {
-                            try{
-                                const key = res.finalUrl.match(/access_key=([0-9a-z]{32})/);
-                                if (key) {
-                                    this.storageAccessKey(key[1]);
-                                    tools.toast('获取授权成功');
-                                    target.innerText = '删除授权';
-                                    resolve();
-                                }
-                                else {
-                                    reject({tip,msg:'没有获得匹配的密钥',data:res});
-                                }
-                            }catch(e){
-                                reject({tip,msg:'解析数据错误',data:e})
-                            }
-                        },
-                        onerror: e=>reject({tip,msg:e.error||e.status,data:e}),
-                        ontimeout: e=>reject({tip,msg:'请求超时',data:e})
+                    window.addEventListener('message', ev=>{
+                        if (ev.origin!='https://www.mcbbs.net' || !ev.data) return;
+                        const key = ev.data.match(/access_key=([0-9a-z]{32})/);
+                        if (key) {
+                            this.storageAccessKey(key[1]);
+                            tools.toast('获取授权成功');
+                            target.innerText = '删除授权';
+                            clearTimeout(timeout);
+                            document.body.contains(iframe) && document.body.removeChild(iframe);
+                            resolve();
+                        }
+                        else {
+                            reject({tip,msg:'没有获得匹配的密钥',data:ev});
+                        }
+                    });
+                    let timeout = setTimeout(()=>{
+                        document.body.contains(iframe) && document.body.removeChild(iframe);
+                        reject({tip,msg:'请求超时'});
+                    }, 5000)
+                    let iframe = element._c({
+                        nodeType:'iframe',
+                        style:'display:none',
+                        src: url,
+                        parent: document.body
                     });
                 })).catch(error=> {
                     target.innerText = '获取授权';
