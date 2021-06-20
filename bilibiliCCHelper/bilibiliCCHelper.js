@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.21
+// @version      0.5.22
 // @description  可以在B站加载外挂本地字幕、下载B站的CC字幕，旧版B站播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -477,8 +477,8 @@ fill-rule="evenodd"></path></svg>`,
                     return;
                 }
                 data.push({
-                    from:match[1]*60*60||0 + match[2]*60 + (+match[3]) + (match[4]/1000),
-                    to:match[5]*60*60||0 + match[6]*60 + (+match[7]) + (match[8]/1000),
+                    from:(match[1]*60*60||0) + match[2]*60 + (+match[3]) + (match[4]/1000),
+                    to:(match[5]*60*60||0) + match[6]*60 + (+match[7]) + (match[8]/1000),
                     content:match[9].trim().replace(/{\\.+?}/g,'').replace(/\\N/gi,'\n').replace(/\\h/g,' ')
                 });
             });
