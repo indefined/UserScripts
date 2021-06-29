@@ -2,7 +2,7 @@
 // @name        bilibili直播间工具
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.37
+// @version     0.5.38
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、硬币直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -89,13 +89,14 @@ const LiveHelper = {
             group:'elementAdjuster'
         },
         fullScreenChat:{
-            name:'全屏弹幕发送框',
+            name:'无侧边网页全屏弹幕发送框',
             group:'elementAdjuster'
         },
+        /*
         chatInGiftPanel:{
             name:'全屏弹幕发送框放入礼物栏',
             group:'elementAdjuster'
-        },
+        },*/
         showVideoLink:{
             name:'轮播显示链接',
             group:'elementAdjuster'
@@ -210,6 +211,17 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
     height: 56px;
 }
 
+/*提高添加了礼物栏的播放器内弹幕发送框高度*/
+#gift-control-vm .fullscreen-danmaku {
+    bottom: 80px !important;
+}
+/*强制显示网页全屏弹幕发送框*/
+.hide-aside-area #gift-control-vm.showdm div:not(.fullscreen-danmaku)~.fullscreen-danmaku,
+.hide-aside-area .live-web-player-controller+.fullscreen-danmaku {
+    display: flex !important;
+}
+
+/*以下样式已暂时弃用*/
 /*直接放在控制栏上的全屏发送框*/
 #live-player-content .chat-input-ctnr.p-relative {
     display: inline-block;
@@ -313,7 +325,7 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
         },
         initValues(){
             this.leftContainer = helper.get('.left-container');
-            this.toolBar = helper.get('#gift-control-vm');
+            this.giftBar = helper.get('#gift-control-vm');
             this.giftPanel = helper.get('div.gift-presets.p-relative.t-right');
             this.giftPackage = helper.get('.item.z-gift-package');
             if(this.giftPackage) {
@@ -321,6 +333,8 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
                 this.giftPackageContainer = this.giftPackage.parentNode;
             }
             this.controllerPanel = helper.get('.web-player-controller-wrap+.web-player-controller-wrap');
+            this.danmuVM = helper.get('#fullscreen-danmaku-vm');
+            this.danmuBar = helper.get('.fullscreen-danmaku');
             this.inputPanel = helper.get('div.chat-input-ctnr.p-relative');
             this.chatControlPanel = this.inputPanel.parentNode;
             this.bottomPanel = this.inputPanel.nextSibling;
@@ -388,7 +402,7 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
                         }, titlePanel);
                     });
                 });
-        }
+            }
         },
         //全屏礼物面板调整
         handlerControllerPanel(){
@@ -397,13 +411,31 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
                   'normal' : className.includes('player-full-win') && !className.includes('hide-aside-area') ?
                   'web-fullscreen' : className.includes('full') ?
                   'fullscreen' : 'normal';
-            if((status=='normal'||!this.settings.fullScreenPanel)&&this.controllerPanel.contains(this.toolBar)){
-                this.leftContainer.appendChild(this.toolBar);
+            if(status=='normal'){
+                if (!this.settings.fullScreenPanel&&this.controllerPanel.contains(this.giftBar)) this.leftContainer.appendChild(this.giftBar);
+                if (!this.danmuVM.contains(this.danmuBar)) this.danmuVM.appendChild(this.danmuBar);
             }
-            else if (status!='normal'&&this.settings.fullScreenPanel&&!this.controllerPanel.contains(this.toolBar)){
-                this.controllerPanel.appendChild(this.toolBar);
+            else{
+                if (this.settings.fullScreenPanel) {
+                    if (!this.controllerPanel.contains(this.giftBar)) {
+                        this.controllerPanel.appendChild(this.giftBar);
+                    }
+                    if (this.settings.fullScreenChat && this.danmuBar) {
+                        this.giftBar.classList.add('showdm');
+                        this.giftBar.appendChild(this.danmuBar);
+                    }
+                    else this.giftBar.classList.remove('showdm');
+                }
+                else {
+                    if (this.controllerPanel.contains(this.giftBar)) this.leftContainer.appendChild(this.giftBar);
+                    if (this.danmuBar) {
+                        if (this.settings.fullScreenChat) this.controllerPanel.appendChild(this.danmuBar);
+                        else if (!this.danmuVM.contains(this.danmuBar)) this.danmuVM.appendChild(this.danmuBar);
+                    }
+                }
             }
-            if (status=='fullscreen'&&this.settings.fullScreenChat){
+            /*
+            if (status=='web-fullscreen-hide'&&this.settings.fullScreenChat){
                 if(this.settings.chatInGiftPanel&&this.settings.fullScreenPanel&&!this.giftPanel.contains(this.sendButton)){
                     this.giftPanel.appendChild(this.inputPanel);
                     this.giftPanel.appendChild(this.sendButton);
@@ -414,10 +446,11 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
                     controller.appendChild(this.sendButton);
                     controller.appendChild(this.inputPanel);
                 }
-            }else if((status!='fullscreen'||!this.settings.fullScreenChat)&&!this.bottomPanel.contains(this.sendButton)){
+            }else if((status!='web-fullscreen-hide'||!this.settings.fullScreenChat)&&!this.bottomPanel.contains(this.sendButton)){
                 this.chatControlPanel.insertBefore(this.inputPanel,this.bottomPanel);
                 this.bottomPanel.appendChild(this.sendButton);
             }
+            */
         },
         update(item,value){
             if(!this.controllerPanel) return;
@@ -441,7 +474,7 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
                     attributeOldValue: true,
                     attributeFilter: ['class']
                 });
-                this.controllerObserver.observe(this.controllerPanel, {childList:true});
+                //this.controllerObserver.observe(this.controllerPanel, {childList:true});
             }
         },
         init(settings){
