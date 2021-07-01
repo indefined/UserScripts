@@ -2,7 +2,7 @@
 // @name        bilibili直播间工具
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.38
+// @version     0.5.38.1
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、硬币直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -412,7 +412,7 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
                   'web-fullscreen' : className.includes('full') ?
                   'fullscreen' : 'normal';
             if(status=='normal'){
-                if (!this.settings.fullScreenPanel&&this.controllerPanel.contains(this.giftBar)) this.leftContainer.appendChild(this.giftBar);
+                if (this.controllerPanel.contains(this.giftBar)) this.leftContainer.appendChild(this.giftBar);
                 if (!this.danmuVM.contains(this.danmuBar)) this.danmuVM.appendChild(this.danmuBar);
             }
             else{
