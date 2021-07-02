@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.6.17
+// @version      0.6.17.1
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -704,6 +704,11 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                 document.querySelector(`#ranking-all .dropdown-item[data-day="${this.rankingDay}"]`).click();
             }
         },
+        noRankingWidth: GM_getValue('noRankingWidth'),
+        setNoRankingWidth(value){
+            GM_setValue('noRankingWidth', this.noRankingWidth = value);
+            this.setStyle();
+        },
         forceWidth: GM_getValue('forceWidth'),
         setForceWidth(value){
             GM_setValue('forceWidth', this.forceWidth = value);
@@ -797,7 +802,11 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
             }
 
             if (this.noRanking) {
-                html += '#recommend .card-list>.zone-list-box.storey-box {width: 100% !important;} #ranking-all{display: none !important}'
+                html += '#ranking-all{display: none !important}';
+            }
+
+            if (this.noRanking && this.noRankingWidth) {
+                html += '#recommend .card-list>.zone-list-box.storey-box {width: 100% !important;}';
             }
 
             const reduceHeight = this.reduceHeight? ' - 12px' : '';
@@ -1021,7 +1030,7 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                             nodeType:'div',style:'margin: 10px 0;',
                             childs: [
                                 '<label style="margin-right: 5px;">不显示排行榜:</label>',
-                                '<span style="margin-right: 5px;color:#00f" title="勾选此项将不显示全站排行榜，但是推荐内容可能会对不齐">(?)</span>',
+                                '<span style="margin-right: 5px;color:#00f" title="勾选此项将不显示全站排行榜，但是右侧会存在空白">(?)</span>',
                                 {
                                     nodeType:'input',type:'checkbox',checked:this.noRanking,
                                     onchange:({target})=>this.setNoRanking(target.checked),
@@ -1044,6 +1053,18 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                         {
                             nodeType:'div',style:'margin: 10px 0;',
                             childs: [
+                                '<label style="margin-right: 5px;">无排行榜加宽:</label>',
+                                '<span style="margin-right: 5px;color:#00f" title="勾选此项将在不显示排行榜时加宽推荐框，但是推荐内容可能会对不齐">(?)</span>',
+                                {
+                                    nodeType:'input',type:'checkbox',checked:this.noRankingWidth,
+                                    onchange:({target})=>this.setNoRankingWidth(target.checked),
+                                    style:'vertical-align: bottom',
+                                },
+                            ]
+                        },
+                        {
+                            nodeType:'div',style:'margin: 10px 0;',
+                            childs: [
                                 '<label style="margin-right: 5px;">低分辨率加宽:</label>',
                                 '<span style="margin-right: 5px;color:#00f" title="勾选此项将把1654px分辨率以下显示整体强制加宽到每行5个推荐，效果和副作用未知，自行尝试">(?)</span>',
                                 {
@@ -1052,6 +1073,9 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                                     style:'vertical-align: bottom',
                                 },
                             ]
+                        },
+                        {
+                            nodeType:'div',style:'margin: 10px 0;',
                         },
                         {
                             nodeType:'div',style:'margin: 10px 0;',
