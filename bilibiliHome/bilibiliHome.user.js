@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.6.16
+// @version      0.6.17
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -664,7 +664,7 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
         [].forEach.call(dropDown.lastChild.childNodes,c => {c.onclick = update;});
         tab.lastChild.addEventListener('mouseover',update);
         if (setting.noRanking) {
-            document.getElementById('ranking-all').style = 'display: none';
+            //document.getElementById('ranking-all').style = 'display: none';
         } else {
             update({target:[].find.call(dropDown.lastChild.childNodes,n=>n.dataset.day==day)});
         }
@@ -698,11 +698,9 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
         })(),
         noRanking: GM_getValue('noRanking'),
         setNoRanking(value){
-            GM_setValue('noRanking', value);
-            if (value) {
-                document.getElementById('ranking-all').style = 'display: none';
-            } else {
-                document.getElementById('ranking-all').style = 'display: block';
+            GM_setValue('noRanking', this.noRanking = value);
+            this.setStyle();
+            if (!value) {
                 document.querySelector(`#ranking-all .dropdown-item[data-day="${this.rankingDay}"]`).click();
             }
         },
@@ -796,6 +794,10 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                 //显示滚动条情况下，排行榜容器维持原样式，内层容器自带滚动条。
                 //左侧推荐容器将内层高度设置为弹性，则外层容器固定高度下如果内容超出会显示滚动条。
                 html += '#recommend #recommend-list{height:unset!important;}';
+            }
+
+            if (this.noRanking) {
+                html += '#recommend .card-list>.zone-list-box.storey-box {width: 100% !important;} #ranking-all{display: none !important}'
             }
 
             const reduceHeight = this.reduceHeight? ' - 12px' : '';
@@ -1019,7 +1021,7 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                             nodeType:'div',style:'margin: 10px 0;',
                             childs: [
                                 '<label style="margin-right: 5px;">不显示排行榜:</label>',
-                                '<span style="margin-right: 5px;color:#00f" title="勾选此项将不显示全站排行榜，但是右侧会存在空白">(?)</span>',
+                                '<span style="margin-right: 5px;color:#00f" title="勾选此项将不显示全站排行榜，但是推荐内容可能会对不齐">(?)</span>',
                                 {
                                     nodeType:'input',type:'checkbox',checked:this.noRanking,
                                     onchange:({target})=>this.setNoRanking(target.checked),
