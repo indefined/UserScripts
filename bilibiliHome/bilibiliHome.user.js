@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.6.17.1
+// @version      0.6.18
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -494,27 +494,43 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
         const tab = rankingHead.querySelector('.bili-tab.rank-tab');
         const dropDown = rankingHead.querySelector('.bili-dropdown.rank-dropdown');
         const warp = rankingAll.querySelector('.rank-list-wrap');
-        let type = 1,day = setting.rankingDay;
-        const data = {1:{},2:{}};
+        let type, day = setting.rankingDay;
         const loading = element.getLoadingDiv();
+        const configs = [
+            {
+                dataLink: 'https://api.bilibili.com/x/web-interface/ranking/v2?rid=0&type=all',
+                link: 'https://www.bilibili.com/v/popular/rank/all',
+                list: warp.firstChild
+            },
+            {
+                dataLink: 'https://api.bilibili.com/x/web-interface/popular?ps=50&pn=',
+                link: 'https://www.bilibili.com/v/popular/all',
+                list: warp.lastChild
+            }
+        ];
         const detail = {};
-        const arc_type = 1;//202010月左右全站全部排行失效，改为提供近期排行
-        //*
         //20121203旧排行彻底失效，删除日期选项
-        rankingAll.lastChild.style = tab.style = dropDown.style = 'display: none;';
-        rankingHead.insertAdjacentHTML('beforeend',`
-                <a href="//www.bilibili.com/v/popular/rank" target="_blank" class="more more-link" style="float: right;background: white;">
-                更多<i class="bilifont bili-icon_caozuo_qianwang"></i><i class="icon icon-arrow-r"></i></a>`);
-        //*/
-        dropDown.firstChild.innerText = setting.rankingDays[day];
-        element._s(dropDown.lastChild,{
-            innerHTML:'',
-            childs:Object.entries(setting.rankingDays).map(([value,text])=>({
-                nodeType:'li',innerText:text,
-                dataset:{day:value},
-                className:'dropdown-item'
-            }))
+        rankingAll.lastChild.style = dropDown.style = 'display: none;';
+
+        rankingHead.firstChild.style = 'display: none';
+        tab.style = 'font-size: 16px;';
+        tab.children[0].dataset.type = 0;
+        tab.children[0].textContent = '全站排行';
+        tab.children[0].addEventListener('mouseover',update);
+        tab.children[1].dataset.type = 1;
+        tab.children[1].textContent = '综合热门';
+        tab.children[1].addEventListener('mouseover',update);
+        configs[1].list.addEventListener('scroll',handleScroll);
+
+        // 更多
+        const more = element._c({
+            nodeType:'a',style:'float: right;background: white;',
+            target: '_blank', href: '',
+            innerHTML: '更多<i class="bilifont bili-icon_caozuo_qianwang"></i><i class="icon icon-arrow-r"></i>',
+            className:'more more-link',
+            parent: rankingHead
         });
+
         //创建一个显示详情的浮窗
         detail.div = element._c({
             nodeType:'div',style:'display:none',
@@ -589,6 +605,8 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
         };
         //将排行数据显示到指定目标中
         function showData(target,data){
+            while(target.lastChild) target.removeChild(target.lastChild);;
+            target.appendChild(loading);
             for (let i = 0;i<data.length;i++){
                 const itemData = data[i];
                 element._c({
@@ -620,53 +638,57 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                 });
             }
         };
-        //获取并缓存数据
-        async function getData(type,day){
-            if (data[type][day]) return data[type][day];
-            //20121203旧排行彻底失效，删除日期选项
-            return fetch('https://api.bilibili.com/x/web-interface/ranking/v2?rid=0&type=all')
-                .then(res=>res.json())
-                .then(list=>{
-                if (list.code!=0){
-                    throw `请求排行榜失败 code ${list.code}</br>msg ${list.message}`;
+        let page = 1;
+        function handleScroll() {
+            if (warp.lastChild.scrollHeight - warp.lastChild.scrollTop == warp.lastChild.clientHeight) {
+                if (++page <= 10) {
+                    handleData(page);
                 }
-                return (data[type][day] = list.data.list);
-            });
-        };
-        //更新页面排行显示状态，并调用更新显示视频
-        function update(ev){
-            if (ev.target.className =='dropdown-item'){
-                dropDown.firstChild.innerText = ev.target.innerText;
-                [].forEach.call(dropDown.lastChild.childNodes,c => {c.style.display=c==ev.target?'none':'unset';});
-                day = ev.target.dataset.day;
-            }else{
-                [].forEach.call(tab.childNodes,c=>{
-                    if (c==ev.target) c.removeEventListener('mouseover',update);
-                    else c.addEventListener('mouseover',update);
-                    c.classList.toggle('on');
-                });
-                type = ev.target.innerText=='全部'?1:2;
-                warp.classList.toggle('show-origin');
             }
-            const target = type==1?warp.firstChild:warp.lastChild;
-            while(target.firstChild) target.removeChild(target.firstChild);
+        }
+        //获取/缓存/调用显示数据
+        async function handleData(page=''){
+            const config = configs[type];
+            let dataPromise;
             loading.firstChild.innerText = '正在加载...';
-            target.appendChild(loading);
-            rankingAll.lastChild.href = `/ranking/${type==1?'all':'origin'}/0/0/${day}/`;
-            getData(type,day)
-                .then((data)=>showData(target,data))
-                .then(()=>target.removeChild(loading))
-                .catch(e=>{
+            config.list.appendChild(loading);
+            if (config.data && !page) {
+                dataPromise = Promise.resolve(config.data);
+            }
+            else {
+                dataPromise = fetch(configs[type].dataLink+page).then(res=>res.json()).then(res=>{
+                    if (res.code!=0) throw `请求排行榜失败 code ${res.code}</br>msg ${res.message}`;
+                    if (!config.data) config.data = [];
+                    config.data.push(...res.data.list);
+                    if (res.data.no_more) configs[1].list.removeEventListener('scroll',handleScroll);
+                    return config.data;
+                });
+            }
+            dataPromise.then((data)=>{
+                showData(config.list, data);
+                config.list.removeChild(loading);
+            }).catch(e=>{
                 loading.firstChild.innerText = `请求排行榜发生错误 ${e}`;
                 console.error('请求排行榜发生错误',e);
-            });
+            });;
         };
-        [].forEach.call(dropDown.lastChild.childNodes,c => {c.onclick = update;});
-        tab.lastChild.addEventListener('mouseover',update);
+        //处理排行榜切换事件，调用获取并显示数据
+        function update(ev){
+            //console.log(ev);
+            if (ev.target.dataset.type==type) return;
+            type = ev.target.dataset.type;
+            setting.setRankingType(type);
+            tab.children[type].classList.add('on');
+            tab.children[1-type].classList.remove('on');
+            type != warp.classList.contains('show-origin') && warp.classList.toggle('show-origin');
+            //rankingAll.lastChild.href = `/ranking/${type==1?'all':'origin'}/0/0/${day}/`;
+            more.href = configs[type].link;
+            handleData();
+        };
         if (setting.noRanking) {
             //document.getElementById('ranking-all').style = 'display: none';
         } else {
-            update({target:[].find.call(dropDown.lastChild.childNodes,n=>n.dataset.day==day)});
+            update({target:{dataset:{type:setting.rankingType}}});
         }
     }
 
@@ -696,12 +718,17 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
             if (rd!=1&&rd!=3&&rd!=7) rd = 3;
             return rd;
         })(),
+        rankingType: GM_getValue('rankingType', 0),
+        setRankingType(value) {
+            if (this.rankingType == value) return;
+            GM_setValue('rankingType', this.rankingType = value);
+        },
         noRanking: GM_getValue('noRanking'),
         setNoRanking(value){
             GM_setValue('noRanking', this.noRanking = value);
             this.setStyle();
             if (!value) {
-                document.querySelector(`#ranking-all .dropdown-item[data-day="${this.rankingDay}"]`).click();
+                document.querySelector(`#ranking-all .bili-tab-item[data-type="${this.rankingType}"]`).dispatchEvent(new Event('mouseover'));
             }
         },
         noRankingWidth: GM_getValue('noRankingWidth'),
@@ -806,7 +833,7 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
             }
 
             if (this.noRanking && this.noRankingWidth) {
-                html += '#recommend .card-list>.zone-list-box.storey-box {width: 100% !important;}';
+                html += '#recommend .card-list>.zone-list-box.storey-box, #recommend .zone-module>.l-con{width: 100% !important;}';
             }
 
             const reduceHeight = this.reduceHeight? ' - 12px' : '';
@@ -888,6 +915,10 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
         border-top-width: 0 !important;
         border-bottom-width: 6px !important;
     }
+    /*旧版*/
+    .bili-wrapper { width: 1160px !important; }
+    .bili-wrapper .l-con { width:900px !important; }
+    .elevator-module { margin-left: 590px !important;}
 }
 `;
             }
