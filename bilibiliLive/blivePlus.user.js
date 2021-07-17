@@ -2,9 +2,9 @@
 // @name        bilibili直播间工具
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.39.1
+// @version     0.5.40
 // @author      indefined
-// @description 可配置 直播间切换勋章/头衔、硬币直接购买勋章、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
+// @description 可配置 直播间切换勋章/头衔、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
 // @grant       GM_getValue
 // @grant       GM_setValue
@@ -665,7 +665,7 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
                 targetConfig.name}管理页面" style="color: #23ade5;">管理我的${targetConfig.name}</a>`;
             //获取数据并调用显示处理
             helper.xhr(targetConfig.dataUrl).then(async data=>{
-                if(targetName=='medal') this.listMedal(data);
+                if(targetName=='medal') await this.listMedal(data);
                 else if(targetName=='title') await this.listTitle(data);
             }).then(()=>{
                 this.loadingDiv.style = 'display:none';
@@ -711,13 +711,23 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
                 platform: 'android'
             });
         },
-        listMedal(data){
+        async listMedal(data){
             let hasMedal = false;
             if (data.code!=0||!data.data||!(data.data.fansMedalList instanceof Array)) {
                 console.error(data);
                 throw(`查询勋章失败 code:${data.code}</br>${data.message}`);
             }
-            data.data.fansMedalList.forEach((v)=>{
+            const medalList = data.data.fansMedalList;
+            if (this.room && this.room.UID) {
+                const wall = await helper.xhr('//api.live.bilibili.com/xlive/web-ucenter/user/MedalWall?target_id='+this.room.UID);
+                if (wall.code ==0 && wall.data && (wall.data.list instanceof Array)) {
+                    for (let item of wall.data.list) {
+                        let medal = medalList.find(i=>i.target_name == item.target_name);
+                        if (medal) medal.live_stream_status = item.live_status;
+                    }
+                }
+            }
+            medalList.forEach((v)=>{
                 if (this.room.ANCHOR_UID==v.target_id) hasMedal = true;
                 const itemDiv = helper.create('div',{
                     style:'margin-top: 8px',
@@ -746,19 +756,9 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
                     style:'color:#999;min-width:50px',
                     href:`/${v.room_id||v.roomid}`,target:"_blank",className:"intimacy-text v-middle dp-i-block",
                     title:`今日上限剩余${v.day_limit-v.today_feed}\n点击前往主播房间`,
-                    innerText:`${v.today_feed}/${v.day_limit}`
+                    innerHTML:`${v.today_feed}/${v.day_limit}${v.live_stream_status==1 ?'<img src="//s1.hdslb.com/bfs/static/blive/blfe-live-room/static/img/living.44021fe..gif" style="height: 12px;vertical-align: middle;" title="正在直播">':''}`
                 },itemDiv);
             });
-            if (this.room.ANCHOR_UID&&!hasMedal){
-                const buyDiv = helper.create('div',{style:'display: inline-block;'},this.dialogBottom);
-                helper.create('div',{
-                    title:"使用20硬币购买本房间勋章",
-                    style:"margin-left: 10px;",
-                    className:"dp-i-block pointer",
-                    onclick:()=>this.buyMedal('metal'),
-                    innerHTML:`<span style="border: 1.8px solid #c8c8c8;border-radius: 50%;border-color: #23ade5;">硬</span><span>20</span>`
-                },buyDiv);
-            }
             if (data.data.fansMedalList.length==0) {
                 helper.create('p',{
                     innerHTML:'<p data-v-17cf8b1e="" class="empty-hint-text">你还没有勋章哦～</p>'
