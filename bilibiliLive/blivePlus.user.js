@@ -2,7 +2,7 @@
 // @name        bilibili直播间工具
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.40
+// @version     0.5.41
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -70,6 +70,7 @@ const helper = {
         document.body.appendChild(toast);
         setTimeout(()=>document.body.removeChild(toast),3000);
     },
+    window:typeof(unsafeWindow)!="undefined"?unsafeWindow:window,
     roomInfo:typeof(unsafeWindow)!="undefined"?unsafeWindow.BilibiliLive:window.BilibiliLive,
     isFirefox:navigator.userAgent.indexOf('Firefox')!=-1
 };
@@ -220,8 +221,7 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
     bottom: 80px !important;
 }
 /*强制显示网页全屏弹幕发送框*/
-.hide-aside-area #gift-control-vm.showdm div:not(.fullscreen-danmaku)~.fullscreen-danmaku,
-.hide-aside-area .live-web-player-controller+.fullscreen-danmaku {
+.player-full-win.hide-aside-area .showdm div:not(.fullscreen-danmaku)~.fullscreen-danmaku{
     display: flex !important;
 }
 
@@ -336,9 +336,6 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
                 this.giftPackage.id = 'giftPackage';
                 this.giftPackageContainer = this.giftPackage.parentNode;
             }
-            this.controllerPanel = helper.get('.web-player-controller-wrap+.web-player-controller-wrap');
-            this.danmuVM = helper.get('#fullscreen-danmaku-vm');
-            this.danmuBar = helper.get('.fullscreen-danmaku');
             this.inputPanel = helper.get('div.chat-input-ctnr.p-relative');
             this.chatControlPanel = this.inputPanel.parentNode;
             this.bottomPanel = this.inputPanel.nextSibling;
@@ -416,25 +413,30 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
                   'web-fullscreen' : className.includes('full') ?
                   'fullscreen' : 'normal';
             if(status=='normal'){
-                if (this.controllerPanel.contains(this.giftBar)) this.leftContainer.appendChild(this.giftBar);
-                if (!this.danmuVM.contains(this.danmuBar)) this.danmuVM.appendChild(this.danmuBar);
+                if (this.giftBar.parentNode != this.leftContainer) this.leftContainer.appendChild(this.giftBar);
+                //if (this.danmuBar && this.giftBar.contains(this.danmuBar)) this.controllerPanel.appendChild(this.danmuBar);
             }
             else{
-                if (this.settings.fullScreenPanel) {
+                this.controllerPanel = helper.get('.web-player-controller-wrap+.web-player-controller-wrap');
+                this.danmuBar = helper.get('.fullscreen-danmaku');
+                if (this.settings.fullScreenPanel && this.controllerPanel) {
                     if (!this.controllerPanel.contains(this.giftBar)) {
                         this.controllerPanel.appendChild(this.giftBar);
                     }
                     if (this.settings.fullScreenChat && this.danmuBar) {
-                        this.giftBar.classList.add('showdm');
+                        this.controllerPanel.classList.add('showdm');
                         this.giftBar.appendChild(this.danmuBar);
                     }
-                    else this.giftBar.classList.remove('showdm');
+                    else this.controllerPanel.classList.remove('showdm');
                 }
                 else {
-                    if (this.controllerPanel.contains(this.giftBar)) this.leftContainer.appendChild(this.giftBar);
-                    if (this.danmuBar) {
-                        if (this.settings.fullScreenChat) this.controllerPanel.appendChild(this.danmuBar);
-                        else if (!this.danmuVM.contains(this.danmuBar)) this.danmuVM.appendChild(this.danmuBar);
+                    if (this.giftBar.parentNode != this.leftContainer) this.leftContainer.appendChild(this.giftBar);
+                    if (this.danmuBar && this.controllerPanel) {
+                        if (this.settings.fullScreenChat) {
+                            this.controllerPanel.classList.add('showdm');
+                            this.controllerPanel.appendChild(this.danmuBar);
+                        }
+                        else this.controllerPanel.classList.remove('showdm');
                     }
                 }
             }
@@ -457,7 +459,6 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
             */
         },
         update(item,value){
-            if(!this.controllerPanel) return;
             if(item=='showVideoLink') {
                 this.updateVideoLink();
             }
@@ -478,7 +479,6 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
                     attributeOldValue: true,
                     attributeFilter: ['class']
                 });
-                //this.controllerObserver.observe(this.controllerPanel, {childList:true});
             }
         },
         init(settings){
@@ -494,7 +494,16 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
     timeSync: {
         status: false,
         init(settings) {
-            this.initElement();
+            if (!helper.window.livePlayer) return;
+            this.icon = helper.create('span',{
+                title: "同步时间",
+                className: 'icon',
+                innerHTML: `<svg t="1595680402158" style="width: 22px; height: 36px;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7532" width="22" height="22"><path d="M938.1888 534.016h-80.7936c0.4096-7.3728 0.6144-14.6432 0.6144-22.016 0-218.624-176.8448-400.7936-389.12-400.7936C257.024 111.2064 80.6912 293.1712 80.6912 512c0 218.7264 176.4352 400.7936 388.1984 400.7936 74.752 0 149.0944-22.016 208.1792-60.0064l42.7008 68.608c-75.0592 48.9472-161.9968 74.8544-250.7776 74.752C209.8176 996.1472 0 779.264 0 512S209.8176 27.8528 468.8896 27.8528C728.3712 27.8528 938.7008 244.736 938.7008 512c0 7.3728-0.2048 14.6432-0.512 22.016z m-261.12 318.7712z m-26.4192-158.1056L426.7008 556.032V291.9424h64v226.5088L689.5616 635.904l-38.912 58.7776z m245.3504-6.656L768 512h256L896 688.0256z" fill="#ffffff" p-id="7533"></path></svg>`,
+                onclick: this.setVideoSync
+            });
+            helper.window.livePlayer.on('ctrlVisibleChange', status=>{
+                if (status && this.status) this.append();
+            });
             this.update('timeSync', settings.timeSync);
         },
         update(item, status) {
@@ -502,11 +511,9 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
             this.status = status;
             if (status) {
                 this.append();
-                if (this.controllerPanel) this.observer.observe(this.controllerPanel, {childList: true});
             }
             else {
                 this.remove();
-                this.observer.disconnect();
             }
         },
         append() {
@@ -517,16 +524,6 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
         },
         remove() {
             if (this.icon.parentNode) this.icon.parentNode.removeChild(this.icon);
-        },
-        initElement(){
-            this.controllerPanel = helper.get('.web-player-controller-wrap+.web-player-controller-wrap');
-            this.icon = helper.create('span',{
-                title: "同步时间",
-                className: 'icon',
-                innerHTML: `<svg t="1595680402158" style="width: 22px; height: 36px;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7532" width="22" height="22"><path d="M938.1888 534.016h-80.7936c0.4096-7.3728 0.6144-14.6432 0.6144-22.016 0-218.624-176.8448-400.7936-389.12-400.7936C257.024 111.2064 80.6912 293.1712 80.6912 512c0 218.7264 176.4352 400.7936 388.1984 400.7936 74.752 0 149.0944-22.016 208.1792-60.0064l42.7008 68.608c-75.0592 48.9472-161.9968 74.8544-250.7776 74.752C209.8176 996.1472 0 779.264 0 512S209.8176 27.8528 468.8896 27.8528C728.3712 27.8528 938.7008 244.736 938.7008 512c0 7.3728-0.2048 14.6432-0.512 22.016z m-261.12 318.7712z m-26.4192-158.1056L426.7008 556.032V291.9424h64v226.5088L689.5616 635.904l-38.912 58.7776z m245.3504-6.656L768 512h256L896 688.0256z" fill="#ffffff" p-id="7533"></path></svg>`,
-                onclick: this.setVideoSync
-            });
-            this.observer = new MutationObserver(()=>this.append());
         },
         setVideoSync() {
             const video = helper.get('video');
@@ -982,15 +979,21 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
         for(const key in this.settingInfos){
             if(this.settings[key]==undefined) this.settings[key] = true;
         }
-        const controller = helper.get('.web-player-controller-wrap+.web-player-controller-wrap');
+        let controller = helper.get('.web-player-controller-wrap+.web-player-controller-wrap');
         if (!controller) return;
         const settingPanel = helper.create('div',{
                   className: 'player-type',
                   style: 'padding-top: 5px;line-height: 14px;',
                   innerHTML:`<div>直播间助手设置</div>`,
               });
-        new MutationObserver(mutations=>{
+        new MutationObserver((mutations, observer)=>{
             //return console.log(mutations);
+            if (!controller.parentNode) {
+                console.log('reload?');
+                observer.disconnect();
+                controller = helper.get('.web-player-controller-wrap+.web-player-controller-wrap');
+                if (controller) observer.observe(controller, {childList:true, subtree:true});
+            }
             for (const mutation of mutations) {
                 for (const panel of mutation.addedNodes) {
                     if (panel.classList && panel.classList.contains('danmaku-control')) {
