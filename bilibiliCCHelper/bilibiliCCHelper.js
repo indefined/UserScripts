@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.22
+// @version      0.5.23
 // @description  可以在B站加载外挂本地字幕、下载B站的CC字幕，旧版B站播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -75,18 +75,20 @@
 0.938l-2.48,-2.48a1,1 0 0 0 -0.287,-1.958l-1.672,0l-1.328,-1.328l0,-0.672a1,1 0 0 1 1,-1l2,0a1,1 0 0 0 0,-2l-3,\
 0a2,2 0 0 0 -1.977,1.695l-5.195,-5.195z"/></svg>`,
         newDisableIcon:`
-<svg width="22" height="22" viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg">\
-<path d="M15.172 18H4a2 2 0 0 1-2-2V6c0-.34.084-.658.233-.938l-.425-.426a1 1 0 1 1 1.414-1.414l15.556 15.556a1 \
-1 0 0 1-1.414 1.414L15.172 18zM4.962 7.79C4.385 8.141 4 8.776 4 9.5v3a2 2 0 0 0 2 2h3a1 1 0 0 0 0-2H7a1 1 0 0 1\
--1-1v-1a1 1 0 0 1 .713-.958L4.962 7.79zM6.828 4H18a2 2 0 0 1 2 2v10c0 .34-.084.658-.233.938l-2.48-2.48A1 1 0 0 \
-0 17 12.5h-1.672L14 11.172V10.5a1 1 0 0 1 1-1h2a1 1 0 0 0 0-2h-3a2 2 0 0 0-1.977 1.695L6.828 4z" fill="#fff" \
-fill-rule="evenodd"></path></svg>`,
+        <svg class="squirtle-svg-icon" viewBox="0 0 28 22" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+              <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                  <path d="M6.998,4 L10.118,7.123 L9.5605,7.1235 C9.4135,6.777 9.151,6.3465 8.8885,6 L7.933,6.3045 C8.101,6.546 8.269,6.8505 8.4055,7.1235 L4.3945,7.1235 L4.3945,9.3705 L5.35,9.3705 L5.35,8.0475 L11.042,8.047 L12.206,9.212 L12.2065,9.3705 L12.364,9.37 L14.494,11.502 L14.389,11.502 L14.389,12.2685 L15.259,12.268 L15.7076026,12.7152226 C15.273892,12.9780418 14.772314,13.2154154 14.2,13.413 C14.3785,13.5705 14.641,13.9275 14.746,14.148 C15.2185,13.959 15.6385,13.7595 16.027,13.5285 L16.027,15.5025 L16.9615,15.5025 L16.961,13.971 L18.536,15.547 L18.5365,15.7125 L18.701,15.712 L20.987,18 L4,18 C2.8954305,18 2,17.1045695 2,16 L2,6 C2,4.8954305 2.8954305,4 4,4 L6.998,4 Z M24,4 C25.1045695,4 26,4.8954305 26,6 L26,16 C26,17.1045695 25.1045695,18 24,18 L23.814,18 L21.2866753,15.470484 C21.499408,15.4571242 21.672579,15.4281871 21.8125,15.366 C22.096,15.24 22.1695,15.0405 22.1695,14.631 L22.1695,13.5915 C22.5475,13.812 22.957,13.98 23.3665,14.106 C23.482,13.8855 23.7445,13.539 23.944,13.3815 C23.0725,13.161 22.201,12.762 21.5605,12.2685 L23.7025,12.2685 L23.7025,11.502 L18.2635,11.502 C18.3685,11.3445 18.4735,11.187 18.568,11.019 L22.6,11.019 L22.6,8.079 L15.565,8.079 L15.564,9.743 L13.204,7.381 L13.204,7.1235 L12.946,7.123 L9.825,4 L24,4 Z M11.0725,9.045 L10.852,9.0975 L6.043,9.0975 L6.043,10.0005 L9.865,10.0005 C9.3925,10.3995 8.815,10.809 8.2795,11.0715 L8.2795,11.6805 L4.3,11.6805 L4.3,12.615 L8.2795,12.615 L8.2795,14.547 C8.2795,14.673 8.23321429,14.7295714 8.10096939,14.7431633 L7.788625,14.7522422 C7.4696875,14.7556875 6.938125,14.75175 6.442,14.736 C6.5995,14.988 6.799,15.429 6.862,15.7125 L7.348864,15.710148 C7.95904,15.70242 8.416,15.6705 8.752,15.5445 C9.1825,15.3975 9.319,15.1245 9.319,14.5785 L9.319,12.615 L13.2985,12.615 L13.2985,11.6805 L9.319,11.6805 L9.319,11.397 C10.2115,10.8825 11.0935,10.2 11.734,9.549 L11.0725,9.045 Z M21.235,13.77 L21.235,14.6205 C21.235,14.7255 21.193,14.757 21.0775,14.757 L20.574025,14.7533985 L20.569,14.753 L19.587,13.77 L21.235,13.77 Z M20.5105,12.2685 C20.731,12.531 20.9935,12.7725 21.2875,13.0035 L19.4815,13.0035 L19.4815,12.4575 L18.5365,12.4575 L18.536,12.718 L18.087,12.268 L20.5105,12.2685 Z M16.839,11.019 L17.497,11.019 C17.4212405,11.1536835 17.3319842,11.2816187 17.2292312,11.4082156 L16.839,11.019 Z M21.6235,9.822 L21.6235,10.4205 L16.4995,10.4205 L16.4995,9.822 L21.6235,9.822 Z M21.6235,8.6775 L21.6235,9.255 L16.4995,9.255 L16.4995,8.6775 L21.6235,8.6775 Z M17.791,6.084 L16.8355,6.084 L16.8355,6.7035 L14.452,6.7035 L14.452,7.491 L16.8355,7.491 L16.8355,7.89 L17.791,7.89 L17.791,7.491 L20.269,7.491 L20.269,7.89 L21.2245,7.89 L21.2245,7.491 L23.6605,7.491 L23.6605,6.7035 L21.2245,6.7035 L21.2245,6.084 L20.269,6.084 L20.269,6.7035 L17.791,6.7035 L17.791,6.084 Z" id="形状结合" fill="#FFFFFF"></path>
+                  <path d="M4.08046105,2.26754606 L4.08516738,2.26283972 C4.4730925,1.8749146 5.10204339,1.8749146 5.48996851,2.26283972 C5.49153201,2.26440322 5.49309028,2.26597193 5.4946433,2.26754583 L21.6870833,18.6777025 C22.0731601,19.0689703 22.0710589,19.6984951 21.6823787,20.0871769 L21.6776695,20.0918861 C21.2897453,20.479812 20.6607945,20.4798133 20.2728686,20.091889 C20.2713046,20.090325 20.2697458,20.0887558 20.2681922,20.0871813 L4.07575482,3.67702186 C3.68967757,3.28575345 3.69177955,2.65622755 4.08046105,2.26754606 Z" id="Path" fill="#FFFFFF"></path>
+              </g>
+            </svg>`,
         newEnableIcon:`
-<svg width="22" height="22" viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg">\
-<path d="M4 4h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm5 5.5a1 1 0 1 0 0-2H6a2 \
-2 0 0 0-2 2v3a2 2 0 0 0 2 2h3a1 1 0 0 0 0-2H7a1 1 0 0 1-1-1v-1a1 1 0 0 1 1-1h2zm8 0a1 1 0 0 0 0-2h-3a2 \
-2 0 0 0-2 2v3a2 2 0 0 0 2 2h3a1 1 0 0 0 0-2h-2a1 1 0 0 1-1-1v-1a1 1 0 0 1 1-1h2z" fill="#fff" \
-fill-rule="evenodd"></path></svg>`,
+        <svg class="squirtle-svg-icon" viewBox="0 0 28 22" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+              <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                  <g transform="translate(2.000000, 0.000000)" fill="#FFFFFF">
+                      <path d="M22,3.5 C23.1045695,3.5 24,4.3954305 24,5.5 L24,16.5 C24,17.6045695 23.1045695,18.5 22,18.5 L2,18.5 C0.8954305,18.5 1.3527075e-16,17.6045695 0,16.5 L0,5.5 C-1.3527075e-16,4.3954305 0.8954305,3.5 2,3.5 L22,3.5 Z M9.018,9.1515 L8.7975,9.204 L3.9885,9.204 L3.9885,10.107 L7.8105,10.107 C7.338,10.506 6.7605,10.9155 6.225,11.178 L6.225,11.787 L2.2455,11.787 L2.2455,12.7215 L6.225,12.7215 L6.225,14.6535 C6.225,14.8005 6.162,14.853 5.973,14.853 C5.9065,14.8565 5.78166667,14.8588333 5.62027778,14.8596111 L5.3535,14.8595625 C5.06475,14.85825 4.71825,14.853 4.3875,14.8425 C4.545,15.0945 4.7445,15.5355 4.8075,15.819 C5.6685,15.819 6.2775,15.8085 6.6975,15.651 C7.128,15.504 7.2645,15.231 7.2645,14.685 L7.2645,12.7215 L11.244,12.7215 L11.244,11.787 L7.2645,11.787 L7.2645,11.5035 C8.157,10.989 9.039,10.3065 9.6795,9.6555 L9.018,9.1515 Z M20.799,8.1855 L13.764,8.1855 L13.764,11.1255 L15.696,11.1255 C15.6015,11.2935 15.486,11.451 15.3495,11.6085 L12.588,11.6085 L12.588,12.375 L14.5515,12.375 C13.995,12.816 13.281,13.215 12.399,13.5195 C12.5775,13.677 12.84,14.034 12.945,14.2545 C13.4175,14.0655 13.8375,13.866 14.226,13.635 L14.226,15.609 L15.1605,15.609 L15.1605,13.8765 L16.7355,13.8765 L16.7355,15.819 L17.6805,15.819 L17.6805,13.8765 L19.434,13.8765 L19.434,14.727 C19.434,14.832 19.392,14.8635 19.2765,14.8635 L19.15575,14.8633359 C18.9962813,14.8628437 18.7305,14.860875 18.447,14.853 C18.552,15.0735 18.657,15.357 18.699,15.588 C19.308,15.588 19.728,15.5985 20.0115,15.4725 C20.295,15.3465 20.3685,15.147 20.3685,14.7375 L20.3685,13.698 C20.7465,13.9185 21.156,14.0865 21.5655,14.2125 C21.681,13.992 21.9435,13.6455 22.143,13.488 C21.2715,13.2675 20.4,12.8685 19.7595,12.375 L21.9015,12.375 L21.9015,11.6085 L16.4625,11.6085 C16.5675,11.451 16.6725,11.2935 16.767,11.1255 L20.799,11.1255 L20.799,8.1855 Z M18.7095,12.375 C18.93,12.6375 19.1925,12.879 19.4865,13.11 L17.6805,13.11 L17.6805,12.564 L16.7355,12.564 L16.7355,13.11 L15.0135,13.11 C15.318,12.879 15.591,12.6375 15.8325,12.375 L18.7095,12.375 Z M19.8225,9.9285 L19.8225,10.527 L14.6985,10.527 L14.6985,9.9285 L19.8225,9.9285 Z M6.834,6.1065 L5.8785,6.411 C6.0465,6.6525 6.2145,6.957 6.351,7.23 L2.34,7.23 L2.34,9.477 L3.2955,9.477 L3.2955,8.154 L10.152,8.154 L10.152,9.477 L11.1495,9.477 L11.1495,7.23 L7.506,7.23 C7.359,6.8835 7.0965,6.453 6.834,6.1065 Z M19.8225,8.784 L19.8225,9.3615 L14.6985,9.3615 L14.6985,8.784 L19.8225,8.784 Z M15.99,6.1905 L15.0345,6.1905 L15.0345,6.81 L12.651,6.81 L12.651,7.5975 L15.0345,7.5975 L15.0345,7.9965 L15.99,7.9965 L15.99,7.5975 L18.468,7.5975 L18.468,7.9965 L19.4235,7.9965 L19.4235,7.5975 L21.8595,7.5975 L21.8595,6.81 L19.4235,6.81 L19.4235,6.1905 L18.468,6.1905 L18.468,6.81 L15.99,6.81 L15.99,6.1905 Z" id="形状结合"></path>
+                  </g>
+              </g>
+            </svg>`,
         createAs(nodeType,config,appendTo){
             const element = document.createElement(nodeType);
             config&&this.setAs(element,config);
@@ -813,8 +815,9 @@ fill-rule="evenodd"></path></svg>`,
             });
             //视频本身没有字幕时，点击CC字幕按钮切换本地字幕和关闭
             //视频本身有字幕时播放器自身会切换到视频自身字幕
-            if(!this.hasSubtitles){
-                this.icon&&this.icon.addEventListener('click',({target})=>{
+            if(!this.hasSubtitles && this.icon){
+                this.icon.innerHTML = elements.newDisableIcon;
+                this.icon.addEventListener('click',({target})=>{
                     if(!this.selectedLocal) localItem.click();
                     else closeItem.click();
                 });
@@ -875,6 +878,54 @@ fill-rule="evenodd"></path></svg>`,
         },
     };//newPlayerHelper END
 
+    //新版番剧播放器，仅下载功能
+    const newBangumiHelper = {
+        iconBtn:undefined,
+        icon:undefined,
+        panel:undefined,
+        selectedLan:undefined,
+        selectedLocal:false,
+        hasSubtitles:false,
+        updateBtnIcon(value) {
+            if (value) {
+                this.icon.classList.add('squirtle-subtitle-show-state');
+                this.icon.classList.remove('squirtle-subtitle-hide-state');
+            } else {
+                this.icon.classList.add('squirtle-subtitle-hide-state');
+                this.icon.classList.remove('squirtle-subtitle-show-state');
+            }
+        },
+        initUI(){
+            Array.from(this.panel.children).forEach(item=>elements.createAs('span', {
+                textContent: '下载',
+                onclick: function() {
+                    bilibiliCCHelper.getSubtitle(undefined, this.previousSibling.data).then(data=>{
+                        encoder.showDialog(data);
+                    }).catch(e=>{
+                        bilibiliCCHelper.toast('获取字幕失败',e);
+                    });
+                    return false;
+                }
+            }, item));
+            //if(!this.hasSubtitles) this.updateBtnIcon(status); // 没有字幕时关闭按钮
+            console.log('Bilibili CC Helper init new Bangumi UI success.');
+        },
+        init(subtitle){
+            this.hasSubtitles = subtitle.count;
+            this.selectedLan = undefined;
+            this.selectedLocal = false;
+            this.iconBtn = elements.getAs('.squirtle-subtitle-wrap');
+            this.panel = elements.getAs('.squirtle-subtitle-select-list');
+            this.icon = this.iconBtn.querySelector('.squirtle-subtitle-icon');
+            if (!this.iconBtn) {
+                throw('找不到新播放器按钮');
+            }
+            //设置ID标记视频为已注入，防止二次初始化
+            this.iconBtn.id = 'bilibili-player-subtitle-btn';
+            if(this.panel) this.initUI();
+        },
+    };//newPlayerHelper END
+
     //启动器
     const bilibiliCCHelper = {
         window:"undefined"==typeof(unsafeWindow)?window:unsafeWindow,
@@ -906,19 +957,23 @@ fill-rule="evenodd"></path></svg>`,
                 .then(()=>this.toast(lan=='close'?'字幕已关闭':`载入字幕:${this.getSubtitleInfo(lan).lan_doc}`))
                 .catch(e=>this.toast('载入字幕失败',e));
         },
-        async getSubtitle(lan){
+        async getSubtitle(lan, name){
             if(this.datas[lan]) return this.datas[lan];
-            const item = this.getSubtitleInfo(lan);
+            const item = this.getSubtitleInfo(lan, name);
             if(!item) throw('找不到所选语言字幕'+lan);
+            if(this.datas[item.lan]) return this.datas[item.lan];
             return fetch(item.subtitle_url)
                 .then(res=>res.json())
                 .then(data=>(this.datas[lan] = data));
         },
-        getSubtitleInfo(lan){
-            return this.subtitle.subtitles.find(item=>item.lan==lan);
+        getSubtitleInfo(lan, name){
+            return this.subtitle.subtitles.find(item=>item.lan==lan || item.lan_doc==name);
+        },
+        getInfo(name) {
+            return this.window[name]||this.window.__INITIAL_STATE__ && this.window.__INITIAL_STATE__.epInfo && this.window.__INITIAL_STATE__.epInfo[name];
         },
         async setupData(){
-            if(this.cid==this.window.cid && this.subtitle) return this.subtitle;
+            if(this.cid==this.getInfo('cid')&& this.subtitle) return this.subtitle;
             if(location.pathname=='/blackboard/html5player.html') {
                 let match = location.search.match(/cid=(\d+)/i);
                 if(!match) return;
@@ -928,14 +983,14 @@ fill-rule="evenodd"></path></svg>`,
                 match = location.search.match(/bvid=(\d+)/i);
                 if(match) this.window.bvid = match[1];
             }
-            this.cid = this.window.cid;
-            this.aid = this.window.aid;
-            this.bvid = this.window.bvid;
+            this.cid = this.getInfo('cid');
+            this.aid = this.getInfo('aid');
+            this.bvid = this.getInfo('bvid');
             this.player = this.window.player;
             this.subtitle = undefined;
             this.datas = {close:{body:[]},local:{body:[]}};
             decoder.data = undefined;
-            if(!window.cid||(!window.aid&&!window.bvid)) return;
+            if(!this.cid||(!this.aid&&!this.bvid)) return;
             return fetch(`//api.bilibili.com/x/player/v2?cid=${this.cid}${this.aid?`&aid=${this.aid}`:`&bvid=${this.bvid}`}`).then(res=>{
                 if (res.status==200) {
                     return res.json().then(ret=>{
@@ -976,6 +1031,9 @@ fill-rule="evenodd"></path></svg>`,
                 else if(elements.getAs('.bilibili-player-video-danmaku-setting')){
                     newPlayerHelper.init(subtitle);
                 }
+                else if(elements.getAs('.squirtle-subtitle-wrap')){
+                    newBangumiHelper.init(subtitle);
+                }
             }).catch(e=>{
                 this.toast('CC字幕助手配置失败',e);
             });
@@ -986,7 +1044,7 @@ fill-rule="evenodd"></path></svg>`,
                 //console.log(mutations)
                 mutations.forEach(mutation=>{
                     if(!mutation.target) return;
-                    if(mutation.target.getAttribute('stage')==1){
+                    if(mutation.target.getAttribute('stage')==1 || mutation.target.classList.contains('squirtle-quality-wrap')){
                         this.tryInit();
                     }
                 });

@@ -19,7 +19,7 @@ bilibili CC字幕工具
   - 支持ASS/SRT/LRC/BCC/TXT纯文本格式
   - 默认系统编码，CR/LF换行
 - 载入本地字幕
-  - 新/旧版HTML5播放器可用
+  - 新/旧版HTML5播放器可用，新版（3.0.x以上）番剧页面不可用
   - 支持ASS/SSA/SRT/LRC/BCC/SBV/VTT格式
   - 支持字幕偏移调整，支持读取LRC歌词内置偏移
   - 支持UTF-8/GB18030/BIG5/UNICODE/JIS/EUC-KR编码
