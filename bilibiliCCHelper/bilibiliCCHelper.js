@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.23
+// @version      0.5.23.1
 // @description  可以在B站加载外挂本地字幕、下载B站的CC字幕，旧版B站播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -907,6 +907,8 @@
                     return false;
                 }
             }, item));
+            //设置ID标记视频为已注入，防止二次初始化
+            this.panel.id = 'bilibili-player-subtitle-btn';
             //if(!this.hasSubtitles) this.updateBtnIcon(status); // 没有字幕时关闭按钮
             console.log('Bilibili CC Helper init new Bangumi UI success.');
         },
@@ -920,8 +922,6 @@
             if (!this.iconBtn) {
                 throw('找不到新播放器按钮');
             }
-            //设置ID标记视频为已注入，防止二次初始化
-            this.iconBtn.id = 'bilibili-player-subtitle-btn';
             if(this.panel) this.initUI();
         },
     };//newPlayerHelper END
