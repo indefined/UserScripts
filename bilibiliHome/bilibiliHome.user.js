@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.6.18
+// @version      0.6.19
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -595,7 +595,7 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                                     '<span class="coin"><i class="icon bilifont bili-icon_shipin_yingbishu"></i>'+
                                     `<span title="${data.stat&&data.stat.coin||data.coins}">${tools.formatNumber(data.stat&&data.stat.coin||data.coins)}</span></span>`,
                                     `<span>时长:<span style="vertical-align: top;" title="${tools.formatNumber(data.duration,'time')}">${tools.formatNumber(data.duration,'time')}</span>`,
-                                    `<span>综合评分:<span style="vertical-align: top;" title="${data.score||data.pts}">${tools.formatNumber(data.score||data.pts)}</span></span>`,
+                                    `<span>${data.score||data.pts?'综合评分:':''}<span style="vertical-align: top;" title="${data.score||data.pts}">${data.score||data.pts?tools.formatNumber(data.score||data.pts):data.rcmd_reason&&data.rcmd_reason.content}</span></span>`,
                                 ]
                             },
                         ]
@@ -621,11 +621,11 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                         {
                             nodeType:'a', target:"_blank",
                             href:`/video/av${itemData.aid}/`,
-                            title:`${itemData.title}\r\n播放:${itemData.stat&&itemData.stat.view||itemData.play} ${tools.formatNumber(itemData.duration, 'time')}`,
+                            title:`${itemData.title}\r\n播放:${tools.formatNumber(itemData.stat&&itemData.stat.view||itemData.play)} | ${tools.formatNumber(itemData.duration, 'time')} | UP: ${itemData.owner&&itemData.owner.name||itemData.author}`,
                             className:'ri-info-wrap clearfix',
                             childs:[
                                 (i==0?`<div class="lazy-img ri-preview"><img src="${itemData.pic.split(':')[1]}@72w_45h.${tools.imgType}"></div>`:''),
-                                `<div class="ri-detail"><p class="ri-title">${itemData.title}</p><p class="ri-point">综合评分：${tools.formatNumber(itemData.score||itemData.pts)}</p></div>`,
+                                `<div class="ri-detail"><p class="ri-title">${itemData.title}</p><p class="ri-point">${itemData.score||itemData.pts?`综合评分：${tools.formatNumber(itemData.score||itemData.pts)}`:itemData.rcmd_reason&&itemData.rcmd_reason.content}</p></div>`,
                                 (i==0?{
                                     nodeType:'div',title:'添加到稍后再看',
                                     dataset:{aid:itemData.aid},className:"watch-later-trigger w-later",
