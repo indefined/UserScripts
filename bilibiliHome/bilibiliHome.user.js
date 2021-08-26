@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.6.19
+// @version      0.6.20
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -97,7 +97,7 @@
         //初始化标题栏并注入推荐下方
         element.mainDiv.id = 'recommend';
         let scrollBox;
-        if(element.isNew){
+        if(element.isNew==1){
             element._s(element.mainDiv.querySelector('.storey-title'),{
                 innerHTML:style,
                 childs:[
@@ -125,6 +125,8 @@
             });
             scrollBox = element.mainDiv.querySelector('div.zone-list-box');
             scrollBox.classList.add('storey-box')
+        }
+        else if(element.isNew==2){
         }
         else {
             element._s(element.mainDiv.querySelector('div.zone-title'),{
@@ -187,7 +189,7 @@
         for(let i=0;i<setting.autoFreshCount;i++) getRecommend();
 
         //如果是新版页面，因为弹性布局原因，需要根据情况设置宽度避免因为不显示滚动条干扰溢出
-        if(element.isNew) {
+        if(element.isNew==1) {
             setting.setListWidth = function() {
                 if(listBox.scrollHeight>listBox.clientHeight && setting.noScrollBar) {
                     listBox.style = 'overflow-y: auto;align-content: flex-start;width: calc(100% + 20px) !important';
@@ -476,6 +478,7 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
 .v-data span .icon{margin-right:4px;vertical-align:top;display:inline-block;width:12px;height:12px}.video-info-module .v-data .play
 .icon{background-position:-282px -90px}.video-info-module .v-data .danmu .icon{background-position:-282px -218px}.video-info-module
 .v-data .star .icon{background-position:-282px -346px}.video-info-module .v-data .coin .icon{background-position:-282px -410px}
+li:not(.show-detail)>a>.watch-later-trigger{display:none}
 </style>
 <header class="rank-head rank-header" style="margin-bottom: 16px !important;"><h3 class="name">排行</h3>
 <div class="bili-tab rank-tab"><div class="bili-tab-item on">全部</div><div class="bili-tab-item">原创</div></div>
@@ -609,9 +612,12 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
             target.appendChild(loading);
             for (let i = 0;i<data.length;i++){
                 const itemData = data[i];
-                element._c({
+                let item, img;
+                item = element._c({
                     nodeType:'li',
                     className:i==0?'rank-item show-detail first highlight':i<3?'rank-item highlight':'rank-item',
+                    onmouseover: ()=>{item.classList.add('show-detail'); if (img){img.innerHTML = `<img src="${itemData.pic.split(':')[1]}@72w_45h.${tools.imgType}">`;img=undefined;}},
+                    onmouseleave: ()=>i!=0&&item.classList.remove('show-detail'),
                     childs:[
                         {
                             nodeType:'i',className:'ri-num',innerText:i+1,
@@ -624,13 +630,14 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                             title:`${itemData.title}\r\n播放:${tools.formatNumber(itemData.stat&&itemData.stat.view||itemData.play)} | ${tools.formatNumber(itemData.duration, 'time')} | UP: ${itemData.owner&&itemData.owner.name||itemData.author}`,
                             className:'ri-info-wrap clearfix',
                             childs:[
-                                (i==0?`<div class="lazy-img ri-preview"><img src="${itemData.pic.split(':')[1]}@72w_45h.${tools.imgType}"></div>`:''),
-                                `<div class="ri-detail"><p class="ri-title">${itemData.title}</p><p class="ri-point">${itemData.score||itemData.pts?`综合评分：${tools.formatNumber(itemData.score||itemData.pts)}`:itemData.rcmd_reason&&itemData.rcmd_reason.content}</p></div>`,
-                                (i==0?{
+                                (i==0?`<div class="lazy-img ri-preview"><img src="${itemData.pic.split(':')[1]}@72w_45h.${tools.imgType}"></div>`:(
+                                    img = element._c({nodeType:'div',className: "lazy-img ri-preview",}))),
+                                `<div class="ri-detail"><p class="ri-title">${itemData.title}</p><p class="ri-point"><span class="name"><i class="icon bilifont bili-icon_xinxi_UPzhu" style="background-position: -282px -154px;"></i>${itemData.owner&&itemData.owner.name||itemData.author}</span></p></div>`,
+                                {
                                     nodeType:'div',title:'添加到稍后再看',
-                                    dataset:{aid:itemData.aid},className:"watch-later-trigger w-later",
+                                    dataset:{aid:itemData.aid},className:"watch-later-trigger w-later watch-later-video van-watchlater black",
                                     onclick:tools.watchLater
-                                }:'')
+                                }
                             ]
                         }
                     ],
@@ -1419,7 +1426,12 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
 
     //初始化
     function init() {
-        if (document.querySelector('.international-home')) element.isNew = true;;
+        if (document.querySelector('.international-home')) {
+            element.isNew = 1;
+        } else if (document.querySelector('#i_cecream')) {
+            element.isNew = 2;
+            throw 'Bilibili APP首页脚本目前尚未适配新版主页，点击https://github.com/indefined/UserScripts/issues/76 查看详情';
+        }
         try{
             setting.init();
             InitRecommend();
@@ -1440,7 +1452,7 @@ span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-bl
                 //console.log(mutations)
                 for(const mutation of mutations){
                     for (const node of mutation.addedNodes) {
-                        if(node.id=='bili_douga') {
+                        if(node.id=='bili_douga' || node.className=='bili-grid') {
                             observer.disconnect();
                             element.mainDiv = node.cloneNode(true);
                             init();

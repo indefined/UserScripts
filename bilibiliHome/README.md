@@ -9,6 +9,8 @@ B站网页端添加APP首页推荐
 
 **提交问题前请仔细读完说明和使用须知**
 
+**<font color="#0f0">此脚本目前未适配新版主页，[点击查看详情](https://github.com/indefined/UserScripts/issues/76)</font>**
+
 -------------------------
 ## 功能
 
