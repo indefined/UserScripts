@@ -2,7 +2,7 @@
 // @name        bilibili直播间工具
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.43
+// @version     0.5.44
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -209,6 +209,9 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
 }
 
 /*控制栏背景现在分离了，礼物栏放在控制栏上后会挤掉原来背景，补上*/
+.live-web-player-controller {
+    background: none !important;
+}
 .web-player-controller-wrap {
     background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.7));
 }
@@ -320,10 +323,6 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
 
 #live-player .count-down {
     margin-top: -10px!important;
-}
-/*右侧弹幕池展开手柄会挡到网页全屏礼物栏*/
-.aside-area-toggle-btn.dp-none.p-absolute {
-    height: 25%;
 }`
             },document.head);
         },
@@ -336,10 +335,13 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
                 this.giftPackage.id = 'giftPackage';
                 this.giftPackageContainer = this.giftPackage.parentNode;
             }
+            /*
             this.inputPanel = helper.get('div.chat-input-ctnr.p-relative');
             this.chatControlPanel = this.inputPanel.parentNode;
             this.bottomPanel = this.inputPanel.nextSibling;
             this.sendButton = this.bottomPanel.lastChild;
+            */
+            this.asideCss = helper.create('style', {innerHTML: '/*右侧弹幕池展开手柄会挡到网页全屏礼物栏*/.aside-area-toggle-btn.dp-none.p-absolute {height: 25%;}'});
             this.title = helper.create('a',{
                 target:'_blank',
                 className:'info-section dp-i-block v-middle title-link',
@@ -468,6 +470,12 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
             else if(item=='fullScreenPanel'||item=='fullScreenChat'||item=='chatInGiftPanel') {
                 this.handlerControllerPanel();
             }
+            if (this.settings.fullScreenPanel) {
+                this.giftPanel.appendChild(this.asideCss);
+            }
+            else if (this.asideCss.parentNode){
+                this.asideCss.parentNode.removeChild(this.asideCss);
+            }
             this.titleObserver.disconnect();
             if(this.settings.showVideoLink) {
                 this.titleObserver.observe(helper.get('#live-player'), {childList:true});
@@ -526,7 +534,9 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
             if (this.icon.parentNode) this.icon.parentNode.removeChild(this.icon);
         },
         setVideoSync() {
-            const video = helper.get('video');
+            const video = (helper.window.livePlayer||helper.window.top.livePlayer).getVideoEl
+            && (helper.window.livePlayer||helper.window.top.livePlayer).getVideoEl()
+            || helper.get('video');
             if (video && video.buffered.length) {
                 video.currentTime = video.buffered.end(0);
             }
