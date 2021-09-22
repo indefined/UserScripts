@@ -17,7 +17,7 @@
 // @exclude      *://*hentaiverse.org/*pages/showequip.php?*
 // @include      *://forums.e-hentai.org/*showtopic=*
 // @include      *://hvmarket.xyz/*
-// @version      2021.04.25
+// @version      2021.09.22
 // ==/UserScript==
 
 if (document.location.href.match(/ss=iw/)&&!document.getElementById('item_pane'))return
@@ -971,6 +971,7 @@ function loadEquips(){
         'Staff':'法杖',
         //布甲
         'Cap ':'兜帽 ',
+        'Cap$':'兜帽',
         'Cap<':'兜帽<',
         'Robe':'长袍',
         'Gloves':'手套',
@@ -1210,10 +1211,13 @@ function loadExtra() {
         'Specials?' : '特殊',
         'Pony Figurines?|Figurines' : '小马公仔',
         //修正一些论坛误翻译的东西
+        '金 Star' : '金星',
+        'Thinking 兜帽' : 'Thinking Cap',
         '黑暗 Descent' : 'Dark Descent',
         '生命加成 Santa' : 'Juggernaut Santa',
         'Arcane 专注' : 'Arcane Focus',
         'Spirit 盾' : 'Spirit Shield',
+        '熟练度加成 Factor' : 'Proficiency Factor',
     };
     dictExtra = new Map();
     for (var i in dict) {

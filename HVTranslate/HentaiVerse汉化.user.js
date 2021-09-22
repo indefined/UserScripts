@@ -13,7 +13,7 @@
 // @include        *://hentaiverse.org/*
 // @include        *://alt.hentaiverse.org/*
 // @core           http://userscripts-mirror.org/scripts/show/41369
-// @version        2021.04.25
+// @version        2021.09.22
 // @grant none
 // ==/UserScript==
 (function () {
@@ -118,7 +118,7 @@ var words = {
     */
 
     //已知现缺：
-        // trains：缺：新陈代谢、激励、解离症；未校对：酩酊
+        // trains：缺：新陈代谢、激励、解离症
         // itemInfos：缺：无价的明朝瓷器、七叶幸运草、幸运兔脚；未校对：格鲁、彩虹蛋、彩绘蛋、神秘宝盒、真-变态胸章
 
 
@@ -149,6 +149,7 @@ var words = {
     ////////////////////////////////////////////////////////////////////////////////
     alerts: {
         // 此部分内原文基本都是使用符合正则格式写的（正则元字符添加\\转义，去除前后的/之后可以直接用于创建RegExp）
+        'You have transgressed against your God and your fellow Man. God has charged me with your redemption. You are hereby Exiled to Wraeclast where, it is hoped, you shall come to repent your Sins, and make your peace with your beloved Father.' : '你已经违背了你的上帝和你的同胞。 上帝已将你的救赎交托给我。 你在此被放逐到瓦尔克拉斯，希望你能来忏悔你的罪孽，并与你敬爱的神父和解。',
         //hvc.js里的
         'Server communication failed: ' : '服务器通讯错误：',
         '/Are you sure you wish to purchase ([\\d,]+) equipment pieces? for ([\\d,]+) credits\\?/' : '是否确认以 $2 Credits的价格购买 $1 件装备',
@@ -193,8 +194,11 @@ var words = {
     ///////////////////////////////////////////////////////
     messagebox: {
         'System Message' : '系统讯息',
-        'Snowflake and the moogles are relaxing on the beach. Check back later.' : '系统维护中，请稍后再来',
+        'Account Suspended' : '你登月了~',
+        'Snowflake and the moogles are relaxing on the beach. Check back later.' : '雪花女神和莫古利正在海滩休息，请稍后再来',
+        'Snowflake and the moogles are rebooting the universe. Check back later.' : '雪花女神和莫古利正在重启宇宙，请稍后再来',
 
+        'No energy items available.' : '你没有可用的精神恢复剂',
         'Name contains invalid characters.' : '名字包含不支持字符(仅支持英文和数字)',
         '/Name must be between (\\d+) and (\\d+) characters\./' : '名字长度需要在$1至$2个字符之间',
         'Requested persona does not exist' : '所选人格角色不存在',
@@ -216,6 +220,7 @@ var words = {
 
         'You cannot afford to train that.' : '你没有足够 Credits 训练指定项目',
         'You cannot start a new training at this time' : '你现在无法开始训练新项目',
+        'You have already maxed that training.' : '该训练已经满级',
         'There is no such skill' : '所指定技能不存在',
 
         'Ability is already slotted' : '技能已装备',
@@ -266,6 +271,7 @@ var words = {
 
         'Insufficient items, kupo!' : '物品不足，咕波！',
         'Equipment not found, kupo!' : '装备不存在，咕波！',
+        'Equipment cannot be attached, kupo!' : '无法附带该装备，咕波！',
         'Insufficient credits, kupo!' : 'Credits 不足，咕波！',
         'The mail moogle cannot carry more than 10 items at a time, kupo!' : '每封邮件最多只能添加10个附件，咕波！',
         'CoD must be at least 10 credits, kupo!' : '货到付款(CoD)至少需要设置 10 Credits，咕波！',
@@ -277,7 +283,9 @@ var words = {
         'Cannot set CoD without attachments, kupo!' : '你必须至少附带一件附件才能设置货到付款(CoD)，咕波！',
         'You cannot afford the postage, kupo!' : '你负担不起邮资，咕波！(没有购买hath能力“邮资已付”时每发一封邮件10C手续费，且设置CoD时会有额外的费用)',
         'You must at minimum specify a recipient and subject, kupo!' : '你必须至少设定一个收件人和主题，咕波！',
+        'You must at minimum specify a subject, kupo!' : '你必须至少填写主题，咕波！',
         'Invalid or missing recipient, kupo!' : '收件人不存在，咕波！',
+        'You cannot read that, kupo!' : '你无法阅读该邮件，咕波！',
         'Messaging yourself must be the ultimate form of social withdrawal, kupo! Seek help, kupo!' : '给自己发邮件是社交退缩的终极形式，咕波！去找些别的乐子吧，咕波！',
         'Mail cannot be returned, kupo!' : '此邮件已无法退回，咕波！',
         'Message has no attachment, kupo!' : '此邮件没有附件，咕波！',
@@ -315,6 +323,11 @@ var words = {
         'You cannot enter the same arena twice in one day.' : '同一竞技场一天只能进入一次',
         'You cannot enter the Item World while exhausted.' : '你无法在精力耗竭时进入道具界',
         'You cannot start a Grindfest while exhausted.' : '你无法在精力耗竭时进入压榨界',
+        'You cannot attempt The Tower again until tomorrow.' : '你今天的塔楼挑战/清通次数已达上限，明天再来吧。',
+        'You do not have enough stamina to start a new Arena.' : '你没有足够的精力开始竞技场挑战',
+        'You do not have enough stamina to enter this Item World.' : '你没有足够的精力进入道具界挑战',
+        'You do not have enough stamina to start a new Grindfest.' : '你没有足够的精力开始压榨界挑战',
+        'You do not have enough stamina to enter The Tower.' : '你没有足够的精力进入塔楼挑战',
         'Item is already max level' : '装备等级已满',
         'Cannot fight in equipped items' : '正在佩戴的装备无法进入道具界中',
 
@@ -422,6 +435,7 @@ var words = {
         'Endurance' : '体质',
         'Intelligence' : '智力',
         'Wisdom' : '智慧',
+        'Isekai bonus' : '异世界奖励',
         'Equipment proficiency' : '武器/装备熟练度',
         '/^One-handed$/' : '单手',
         '/^Two-handed$/' : '双手',
@@ -579,8 +593,8 @@ var words = {
         'Battle Scroll Slots' : '卷轴携带数',
         'Battle Infusion Slots' : '魔药携带数',
         'Battle Inventory Slots' : '战斗携带品携带数',
-        'Persona Slot' : '人物槽',
-        'Equipment Set' : '套装栏',
+        'Persona Slot' : '人物角色槽',
+        'Equipment Set' : '装备套装槽',
 
         'Here you can exchange your credits for Henjutsu 训练 in various subjects.' : '在这里你可以消耗credit提升你的各项能力',
         '训练 happens in realtime, and you can only train one skill at a time.' : '训练耗时是现实时间（小时），一次只能训练一个项目',
@@ -596,7 +610,7 @@ var words = {
         'You now have a slightly larger chance of uncovering lost artifacts!' : '你发现丢失文物的几率现在有轻微的提升！',
         //缺：新陈代谢、激励
         'Your battle scroll slots have been increased!' : '你的战斗卷轴携带槽现在增加了一格！',
-        'Your battle infusion slots have been increased!' : '你的战斗魔药携带槽现在增加了一格！', //未校验
+        'Your battle infusion slots have been increased!' : '你的战斗魔药携带槽现在增加了一格！',
         'Your battle inventory space has been increased!' : '你的战斗携带品槽现在增加了一格！',
         //缺：解离症
         'You can now use an additional equipment set!' : '你现在可以多使用一套额外的装备套装！',
@@ -1310,7 +1324,7 @@ var words = {
         'Iron Heart' : '钢铁之心(等级8)', // 2019 圣诞节
         'Shrine Fortune' : '神社灵签(等级7)', // 2020起复活节
         'Plague Mask' : '瘟疫面具(等级8)', // 2020 复活节
-        'Festival Coupon' : '节日礼券(等级7)', //2020起收获节（中秋？）
+        'Festival Coupon' : '节日礼券(等级7)', //2020起收获节（中秋）
         'Annoying Gun' : '烦人的枪(等级8)', //2020 圣诞节
         'Vaccine Certificate' : '疫苗证明(等级8)', //2021 复活节
 
@@ -1321,7 +1335,7 @@ var words = {
     itemInfos: {
         //物品类型
         '/^Trophy$/': '奖杯',
-        '/^Consumable$/': '消耗品(物品仓库中可点击添加到右侧战斗携带品栏)',
+        '/^Consumable$/': '消耗品',
         '/^Artifact$/': '文物',
         '/^Token$/': '令牌',
         '/^Crystal$/': '水晶',
@@ -1543,7 +1557,7 @@ var words = {
         'You found this junk in your Xmas stocking when you woke up. Maybe Snowflake will give you something useful in exchange.' : '你醒来时在你的圣诞袜里发现这个垃圾。把它交给雪花或许她会给你一些好东西作为交换。(2009年以来每年圣诞节礼物)', //0.87更新
         'This box is said to contain an item of immense power. You should get Snowflake to open it.' : '传说此盒子封印了一件拥有巨大力量的装备。你应该找雪花来打开它。(年度榜单或者年度活动奖品)',
         'You happened upon this item when you somehow found time to play HV on the gamiest day of the year. It is attached to some strange mechanism.' : '在今年鸟最多的日子，当你不知怎的抓到时间刷 HV 时意外发现这个东西。它和一些奇怪的机械装置接在一起。(《传送门 2》发售纪念)',
-        'A coupon which was handled to you by a festival moogle during the Loot and Harvest Festival. Offer it to Snowflake for some bonus loot.' : '一个在战利与丰收节日期间由节日莫古利送给你的礼券。把它交给雪花可以交换额外的战利品。[2020起收获节活动]',
+        'A coupon which was handled to you by a festival moogle during the Loot and Harvest Festival. Offer it to Snowflake for some bonus loot.' : '一个在战利与丰收节日期间由节日莫古利送给你的礼券。把它交给雪花可以交换额外的战利品。[2020起中秋节活动]',
 
         'A gift for the 2010 Winter Celebrations. Its surface has a mysterious sheen which seems to bend light in strange ways. You will need to make Snowflake open it.' : '2010 年冬天的庆祝活动的礼物。它的表面呈现不可思议的光泽，看样子是用奇妙的方式反射光线。你需要请雪花来打开它。',
         'If you look it in the mouth, some evil fate may befall you. Hand it to Snowflake instead, and she might give you a little something.' : '如果你检查马嘴，某些恶运可能会降临到你身上。相反地，把它牵给雪花，她会给你一些别的。(2011 圣诞节)',
@@ -1653,6 +1667,7 @@ var words = {
         'Chausses' : '裤',
         //护甲部位
         'Cap ' : '帽 ',
+        '/Cap$/' : '帽 ',
         'Robe' : '长袍',
         'Breastplate' : '护胸',
         'Cuirass' : '胸甲',
@@ -1953,7 +1968,7 @@ var words = {
         'Select an equipment piece from the list to the left then hit Soulfuse Item below to permanently bind it to you. This will make it level as you do. There is no way to break this bond outside of salvaging the item.' : '从左侧列表选择一件装备，然后点击下方 Soulfuse Item 将该装备与你进行永久绑定。灵魂绑定之后该装备会跟随你的等级一起成长。除非你将装备分解否则没有其它办法可以解除绑定状态。',
         'Select an equipment piece from the list to the left then hit Soulfuse Item below to permanently bind it to you. This will make it level as you do. There is no way to break this bond, but the item can still be salvaged or sold.' : '从左侧列表选择一件装备，然后点击下方 Soulfuse Item 将该装备与你进行永久绑定。灵魂绑定之后该装备会跟随你的等级一起成长。此绑定无法解除，但是装备仍然可以被拆解或者出售给系统店。',
         'The cost for soulfusing with an item depends both on your level and how many levels below you the item is.' : '灵魂绑定消耗的碎片数量取决于装备的品质以及该装备比你高出的等级数。',
-        'You cannot soulfuse items that have a gear level higher than 100 above your current level. Right now, you can soulfuse equipment up to level' : '你不能灵魂绑定高于自己100级的装备，也就是说, 你目前可以灵魂绑定的最高装备等级是',
+        'You cannot soulfuse items that have a gear level higher than 100 above your current level. Right now, you can soulfuse equipment up to level' : '你不能灵魂绑定高于自己超过100级的装备，也就是说, 你目前可以灵魂绑定的最高装备等级是',
 
         'You currently have ' : '你当前拥有 ',
         'Amnesia Shards' : '重铸碎片',
@@ -2052,7 +2067,8 @@ var words = {
         'Destined' : '天选者',
         'Godslayer' : '弑神者',
         'Dovahkiin' : '龙裔',
-        '% Damage' : '% 物理伤害',
+        'Ponyslayer' : '小马杀手',
+        '% Damage' : '% 伤害',
         '% Evade' : '% 闪避率',
         'The power of the Dragonborn.' : '龙裔之力（可使用龙吼）',
         'Level Default' : '自动选择（根据当前等级）',
@@ -2061,7 +2077,7 @@ var words = {
 
         'Font Engine' : '文字引擎',
         'Here you can choose a custom font instead of the standard HentaiVerse font engine.' : '在这里你可以选择使用自定义字体代替HV的默认的字体引擎，',
-        'This mostly affects how fast pages will render and how pretty they will look.' : '这将大幅改善页面的加载速度以及页面显示的字体效果。为了更好的使用脚本及完全汉化其它内容，你必须设置自定义字体',
+        'This mostly affects how fast pages will render and how pretty they will look.' : '这将大幅改善页面的加载速度以及页面显示的字体效果。为了完全汉化其它内容及更好的使用其它脚本，你必须设置自定义字体',
         'Use Custom Font (specify below - this font MUST be installed on your local system to work)' : '使用自定义字体（下方字体名称必填，所指定的字体如果本地系统内没有安装会自动使用其它字体替代）',
         'font-family' : '字体名称',
         'font-size' : '字体大小',
@@ -2075,9 +2091,8 @@ var words = {
         '-8 to 8 pixels (tweak until text appears centered)' : '-8 ~ 8 像素（请输入数字，可适当调整使文字垂直居中）',
 
         'Equipment Sets' : '套装选择',
-        'If you want to have separate slotted abilities, battle items and skillbars/autocast assignments per equipment set for your current persona, you can toggle the options below. ' : '当创建一个新人物的时候，默认使用和原来人物一样的技能，战斗物品，快捷栏，自动施法配置',
-        'If you still want to have separate assignments per equipment set for one or more of these, you can toggle the options below. ' : '如果你想让新人物默认不使用原人物的各项配置，你可以在这里更改选项',
-        'If this is changed, the current persona\'s shared set will be assigned to Set 1 and vice versa. This can be set differently for each persona.' : ' 如果更改以下设定（即不将默认套装应用于新人物），当前人物的各项配置将被归类至套装1，当取消勾选时将重新归类至默认套装内',
+        'If you want to have separate slotted abilities, battle items and skillbars/autocast assignments per equipment set for your current persona, you can toggle the options below. ' : '默认情况下，同一个人格角色下的所有装备套装共享一样的技能，战斗物品，快捷栏，自动施法配置。如果你想让不同的装备套装不使用不同的各项配置，你可以在这里更改选项。',
+        'If this is changed, the current persona\'s shared set will be assigned to Set 1 and vice versa. This can be set differently for each persona.' : ' 如果以下设定被勾选，则当前人物角色该项的原有设置将被归类至套装1，其它套装可以重新设置，当取消勾选时则所有套装的该项配置将重新使用原有套装1的设置。',
         'Use Separate Ability Set Assigments' : '使用不同的技能配置',
         'Use Separate Battle Item Assigments' : '使用不同的战斗物品配置',
         'Use Separate Skillbar/Autocast Assignments' : '使用不同的快捷栏及自动施放配置',
@@ -2097,6 +2112,7 @@ var words = {
 
         'Quickbar Slots' : '快捷栏',
         'Here you can set up which spells will appear on the battle screen quickbar.' : '这里你可以设定战斗中的技能法术快捷栏',
+        '/Set (\\d+) is selected/' : '当前为套装$1设置',
         //技能法术名称使用独立的skills字典
         'Not Assigned' : '未设置',
 
@@ -2150,7 +2166,7 @@ var words = {
         'to any primary stat. This increases by one for every tenth level. ' : '点属性奖励，这个阈值每10级会提升1点。',
         'Gaining primary stats in this way will not increase how much EXP your next point costs.' : '利用这种方式获得的主属性提升不会增加你的加点消耗。',
         'Trophies can be exchanged for a piece of equipment.' : '奖杯可以兑换一件指定类型的装备',
-        'The quality and tier of the item depends on the trophy you offer. ' : '获取的装备品质基于所献祭奖杯的等级而骰动。',
+        'The quality and tier of the item depends on the trophy you offer. ' : '获取的装备品质基于所献祭的奖杯和奖杯升级等级而骰动。',
         'You can select the major class of the item being granted from the list below.' : '在下方选择你想获取的装备类型。',
         'Offering ' : '献祭 ',
         '/need (\\d+) more/' : '还需要额外 $1 个以升级献祭',
@@ -2374,7 +2390,7 @@ var words = {
         'Any attachments have been returned.' : '邮件中附带的附件已归还仓库。',
         'Your message has been sent.' : '邮件已发送',
 
-        '/According to your prices, COD should be (\\d+) credits/' : '根据你在HVToolBox里设置的价格，这个邮件的货到付款(CoD)价格应当是 $1 Credits',
+        '/According to your prices in HVtoolBox, COD should be (\\d+) credits/' : '根据你在HVToolBox里设置的价格，这个邮件的货到付款(CoD)价格应当是 $1 Credits',
     },
 
     ///////////////////////////////////////////////////////彩票
@@ -2451,6 +2467,8 @@ var words = {
         'End of Days' : '世界末日',
         'Eternal Darkness' : '永恒黑暗',
         'A Dance with Dragons' : '与龙共舞',
+        'Post-Game Content' : '赛后内容',
+        'Secret Pony Level' : '秘密小马等级',
         'Konata' : '泉此方',
         'Mikuru Asahina' : '朝比奈实玖瑠',
         'Ryouko Asakura' : '朝仓凉子',
@@ -2460,6 +2478,7 @@ var words = {
         'Flying Spaghetti Monster' : '飞行意大利面怪物',
         'Triple Trio and the Tree' : '大树十重奏',
 
+        'There are no challenges available at your level. Check back later!' : '没有适用于你当前等级的挑战。努力升级以后再来查看吧！',
         'Challenge' : '名称',
         'Highest Clear' : '最高通过难度',
         'EXP Mod' : '经验倍率',
@@ -2480,7 +2499,7 @@ var words = {
 
         'The Tower is an Isekai-Only battle mode where the goal is to get as high as possible before the end of the season. ' : '塔楼(The Tower)是异世界独有的战斗模式，目标是在每个赛季结束前尽可能获得更高的排位。',
         'Ranking high in this mode at the end of the season will provide you with some permanent bonuses on HV Persistent.' : '塔楼天梯以半年为一个赛季周期，每年冬夏至日赛季结束异世界将会重置。在塔楼下取得高排位将在每个赛季结束后获得一些传统世界模式的永久奖励。',
-        'The difficulty and monster level in this battle mode is locked to each floor. Difficulty will increase every five floors, and monster level will increase by 10 per floor.' : '塔楼模式的战斗难度和怪物等级与对应层级锁定，和你的设置和自身等级无关。战斗难度将每5层提升一次，怪物等级将每层提升10级。',
+        'The difficulty and monster level in this battle mode is locked to each floor. Difficulty will increase every five floors, and monster level will increase by 10 per floor.' : '塔楼模式的战斗难度和怪物等级与对应层级锁定，和你的设置及自身等级无关。战斗难度将每5层提升一次，怪物等级将每层提升10级。',
         'Your Ranking: ' : '你的排名: ',
         'Unranked' : '没有排名',
         '1st' : '1',
@@ -2490,6 +2509,7 @@ var words = {
         'Current Floor:' : '当前层级:',
         'Monster Level' : '怪物等级',
         'Daily Attempts: ' : '今日挑战: ',
+        'Daily Clears:' : '今日清通:',
 
         'Welcome to the Grindfest.' : '欢迎来到压榨界',
         'A Grindfest consists of up to 1000 rounds of battle.' : '压榨界包含1000场连续且难度递增的战斗',
