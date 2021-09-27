@@ -149,7 +149,7 @@ var words = {
     ////////////////////////////////////////////////////////////////////////////////
     alerts: {
         // 此部分内原文基本都是使用符合正则格式写的（正则元字符添加\\转义，去除前后的/之后可以直接用于创建RegExp）
-        'You have transgressed against your God and your fellow Man. God has charged me with your redemption. You are hereby Exiled to Wraeclast where, it is hoped, you shall come to repent your Sins, and make your peace with your beloved Father.' : '你已经违背了你的上帝和你的同胞。 上帝已将你的救赎交托给我。 你在此被放逐到瓦尔克拉斯，希望你能来忏悔你的罪孽，并与你敬爱的神父和解。',
+        'You have transgressed against your God and your fellow Man. God has charged me with your redemption. You are hereby Exiled to Wraeclast where, it is hoped, you shall come to repent your Sins, and make your peace with your beloved Father.' : '你已经违背了你的上帝和你的同胞。 上帝已将你的救赎交托给我。 你在此被放逐到瓦尔克拉斯，希望你能来忏悔你的罪孽，并与你敬爱的神父和解（译者注：在使用 Monsterbation 时，你不能在启用 mouseEngage 的同时将物品使用绑定在鼠标点击上；或将物品使用绑定在 Monsterbation 的鼠标 Hover 上）',
         //hvc.js里的
         'Server communication failed: ' : '服务器通讯错误：',
         '/Are you sure you wish to purchase ([\\d,]+) equipment pieces? for ([\\d,]+) credits\\?/' : '是否确认以 $2 Credits的价格购买 $1 件装备',
