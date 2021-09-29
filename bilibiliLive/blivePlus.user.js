@@ -2,7 +2,7 @@
 // @name        bilibili直播间工具
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.45
+// @version     0.5.46
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -556,7 +556,7 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
             medal:{
                 name:'勋章',
                 link:'//link.bilibili.com/p/center/index#/user-center/wearing-center/my-medal',
-                dataUrl:'//api.live.bilibili.com/i/api/medal?page=1&pageSize=1000'
+                dataUrl:'//api.live.bilibili.com/fans_medal/v2/HighQps/received_medals',
             },
             title:{
                 name:'头衔',
@@ -720,20 +720,11 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
         },
         async listMedal(data){
             let hasMedal = false;
-            if (data.code!=0||!data.data||!(data.data.fansMedalList instanceof Array)) {
+            if (data.code!=0||!data.data||!(data.data.list instanceof Array)) {
                 console.error(data);
                 throw(`查询勋章失败 code:${data.code}</br>${data.message}`);
             }
-            const medalList = data.data.fansMedalList;
-            if (this.room && this.room.UID) {
-                const wall = await helper.xhr('//api.live.bilibili.com/xlive/web-ucenter/user/MedalWall?target_id='+this.room.UID);
-                if (wall.code ==0 && wall.data && (wall.data.list instanceof Array)) {
-                    for (let item of wall.data.list) {
-                        let medal = medalList.find(i=>i.target_name == item.target_name);
-                        if (medal) medal.live_stream_status = item.live_status;
-                    }
-                }
-            }
+            const medalList = data.data.list;
             medalList.forEach((v)=>{
                 if (this.room.ANCHOR_UID==v.target_id) hasMedal = true;
                 const itemDiv = helper.create('div',{
@@ -766,11 +757,14 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
                     innerHTML:`${v.today_feed}/${v.day_limit}${v.live_stream_status==1 ?'<img src="//s1.hdslb.com/bfs/static/blive/blfe-live-room/static/img/living.44021fe..gif" style="height: 12px;vertical-align: middle;" title="正在直播">':''}`
                 },itemDiv);
             });
-            if (data.data.fansMedalList.length==0) {
+            if (data.data.curr_page == 1 && medalList.length==0) {
                 helper.create('p',{
                     innerHTML:'<p data-v-17cf8b1e="" class="empty-hint-text">你还没有勋章哦～</p>'
                     +'<div data-v-17cf8b1e="" class="empty-image"></div>'
                 },this.dialogPanel);
+            }
+            else if (data.data.curr_page < data.data.total_page) {
+                await helper.xhr(this.strings.medal.dataUrl + '?page=' + (+data.data.curr_page+1)).then(async data=>this.listMedal(data));
             }
         },
         async listTitle(data){
