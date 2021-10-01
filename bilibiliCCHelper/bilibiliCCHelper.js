@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.24
+// @version      0.5.24.1
 // @description  可以在B站加载外挂本地字幕、下载B站的CC字幕，旧版B站播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -897,7 +897,7 @@
         },
         initUI(){
             //下载标识
-            elements.createAs('style', {innerHTML:'li.squirtle-select-item:after {content: "下载";}'}, document.head);
+            elements.createAs('style', {innerHTML:'.squirtle-subtitle-select-list>li.squirtle-select-item:after {content: "下载";}'}, document.head);
             this.panel.addEventListener('click', function(ev) {
                 if (!(ev.target instanceof HTMLLIElement)) return;
                 const rect = ev.target.getBoundingClientRect().right;
