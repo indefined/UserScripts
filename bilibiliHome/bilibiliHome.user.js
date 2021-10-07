@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.6.20
+// @version      0.6.21
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -438,7 +438,7 @@
 .ri-num{position:absolute;color:#999;height:18px;line-height:18px;width:18px;top:0;left:0;font-size:12px;min-width:12px;text-align:center;padding:0
 3px;font-weight:bolder;font-style:normal}.rank-list .rank-item.highlight .ri-num{background:#00a1d6;color:#fff}.rank-list
 .rank-item .ri-info-wrap{position:relative;display:block;cursor:pointer}.rank-list .rank-item .ri-info-wrap
-.w-later{right:160px}.rank-list .rank-item .ri-info-wrap:hover .w-later{display:block}.rank-list .rank-item
+.w-later{left:45px}.rank-list .rank-item .ri-info-wrap:hover .w-later{display:block}.rank-list .rank-item
 .ri-preview{margin-right:5px;width:80px;height:50px;float:left;display:none;border-radius:4px;overflow:hidden}.rank-list
 .rank-item.show-detail .ri-preview{display:block}.rank-list .rank-item .ri-detail{float:left}.rank-list .rank-item .ri-detail
 .ri-title{line-height:18px;height:18px;overflow:hidden;color:#222}.rank-list .rank-item .ri-detail
@@ -663,7 +663,7 @@ li:not(.show-detail)>a>.watch-later-trigger{display:none}
                 dataPromise = Promise.resolve(config.data);
             }
             else {
-                dataPromise = fetch(configs[type].dataLink+page).then(res=>res.json()).then(res=>{
+                dataPromise = fetch(configs[type].dataLink+page,{credentials:'include'}).then(res=>res.json()).then(res=>{
                     if (res.code!=0) throw `请求排行榜失败 code ${res.code}</br>msg ${res.message}`;
                     if (!config.data) config.data = [];
                     config.data.push(...res.data.list);
