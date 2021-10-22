@@ -257,7 +257,7 @@
             URL.revokeObjectURL(this.actionButton.href);
             this.actionButton.classList.remove('bpui-state-disabled','bui-button-disabled');
             this.actionButton.href = URL.createObjectURL(new Blob([result],{type:'text/'+type}));
-            this.actionButton.download = `${document.title}.${type}`;
+            this.actionButton.download = `${bilibiliCCHelper.getInfo('h1Title') || document.title}.${type}`;
         },
         encodeToLRC(data){
             this.updateDownload(data.map(({from,to,content})=>{
@@ -972,7 +972,7 @@
             return this.subtitle.subtitles.find(item=>item.lan==lan || item.lan_doc==name);
         },
         getInfo(name) {
-            return this.window[name]||this.window.__INITIAL_STATE__ && this.window.__INITIAL_STATE__.epInfo && this.window.__INITIAL_STATE__.epInfo[name];
+            return this.window[name]||( this.window.__INITIAL_STATE__ && this.window.__INITIAL_STATE__[name] ) || this.window.__INITIAL_STATE__ && this.window.__INITIAL_STATE__.epInfo && this.window.__INITIAL_STATE__.epInfo[name];
         },
         async setupData(){
             if(this.cid==this.getInfo('cid')&& this.subtitle) return this.subtitle;
