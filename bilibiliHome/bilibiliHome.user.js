@@ -108,7 +108,7 @@
                         childs: [
                             {
                                 nodeType: 'div',
-                                style: 'width: 86px;',
+                                style: 'width: 72px;',
                                 className: 'btn btn-change',
                                 innerHTML:
                                     '<i class="bilifont bili-icon_caozuo_huanyihuan"></i><span class="info">换一换</span>',
