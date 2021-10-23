@@ -93,292 +93,384 @@
 </style>`;
 
     //APP首页推荐
-    function InitRecommend () {
+    function InitRecommend() {
         //初始化标题栏并注入推荐下方
         element.mainDiv.id = 'recommend';
         let scrollBox;
-        if(element.isNew==1){
-            element._s(element.mainDiv.querySelector('.storey-title'),{
-                innerHTML:style,
-                childs:[
+        if (element.isNew == 1) {
+            element._s(element.mainDiv.querySelector('.storey-title'), {
+                innerHTML: style,
+                childs: [
                     '<div class="l-con"><svg aria-hidden="true" class="svg-icon"><use xlink:href="#bili-douga"></use></svg><span class="name">猜你喜欢</span></div>',
                     {
-                        nodeType:'div',
-                        className:'exchange-btn',
-                        childs:[
+                        nodeType: 'div',
+                        className: 'exchange-btn',
+                        childs: [
                             {
-                                nodeType:'div',
+                                nodeType: 'div',
                                 style: 'width: 86px;',
-                                className:'btn btn-change',
-                                innerHTML:'<i class="bilifont bili-icon_caozuo_huanyihuan"></i><span class="info">加载更多</span>',
-                                onclick:()=>{ for(let i=0;i<setting.manualFreshCount;i++) getRecommend();}
+                                className: 'btn btn-change',
+                                innerHTML:
+                                    '<i class="bilifont bili-icon_caozuo_huanyihuan"></i><span class="info">加载更多</span>',
+                                onclick: () => {
+                                    for (let i = 0; i < setting.manualFreshCount; i++)
+                                        getRecommend();
+                                },
                             },
                             {
-                                nodeType:'span',
-                                className:'btn more',
-                                innerHTML:'<span>设置</span><i class="bilifont bili-icon_caozuo_qianwang"></i>',
-                                onclick:()=>setting.show()
-                            }
-                        ]
-                    }
-                ]
+                                nodeType: 'span',
+                                className: 'btn more',
+                                innerHTML:
+                                    '<span>设置</span><i class="bilifont bili-icon_caozuo_qianwang"></i>',
+                                onclick: () => setting.show(),
+                            },
+                        ],
+                    },
+                ],
             });
             scrollBox = element.mainDiv.querySelector('div.zone-list-box');
-            scrollBox.classList.add('storey-box')
-        }
-        else if(element.isNew==2){
-        }
-        else {
-            element._s(element.mainDiv.querySelector('div.zone-title'),{
-                innerHTML:style,
-                childs:[
+            scrollBox.classList.add('storey-box');
+        } else if (element.isNew == 2) {
+        } else {
+            element._s(element.mainDiv.querySelector('div.zone-title'), {
+                innerHTML: style,
+                childs: [
                     {
-                        nodeType:'div',
-                        className:'headline clearfix',
-                        innerHTML:'<i class="icon icon_t icon-douga"></i><span class="name">猜你喜欢</span>',
-                        childs:[
+                        nodeType: 'div',
+                        className: 'headline clearfix',
+                        innerHTML:
+                            '<i class="icon icon_t icon-douga"></i><span class="name">猜你喜欢</span>',
+                        childs: [
                             {
-                                nodeType:'div',
-                                className:'link-more',style:'cursor:pointer;user-select: none;',
-                                innerHTML:'<span>设置  </span><i class="icon"></i>',
-                                onclick:()=>setting.show()
+                                nodeType: 'div',
+                                className: 'link-more',
+                                style: 'cursor:pointer;user-select: none;',
+                                innerHTML: '<span>设置  </span><i class="icon"></i>',
+                                onclick: () => setting.show(),
                             },
                             {
-                                nodeType:'div',
-                                className:'read-push',style:'cursor:pointer;user-select: none;',
-                                innerHTML:'<i class="icon icon_read"></i><span class="info">加载更多</span>',
-                                onclick:()=>{ for(let i=0;i<setting.manualFreshCount;i++) getRecommend();}
-                            }
-                        ]
-                    }
-                ]
+                                nodeType: 'div',
+                                className: 'read-push',
+                                style: 'cursor:pointer;user-select: none;',
+                                innerHTML:
+                                    '<i class="icon icon_read"></i><span class="info">加载更多</span>',
+                                onclick: () => {
+                                    for (let i = 0; i < setting.manualFreshCount; i++)
+                                        getRecommend();
+                                },
+                            },
+                        ],
+                    },
+                ],
             });
             scrollBox = element.mainDiv.querySelector('div.storey-box.clearfix');
         }
         let listBox;
-        element._s(scrollBox,{
-            innerHTML:'',style:'overflow:hidden auto;display:block',
-            childs:[listBox = element._c({
-                nodeType:'div',className:scrollBox.className,
-                id:'recommend-list',
-                style:'overflow:auto',
-                innerHTML:'<span style="display:none">empty</span>'
-            })]
+        element._s(scrollBox, {
+            innerHTML: '',
+            style: 'overflow:hidden auto;display:block',
+            childs: [
+                (listBox = element._c({
+                    nodeType: 'div',
+                    className: scrollBox.className,
+                    id: 'recommend-list',
+                    style: 'overflow:auto',
+                    innerHTML: '<span style="display:none">empty</span>',
+                })),
+            ],
         });
         const moreButton = element._c({
-            nodeType:'div',className:"clearfix",
-            innerHTML:'<div class="load-state" style="cursor: pointer;padding: 4px;text-align: center;">回到推荐顶部</div>',
-            onclick:()=>{
+            nodeType: 'div',
+            className: 'clearfix',
+            innerHTML:
+                '<div class="load-state" style="cursor: pointer;padding: 4px;text-align: center;">回到推荐顶部</div>',
+            onclick: () => {
                 listBox.scrollTop = 0;
                 scrollBox.scrollTop = 0;
                 element.mainDiv.scrollIntoView();
-            }
+            },
         });
-        scrollBox.insertAdjacentElement('afterend',moreButton);
-        if(element.isNew) {
-            document.querySelector('.proxy-box').insertAdjacentElement('afterbegin',element.mainDiv);
-        }
-        else {
-            document.querySelector('#home_popularize').insertAdjacentElement('afterend',element.mainDiv);
+        scrollBox.insertAdjacentElement('afterend', moreButton);
+        if (element.isNew) {
+            document
+                .querySelector('.proxy-box')
+                .insertAdjacentElement('afterbegin', element.mainDiv);
+        } else {
+            document
+                .querySelector('#home_popularize')
+                .insertAdjacentElement('afterend', element.mainDiv);
         }
 
-        const recommends = [];//保存当前页面中的推荐元素，用于清除多余内容
+        const recommends = []; //保存当前页面中的推荐元素，用于清除多余内容
         //显示历史推荐
-        if(setting.historyData) updateRecommend(setting.historyData);
+        if (setting.historyData) updateRecommend(setting.historyData);
         //加载新推荐
-        for(let i=0;i<setting.autoFreshCount;i++) getRecommend();
+        for (let i = 0; i < setting.autoFreshCount; i++) getRecommend();
 
         //如果是新版页面，因为弹性布局原因，需要根据情况设置宽度避免因为不显示滚动条干扰溢出
-        if(element.isNew==1) {
-            setting.setListWidth = function() {
-                if(listBox.scrollHeight>listBox.clientHeight && setting.noScrollBar) {
-                    listBox.style = 'overflow-y: auto;align-content: flex-start;width: calc(100% + 20px) !important';
+        if (element.isNew == 1) {
+            setting.setListWidth = function () {
+                if (listBox.scrollHeight > listBox.clientHeight && setting.noScrollBar) {
+                    listBox.style =
+                        'overflow-y: auto;align-content: flex-start;width: calc(100% + 20px) !important';
+                } else {
+                    listBox.style =
+                        'overflow-y: auto;align-content: flex-start;width: 100% !important';
                 }
-                else {
-                    listBox.style = 'overflow-y: auto;align-content: flex-start;width: 100% !important';
-                }
-            }
+            };
             setting.setListWidth();
-            new MutationObserver(setting.setListWidth).observe(listBox,{childList:true});
+            new MutationObserver(setting.setListWidth).observe(listBox, { childList: true });
         }
         //获取推荐视频数据
-        function getRecommend () {
+        function getRecommend() {
             let loadingDiv;
-            listBox.insertAdjacentElement('afterBegin',loadingDiv=element.getLoadingDiv('recommend'));
+            listBox.insertAdjacentElement(
+                'afterBegin',
+                (loadingDiv = element.getLoadingDiv('recommend'))
+            );
             GM_xmlhttpRequest({
                 method: 'GET',
-                url: 'https://app.bilibili.com/x/feed/index?build=1&mobi_app=android&idx='
-                + (Date.now()/1000).toFixed(0) + (setting.accessKey?'&access_key='+setting.accessKey:''),
-                onload: res=>{
+                url:
+                    'https://app.bilibili.com/x/v2/feed/index?build=1&mobi_app=android&idx=' +
+                    (Date.now() / 1000).toFixed(0) +
+                    (setting.accessKey ? '&access_key=' + setting.accessKey : ''),
+                onload: res => {
                     try {
                         const rep = JSON.parse(res.response);
-                        if (rep.code!=0){
+                        if (rep.code != 0) {
                             loadingDiv.firstChild.innerText = `请求app首页失败 code ${rep.code}</br>msg ${rep.message}`;
-                            return console.error('请求app首页失败',rep);
+                            return console.error('请求app首页失败', rep);
                         }
-                        setting.pushHistory(rep.data);
-                        updateRecommend(rep.data);
+                        setting.pushHistory(rep.data.items);
+                        updateRecommend(rep.data.items);
                         loadingDiv.style.display = 'none';
-                    } catch (e){
+                    } catch (e) {
                         loadingDiv.firstChild.innerText = `请求app首页发生错误 ${e}`;
-                        console.error(e,'请求app首页发生错误');
+                        console.error(e, '请求app首页发生错误');
                     }
                 },
-                onerror: e=>{
+                onerror: e => {
                     loadingDiv.firstChild.innerText = `请求app首页发生错误 ${e}`;
-                    console.error(e,'请求app首页发生错误');
-                }
+                    console.error(e, '请求app首页发生错误');
+                },
             });
         }
 
         //旧版创建视频卡
         function createOldRecommend(data) {
             return element._c({
-                nodeType:'div',
-                className:'spread-module',
-                childs:[{
-                    nodeType:'a',target:'_blank',
-                    onmouseenter: data.goto=='av'&&tools.preview,
-                    onmouseleave: data.goto=='av'&&tools.preview,
-                    onmousemove: data.goto=='av'&&tools.preview,
-                    href:data.goto=='av'?`/video/av${data.param}`:data.uri,
-                    dataset:{
-                        tag_id:data.tag?data.tag.tag_id:'',
-                        id:data.param,goto:data.goto,mid:data.mid,rid:data.tid
-                    },
-                    childs:[
-                        {
-                            nodeType:'div',className:'pic',
-                            childs:[
-                                `<div class="lazy-img"><img src="${data.cover}@160w_100h.${tools.imgType}" /></div>`,
-                                `<div class="cover-preview-module"></div>`,
-                                `<div class="mask-video"></div>`,
-                                `<div class="danmu-module"></div>`,
-                                `<span title="分区：${data.tname||data.badge}" class="tname">${data.tname||data.badge}</span>`,
-                                data.duration&&`<span class="dur">${tools.formatNumber(data.duration,'time')}</span>`||'',
-                                data.goto=='av'?{
-                                    nodeType:'div',
-                                    dataset:{aid:data.param},title:'稍后再看',
-                                    className:'watch-later-trigger w-later',
-                                    onclick:tools.watchLater
-                                }:'',
-                                (data.dislike_reasons&&setting.accessKey)?{
-                                    nodeType:'div',innerText:'Ｘ',
-                                    className:'dislike-botton',
-                                    childs:[{
-                                        nodeType:'div',
-                                        className:'dislike-list',
-                                        childs:data.dislike_reasons.map(reason=>({
-                                            nodeType:'div',
-                                            dataset:{reason_id:reason.reason_id},
-                                            innerText:reason.reason_name,
-                                            title:`提交因为【${reason.reason_name}】不喜欢`,
-                                            onclick:dislike,
-                                        }))
-                                    }]
-                                }:''
-                            ]
+                nodeType: 'div',
+                className: 'spread-module',
+                childs: [
+                    {
+                        nodeType: 'a',
+                        target: '_blank',
+                        onmouseenter: data.goto == 'av' && tools.preview,
+                        onmouseleave: data.goto == 'av' && tools.preview,
+                        onmousemove: data.goto == 'av' && tools.preview,
+                        href: data.goto == 'av' ? `/video/av${data.param}` : data.uri,
+                        dataset: {
+                            tag_id: data.tag ? data.tag.tag_id : '',
+                            id: data.param,
+                            goto: data.goto,
+                            mid: data.args.up_id,
+                            rid: data.tid,
                         },
-                        `<p title="${data.title}" class="t">${data.title}</p>`,
-                        `<p class="num"><span class="play"><i class="icon"></i>${tools.formatNumber(data.play)}</span>`
-                        +`<span class="danmu"><i class="icon"></i>${tools.formatNumber(data.danmaku)}</span>`
-                    ]
-                }]
-            })
+                        childs: [
+                            {
+                                nodeType: 'div',
+                                className: 'pic',
+                                childs: [
+                                    `<div class="lazy-img"><img src="${data.cover}@160w_100h.${tools.imgType}" /></div>`,
+                                    `<div class="cover-preview-module"></div>`,
+                                    `<div class="mask-video"></div>`,
+                                    `<div class="danmu-module"></div>`,
+                                    `<span title="分区：${
+                                        data.args.tname || data.badge
+                                    }" class="tname">${data.args.tname || data.badge}</span>`,
+                                    (data.duration &&
+                                        `<span class="dur">${tools.formatNumber(
+                                            data.duration,
+                                            'time'
+                                        )}</span>`) ||
+                                        '',
+                                    data.goto == 'av'
+                                        ? {
+                                              nodeType: 'div',
+                                              dataset: { aid: data.param },
+                                              title: '稍后再看',
+                                              className: 'watch-later-trigger w-later',
+                                              onclick: tools.watchLater,
+                                          }
+                                        : '',
+                                    data.three_point.dislike_reasons && setting.accessKey
+                                        ? {
+                                              nodeType: 'div',
+                                              innerText: 'Ｘ',
+                                              className: 'dislike-botton',
+                                              childs: [
+                                                  {
+                                                      nodeType: 'div',
+                                                      className: 'dislike-list',
+                                                      childs: data.three_point.dislike_reasons.map(
+                                                          reason => ({
+                                                              nodeType: 'div',
+                                                              dataset: { reason_id: reason.id },
+                                                              innerText: reason.name,
+                                                              title: `提交因为【${reason.name}】不喜欢`,
+                                                              onclick: dislike,
+                                                          })
+                                                      ),
+                                                  },
+                                              ],
+                                          }
+                                        : '',
+                                ],
+                            },
+                            `<p title="${data.title}" class="t">${data.title}</p>`,
+                            `<p class="num"><span class="play"><i class="icon"></i>${tools.formatNumber(
+                                data.play
+                            )}</span>` +
+                                `<span class="danmu"><i class="icon"></i>${tools.formatNumber(
+                                    data.danmaku
+                                )}</span>`,
+                        ],
+                    },
+                ],
+            });
         }
         //新版创建视频卡
         function createNewRecommend(data) {
             return element._c({
-                nodeType:'div',style:'display:block',
-                className:'video-card-common',
-                childs:[
+                nodeType: 'div',
+                style: 'display:block',
+                className: 'video-card-common',
+                childs: [
                     {
-                        nodeType:'div',className:'card-pic',
-                        onmouseenter: data.goto=='av'&&tools.preview,
-                        onmouseleave: data.goto=='av'&&tools.preview,
-                        onmousemove: data.goto=='av'&&tools.preview,
-                        dataset:{
-                            tag_id:data.tag?data.tag.tag_id:'',
-                            id:data.param,goto:data.goto,mid:data.mid,rid:data.tid
+                        nodeType: 'div',
+                        className: 'card-pic',
+                        onmouseenter: data.goto == 'av' && tools.preview,
+                        onmouseleave: data.goto == 'av' && tools.preview,
+                        onmousemove: data.goto == 'av' && tools.preview,
+                        dataset: {
+                            tag_id: data.tag ? data.tag.tag_id : '',
+                            id: data.param,
+                            goto: data.goto,
+                            mid: data.args.up_id,
+                            rid: data.tid,
                         },
-                        childs:[
-                            `<a href="${data.goto=='av'?`/video/av${data.param}`:data.uri}" target="_blank">`
-                            + `<img src="${data.cover}@216w_122h_1c_100q.${tools.imgType}"><div class="count">`
-                            + `<div class="left"><span><i class="bilifont bili-icon_shipin_bofangshu"></i>${tools.formatNumber(data.play)}</span>`
-                            +(data.like&&`<span><i class="bilifont bili-icon_shipin_dianzanshu"></i>${tools.formatNumber(data.like)}</span></div>`||'</div>')
-                            + `<div class="right"><span>${data.duration&&tools.formatNumber(data.duration,'time')||''}</span></div></div></a>`,
+                        childs: [
+                            `<a href="${
+                                data.goto == 'av' ? `/video/av${data.param}` : data.uri
+                            }" target="_blank">` +
+                                `<img src="${data.cover}@216w_122h_1c_100q.${tools.imgType}"><div class="count">` +
+                                `<div class="left"><span><i class="bilifont bili-icon_shipin_bofangshu"></i>${tools.formatNumber(
+                                    data.play
+                                )}</span>` +
+                                ((data.like &&
+                                    `<span><i class="bilifont bili-icon_shipin_dianzanshu"></i>${tools.formatNumber(
+                                        data.like
+                                    )}</span></div>`) ||
+                                    '</div>') +
+                                `<div class="right"><span>${
+                                    (data.duration && tools.formatNumber(data.duration, 'time')) ||
+                                    ''
+                                }</span></div></div></a>`,
                             `<div class="cover-preview-module van-framepreview"></div>`,
                             `<div class="danmu-module van-danmu"></div>`,
-                            `<span title="分区：${data.tname||data.badge}" class="tname">${data.tname||data.badge}</span>`,
-                            data.goto=='av'?{
-                                nodeType:'div',
-                                dataset:{aid:data.param},title:'稍后再看',
-                                className:'watch-later-video van-watchlater black',
-                                onclick:tools.watchLater
-                            }:'',
-                            (data.dislike_reasons&&setting.accessKey)?{
-                                nodeType:'div',innerText:'Ｘ',
-                                className:'dislike-botton',
-                                childs:[{
-                                    nodeType:'div',
-                                    className:'dislike-list',
-                                    childs:data.dislike_reasons.map(reason=>({
-                                        nodeType:'div',
-                                        dataset:{reason_id:reason.reason_id},
-                                        innerText:reason.reason_name,
-                                        title:`提交因为【${reason.reason_name}】不喜欢`,
-                                        onclick:dislike,
-                                    }))
-                                }]
-                            }:''
-                        ]
+                            `<span title="分区：${data.args.tname || data.badge}" class="tname">${
+                                data.args.tname || data.badge
+                            }</span>`,
+                            data.goto == 'av'
+                                ? {
+                                      nodeType: 'div',
+                                      dataset: { aid: data.param },
+                                      title: '稍后再看',
+                                      className: 'watch-later-video van-watchlater black',
+                                      onclick: tools.watchLater,
+                                  }
+                                : '',
+                            data.three_point.dislike_reasons && setting.accessKey
+                                ? {
+                                      nodeType: 'div',
+                                      innerText: 'Ｘ',
+                                      className: 'dislike-botton',
+                                      childs: [
+                                          {
+                                              nodeType: 'div',
+                                              className: 'dislike-list',
+                                              childs: data.three_point.dislike_reasons.map(
+                                                  reason => ({
+                                                      nodeType: 'div',
+                                                      dataset: { reason_id: reason.id },
+                                                      innerText: reason.name,
+                                                      title: `提交因为【${reason.reason_name}】不喜欢`,
+                                                      onclick: dislike,
+                                                  })
+                                              ),
+                                          },
+                                      ],
+                                  }
+                                : '',
+                        ],
                     },
-                    `<a href="${data.goto=='av'?`/video/av${data.param}`:data.uri}" target="_blank" title="${data.title}" class="title">${data.title}</a>`,
-                    `<a href="//space.bilibili.com/${data.mid}/" target="_blank" class="up"><i class="bilifont bili-icon_xinxi_UPzhu"></i>${data.name||data.badge}</a>`,
-                ]
-            })
+                    `<a href="${
+                        data.goto == 'av' ? `/video/av${data.param}` : data.uri
+                    }" target="_blank" title="${data.title}" class="title">${data.title}</a>`,
+                    `<a href="//space.bilibili.com/${
+                        data.args.up_id
+                    }/" target="_blank" class="up"><i class="bilifont bili-icon_xinxi_UPzhu"></i>${
+                        data.args.up_name || data.badge
+                    }</a>`,
+                ],
+            });
         }
         //显示推荐视频
-        function updateRecommend (datas){
+        function updateRecommend(datas) {
             const point = listBox.firstChild;
-            datas.forEach(data=>{
-                const recommend = element.isNew?createNewRecommend(data):createOldRecommend(data);
-                recommends.push(point.insertAdjacentElement('beforeBegin',recommend));
+            datas.forEach(data => {
+                const recommend = element.isNew
+                    ? createNewRecommend(data)
+                    : createOldRecommend(data);
+                recommends.push(point.insertAdjacentElement('beforeBegin', recommend));
             });
             //移除多余的显示内容
-            while(setting.pageLimit && recommends.length>setting.pageLimit) listBox.removeChild(recommends.shift());
+            while (setting.pageLimit && recommends.length > setting.pageLimit)
+                listBox.removeChild(recommends.shift());
             listBox.scrollTop = 0;
             scrollBox.scrollTop = 0;
         }
 
         //提交不喜欢视频，视频数据提前绑定在页面元素上
-        function dislike (ev) {
-            let target=ev.target,parent=target.parentNode;
+        function dislike(ev) {
+            let target = ev.target,
+                parent = target.parentNode;
             let cancel;
             let url = `https://app.bilibili.com/x/feed/dislike`;
-            if (parent.className!='dislike-list'){
+            if (parent.className != 'dislike-list') {
                 cancel = true;
                 let deep = 1;
-                while(!parent.dataset.id&&deep++<4){
+                while (!parent.dataset.id && deep++ < 4) {
                     target = parent;
-                    parent=target.parentNode;
+                    parent = target.parentNode;
                 }
-                if (!parent.dataset.id){
-                    tools.toast('请求撤销稍后再看失败：页面元素异常',ev);
+                if (!parent.dataset.id) {
+                    tools.toast('请求撤销稍后再看失败：页面元素异常', ev);
                     return false;
                 }
                 url += `/cancel`;
-            }else{
+            } else {
                 parent = parent.parentNode.parentNode;
-                if(!element.isNew) parent = parent.parentNode;
+                if (!element.isNew) parent = parent.parentNode;
             }
-            url += `?goto=${parent.dataset.goto}&id=${parent.dataset.id}&mid=${parent.dataset.mid}`
-                +`&reason_id=${target.dataset.reason_id}&rid=${parent.dataset.rid}&tag_id=${parent.dataset.tag_id}`;
-            if (setting.accessKey) url += '&access_key='+ setting.accessKey;
-            const handleCover = ()=>{
-                if (cancel){
+            url +=
+                `?goto=${parent.dataset.goto}&id=${parent.dataset.id}&mid=${parent.dataset.mid}` +
+                `&reason_id=${target.dataset.reason_id}&rid=${parent.dataset.rid}&tag_id=${parent.dataset.tag_id}`;
+            if (setting.accessKey) url += '&access_key=' + setting.accessKey;
+            const handleCover = () => {
+                if (cancel) {
                     parent.removeChild(target);
-                }else{
+                } else {
                     const cover = document.createElement('div');
                     cover.className = 'dislike-cover';
                     cover.dataset.reason_id = target.dataset.reason_id;
@@ -389,40 +481,46 @@
             };
             //console.log(url);
             GM_xmlhttpRequest({
-                method: 'GET',url,
-                onload: res=>{
+                method: 'GET',
+                url,
+                onload: res => {
                     try {
                         const par = JSON.parse(res.response);
-                        if (par.code == 0){
+                        if (par.code == 0) {
                             handleCover();
-                        }else if((par.code==-101 && par.message=='账号未登录') || par.code==-400){
+                        } else if (
+                            (par.code == -101 && par.message == '账号未登录') ||
+                            par.code == -400
+                        ) {
                             setting.storageAccessKey(undefined);
                             tools.toast(`未获取授权或者授权失效，请点击设置重新获取授权`);
+                        } else {
+                            tools.toast(`请求不喜欢错误 code ${par.code}</br>msg ${par.message}`, {
+                                par,
+                                url,
+                            });
                         }
-                        else{
-                            tools.toast(`请求不喜欢错误 code ${par.code}</br>msg ${par.message}`,{par,url});
-                        }
-                    } catch (e){
-                        tools.toast(`请求不喜欢发生错错误${e}`,e);
+                    } catch (e) {
+                        tools.toast(`请求不喜欢发生错错误${e}`, e);
                     }
                 },
-                onerror: e=>{
-                    tools.toast(`请求不喜欢发生错误`,e);
-                }
+                onerror: e => {
+                    tools.toast(`请求不喜欢发生错误`, e);
+                },
             });
             return false;
         }
     }
 
     //全站排行榜
-    function InitRanking(){
+    function InitRanking() {
         let rankingAll;
-        if(element.isNew) {
+        if (element.isNew) {
             //……直接把旧版的排行修一修搬过来用吧
             rankingAll = element.mainDiv.querySelector('.rank-list');
-            element._s(rankingAll,{
-                className:'sec-rank report-wrap-module zone-rank rank-list',
-                innerHTML:`
+            element._s(rankingAll, {
+                className: 'sec-rank report-wrap-module zone-rank rank-list',
+                innerHTML: `
 <style>
 .bili-dropdown{position:relative;display:inline-block;vertical-align:middle;background-color:#fff;cursor:default;padding:0
 7px;height:22px;line-height:22px;border:1px solid #ccd0d7;border-radius:4px}.bili-dropdown:hover{border-radius:4px 4px 0
@@ -485,10 +583,9 @@ li:not(.show-detail)>a>.watch-later-trigger{display:none}
 <div class="bili-dropdown rank-dropdown"><span class="selected">三日</span><i class="icon icon-arrow-down"></i>
 <ul class="dropdown-list"><li class="dropdown-item" style="display: none;">三日</li><li class="dropdown-item">一周</li></ul></div></header>
 <div class="rank-list-wrap"><ul class="rank-list hot-list"><li class="state"><div class="b-loading"></div></li></ul><ul class="rank-list origin-list">
-<li class="state"><div class="b-loading"></div></li></ul></div><a href="/ranking/all/1/1/3/" target="_blank" class="more-link">查看更多<i class="icon icon-arrow-r"></i></a>`
+<li class="state"><div class="b-loading"></div></li></ul></div><a href="/ranking/all/1/1/3/" target="_blank" class="more-link">查看更多<i class="icon icon-arrow-r"></i></a>`,
             });
-        }
-        else {
+        } else {
             rankingAll = element.mainDiv.querySelector('#ranking_douga');
         }
         rankingAll.id = 'ranking-all';
@@ -497,19 +594,20 @@ li:not(.show-detail)>a>.watch-later-trigger{display:none}
         const tab = rankingHead.querySelector('.bili-tab.rank-tab');
         const dropDown = rankingHead.querySelector('.bili-dropdown.rank-dropdown');
         const warp = rankingAll.querySelector('.rank-list-wrap');
-        let type, day = setting.rankingDay;
+        let type,
+            day = setting.rankingDay;
         const loading = element.getLoadingDiv();
         const configs = [
             {
                 dataLink: 'https://api.bilibili.com/x/web-interface/ranking/v2?rid=0&type=all',
                 link: 'https://www.bilibili.com/v/popular/rank/all',
-                list: warp.firstChild
+                list: warp.firstChild,
             },
             {
                 dataLink: 'https://api.bilibili.com/x/web-interface/popular?ps=50&pn=',
                 link: 'https://www.bilibili.com/v/popular/all',
-                list: warp.lastChild
-            }
+                list: warp.lastChild,
+            },
         ];
         const detail = {};
         //20121203旧排行彻底失效，删除日期选项
@@ -519,183 +617,274 @@ li:not(.show-detail)>a>.watch-later-trigger{display:none}
         tab.style = 'font-size: 16px;';
         tab.children[0].dataset.type = 0;
         tab.children[0].textContent = '全站排行';
-        tab.children[0].addEventListener('mouseover',update);
+        tab.children[0].addEventListener('mouseover', update);
         tab.children[1].dataset.type = 1;
         tab.children[1].textContent = '综合热门';
-        tab.children[1].addEventListener('mouseover',update);
-        configs[1].list.addEventListener('scroll',handleScroll);
+        tab.children[1].addEventListener('mouseover', update);
+        configs[1].list.addEventListener('scroll', handleScroll);
 
         // 更多
         const more = element._c({
-            nodeType:'a',style:'float: right;background: white;',
-            target: '_blank', href: '',
-            innerHTML: '更多<i class="bilifont bili-icon_caozuo_qianwang"></i><i class="icon icon-arrow-r"></i>',
-            className:'more more-link',
-            parent: rankingHead
+            nodeType: 'a',
+            style: 'float: right;background: white;',
+            target: '_blank',
+            href: '',
+            innerHTML:
+                '更多<i class="bilifont bili-icon_caozuo_qianwang"></i><i class="icon icon-arrow-r"></i>',
+            className: 'more more-link',
+            parent: rankingHead,
         });
 
         //创建一个显示详情的浮窗
         detail.div = element._c({
-            nodeType:'div',style:'display:none',
-            className:'spread-module video-info-module',
-            onmouseenter: ()=> (detail.div.style.display = 'block'),
-            onmouseleave: ()=> (detail.div.style.display = 'none'),
+            nodeType: 'div',
+            style: 'display:none',
+            className: 'spread-module video-info-module',
+            onmouseenter: () => (detail.div.style.display = 'block'),
+            onmouseleave: () => (detail.div.style.display = 'none'),
         });
-        warp.insertBefore(detail.div,warp.lastChild);
+        warp.insertBefore(detail.div, warp.lastChild);
 
         //更新显示详情浮窗内容
-        function updateDetail(data,offsetTop){
-            element._s(detail.div,{
+        function updateDetail(data, offsetTop) {
+            element._s(detail.div, {
                 style: `display:"none";left:${rankingAll.offsetLeft}px;top:${offsetTop}px;`,
-                innerHTML:['<style>.clearfix.v-data>div>span{display: block;margin-bottom: 4px;width: 100%;}',
-                           '.cover-preview-module.show {opacity: 1}',
-                           '.cover-preview-module .cover {position: absolute;left: 0;top: 7px;height: 98px;width: 100%;margin-top: 2px}',
-                           '.spread-module .pic {position: relative;display: block;overflow: hidden;border-radius: 4px}</style>',
-                          ].join(''),
-                childs:[
-                    `<a class="v-title" target="_blank" style="color: rgb(0, 0, 0);" title="${data.title}" href="${`/video/av${data.aid}/`}">${data.title}</a>`,
+                innerHTML: [
+                    '<style>.clearfix.v-data>div>span{display: block;margin-bottom: 4px;width: 100%;}',
+                    '.cover-preview-module.show {opacity: 1}',
+                    '.cover-preview-module .cover {position: absolute;left: 0;top: 7px;height: 98px;width: 100%;margin-top: 2px}',
+                    '.spread-module .pic {position: relative;display: block;overflow: hidden;border-radius: 4px}</style>',
+                ].join(''),
+                childs: [
+                    `<a class="v-title" target="_blank" style="color: rgb(0, 0, 0);" title="${
+                        data.title
+                    }" href="${`/video/av${data.aid}/`}">${data.title}</a>`,
                     {
-                        nodeType:'div',
-                        className:'clearfix v-data',
-                        childs:[
-                            {nodeType:'div',style:'display: inline-block;width:160px',
-                             childs:[{
-                                nodeType:'a',target:'_blank',
-                                href: '/video/av'+data.aid,
-                                onmouseenter: tools.preview,
-                                onmouseleave: tools.preview,
-                                onmousemove: tools.preview,
-                                dataset:{id:data.aid},
-                                childs:[
-                                    {
-                                        nodeType:'div',className:'pic',
-                                        childs:[
-                                            `<div class="lazy-img" style="height:100px"><img src="${data.pic.replace(/https?:/,'')}@160w_100h.${tools.imgType}" /></div>`,
-                                            `<div class="cover-preview-module ${element.isNew?'van-framepreview':''} ranking"></div>`,
-                                            `<div class="mask-video"></div>`,
-                                            `<div class="danmu-module van-danmu"></div>`,
-                                            //`<span title="分区：${data.tname||data.badge}" class="tname">${data.tname||data.badge}</span>`,
-                                            {
-                                                nodeType:'div',
-                                                dataset:{aid:data.aid},title:'稍后再看',
-                                                className:'watch-later-trigger w-later watch-later-video van-watchlater black',
-                                                onclick:tools.watchLater
-                                            },
-                                        ]
-                                    },
-                                ]
-                            }]},
+                        nodeType: 'div',
+                        className: 'clearfix v-data',
+                        childs: [
                             {
-                                nodeType:'div',
-                                style:'display: inline-block;vertical-align: top;width: 130px;margin-left:3px',
-                                childs:[
-                                    '<span class="name"><i class="icon bilifont bili-icon_xinxi_UPzhu" style="background-position: -282px -154px;"></i>'+
-                                    `<a href="//space.bilibili.com/${data.owner&&data.owner.mid||data.mid}/" target="_blank" title="${data.owner&&data.owner.name||data.author}">${data.owner&&data.owner.name||data.author}</a></span>`,
-                                    '<span class="play"><i class="icon bilifont bili-icon_shipin_bofangshu"></i>'+
-                                    `<span title="${data.stat&&data.stat.view||data.play}">${tools.formatNumber(data.stat&&data.stat.view||data.play)}</span></span>`,
-                                    '<span class="danmu"><i class="icon bilifont bili-icon_shipin_danmushu"></i>'+
-                                    `<span title="${data.stat&&data.stat.danmaku||data.video_review}">${tools.formatNumber(data.stat&&data.stat.danmaku||data.video_review)}</span></span>`,
-                                    '<span class="coin"><i class="icon bilifont bili-icon_shipin_yingbishu"></i>'+
-                                    `<span title="${data.stat&&data.stat.coin||data.coins}">${tools.formatNumber(data.stat&&data.stat.coin||data.coins)}</span></span>`,
-                                    `<span>时长:<span style="vertical-align: top;" title="${tools.formatNumber(data.duration,'time')}">${tools.formatNumber(data.duration,'time')}</span>`,
-                                    `<span>${data.score||data.pts?'综合评分:':''}<span style="vertical-align: top;" title="${data.score||data.pts}">${data.score||data.pts?tools.formatNumber(data.score||data.pts):data.rcmd_reason&&data.rcmd_reason.content}</span></span>`,
-                                ]
+                                nodeType: 'div',
+                                style: 'display: inline-block;width:160px',
+                                childs: [
+                                    {
+                                        nodeType: 'a',
+                                        target: '_blank',
+                                        href: '/video/av' + data.aid,
+                                        onmouseenter: tools.preview,
+                                        onmouseleave: tools.preview,
+                                        onmousemove: tools.preview,
+                                        dataset: { id: data.aid },
+                                        childs: [
+                                            {
+                                                nodeType: 'div',
+                                                className: 'pic',
+                                                childs: [
+                                                    `<div class="lazy-img" style="height:100px"><img src="${data.pic.replace(
+                                                        /https?:/,
+                                                        ''
+                                                    )}@160w_100h.${tools.imgType}" /></div>`,
+                                                    `<div class="cover-preview-module ${
+                                                        element.isNew ? 'van-framepreview' : ''
+                                                    } ranking"></div>`,
+                                                    `<div class="mask-video"></div>`,
+                                                    `<div class="danmu-module van-danmu"></div>`,
+                                                    //`<span title="分区：${data.tname||data.badge}" class="tname">${data.tname||data.badge}</span>`,
+                                                    {
+                                                        nodeType: 'div',
+                                                        dataset: { aid: data.aid },
+                                                        title: '稍后再看',
+                                                        className:
+                                                            'watch-later-trigger w-later watch-later-video van-watchlater black',
+                                                        onclick: tools.watchLater,
+                                                    },
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
                             },
-                        ]
-                    }
-                ]
+                            {
+                                nodeType: 'div',
+                                style: 'display: inline-block;vertical-align: top;width: 130px;margin-left:3px',
+                                childs: [
+                                    '<span class="name"><i class="icon bilifont bili-icon_xinxi_UPzhu" style="background-position: -282px -154px;"></i>' +
+                                        `<a href="//space.bilibili.com/${
+                                            (data.owner && data.owner.mid) || data.args.up_id
+                                        }/" target="_blank" title="${
+                                            (data.owner && data.owner.name) || data.author
+                                        }">${
+                                            (data.owner && data.owner.name) || data.author
+                                        }</a></span>`,
+                                    '<span class="play"><i class="icon bilifont bili-icon_shipin_bofangshu"></i>' +
+                                        `<span title="${
+                                            (data.stat && data.stat.view) || data.play
+                                        }">${tools.formatNumber(
+                                            (data.stat && data.stat.view) || data.play
+                                        )}</span></span>`,
+                                    '<span class="danmu"><i class="icon bilifont bili-icon_shipin_danmushu"></i>' +
+                                        `<span title="${
+                                            (data.stat && data.stat.danmaku) || data.video_review
+                                        }">${tools.formatNumber(
+                                            (data.stat && data.stat.danmaku) || data.video_review
+                                        )}</span></span>`,
+                                    '<span class="coin"><i class="icon bilifont bili-icon_shipin_yingbishu"></i>' +
+                                        `<span title="${
+                                            (data.stat && data.stat.coin) || data.coins
+                                        }">${tools.formatNumber(
+                                            (data.stat && data.stat.coin) || data.coins
+                                        )}</span></span>`,
+                                    `<span>时长:<span style="vertical-align: top;" title="${tools.formatNumber(
+                                        data.duration,
+                                        'time'
+                                    )}">${tools.formatNumber(data.duration, 'time')}</span>`,
+                                    `<span>${
+                                        data.score || data.pts ? '综合评分:' : ''
+                                    }<span style="vertical-align: top;" title="${
+                                        data.score || data.pts
+                                    }">${
+                                        data.score || data.pts
+                                            ? tools.formatNumber(data.score || data.pts)
+                                            : data.rcmd_reason && data.rcmd_reason.content
+                                    }</span></span>`,
+                                ],
+                            },
+                        ],
+                    },
+                ],
             });
-        };
+        }
         //将排行数据显示到指定目标中
-        function showData(target,data){
-            while(target.lastChild) target.removeChild(target.lastChild);;
+        function showData(target, data) {
+            while (target.lastChild) target.removeChild(target.lastChild);
             target.appendChild(loading);
-            for (let i = 0;i<data.length;i++){
+            for (let i = 0; i < data.length; i++) {
                 const itemData = data[i];
                 let item, img;
                 item = element._c({
-                    nodeType:'li',
-                    className:i==0?'rank-item show-detail first highlight':i<3?'rank-item highlight':'rank-item',
-                    onmouseover: ()=>{item.classList.add('show-detail'); if (img){img.innerHTML = `<img src="${itemData.pic.split(':')[1]}@72w_45h.${tools.imgType}">`;img=undefined;}},
-                    onmouseleave: ()=>i!=0&&item.classList.remove('show-detail'),
-                    childs:[
+                    nodeType: 'li',
+                    className:
+                        i == 0
+                            ? 'rank-item show-detail first highlight'
+                            : i < 3
+                            ? 'rank-item highlight'
+                            : 'rank-item',
+                    onmouseover: () => {
+                        item.classList.add('show-detail');
+                        if (img) {
+                            img.innerHTML = `<img src="${itemData.pic.split(':')[1]}@72w_45h.${
+                                tools.imgType
+                            }">`;
+                            img = undefined;
+                        }
+                    },
+                    onmouseleave: () => i != 0 && item.classList.remove('show-detail'),
+                    childs: [
                         {
-                            nodeType:'i',className:'ri-num',innerText:i+1,
-                            onmouseenter: (ev)=> updateDetail(itemData,ev.pageY),
-                            onmouseleave: ()=> (detail.div.style.display = 'none'),
+                            nodeType: 'i',
+                            className: 'ri-num',
+                            innerText: i + 1,
+                            onmouseenter: ev => updateDetail(itemData, ev.pageY),
+                            onmouseleave: () => (detail.div.style.display = 'none'),
                         },
                         {
-                            nodeType:'a', target:"_blank",
-                            href:`/video/av${itemData.aid}/`,
-                            title:`${itemData.title}\r\n播放:${tools.formatNumber(itemData.stat&&itemData.stat.view||itemData.play)} | ${tools.formatNumber(itemData.duration, 'time')} | UP: ${itemData.owner&&itemData.owner.name||itemData.author}`,
-                            className:'ri-info-wrap clearfix',
-                            childs:[
-                                (i==0?`<div class="lazy-img ri-preview"><img src="${itemData.pic.split(':')[1]}@72w_45h.${tools.imgType}"></div>`:(
-                                    img = element._c({nodeType:'div',className: "lazy-img ri-preview",}))),
-                                `<div class="ri-detail"><p class="ri-title">${itemData.title}</p><p class="ri-point"><span class="name"><i class="icon bilifont bili-icon_xinxi_UPzhu" style="background-position: -282px -154px;"></i>${itemData.owner&&itemData.owner.name||itemData.author}</span></p></div>`,
+                            nodeType: 'a',
+                            target: '_blank',
+                            href: `/video/av${itemData.aid}/`,
+                            title: `${itemData.title}\r\n播放:${tools.formatNumber(
+                                (itemData.stat && itemData.stat.view) || itemData.play
+                            )} | ${tools.formatNumber(itemData.duration, 'time')} | UP: ${
+                                (itemData.owner && itemData.owner.name) || itemData.author
+                            }`,
+                            className: 'ri-info-wrap clearfix',
+                            childs: [
+                                i == 0
+                                    ? `<div class="lazy-img ri-preview"><img src="${
+                                          itemData.pic.split(':')[1]
+                                      }@72w_45h.${tools.imgType}"></div>`
+                                    : (img = element._c({
+                                          nodeType: 'div',
+                                          className: 'lazy-img ri-preview',
+                                      })),
+                                `<div class="ri-detail"><p class="ri-title">${
+                                    itemData.title
+                                }</p><p class="ri-point"><span class="name"><i class="icon bilifont bili-icon_xinxi_UPzhu" style="background-position: -282px -154px;"></i>${
+                                    (itemData.owner && itemData.owner.name) || itemData.author
+                                }</span></p></div>`,
                                 {
-                                    nodeType:'div',title:'添加到稍后再看',
-                                    dataset:{aid:itemData.aid},className:"watch-later-trigger w-later watch-later-video van-watchlater black",
-                                    onclick:tools.watchLater
-                                }
-                            ]
-                        }
+                                    nodeType: 'div',
+                                    title: '添加到稍后再看',
+                                    dataset: { aid: itemData.aid },
+                                    className:
+                                        'watch-later-trigger w-later watch-later-video van-watchlater black',
+                                    onclick: tools.watchLater,
+                                },
+                            ],
+                        },
                     ],
-                    parent:target
+                    parent: target,
                 });
             }
-        };
+        }
         let page = 1;
         function handleScroll() {
-            if (warp.lastChild.scrollHeight - warp.lastChild.scrollTop == warp.lastChild.clientHeight) {
+            if (
+                warp.lastChild.scrollHeight - warp.lastChild.scrollTop ==
+                warp.lastChild.clientHeight
+            ) {
                 if (++page <= 10) {
                     handleData(page);
                 }
             }
         }
         //获取/缓存/调用显示数据
-        async function handleData(page=''){
+        async function handleData(page = '') {
             const config = configs[type];
             let dataPromise;
             loading.firstChild.innerText = '正在加载...';
             config.list.appendChild(loading);
             if (config.data && !page) {
                 dataPromise = Promise.resolve(config.data);
+            } else {
+                dataPromise = fetch(configs[type].dataLink + page, { credentials: 'include' })
+                    .then(res => res.json())
+                    .then(res => {
+                        if (res.code != 0)
+                            throw `请求排行榜失败 code ${res.code}</br>msg ${res.message}`;
+                        if (!config.data) config.data = [];
+                        config.data.push(...res.data.list);
+                        if (res.data.no_more)
+                            configs[1].list.removeEventListener('scroll', handleScroll);
+                        return config.data;
+                    });
             }
-            else {
-                dataPromise = fetch(configs[type].dataLink+page,{credentials:'include'}).then(res=>res.json()).then(res=>{
-                    if (res.code!=0) throw `请求排行榜失败 code ${res.code}</br>msg ${res.message}`;
-                    if (!config.data) config.data = [];
-                    config.data.push(...res.data.list);
-                    if (res.data.no_more) configs[1].list.removeEventListener('scroll',handleScroll);
-                    return config.data;
+            dataPromise
+                .then(data => {
+                    showData(config.list, data);
+                    config.list.removeChild(loading);
+                })
+                .catch(e => {
+                    loading.firstChild.innerText = `请求排行榜发生错误 ${e}`;
+                    console.error('请求排行榜发生错误', e);
                 });
-            }
-            dataPromise.then((data)=>{
-                showData(config.list, data);
-                config.list.removeChild(loading);
-            }).catch(e=>{
-                loading.firstChild.innerText = `请求排行榜发生错误 ${e}`;
-                console.error('请求排行榜发生错误',e);
-            });;
-        };
+        }
         //处理排行榜切换事件，调用获取并显示数据
-        function update(ev){
+        function update(ev) {
             //console.log(ev);
-            if (ev.target.dataset.type==type) return;
+            if (ev.target.dataset.type == type) return;
             type = ev.target.dataset.type;
             setting.setRankingType(type);
             tab.children[type].classList.add('on');
-            tab.children[1-type].classList.remove('on');
+            tab.children[1 - type].classList.remove('on');
             type != warp.classList.contains('show-origin') && warp.classList.toggle('show-origin');
             //rankingAll.lastChild.href = `/ranking/${type==1?'all':'origin'}/0/0/${day}/`;
             more.href = configs[type].link;
             handleData();
-        };
+        }
         if (setting.noRanking) {
             //document.getElementById('ranking-all').style = 'display: none';
         } else {
-            update({target:{dataset:{type:setting.rankingType}}});
+            update({ target: { dataset: { type: setting.rankingType } } });
         }
     }
 
