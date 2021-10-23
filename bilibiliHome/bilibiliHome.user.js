@@ -328,9 +328,7 @@
                                 ],
                             },
                             `<p title="${data.title}" class="t">${data.title}</p>`,
-                            `<p class="num"><span class="play"><i class="icon"></i>${tools.formatNumber(
-                                data.play
-                            )}</span>` +
+                            `<p class="num"><span class="play"><i class="icon"></i>${data.cover_left_text_1}</span>` +
                                 `<span class="danmu"><i class="icon"></i>${tools.formatNumber(
                                     data.danmaku
                                 )}</span>`,
@@ -365,7 +363,7 @@
                             }" target="_blank">` +
                                 `<img src="${data.cover}@216w_122h_1c_100q.${tools.imgType}"><div class="count">` +
                                 `<div class="left"><span><i class="bilifont bili-icon_shipin_bofangshu"></i>${tools.formatNumber(
-                                    data.play
+                                    data.cover_left_text_1
                                 )}</span>` +
                                 ((data.like &&
                                     `<span><i class="bilifont bili-icon_shipin_dianzanshu"></i>${tools.formatNumber(
@@ -718,9 +716,9 @@ li:not(.show-detail)>a>.watch-later-trigger{display:none}
                                         }</a></span>`,
                                     '<span class="play"><i class="icon bilifont bili-icon_shipin_bofangshu"></i>' +
                                         `<span title="${
-                                            (data.stat && data.stat.view) || data.play
+                                            (data.stat && data.stat.view) || data.cover_left_text_1
                                         }">${tools.formatNumber(
-                                            (data.stat && data.stat.view) || data.play
+                                            (data.stat && data.stat.view) || data.cover_left_text_1
                                         )}</span></span>`,
                                     '<span class="danmu"><i class="icon bilifont bili-icon_shipin_danmushu"></i>' +
                                         `<span title="${
