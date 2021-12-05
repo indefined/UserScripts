@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.6.21
+// @version      0.6.22
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -372,7 +372,7 @@
                 parent = parent.parentNode.parentNode;
                 if(!element.isNew) parent = parent.parentNode;
             }
-            url += `?goto=${parent.dataset.goto}&id=${parent.dataset.id}&mid=${parent.dataset.mid}`
+            url += `?build=5000000&goto=${parent.dataset.goto}&id=${parent.dataset.id}&mid=${parent.dataset.mid}`
                 +`&reason_id=${target.dataset.reason_id}&rid=${parent.dataset.rid}&tag_id=${parent.dataset.tag_id}`;
             if (setting.accessKey) url += '&access_key='+ setting.accessKey;
             const handleCover = ()=>{
@@ -395,7 +395,7 @@
                         const par = JSON.parse(res.response);
                         if (par.code == 0){
                             handleCover();
-                        }else if((par.code==-101 && par.message=='账号未登录') || par.code==-400){
+                        }else if((par.code==-101 && par.message=='账号未登录')){
                             setting.storageAccessKey(undefined);
                             tools.toast(`未获取授权或者授权失效，请点击设置重新获取授权`);
                         }
