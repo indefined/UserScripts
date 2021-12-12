@@ -17,7 +17,8 @@
 // @exclude      *://*hentaiverse.org/*pages/showequip.php?*
 // @include      *://forums.e-hentai.org/*showtopic=*
 // @include      *://hvmarket.xyz/*
-// @version      2021.09.22
+// @include      *://reasoningtheory.net/*
+// @version      2021.12.12
 // ==/UserScript==
 
 if (document.location.href.match(/ss=iw/)&&!document.getElementById('item_pane'))return
@@ -50,6 +51,7 @@ function main(){
         'Bazaar&ss=la', //防具彩票12
         'equip', //装备属性页13
         'hvmarket.xyz', //hvmarket14
+        'reasoningtheory.net', //拍卖15
     ];
     var location;
     for(location = 0; location < lklist.length; location++){
@@ -199,6 +201,34 @@ function main(){
             translateExtra('div.cs'); //物品分类
             translateItems('.main_content>h1'); //购买页面标头
             translateItems('h2.exch'); //购买页面的购买描述
+            break;
+
+        case 15: //拍卖
+            var table = document.querySelector('table.bidlog>:nth-child(2)');
+            if (table) {
+                // 翻译拍卖记录
+                translateItems('td:nth-child(6)');
+                translateEquips('td:nth-child(6)');
+                new MutationObserver(function(){
+                    // 拍卖记录自动刷新
+                    translatedList.clear(); // 清空旧翻译记录
+                    if (!translated) translated = -1;
+                    // 重新翻译
+                    translateItems('td:nth-child(6)');
+                    translateEquips('td:nth-child(6)');
+                    if (translated == -1) restore();
+                }).observe(table, {childList:true});
+            }
+            else if (document.getElementById('itemSections')) {
+                // 拍卖列表
+                translateItems('td:nth-child(2)');
+                translateEquips('td:nth-child(2)');
+            }
+            else if (document.getElementById('draw')) {
+                // 拍卖时间
+                translateItems('.itemHeader>span>span:nth-child(2)');
+                translateEquips('.itemHeader>span>span:nth-child(2)');
+            }
             break;
 
         default: //没有匹配命中需要翻译的网页

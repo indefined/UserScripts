@@ -20,9 +20,11 @@
 
 ## 脚本说明
 
+![效果实例](https://greasyfork.s3.us-east-2.amazonaws.com/nzycbcbtb9p5prkg7bhlrfy87ipf)
+
 **当前脚本适配HV 0.88版本（即异世界第二季）**
 
-### HV 装备物品汉化 v2021.09.22 [点击此处安装](https://sleazyfork.org/scripts/404119/code/install.user.js)
+### HV 装备物品汉化 v2021.12.12 [点击此处安装](https://sleazyfork.org/scripts/404119/code/install.user.js)
 
 - 基于原**HV物品汉化**脚本修改，汉化Hentaiverse、EH论坛、HVMarket内的物品、装备及装备属性，带装备高亮/装备店隐藏锁定装备
 - **如有同时使用其它汉化，需要先于其它汉化脚本安装运行才会生效**
