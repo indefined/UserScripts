@@ -2,7 +2,7 @@
 // @name        bilibili直播间工具
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.46.4
+// @version     0.5.47
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -556,7 +556,7 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
             medal:{
                 name:'勋章',
                 link:'//link.bilibili.com/p/center/index#/user-center/wearing-center/my-medal',
-                dataUrl:'//api.live.bilibili.com/fans_medal/v5/live_fans_medal/iApiMedal',
+                dataUrl:'//api.live.bilibili.com/xlive/app-ucenter/v1/fansMedal/panel?page_size=256',
             },
             title:{
                 name:'头衔',
@@ -719,26 +719,15 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
             });
         },
         async listMedal(data, medalWall){
-            this.loadingDiv.style = '';
+            //this.loadingDiv.style = '';
             let hasMedal = false;
-            if (data.code!=0||!data.data||!(data.data.fansMedalList instanceof Array)) {
+            if (data.code!=0||!data.data) {
                 console.error(data);
                 throw(`查询勋章失败 code:${data.code}</br>${data.message}`);
             }
-            const medalList = data.data.fansMedalList;
-            if (this.room && this.room.UID && !medalWall) {
-                const wall = await helper.xhr('//api.live.bilibili.com/xlive/web-ucenter/user/MedalWall?target_id='+this.room.UID);
-                if (wall.code ==0 && wall.data && (wall.data.list)) {
-                    medalWall = wall.data.list
-                }
-            }
-            if (medalWall instanceof Array) {
-                for (let item of medalWall) {
-                    let medal = medalList.find(i=>i.target_name == item.target_name);
-                    if (medal) medal.live_stream_status = item.live_status;
-                }
-            }
+            const medalList = (data.data.special_list||[]).concat(data.data.list||[]);
             medalList.forEach((v)=>{
+                v = {...v.medal, ...v.room_info, target_name: v.anchor_info.nick_name, status: v.medal.wearing_status};
                 if (this.room.ANCHOR_UID==v.target_id) hasMedal = true;
                 const itemDiv = helper.create('div',{
                     style:'margin-top: 8px',
@@ -767,18 +756,18 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
                     style:'color:#999;min-width:50px',
                     href:`/${v.room_id||v.roomid}`,target:"_blank",className:"intimacy-text v-middle dp-i-block",
                     title:`今日上限剩余${v.day_limit-v.today_feed}\n点击前往主播房间`,
-                    innerHTML:`${v.today_feed}/${v.day_limit}${v.live_stream_status==1 ?'<img src="//s1.hdslb.com/bfs/static/blive/blfe-live-room/static/img/living.44021fe..gif" style="height: 12px;vertical-align: middle;" title="正在直播">':''}`
+                    innerHTML:`${v.today_feed}/${v.day_limit}${v.living_status==1 ?'<img src="//s1.hdslb.com/bfs/static/blive/blfe-live-room/static/img/living.44021fe..gif" style="height: 12px;vertical-align: middle;" title="正在直播">':''}`
                 },itemDiv);
             });
-            const pages = data.data.pageinfo;
-            if (pages && pages.curPage == 1 && medalList.length==0) {
+            const pages = data.data.page_info;
+            if (pages && pages.current_page == 1 && medalList.length==0) {
                 helper.create('p',{
                     innerHTML:'<p data-v-17cf8b1e="" class="empty-hint-text">你还没有勋章哦～</p>'
                     +'<div data-v-17cf8b1e="" class="empty-image"></div>'
                 },this.dialogPanel);
             }
-            else if (pages && pages.curPage < pages.totalpages) {
-                await helper.xhr(this.strings.medal.dataUrl + '?page=' + (+pages.curPage+1)).then(async data=>this.listMedal(data, medalWall));
+            else if (pages && pages.has_more) {
+                await helper.xhr(this.strings.medal.dataUrl + '?page=' + (pages.next_page)).then(async data=>this.listMedal(data, medalWall));
             }
         },
         async listTitle(data){
