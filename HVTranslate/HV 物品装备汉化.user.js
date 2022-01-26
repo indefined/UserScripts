@@ -18,7 +18,7 @@
 // @include      *://forums.e-hentai.org/*showtopic=*
 // @include      *://hvmarket.xyz/*
 // @include      *://reasoningtheory.net/*
-// @version      2021.12.12
+// @version      2021.01.25
 // ==/UserScript==
 
 if (document.location.href.match(/ss=iw/)&&!document.getElementById('item_pane'))return
@@ -219,10 +219,19 @@ function main(){
                     if (translated == -1) restore();
                 }).observe(table, {childList:true});
             }
-            else if (document.getElementById('itemSections')) {
+            else if (table = document.getElementById('itemSections')) {
                 // 拍卖列表
                 translateItems('td:nth-child(2)');
                 translateEquips('td:nth-child(2)');
+                new MutationObserver(function(){
+                    // 拍卖列表自动刷新
+                    translatedList.clear(); // 清空旧翻译记录
+                    if (!translated) translated = -1;
+                    // 重新翻译
+                    translateItems('td:nth-child(2)');
+                    translateEquips('td:nth-child(2)');
+                    if (translated == -1) restore();
+                }).observe(table, {childList:true});
             }
             else if (document.getElementById('draw')) {
                 // 拍卖时间
@@ -446,6 +455,12 @@ function loadItems(){
         'Repurposed Actuator' : '动力碎片(重)',
         'Shade Fragment' : '暗影碎片(轻)',
         'Crystallized Phazon' : '相位碎片(布)',
+        'Legendary Weapon Core' : '传奇武器核心',
+        'Peerless Weapon Core' : '无双武器核心',
+        'Legendary Staff Core' : '传奇法杖核心',
+        'Peerless Staff Core' : '无双法杖核心',
+        'Legendary Armor Core' : '传奇护甲核心',
+        'Peerless Armor Core' : '无双护甲核心',
         'Voidseeker Shard' : '虚空碎片',
         'Featherweight Shard' : '羽毛碎片',
         'Aether Shard' : '以太碎片',
@@ -517,6 +532,7 @@ function loadItems(){
         'Festival Coupon' : '节日礼券(等级7)', //2020起收获节（中秋？）
         'Annoying Gun' : '烦人的枪(等级8)', //2020 圣诞节
         'Vaccine Certificate' : '疫苗证明(等级8)', //2021 复活节
+        'Barrel' : '酒桶(等级8)', //2021 圣诞节
 
 
         //旧旧古董

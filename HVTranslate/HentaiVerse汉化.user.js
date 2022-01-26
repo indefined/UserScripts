@@ -13,7 +13,7 @@
 // @include        *://hentaiverse.org/*
 // @include        *://alt.hentaiverse.org/*
 // @core           http://userscripts-mirror.org/scripts/show/41369
-// @version        2021.09.22
+// @version        2022.01.25
 // @grant none
 // ==/UserScript==
 (function () {
@@ -24,11 +24,12 @@
     //格式： 'css选择器': ['使用到的字典名称',..]
     //注意使用到的字典顺序，互相包含的分区或者一个分区使用多个字典前面的翻译可能会影响后面的结果
     var dictsMap = {
-        // 除了本字典分区里指定的部分之外，正文字典里另有elementTitle(鼠标悬停)和alerts(浏览器弹窗)两个特殊部分使用独立方法翻译且所有页面生效
-        '#messagebox' : ['messagebox', 'items', 'equipsName', 'equipsInfo'], //System Message弹窗，所有页面的系统信息提示翻译均在这部分
+        // 除了本字典分区里指定的部分之外，正文字典里另有alerts(浏览器弹窗)特殊部分使用独立方法翻译且所有页面生效
+        '#messagebox' : ['messagebox', 'items', 'equipsName', 'equipsInfo'], //HV内的系统消息浮窗，所有页面的系统信息提示翻译均在这部分
+        '#messagebox_outer' : ['messagebox', 'items', 'equipsName', 'equipsInfo'], //HV内的系统消息浮窗，所有页面的系统信息提示翻译均在这部分
         'body>script[src$="hvc.js"]+div[style]:not([id])' : ['login'], //登陆页面，因为没有ID特征比较难搞
         '#navbar' : ['menu', 'difficulty'], //主菜单导航栏，使用菜单字典和难度名字典
-        '#eqch_left' : ['character', 'equipsName'], //主界面和切换装备页左侧栏，使用主界面字典和装备字典
+        '#eqch_left' : ['character', 'equipsName', 'equipsPart'], //主界面和切换装备页左侧栏，使用主界面字典和装备字典
         '#compare_pane' : ['equipsInfo'], //切换装备页面的装备对比悬浮窗，使用装备信息字典。
         '#eqch_stats' : ['characterStatus'], //主界面右侧状态栏
         '#ability_outer' : ['ability'], //技能页面，使用技能名称字典
@@ -41,12 +42,14 @@
         '#itshop_outer' : ['items', 'artifact'], //物品商店
         '#eqshop_outer' : ['equipsName'], //装备商店
         '#itembot_outer' : ['itemBot', 'items', 'artifact'], //采购机器人
+        '#bocreate' : ['itemBot'], //采购机器人
         '#settings_outer' : ['settings', 'skills', 'difficulty', 'equipsName'], //设置页面
         '#monstercreate_right' : ['monsterCreate'], //创建怪物信息，由于此面板被怪物实验室包含，实际也使用到了下一行的字典
         '#monster_outer' : ['monsterLabs'], //怪物实验室
         '#upgrade_text' : ['monsterLabs', 'items'], //怪物实验室的升级强化需求提示，需要监听动态翻译
         '#shrine_left' : ['artifact'], //祭坛左侧物品列表
         '#shrine_right' : ['shrine'], //祭坛右侧说明
+        '#accept_equip' : ['equipsPart'], //装备献祭选项
         '#shrine_offertext' : ['artifact', 'shrine'], //祭坛献祭物品动态说明，需要动态监听
         '#mmail_outer' : ['mm'], //邮件
         '#mmail_attachlist' : ['items', 'artifact', 'equipsName'], //邮件附件列表
@@ -81,6 +84,7 @@
     //只要上面字典分区里没有的就算在下面动态元素列表里有的也不会被翻译
     var dynamicElem = [
         '#popup_box', //装备、物品信息悬浮窗
+        '#bocreate', //物品机器人订单按钮
         '#ability_info', //技能说明悬浮窗
         '#upgrade_text', //怪物实验室强化动态文字
         '#forge_cost_div', //装备修复、拆解、魂绑、重铸右侧的动态提示文本
@@ -119,29 +123,8 @@ var words = {
 
     //已知现缺：
         // trains：缺：新陈代谢、激励、解离症
-        // itemInfos：缺：无价的明朝瓷器、七叶幸运草、幸运兔脚；未校对：格鲁、彩虹蛋、彩绘蛋、神秘宝盒、真-变态胸章
+        // itemInfos：缺：无价的明朝瓷器、七叶幸运草、幸运兔脚；
 
-
-    ////////////////////////////////////////////////////////////////////////////////
-    // 页面元素鼠标悬停的英文提示文本，此部分使用独立方法翻译不受上面dictsMap影响
-    // 所有页面的鼠标悬停文本提示（非悬浮窗）翻译均在这部分
-    ////////////////////////////////////////////////////////////////////////////////
-    elementTitle: {
-        'Stamina: Great. You receive a 100% EXP Bonus.' : '精力充沛，你将获得+100%经验奖励',
-        'Stamina: Normal. You are not receiving any bonuses or penalties.' : '精力正常，你既不会收到额外的奖励也不会受到惩罚',
-        'Stamina: Exhausted. You do not receive EXP or drops from monsters, and you cannot gain proficiencies.' : '精力耗竭，你将无法从怪物收到任何经验或者掉落，也无法获得熟练度奖励',
-        'You Got Mail' : '你有新邮件',
-        'Major Ability Slot' : '主要技能槽',
-        'Supportive Ability Slot' : '辅助技能槽',
-        'Protection Augment Ability Slot' : '“守护”扩充技能槽',
-        'Drain Augment Ability Slot' : '“枯竭”扩充技能槽',
-        'Click or drag an unlocked ability to fill slot.' : '点击或者拖曳一个已解锁技能到此处安装',
-        'Unlock Cost:' : '解锁消耗',
-        '/Mastery Points?/' : '支配点',
-        'You cannot opt out unless you have at least one ticket.' : '你必须至少购买一张彩票才能选择放弃头奖争夺',
-        'You will not participate in the drawing for the grand prize of this lottery.' : '你已经放弃参与本次彩票的头奖争夺',
-
-    },
 
     ////////////////////////////////////////////////////////////////////////////////
     // 浏览器弹窗，此部分使用独立翻译方法不受上面dictsMap影响
@@ -149,7 +132,6 @@ var words = {
     ////////////////////////////////////////////////////////////////////////////////
     alerts: {
         // 此部分内原文基本都是使用符合正则格式写的（正则元字符添加\\转义，去除前后的/之后可以直接用于创建RegExp）
-        'You have transgressed against your God and your fellow Man. God has charged me with your redemption. You are hereby Exiled to Wraeclast where, it is hoped, you shall come to repent your Sins, and make your peace with your beloved Father.' : '你已经违背了你的上帝和你的同胞。 上帝已将你的救赎交托给我。 你在此被放逐到瓦尔克拉斯，希望你能来忏悔你的罪孽，并与你敬爱的神父和解（译者注：在使用 Monsterbation 时，你不能在启用 mouseEngage 的同时将物品使用绑定在鼠标点击上；或将物品使用绑定在 Monsterbation 的鼠标 Hover 上）',
         //hvc.js里的
         'Server communication failed: ' : '服务器通讯错误：',
         '/Are you sure you wish to purchase ([\\d,]+) equipment pieces? for ([\\d,]+) credits\\?/' : '是否确认以 $2 Credits的价格购买 $1 件装备',
@@ -197,6 +179,8 @@ var words = {
         'Account Suspended' : '你登月了~',
         'Snowflake and the moogles are relaxing on the beach. Check back later.' : '雪花女神和莫古利正在海滩休息，请稍后再来',
         'Snowflake and the moogles are rebooting the universe. Check back later.' : '雪花女神和莫古利正在重启宇宙，请稍后再来',
+        'Snowflake and the moogles are playing in the snow. Check back later.' : '雪花女神和莫古利正在玩雪，请稍后再来',
+        'Snowflake and the moogles are pining for spring. Check back later.' : '雪花女神和莫古利渴望春天，请稍后再来',
 
         'No energy items available.' : '你没有可用的精神恢复剂',
         'Name contains invalid characters.' : '名字包含不支持字符(仅支持英文和数字)',
@@ -293,6 +277,7 @@ var words = {
         'was added to your balance.' : '已添加到你的余额。',
 
         'Invalid reward class' : '所选奖励类型不可用',
+        'Invalid reward type' : '所选奖励类型不可用',
         'No such item' : '物品不存在',
         'You do not have enough of that trophy' : '你没有足够的奖杯执行此次献祭',
         'Snowflake has blessed you with some of her power!' : '雪花女神用她的力量祝福了你！',
@@ -356,6 +341,7 @@ var words = {
         '. (It\'s free!)' : ' (不要钱的)',
         'User:' : '用户:',
         'Pass:' : '密码:',
+        'Login!' : '登陆!',
         '/^ or $/' : ' 或者 ',
         'Register' : '注册',
         'The HentaiVerse a free online game presented by ' : 'HentaiVerse是由E绅士呈现的一个免费在线游戏 ',
@@ -376,6 +362,7 @@ var words = {
         'Equipment Shop' : '武器店',
         '/^Item Shop$/' : '道具店',
         'Item Shop Bot' : '采购机器人',
+        'Item Backorder' : '采购机器人',
         'Monster Lab' : '怪物实验室',
         'The Shrine' : '雪花祭坛',
         'MoogleMail' : '莫古利邮局',
@@ -410,6 +397,12 @@ var words = {
         '/^Persistent$/' : '恒定世界',
         'Currently playing on Persistent' : '你当前在传统恒定世界模式下',
         'Click to switch to Isekai' : '点击切换到异世界模式',
+
+        'You have increased stamina drain due to low riddle accuracy' : '因为你的小马图回答正确率太低，你的精力消耗速率被提高了',
+        'Great. You receive a 100% EXP Bonus but stamina drains 50% faster.' : '充沛，你将获得+100%经验奖励，但精力消耗速度增加50%。',
+        'Normal. You are not receiving any bonuses or penalties.' : '正常，你既不会收到额外的奖励也不会受到惩罚',
+        'Exhausted. You do not receive EXP or drops from monsters, and you cannot gain proficiencies.' : '耗竭，你将无法从怪物收到任何经验或者掉落，也无法获得熟练度奖励',
+        'You Got Mail' : '你有新邮件',
     },
 
     ///////////////////////////////////////////////////////难度名
@@ -454,10 +447,6 @@ var words = {
         'Equipment Slots' : '套装切换',
         'Main Hand' : '主手',
         'Off Hand' : '副手',
-        'Body' : '身体',
-        'Hands' : '手部',
-        'Legs' : '腿部',
-        'Feet' : '足部',
         'Empty Slot' : '空槽位',
         'Empty' : '空',
         'Soulbound' : '灵魂绑定',
@@ -618,9 +607,17 @@ var words = {
 
     ///////////////////////////////////////////////////////技能
     ability: {
+        'Major Ability Slot' : '主要技能槽',
+        'Supportive Ability Slot' : '辅助技能槽',
+        'Protection Augment Ability Slot' : '“守护”扩充技能槽',
+        'Drain Augment Ability Slot' : '“枯竭”扩充技能槽',
+        'Click or drag an unlocked ability to fill slot.' : '点击或者拖曳一个已解锁技能到此处安装',
+        'Unlock Cost:' : '解锁消耗',
+
         'Maxed' : '已满级',
         'Ability Points' : '技能点',
         'Mastery Points' : '支配点',
+        'Mastery Point' : '支配点',
         'AP' : '技能点',
         'Cost:' : '消耗:',
         'HP Tank' : '体力值增幅',
@@ -1124,6 +1121,13 @@ var words = {
         'Shade Fragment' : '暗影碎片(轻)',
         'Crystallized Phazon' : '相位碎片(布)',
 
+        'Legendary Weapon Core' : '传奇武器核心',
+        'Peerless Weapon Core' : '无双武器核心',
+        'Legendary Staff Core' : '传奇法杖核心',
+        'Peerless Staff Core' : '无双法杖核心',
+        'Legendary Armor Core' : '传奇护甲核心',
+        'Peerless Armor Core' : '无双护甲核心',
+
         'Voidseeker Shard' : '虚空碎片',
         'Featherweight Shard' : '羽毛碎片',
         'Aether Shard' : '以太碎片',
@@ -1163,7 +1167,6 @@ var words = {
         'Grue' : '格鲁',
         'Seven-Leafed Clover' : '七叶幸运草',
         'Rabbit\'s Foot' : '幸运兔脚',
-        'Wirt\'s Leg' : '维特之脚',
         'Wirts Leg' : '维特之脚',
         'Shark-Mounted Laser' : '装在鲨鱼头上的激光枪',
         'BFG9000' : 'BFG9000',
@@ -1327,6 +1330,7 @@ var words = {
         'Festival Coupon' : '节日礼券(等级7)', //2020起收获节（中秋）
         'Annoying Gun' : '烦人的枪(等级8)', //2020 圣诞节
         'Vaccine Certificate' : '疫苗证明(等级8)', //2021 复活节
+        'Barrel' : '酒桶(等级8)', //2021 圣诞节
 
 
     },
@@ -1397,6 +1401,12 @@ var words = {
         'Supportive Magic Proficiency': '增益魔法熟练度',
         'Magical Base Damage': '基础魔法伤害',
         'Physical Base Damage': '基础物理伤害',
+        'The core of a legendary weapon. Contains the power to improve a weapon beyond its original potential.' : '一件传奇武器的核心。含有提升一件武器原始潜能的力量。',
+        'The core of a peerless weapon. Contains the power to improve a weapon beyond its original potential.' : '一件无双武器的核心。含有提升一件武器原始潜能的力量。',
+        'The core of a legendary staff. Contains the power to improve a staff beyond its original potential.' : '一件传奇法杖的核心。含有提升一件法杖原始潜能的力量。',
+        'The core of a peerless staff. Contains the power to improve a staff beyond its original potential.' : '一件无双法杖的核心。含有提升一件法杖原始潜能的力量。',
+        'The core of a legendary armor. Contains the power to improve an armor piece or shield beyond its original potential.' : '一件传奇护甲的核心。含有提升一件护甲或者盾牌原始潜能的力量。',
+        'The core of a peerless armor. Contains the power to improve an armor piece or shield beyond its original potential.' : '一件无双护甲的核心。含有提升一件护甲或者盾牌原始潜能的力量。',
         //其它可强化属性与equipsInfo装备属性字典共用
 
         //碎片
@@ -1550,8 +1560,8 @@ var words = {
         'The label is faded, but you can barely make out the letters' : '标签已经褪色了，但是你勉强认出了一些字母', //-s-ra--eca、-f-zer、-ode--a、J--s-n、-ov-vax、-put--V、Co--de--a
         'Give it to Snowflake for analysis.' : '把它交给雪花分析。(2021 复活节活动)',
 
-        //旧奖杯。未校对：彩虹蛋、彩绘蛋、神秘宝盒、真-变态胸章
-        'One of only 57 limited edition boxes filled with spent ability points. You\'re not quite sure when you picked this up, but something tells you to hang onto it.' : '57 个限量版盒子的其中一个，里面放满了用过的技能点。你很犹豫是否要捡起它，但有个声音告诉你要紧抓住它不放。',
+        //旧奖杯
+        'One of only 57 limited edition boxes filled with spent ability points. You\'re not quite sure when you picked this up, but something tells you to hang on to it.' : '57 个限量版盒子的其中一个，里面放满了用过的技能点。你很犹豫是否要捡起它，但有个声音告诉你要紧抓住它不放。',
         'These gifts were handed out for the 2009 Winter Solstice. It appears to be sealed shut, so you will need to make Snowflake open it.' : '这些礼物在 2009 年冬至发放。看来这似乎是密封包装，所以你需要请雪花来打开它。',
         'You found these in your Xmas stocking when you woke up. Maybe Snowflake will give you something for them.' : '你醒来时在你的圣诞袜里发现这些东西。说不定雪花会跟你交换礼物。(2009年以来每年圣诞节礼物)',
         'You found this junk in your Xmas stocking when you woke up. Maybe Snowflake will give you something useful in exchange.' : '你醒来时在你的圣诞袜里发现这个垃圾。把它交给雪花或许她会给你一些好东西作为交换。(2009年以来每年圣诞节礼物)', //0.87更新
@@ -1570,6 +1580,7 @@ var words = {
         'A very fragile flower. While you would leave it at home rather than take it into battle, handing it to Snowflake for safekeeping seems like the better choice.' : '一朵非常脆弱的花。虽然你宁愿把它留在家里也不愿带入战斗，但把它交给雪花保管似乎是更好的选择。(2018 圣诞节)',
         'A heart, made of iron. While it was capable of protecting you from damage once, it seems to have been spent already. You should give it to Snowflake.' : '一颗钢铁制作的心。在它曾经可用时它可以保护你免受一次伤害，但它现在似乎已经被用过了。你应该把它给雪花。(2019 圣诞节)',
         'A precursor smartgun with autonomous aiming and talking functionality. The name "Skippy" is crudely painted on its side. It seems broken in more ways than one.' : '一把拥有自动瞄准和说话功能的旧世界智能枪。其名称"Skippy"粗犷地喷涂在侧面。它似乎不止一个地方坏了(2020 圣诞节)',
+        'Taru da! It\'s a barrel, which may or may not be filled with yummy nomnoms, but you will never know unless you ask Snowflake to open it.' : '塔鲁达！ 这是一个桶，里面可能装满了美味的nomnoms，也可能没有，但除非你让雪花打开它，否则你永远不会知道。(2021 圣诞节)',
 
         'A badge inscribed with your RealPervert identity. Regardless of whether you fell for it or not, you got this for participating in the 2011 April Fools thread.' : '一个刻着你的实名变态身份的胸章。无论你是否信以为真，你参与了 2011 年愚人节主题就会得到这个。',
         'A 1/10th scale collectible figure of Raptor Jesus. Consolitory prize for those who did not ascend during the May 2011 Rapture.' : '猛禽耶稣的 1/10 比例缩放公仔。给 2011 年 5 月被提发生期间没被送到天上的人开个安慰价格。',
@@ -1783,6 +1794,25 @@ var words = {
         ' the ' : ' ',
         '/^[tT]he /' : '',
         '/ the$/i' : '',
+    },
+
+    ///////////////////////////////////////////////////////装备部件
+    ////……由于拆分起来比较麻烦装备部件字典和其它部分有内容重叠
+    ///////////////////////////////////////////////////////
+    equipsPart: {
+        'One-Handed Weapon':'单手武器',
+        'Two-Handed Weapon':'双手武器',
+        'Staff':'法杖',
+        'Shield':'盾牌',
+        'Cloth Armor':'布甲',
+        'Light Armor':'轻甲',
+        'Heavy Armor':'重甲',
+
+        'Helmet' : '头部',
+        'Body' : '身体',
+        'Hands' : '手部',
+        'Legs' : '腿部',
+        'Feet' : '足部',
     },
 
     ///////////////////////////////////////////////////////装备说明
@@ -2090,12 +2120,12 @@ var words = {
         'normal, italic, oblique' : '普通(normal),斜体(italic),斜体+(oblique)（请输入对应英文）',
         '-8 to 8 pixels (tweak until text appears centered)' : '-8 ~ 8 像素（请输入数字，可适当调整使文字垂直居中）',
 
-        'Equipment Sets' : '套装选择',
-        'If you want to have separate slotted abilities, battle items and skillbars/autocast assignments per equipment set for your current persona, you can toggle the options below. ' : '默认情况下，同一个人格角色下的所有装备套装共享一样的技能，战斗物品，快捷栏，自动施法配置。如果你想让不同的装备套装不使用不同的各项配置，你可以在这里更改选项。',
-        'If this is changed, the current persona\'s shared set will be assigned to Set 1 and vice versa. This can be set differently for each persona.' : ' 如果以下设定被勾选，则当前人物角色该项的原有设置将被归类至套装1，其它套装可以重新设置，当取消勾选时则所有套装的该项配置将重新使用原有套装1的设置。',
+        'Equipment Sets' : '套装设定',
+        'If you want to have separate slotted abilities, battle items and skillbars/autocast assignments per equipment set for your current persona, you can toggle the options below. ' : '默认情况下，同一个人格角色下的所有装备套装共享一样的技能、战斗物品、快捷栏、自动施法配置。如果你想让不同的装备套装使用不同的各项配置，你可以在这里更改选项。',
+        'If this is changed, the current persona\'s shared set will be assigned to Set 1 and vice versa. This can be set differently for each persona.' : ' 如果以下选项被勾选，则当前人物角色该项的原有设置将仅应用于套装1，其它套装可以重新设置，当取消勾选时则当前人格角色下所有套装的该项配置将重新使用原有套装1的设置。',
         'Use Separate Ability Set Assigments' : '使用不同的技能配置',
         'Use Separate Battle Item Assigments' : '使用不同的战斗物品配置',
-        'Use Separate Skillbar/Autocast Assignments' : '使用不同的快捷栏及自动施放配置',
+        'Use Separate Skillbar/Autocast Assignments' : '使用不同的快捷栏及自动施法配置',
 
         'Vital Bar Style' : '状态值显示设置',
         'You can either use the standard bar which uses pips for charges, or a more utilitarian (and skinnable) bar that has numerical bars for everything.' : '你可以使用预设的两端缩进（类似上古卷轴式）血条来表示体力值，圆点来表示Overcharge槽，也可以使用更直观的通常血条来表示体力值和Overcharge槽。',
@@ -2105,9 +2135,9 @@ var words = {
         'Shrine Trophy Upgrades' : '献祭奖杯升级',
         'By default, as you gain levels, Snowflake will start accepting more lower-tier trophies for a higher-trophy roll in the Shrine. You can override this behavior here.' : '默认情况下，雪花女神将随着你等级的提升自动接受你将多个低等级奖杯升级成高等级奖杯进行献祭，你可以在下面更改覆盖默认设置。（奖杯升级是叠加的，意味着32个等级2奖杯可以升级成1个等级5奖杯）',
         'Use Default' : '使用默认（跟随等级自动提升，200级时升级到等级3，300级时升级到等级4，400级时升级到等级5）',
-        'Upgrade to Tier 3' : '升级到等级3（献祭时4个等级2奖杯升级为一个等级3奖杯，提升品质同时献祭价值提升为1.1倍）',
-        'Upgrade to Tier 4' : '升级到等级4（献祭时2个等级3奖杯升级为一个等级4奖杯，提升品质同时献祭价值提升为1.2倍）',
-        'Upgrade to Tier 5' : '升级到等级5（献祭时4个等级4奖杯升级为一个等级5奖杯，提升品质同时献祭价值提升为1.3倍）',
+        'Upgrade to Tier 3' : '升级到等级3（献祭时4个等级2奖杯升级为一个等级3奖杯，同时献祭价值提升为1.1倍）',
+        'Upgrade to Tier 4' : '升级到等级4（献祭时2个等级3奖杯升级为一个等级4奖杯，同时献祭价值提升为1.2倍）',
+        'Upgrade to Tier 5' : '升级到等级5（献祭时4个等级4奖杯升级为一个等级5奖杯，同时献祭价值提升为1.3倍）',
         'Do Not Upgrade' : '不升级',
 
         'Quickbar Slots' : '快捷栏',
@@ -2135,6 +2165,8 @@ var words = {
         'No Auto-Salvage' : '不自动拆解',
         '/^Salvage (\\w+)$/' : '自动拆解 $1 或更低品质',
         '/ Armor$/' : ' 护甲',
+
+        'Apply Changes' : '确认更改',
     },
 
 
@@ -2148,6 +2180,11 @@ var words = {
         'Minimum Price' : '最低允许出价',
         'Current High Bid' : '目前最高出价',
         'Active Bot Tasks' : '已激活的采购任务',
+        'Create Backorder' : '创建订单',
+        'Update Backorder' : '更新订单',
+        'Delete Backorder' : '删除订单',
+        'Placing a backorder will allow you to automatically buy items that are sold to the item shop. The max bid should be set to the maximum value you are willing to pay for an item. If you are the highest bidder for a sold item, you will pay whatever the second highest bidder offered, or the minimum price (normal buying price) if there are no other backorders.' : '创建一个采购订单将允许你自动购买别人出售在商店的物品。最高出价应当永远设置为你愿意支付的最高价格。如果你是最高出价者，你将支付第二出价者的出价获得商品，如果你是唯一的出价者，那你将以最低价获得该订单。',
+        'You only pay for items if and when the backorder is filled. If your account does not have sufficient credits whenever an item is sold, your backorder will be deleted.' : '你仅在该订单成立时支付货款。如果订单成立时你的账户余额不足以支付该订单，你的订单将会被删除。',
     },
 
     ///////////////////////////////////////////////////////雪花神殿
@@ -2162,17 +2199,20 @@ var words = {
         'A bunch of crystals' : '随机种类水晶1000颗',
         'Some rare consumables' : '1 瓶终极万能药或 1 瓶能量饮料',
         'A permanent +1 bonus to a primary stat' : '永久提升1点主要属性',
-        'Note that you cannot currently receive more than ' : '根据你目前的等级，你不能获得多于',
+        'You cannot currently receive more than ' : '根据你目前的等级，你不能获得多于',
         'to any primary stat. This increases by one for every tenth level. ' : '点属性奖励，这个阈值每10级会提升1点。',
         'Gaining primary stats in this way will not increase how much EXP your next point costs.' : '利用这种方式获得的主属性提升不会增加你的加点消耗。',
         'Trophies can be exchanged for a piece of equipment.' : '奖杯可以兑换一件指定类型的装备',
-        'The quality and tier of the item depends on the trophy you offer. ' : '获取的装备品质基于所献祭的奖杯和奖杯升级等级而骰动。',
+        'The quality and tier of the item depends on the trophy you offer. ' : '获取的装备品质基于献祭的奖杯而骰动。',
         'You can select the major class of the item being granted from the list below.' : '在下方选择你想获取的装备类型。',
         'Offering ' : '献祭 ',
         '/need (\\d+) more/' : '还需要额外 $1 个以升级献祭',
+        '/Offer (.+) for :/' : '献祭 $1 换取',
+        '/You have (\\d+ / \\d+) items required for this offering/' : '当前持有 $1 献祭所需奖杯数',
         'You have handed in' : '你有总价值',
         'worth of trophies' : '的奖杯献祭记录',
         'Collectibles can be exchanged for a random selection of bindings and materials.' : '献祭一个收藏品可以获得随机种类的 1 个黏合剂和 1-3 个高阶基本素材',
+        'Random Reward' : '随机奖励',
     },
 
     ///////////////////////////////////////////////////////怪物实验室
@@ -2416,7 +2456,8 @@ var words = {
         '3rd Prize' : '三等奖',
         '4th Prize' : '四等奖',
         '5th Prize' : '五等奖',
-        'Winner:' : '中奖者:',
+        'Equip Winner:' : '装备中奖者:',
+        'Core Winner:' : '核心中奖者:',
         'TBD' : '暂未开奖',
         'You currently have' : '你目前拥有',
         'Each ticket costs' : '购买一张彩票将花费',
@@ -2428,7 +2469,7 @@ var words = {
         'The Weapon Lottery lets you spend GP on a chance to win the specific equipment piece shown on the left.' : '使用GP购买武器彩票有机会赢取“无双”武器',
         'Each lottery period lasts 24 hours. At midnight UTC, a drawing is held, and a new lottery period starts.' : '每期彩票发行期为24小时，武器彩票于协调世界时 0点 开奖，同时发行新一期彩票',
         'In addition to normal tickets, you can also spend a Golden Lottery Ticket to add 100 tickets and double your effective ticket count at the time of drawing. This will not increase the effective ticket count past 10% of the total purchased tickets. Golden Lottery Tickets can only be acquired as a consolation prize from the lottery.' : '你也可以使用黄金彩票券兑换100张彩票，并且让自己持有的彩票数量翻倍（效果在开奖时计算，最高不超过10%总售出彩票）。黄金彩票券只能通过购买彩票中奖获得。',
-        'The number of items granted by the 2nd-5th prize will increase with the size of the pot. You can only ever win one of the prizes no matter how many tickets you purchase.' : '2-5等奖的奖品数量取决于彩池的大小，无论你购买了多少注彩票，你只能中一个奖项，如果你不想要一等奖，目标只是2-5等奖的物品奖励，那么你可以点击一等奖下面的DO NOT WANT按钮，这会令你放弃赢得头奖的资格，增加你20%赢取2-5等奖的概率',
+        'The number of items granted by the 2nd-5th prize will increase with the size of the pot. You can only ever win one of the prizes no matter how many tickets you purchase.' : '2-5等奖的奖品数量取决于彩池的大小，无论你购买了多少注彩票，你只能中一个奖项，如果你不想要一等奖装备，那么你可以点击一等奖下面的DO NOT WANT按钮，这会令你放弃头奖装备，取而代之如果你抽中头奖你将获得对应的装备核心',
         'The Armor Lottery lets you spend GP on a chance to win the specific equipment piece shown on the left.' : '使用GP购买防具彩票有机会获得“无双”防具',
         'Each lottery period lasts 24 hours. At noon UTC, a drawing is held, and a new lottery period starts.' : '每期彩票持续24小时，防具彩票于协调世界时 12点 开奖，同时发行新一期彩票',
         'Today\'s ticket sale is closed.' : '本期彩票售卖已结束',
@@ -2441,6 +2482,8 @@ var words = {
         '/Chaos Tokens?/' : '混沌令牌',
         '/Caffeinated Cand(y|ies)/' : '咖啡因糖果',
         '/Golden Lottery Tickets?/' : '黄金彩票券',
+        'You cannot opt out unless you have at least one ticket.' : '你必须至少购买一张彩票才能选择放弃头奖争夺',
+        'You will not participate in the drawing for the grand prize of this lottery.' : '你已经放弃参与本次彩票的头奖争夺',
     },
 
     ///////////////////////////////////////////////////////战斗
@@ -2499,7 +2542,7 @@ var words = {
 
         'The Tower is an Isekai-Only battle mode where the goal is to get as high as possible before the end of the season. ' : '塔楼(The Tower)是异世界独有的战斗模式，目标是在每个赛季结束前尽可能获得更高的排位。',
         'Ranking high in this mode at the end of the season will provide you with some permanent bonuses on HV Persistent.' : '塔楼天梯以半年为一个赛季周期，每年冬夏至日赛季结束异世界将会重置。在塔楼下取得高排位将在每个赛季结束后获得一些传统世界模式的永久奖励。',
-        'The difficulty and monster level in this battle mode is locked to each floor. Difficulty will increase every five floors, and monster level will increase by 10 per floor.' : '塔楼模式的战斗难度和怪物等级与对应层级锁定，和你的设置及自身等级无关。战斗难度将每5层提升一次，怪物等级将每层提升10级。',
+        'The difficulty and monster level in this battle mode is locked to each floor, with an increase in monster level, difficulty or number of rounds for each floor.' : '此模式下的战斗难度和怪物等级与对应层级绑定，和你的设置及自身等级无关。每一层都会伴随着怪物等级、战斗难度或者战斗场次的提升。',
         'Your Ranking: ' : '你的排名: ',
         'Unranked' : '没有排名',
         '1st' : '1',
@@ -2530,6 +2573,8 @@ var words = {
     ///////////////////////////////////////////////////////小马引导图
     riddlemaster: {
         'Choose the right answer based on the image below' : '请回答以下图片中小马的正确名称(输入A或B或C)，点击右侧PONY CHART按钮可查看小马名称参考',
+        'Select ALL ponies you see in the image above then hit "Submit Answer" before the time limit runs out.': '请在时间限制结束之前选择你在上图认出的所有小马名称并点击“提交答案”',
+        'Submit Answer' : '提交答案',
         'Timer' : '时间',
     },
 
@@ -3004,11 +3049,14 @@ var words = {
         //动态元素字典、监听器，用来翻译动态变化的内容
         var dynamicDict = new Map();
         var observer = new MutationObserver((mutations,observer) => {
+            //console.log(mutations);
             if(!translated) return;
             mutations.forEach(mutation => {
                 var elem = mutation.target;
                 if(elem.style.visibility!='hidden') {
                     translateText(elem, dynamicDict.get(elem), true);
+                    translateButtons(elem, dynamicDict.get(elem), true);
+                    translateElemTitle(elem, dynamicDict.get(elem), true);
                 }
             });
         });
@@ -3021,32 +3069,46 @@ var words = {
             const dict = value.map(buildDict).flat();
 
             translateText(elem, dict, isDynamic); //翻译文本
+            translateButtons(elem, dict, isDynamic); //翻译表单按钮
+            translateElemTitle(elem, dict, isDynamic); //翻译鼠标悬停文本
             if (isDynamic) {
                 dynamicDict.set(elem, dict); //存储字典以备动态翻译使用
-                observer.observe(elem, {childList:true}); //监听翻译动态内容
+                observer.observe(elem, {childList:true, attribute: true, attributeFilter: ['value', 'title']}); //监听翻译动态内容
             }
         }
     }
 
-    //翻译表单按钮……目前只有设置界面一个东西需要单独汉化，所以并没有写字典
-    function translateButton() {
-        var settingButton = document.querySelector('#settings_apply>input[value="Apply Changes"]');
-        if (settingButton) {
-            translatedList.set(settingButton, {value: settingButton.value});
-            settingButton.value = '确认更改';
+    //翻译指定元素下的所有按钮，包含自身
+    function translateButtons(target, dict, isDynamic) {
+        if (target instanceof HTMLInputElement) translateButton(target, dict, isDynamic);
+        else {
+            Array.from(target.querySelectorAll('input[type="submit"]')).forEach(elem => {
+                translateButton(elem, dict, isDynamic);
+            });
+        }
+    }
+
+    //翻译表单按钮
+    function translateButton(elem, dict, isDynamic) {
+        var value = elem.value;
+        for(var item of dict){
+            value = value.replace(item.reg, item.value);
+        }
+        if(value!=elem.value) {
+            if (!isDynamic) translatedList.set(elem, {value: elem.value});
+            elem.value = value;
         }
     }
 
     //翻译页面元素悬停的文字提示
-    function translateElemTitle() {
-        var dict = buildDict('elementTitle');
-        Array.from(document.body.querySelectorAll('[title]')).forEach(elem=>{
+    function translateElemTitle(target, dict, isDynamic) {
+        Array.from(target.querySelectorAll('[title]')).forEach(elem=>{
             var txt = elem.title;
             for (var item of dict) {
                 txt = txt.replace(item.reg, item.value);
             }
             if (txt!=elem.title) {
-                translatedList.set(elem, {title: elem.title});
+                if (!isDynamic) translatedList.set(elem, {title: elem.title});
                 elem.title = txt;
             }
         });
@@ -3075,8 +3137,6 @@ var words = {
         //console.time('hvtranslate');
         if (!document.getElementById('textlog')) {
             translateAllText();
-            translateElemTitle();
-            translateButton();
             initRestoreButton();
         }
         else {
