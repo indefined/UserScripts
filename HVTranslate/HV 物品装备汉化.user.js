@@ -18,7 +18,7 @@
 // @include      *://forums.e-hentai.org/*showtopic=*
 // @include      *://hvmarket.xyz/*
 // @include      *://reasoningtheory.net/*
-// @version      2021.01.25
+// @version      2021.01.27
 // ==/UserScript==
 
 if (document.location.href.match(/ss=iw/)&&!document.getElementById('item_pane'))return
@@ -713,12 +713,12 @@ function loadItems(){
         's Blessing enchantment' : '的祝福的附魔效果',
         'These fragments can be used in the forge to permanently soulfuse an equipment piece to you, which will make it level as you do.' : '这个碎片可以将一件装备与你灵魂绑定，灵魂绑定的装备会随着你的等级一同成长。',
         'You can fuse this crystal with a monster in the monster tab to increase its' : '你可以用这种水晶在怪物实验室里面为一个怪物提升它的',
-        'Strength.' : '力量',
-        'Dexterity.' : '灵巧',
-        'Agility.' : '敏捷',
-        'Endurance.' : '体质',
-        'Intelligence.' : '智力',
-        'Wisdom.' : '智慧',
+        'Strength\\.' : '力量',
+        'Dexterity\\.' : '灵巧',
+        'Agility\\.' : '敏捷',
+        'Endurance\\.' : '体质',
+        'Intelligence\\.' : '智力',
+        'Wisdom\\.' : '智慧',
         'Fire Resistance' : '火属性抗性',
         'Cold Resistance' : '冰属性抗性',
         'Electrical Resistance' : '电属性抗性',

@@ -24,7 +24,7 @@
 
 **当前脚本适配HV 0.89版本（即2022年异世界第一季）**
 
-### HV 装备物品汉化 v2022.01.25 [点击此处安装](https://sleazyfork.org/scripts/404119/code/install.user.js)
+### HV 装备物品汉化 v2022.01.27 [点击此处安装](https://sleazyfork.org/scripts/404119/code/install.user.js)
 
 - 基于原**HV物品汉化**脚本修改，汉化Hentaiverse、EH论坛、HVMarket内的物品、装备及装备属性，带装备高亮/装备店隐藏锁定装备
 - **如有同时使用其它汉化，需要先于其它汉化脚本安装运行才会生效**
