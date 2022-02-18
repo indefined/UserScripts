@@ -2,7 +2,7 @@
 // @name         网易CC直播净化
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.1.11
+// @version      0.1.12
 // @description  自定义屏蔽CC直播HTML5网页大部分不想看到的碍眼特效和内容
 // @author       indefined
 // @match        *://cc.163.com/*
@@ -466,6 +466,18 @@ li.chat_item.notify.activity-notify {
     display: none !important;
 }
 `
+        },
+        noDMStash:{
+            title:'去除弹幕点赞/引用',
+            style:`
+span.comment-stash-group-warpper,
+.comment-stash-group {
+    display: none !important;
+}
+div.comment-canvas>* {
+    pointer-events: none !important;
+}
+            `
         },
         noDMColor:{
             title:'去除弹幕颜色',
