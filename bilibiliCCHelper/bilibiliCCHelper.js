@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.24.1
+// @version      0.5.25
 // @description  可以在B站加载外挂本地字幕、下载B站的CC字幕，旧版B站播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -988,12 +988,13 @@
             this.cid = this.getInfo('cid');
             this.aid = this.getInfo('aid');
             this.bvid = this.getInfo('bvid');
+            this.epid = this.getInfo('id');
             this.player = this.window.player;
             this.subtitle = undefined;
             this.datas = {close:{body:[]},local:{body:[]}};
             decoder.data = undefined;
             if(!this.cid||(!this.aid&&!this.bvid)) return;
-            return fetch(`//api.bilibili.com/x/player/v2?cid=${this.cid}${this.aid?`&aid=${this.aid}`:`&bvid=${this.bvid}`}`).then(res=>{
+            return fetch(`//api.bilibili.com/x/player/v2?cid=${this.cid}${this.aid?`&aid=${this.aid}`:`&bvid=${this.bvid}`}${this.epid?`&ep_id=${this.epid}`:''}`).then(res=>{
                 if (res.status==200) {
                     return res.json().then(ret=>{
                         if (ret.code == -404) {
