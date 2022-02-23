@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.25
+// @version      0.5.25.1
 // @description  可以在B站加载外挂本地字幕、下载B站的CC字幕，旧版B站播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -994,6 +994,24 @@
             this.datas = {close:{body:[]},local:{body:[]}};
             decoder.data = undefined;
             if(!this.cid||(!this.aid&&!this.bvid)) return;
+            if (this.cid==0 && this.epid!=0) {
+                return fetch(`//api.qiu.moe/intl/gateway/v2/app/subtitle?ep_id=${this.epid}`).then(res=>{
+                    return res.json()
+                }).then(ret=>{
+                    if (ret.code!=0) throw('无法读取本视频APP字幕配置'+ret.message);
+                    this.subtitle = {
+                        subtitles: ret.data.subtitles.map((item) => ({
+                            'lan': item.key,
+                            'lan_doc': item.title,
+                            'subtitle_url': item.url.replace(/https?:\/\//, '//')
+                        })),
+                        count: ret.data.subtitles.length,
+                        allow_submit: false
+                    };
+                    this.subtitle.subtitles.push({lan:'close',lan_doc:'关闭'},{lan:'local',lan_doc:'本地字幕'});
+                    return this.subtitle;
+                });
+            }
             return fetch(`//api.bilibili.com/x/player/v2?cid=${this.cid}${this.aid?`&aid=${this.aid}`:`&bvid=${this.bvid}`}${this.epid?`&ep_id=${this.epid}`:''}`).then(res=>{
                 if (res.status==200) {
                     return res.json().then(ret=>{
