@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.25.2
+// @version      0.5.26
 // @description  可以在B站加载外挂本地字幕、下载B站的CC字幕，旧版B站播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -836,6 +836,41 @@
             });
             console.log('Bilibili CC Helper init new UI success.');
         },
+        //2.75版UI
+        initUI275(){
+            //下载标识
+            if (this.localPanel = this.panel.querySelector('.bilibili-player-video-subtitle-setting-item-body')) {
+                if (!this.localPanel.querySelector('.bilibili-player-video-subtitle-setting-title')) {
+                    this.localPanel.insertAdjacentElement('afterbegin', elements.createAs('div', {
+                        innerText: '字幕',
+                        className: 'bilibili-player-video-subtitle-setting-title',
+                        onclick:()=> decoder.show(status=>(status && (this.icon.innerHTML = elements.newEnableIcon)))
+                    }));
+                }
+                else {
+                    this.localPanel.querySelector('.bilibili-player-video-subtitle-setting-title').onclick = ()=> decoder.show(status=>(status && (this.icon.innerHTML = elements.newEnableIcon)))
+                }
+            }
+            if (this.lngPanel = this.panel.querySelector('.bilibili-player-video-subtitle-setting-lan-majorlist')) {
+                this.lngPanel.addEventListener('click', function(ev) {
+                    if (!(ev.target instanceof HTMLLIElement) || ev.target.lastChild.data=='本地字幕') return;
+                    const rect = ev.target.getBoundingClientRect().right;
+                    if (rect ==0 || rect -ev.x > 30) return;// 仅当点击字幕右侧30像素内的下载标识区域时触发下载
+                    bilibiliCCHelper.getSubtitle(undefined, ev.target.lastChild.data).then(data=>{
+                        encoder.showDialog(data);
+                    }).catch(e=>{
+                        bilibiliCCHelper.toast('获取字幕失败',e);
+                    });
+                    return false;
+                });
+            }
+            elements.createAs('style', {
+                innerHTML:'.bilibili-player-video-subtitle-setting-lan-majorlist>li.bilibili-player-video-subtitle-setting-lan-majorlist-item:after {content: "下载";right: 12px;position: absolute;}'
+                +'.bilibili-player-video-subtitle-setting-title {cursor:pointer}.bilibili-player-video-subtitle-setting-title:before {content: "本地"}'
+            }, this.panel);
+            if(!this.hasSubtitles) this.icon.innerHTML = elements.newDisableIcon; // 没有字幕时关闭按钮
+            console.log('Bilibili CC Helper init new 2.75 UI success.');
+        },
         init(subtitle){
             this.hasSubtitles = subtitle.count;
             this.selectedLan = undefined;
@@ -858,12 +893,19 @@
                 //设置ID标记视频为已注入，防止二次初始化
                 this.iconBtn.id = 'bilibili-player-subtitle-btn';
                 new MutationObserver((mutations,observer)=>{
+                    //console.log(mutations);
                     for (const mutation of mutations){
                         if(!mutation.target) continue;
                         if(mutation.target.classList.contains('bilibili-player-video-subtitle-setting-lan')){
                             observer.disconnect();
                             this.panel = mutation.target;
                             this.initUI();
+                            return;
+                        }
+                        else if (mutation.target.classList.contains('bilibili-player-video-subtitle-setting-left')){
+                            observer.disconnect();
+                            this.panel = mutation.target;
+                            this.initUI275();
                             return;
                         }
                     }
@@ -966,7 +1008,7 @@
             if(this.datas[item.lan]) return this.datas[item.lan];
             return fetch(item.subtitle_url)
                 .then(res=>res.json())
-                .then(data=>(this.datas[lan] = data));
+                .then(data=>(this.datas[item.lan] = data));
         },
         getSubtitleInfo(lan, name){
             return this.subtitle.subtitles.find(item=>item.lan==lan || item.lan_doc==name);
