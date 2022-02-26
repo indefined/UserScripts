@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.26.1
+// @version      0.5.26.2
 // @description  可以在B站加载外挂本地字幕、下载B站的CC字幕，旧版B站播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -840,7 +840,7 @@
         initUI275(){
             //下载标识
             if (this.localPanel = this.panel.querySelector('.bilibili-player-video-subtitle-setting-item-body')) {
-                if (!this.localPanel.querySelector('.bilibili-player-video-subtitle-setting-title')) {
+                if (!(this.localButton = this.localPanel.querySelector('.bilibili-player-video-subtitle-setting-title'))) {
                     this.localPanel.insertAdjacentElement('afterbegin', elements.createAs('div', {
                         innerText: '字幕',
                         className: 'bilibili-player-video-subtitle-setting-title',
@@ -848,7 +848,12 @@
                     }));
                 }
                 else {
-                    this.localPanel.querySelector('.bilibili-player-video-subtitle-setting-title').onclick = ()=> decoder.show(status=>(status && (this.icon.innerHTML = elements.newEnableIcon)))
+                    this.localButton.onclick = ()=> decoder.show(status=>{
+                        if (status) {
+                            this.selectedLocal = true;
+                            this.icon.innerHTML = elements.newEnableIcon;
+                        }
+                    })
                 }
             }
             if (this.lngPanel = this.panel.querySelector('.bilibili-player-video-subtitle-setting-lan-majorlist')) {
@@ -868,7 +873,19 @@
                 innerHTML:'.bilibili-player-video-subtitle-setting-lan-majorlist>li.bilibili-player-video-subtitle-setting-lan-majorlist-item:after {content: "下载";right: 12px;position: absolute;}'
                 +'.bilibili-player-video-subtitle-setting-title {cursor:pointer}.bilibili-player-video-subtitle-setting-title:before {content: "本地"}'
             }, this.panel);
-            if(!this.hasSubtitles) this.icon.innerHTML = elements.newDisableIcon; // 没有字幕时关闭按钮
+            if(!this.hasSubtitles) {
+                this.icon.onclick = ()=>{
+                    if (this.selectedLocal) {
+                        this.selectedLocal = false;
+                        bilibiliCCHelper.loadSubtitle('close');
+                        this.icon.innerHTML = elements.newDisableIcon;
+                    }
+                    else {
+                        this.localButton.click();
+                    }
+                };
+                this.icon.innerHTML = elements.newDisableIcon; // 没有字幕时关闭按钮
+            }
             console.log('Bilibili CC Helper init new 2.75 UI success.');
         },
         init(subtitle){
