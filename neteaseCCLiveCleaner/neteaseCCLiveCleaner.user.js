@@ -2,7 +2,7 @@
 // @name         网易CC直播净化
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.1.13
+// @version      0.1.14
 // @description  自定义屏蔽CC直播HTML5网页大部分不想看到的碍眼特效和内容
 // @author       indefined
 // @match        *://cc.163.com/*
@@ -341,6 +341,7 @@ div#gift-banner {
         noBoxDrop:{
             title:'去除抢宝箱消息',
             style:`
+div#pluginModal,
 /*<!-- 圣旨礼物掉落区 -->*/
 div#decreeBoxDropWrap,
 /*<!-- 圣旨礼物点击区 -->*/
@@ -398,7 +399,6 @@ li[class*=styles-module_msg]>img,
             title:'去除聊天气泡',
             style:`
 /*聊天气泡同行，去除背景和聊天框*/
-.screen-msg-wrap>div,
 .chat_info,
 .chat_msg_con,
 .chat_msg_normal {
@@ -406,8 +406,13 @@ li[class*=styles-module_msg]>img,
     border: none !important;
     background: none !important;
 }
+[class*="chat-bubble-module_bubble"]{
+    border: none !important;
+    padding: 0 !important;
+    background: none !important;
+}
 /*去除聊天气泡图片和换行*/
-[class*="chat-bubble-module"],
+[class*="chat-bubble-module_adorn"],
 .chat_msg>div,
 .chat_item_bubble>div>br,
 .chat_item_bubble>br{
@@ -471,6 +476,14 @@ li.chat_item.admin-notify {
 /*活动消息*/
 li.chat_item.notify.activity-notify {
     display: none;
+}
+`
+        },
+        noNotChat:{
+            title:'去除其它非聊天消息',
+            style:`
+.screen-msg-wrap>li:not(.chat_item) {
+    display:none;
 }
 `
         },
