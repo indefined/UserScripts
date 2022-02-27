@@ -2,7 +2,7 @@
 // @name         网易CC直播净化
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.1.12
+// @version      0.1.13
 // @description  自定义屏蔽CC直播HTML5网页大部分不想看到的碍眼特效和内容
 // @author       indefined
 // @match        *://cc.163.com/*
@@ -159,6 +159,14 @@ body:not(.blizzardtv-iframe-body) div#live_player {
     height: calc(100% - 100px) !important;
 }*/
 `
+        },
+        noRecommend:{
+            title:'去除底部推荐',
+            style:`
+div#recommend-module {
+    display: none !important;
+}
+            `,
         },
         noDynamicMsg:{
             title:'去除千里传音',
@@ -353,8 +361,8 @@ div#giftBoxShowWrap {
             title:'去除粉丝勋章',
             style:`
 /*粉丝勋章*/
-span.chat-tip-container{
-    display: none
+div.js-fans-medal-icon{
+    display: none !important;
 }
 `
         },
@@ -362,9 +370,14 @@ span.chat-tip-container{
             title:'去除用户前缀图标',
             style:`
 /*用户前缀图标*/
+img[class*=personal-info-module],
+a[class*=personal-info-module],
+img[class*=riches-level-hover-tips],
+li[class*=styles-module_msg]>img,
+.chat_item>img,
 .chat_item .chat_priv_img img,
 .chat_item.notify>img{
-    display: none;
+    display: none !important;
 }
 `
         },
@@ -372,6 +385,7 @@ span.chat-tip-container{
             title:'去除聊天图片',
             style:`
 /*聊天图片*/
+[class*=styles-module_chatContent] img,
 .chat_msg_content img {
     display: none !important;
 }
@@ -384,6 +398,7 @@ span.chat-tip-container{
             title:'去除聊天气泡',
             style:`
 /*聊天气泡同行，去除背景和聊天框*/
+.screen-msg-wrap>div,
 .chat_info,
 .chat_msg_con,
 .chat_msg_normal {
@@ -392,6 +407,7 @@ span.chat-tip-container{
     background: none !important;
 }
 /*去除聊天气泡图片和换行*/
+[class*="chat-bubble-module"],
 .chat_msg>div,
 .chat_item_bubble>div>br,
 .chat_item_bubble>br{
