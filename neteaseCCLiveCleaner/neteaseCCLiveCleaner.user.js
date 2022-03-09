@@ -2,7 +2,7 @@
 // @name         网易CC直播净化
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.1.14
+// @version      0.1.15
 // @description  自定义屏蔽CC直播HTML5网页大部分不想看到的碍眼特效和内容
 // @author       indefined
 // @match        *://cc.163.com/*
@@ -362,6 +362,7 @@ div#giftBoxShowWrap {
             title:'去除粉丝勋章',
             style:`
 /*粉丝勋章*/
+.fansbadge-badge,
 div.js-fans-medal-icon{
     display: none !important;
 }
