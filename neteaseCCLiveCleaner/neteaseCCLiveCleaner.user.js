@@ -2,7 +2,7 @@
 // @name         网易CC直播净化
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.1.15
+// @version      0.1.16
 // @description  自定义屏蔽CC直播HTML5网页大部分不想看到的碍眼特效和内容
 // @author       indefined
 // @match        *://cc.163.com/*
@@ -133,8 +133,10 @@ div#vbr-limit-alert {
 `
         },
         noLuckGift:{
-            title:'去除幸运抽奖',
+            title:'去除抽奖弹窗',
             style:`
+/*弹幕风暴（或者还有其它插件的容器*/
+#pluginModal,
 /*幸运抽奖*/
 #lucky-lottery-modal{
     display: none;
@@ -506,6 +508,15 @@ span.comment-stash-group-warpper,
 }
 div.comment-canvas>* {
     pointer-events: none !important;
+}
+            `
+        },
+        noDMStorm:{
+            title:'去除弹幕风暴',
+            style:`
+.cmt .storm_bulletScreen_icon,
+.cmt .storm_bulletScreen_icon+span{
+    display: none !important;
 }
             `
         },
