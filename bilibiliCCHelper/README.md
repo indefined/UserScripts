@@ -10,6 +10,17 @@ bilibili CC字幕工具
 **提交问题反馈前请先看完兼容和已知问题**
 
 -------------------------
+## 使用说明
+- 原理上来说使用Tampermonkey、Violentmonkey安装应该可以正常使用
+- 但不知道为什么似乎还是会有可能由于安全沙盒问题被隔离从而导致一些（海外）番剧解析字幕信息失败
+- 如果只是某个番剧临时想下载一下的话……可以不使用脚本管理器安装，新建一个书签，地址写上
+```
+javascript:(function(){document.head.appendChild(document.createElement('script')).src = "https://greasyfork.org/scripts/378513-bilibili-cc字幕工具/code/Bilibili CC字幕工具.user.js"})()
+```
+- 想下载的时候在那个番剧页面点击这个书签就可以加载脚本了，因为不通过脚本管理器这个方法理论上不会有沙盒问题
+
+
+-------------------------
 ## 功能
 
 - 旧版HTML5播放器支持使用CC字幕
