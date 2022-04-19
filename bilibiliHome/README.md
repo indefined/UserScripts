@@ -11,6 +11,10 @@ B站网页端添加APP首页推荐
 
 **<font color="#0f0">此脚本目前未适配新版主页，[点击查看详情](https://github.com/indefined/UserScripts/issues/76)</font>**
 
+**如果你使用新版首页的话可以使用[bilibili-app-recommend
+](https://greasyfork.org/zh-CN/scripts/443530-bilibili-app-recommend)**
+
+
 -------------------------
 ## 功能
 
