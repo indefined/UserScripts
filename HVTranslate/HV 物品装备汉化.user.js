@@ -18,7 +18,7 @@
 // @include      *://forums.e-hentai.org/*showtopic=*
 // @include      *://hvmarket.xyz/*
 // @include      *://reasoningtheory.net/*
-// @version      2021.01.27
+// @version      2021.04.19
 // ==/UserScript==
 
 if (document.location.href.match(/ss=iw/)&&!document.getElementById('item_pane'))return
@@ -533,6 +533,7 @@ function loadItems(){
         'Annoying Gun' : '烦人的枪(等级8)', //2020 圣诞节
         'Vaccine Certificate' : '疫苗证明(等级8)', //2021 复活节
         'Barrel' : '酒桶(等级8)', //2021 圣诞节
+        'CoreCare Starter Kit' : '核心服务工具套件(等级8)', //2022 圣诞节
 
 
         //旧旧古董
@@ -661,6 +662,13 @@ function loadItems(){
         'Blue Vaccine Vial' : '蓝色疫苗瓶',
         'Indigo Vaccine Vial' : '靛色疫苗瓶',
         'Violet Vaccine Vial' : '紫色疫苗瓶',
+        //2022
+        'Core Carrying Bag' : '核心携带包',
+        'Core Display Stand' : '核心展示架',
+        'Core Ornament Set' : '核心饰品套装',
+        'Core Maintenance Set' : '核心维护套装',
+        'Core Wall-Mount Display' : '核心壁挂显示器',
+        'Core LED Illumination' : '核心LED照明',
 
 
 

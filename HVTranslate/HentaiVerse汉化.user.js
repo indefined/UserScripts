@@ -13,7 +13,7 @@
 // @include        *://hentaiverse.org/*
 // @include        *://alt.hentaiverse.org/*
 // @core           http://userscripts-mirror.org/scripts/show/41369
-// @version        2022.01.25
+// @version        2022.04.19
 // @grant none
 // ==/UserScript==
 (function () {
@@ -1287,6 +1287,13 @@ var words = {
         'Blue Vaccine Vial' : '蓝色疫苗瓶',
         'Indigo Vaccine Vial' : '靛色疫苗瓶',
         'Violet Vaccine Vial' : '紫色疫苗瓶',
+        //2022
+        'Core Carrying Bag' : '核心携带包',
+        'Core Display Stand' : '核心展示架',
+        'Core Ornament Set' : '核心饰品套装',
+        'Core Maintenance Set' : '核心维护套装',
+        'Core Wall-Mount Display' : '核心壁挂显示器',
+        'Core LED Illumination' : '核心LED照明',
 
 
         //节日及特殊奖杯
@@ -1331,6 +1338,7 @@ var words = {
         'Annoying Gun' : '烦人的枪(等级8)', //2020 圣诞节
         'Vaccine Certificate' : '疫苗证明(等级8)', //2021 复活节
         'Barrel' : '酒桶(等级8)', //2021 圣诞节
+        'CoreCare Starter Kit' : '核心服务工具套件(等级8)', //2022 圣诞节
 
 
     },
@@ -1559,6 +1567,7 @@ var words = {
         'Some hoarded supplies from the 2020 Easter Event. Give it to Snowflake for redistribution.' : '2020复活节活动时囤积的一些物资。把它交给雪花重新分配。',
         'The label is faded, but you can barely make out the letters' : '标签已经褪色了，但是你勉强认出了一些字母', //-s-ra--eca、-f-zer、-ode--a、J--s-n、-ov-vax、-put--V、Co--de--a
         'Give it to Snowflake for analysis.' : '把它交给雪花分析。(2021 复活节活动)',
+        'Lost goods from the new CoreCare™ series of Snowflake-approved products. Give it back to Snowflake.' : '雪花核准的新[核心服务]™系列丢失的产品，把它交换给雪花。(2022 复活节活动)',
 
         //旧奖杯
         'One of only 57 limited edition boxes filled with spent ability points. You\'re not quite sure when you picked this up, but something tells you to hang on to it.' : '57 个限量版盒子的其中一个，里面放满了用过的技能点。你很犹豫是否要捡起它，但有个声音告诉你要紧抓住它不放。',
@@ -1605,6 +1614,7 @@ var words = {
         'A special kind of omikuji that does not actually tell your fortune, but will instead directly grant you some if you offer it to Snowflake.' : '一种特殊的神签，它并不会实际告诉你命运，但是如果你把它献祭给雪花可以直接交换一些东西。[2020起复活节活动]',
         'A precursor beak-shaped mask filled with fragrant herbs, said to protect the wearer from disease and miasma but probably doesn\'t. [2020 Easter Event]' : '一种充满香草药的喙状前体面具，据说可以保护佩戴者免受疾病和瘴气的侵害，但实际可能并不能。[2020 复活节活动]',
         'A paper certifying that the holder was recently vaccinated from some ancient disease. It expired centuries ago and only has historic value. [2021 Easter Event]' : '一张证明持有者最近接种过某种远古疾病疫苗的文件。它已经在好几个世纪前过期，仅具有历史价值。[2021 复活节活动]',
+        'A polishing cloth, pine-scented spray bottle and various other maintenance tools to give your Equipment Cores the love they deserve. [2022 Easter Event]' : '抛光布、松香喷雾瓶和其他各种维护工具，为您的设备核心提供应有的爱。[2022 复活节活动]'
 
 
     },
