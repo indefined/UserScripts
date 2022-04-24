@@ -18,7 +18,7 @@
 // @include      *://forums.e-hentai.org/*showtopic=*
 // @include      *://hvmarket.xyz/*
 // @include      *://reasoningtheory.net/*
-// @version      2021.04.19
+// @version      2022.04.19
 // ==/UserScript==
 
 if (document.location.href.match(/ss=iw/)&&!document.getElementById('item_pane'))return
@@ -533,7 +533,7 @@ function loadItems(){
         'Annoying Gun' : '烦人的枪(等级8)', //2020 圣诞节
         'Vaccine Certificate' : '疫苗证明(等级8)', //2021 复活节
         'Barrel' : '酒桶(等级8)', //2021 圣诞节
-        'CoreCare Starter Kit' : '核心服务工具套件(等级8)', //2022 圣诞节
+        'CoreCare Starter Kit' : '核心服务工具套件(等级8)', //2022 复活节
 
 
         //旧旧古董
