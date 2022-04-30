@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.26.2
+// @version      0.5.27
 // @description  可以在B站加载外挂本地字幕、下载B站的CC字幕，旧版B站播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -406,7 +406,7 @@
         handleSubtitle(){
             if(!this.data) return;
             const offset = +this.offset.value;
-            bilibiliCCHelper.updateSubtitle(!offset?this.data:{
+            bilibiliCCHelper.updateLocal(!offset?this.data:{
                 body:this.data.body.map(({from,to,content})=>({
                     from:from - offset,
                     to:to - offset,
@@ -578,7 +578,7 @@
                 //本地字幕解码器产生加载事件后再切换状态
                 decoder.show((status)=>{
                     if(status==true){
-                        this.downloadBtn.classList.add('bpui-state-disabled','bpui-button-icon');
+                        this.downloadBtn.classList.remove('bpui-state-disabled','bpui-button-icon');
                         this.isclosed = false;
                         this.selectedLan = value;
                         this.icon.innerHTML = elements.oldEnableIcon;
@@ -800,7 +800,7 @@
                     decoder.show((status)=>{
                         if(status==true){
                             this.selectedLocal = true;
-                            this.downloadBtn.classList.add('bui-button-disabled','bpui-button-icon');
+                            this.updateDownloadBtn('local');
                             this.icon.innerHTML = elements.newEnableIcon;
                         }
                     });
@@ -1007,6 +1007,10 @@
             this.removeTimmer = setTimeout(()=>{
                 panel.contains(this.toastDiv)&&panel.removeChild(this.toastDiv)
             },3000);
+        },
+        async updateLocal(data){
+            this.datas.local = data;
+            return this.updateSubtitle(data);
         },
         async updateSubtitle(data){
             this.window.player.updateSubtitle(data);
