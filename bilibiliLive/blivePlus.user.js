@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name        bilibili直播间工具
-// @namespace   indefined
+// @namespace   https://github.com/indefined/UserScripts/tree/master/bilibiliLive
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.47.4
+// @version     0.5.47.5
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -617,8 +617,8 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
                 }).join('')).join('')
                 //*/
                 //深色模式
-                +'html[lab-style*="dark"] #title-medal-dialog > div > div:nth-child(2n+1) {background-color: var(--dark-1);}'
-                +'html[lab-style*="dark"] #title-medal-dialog .title-medal-selected-line {background: #71390799 !important;}'
+                +'html[lab-style*="dark"] #title-medal-dialog > div > div:nth-child(2n+1) {background-color: #32323199;}'
+                +'html[lab-style*="dark"] #title-medal-dialog .title-medal-selected-line {background: #855f1699 !important;}'
             },this.dialog);
             //对话框箭头
             this.dialogArraw = helper.create('div',{
