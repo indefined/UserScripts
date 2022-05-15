@@ -2,7 +2,7 @@
 // @name        bilibili直播间工具
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.47.4
+// @version     0.5.47.5
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -617,13 +617,12 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
                 }).join('')).join('')
                 //*/
                 //深色模式
-                +'html[lab-style*="dark"] #title-medal-dialog > div > div:nth-child(2n+1) {background-color: var(--dark-1);}'
-                +'html[lab-style*="dark"] #title-medal-dialog .title-medal-selected-line {background: #71390799 !important;}'
+                +'html[lab-style*="dark"] #title-medal-dialog > div > div:nth-child(2n+1) {background-color: #32323199;}'
+                +'html[lab-style*="dark"] #title-medal-dialog .title-medal-selected-line {background: #855f1699 !important;}'
+                +'html[lab-style*="dark"] .gift-presets .gift-package:after{color:var(--dark-font-1)}'
             },this.dialog);
             //对话框箭头
-            this.dialogArraw = helper.create('div',{
-                className:"p-absolute",
-                style:"top: 100%;border-left: 4px solid transparent;border-right: 4px solid transparent;border-top: 8px solid #fff;"
+            this.dialogArraw = helper.create('style',{
             },this.dialog);
             //对话框标题
             this.dialogTitle = helper.create('div',{style:"font-weight: 400;font-size: 18px;"},this.dialog);
@@ -662,7 +661,7 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
             this.dialogTitle.innerText = '我的'+targetConfig.name;
             //设置对话框位置
             this.dialog.style = `transform-origin: ${target.offsetLeft+3}px bottom 0px;position:absolute;bottom:50px;color: #23ade5;`;
-            this.dialogArraw.style.left = target.offsetLeft+3 + 'px';
+            this.dialogArraw.innerHTML = `#title-medal-dialog:after,#title-medal-dialog:before{left:${target.offsetLeft+6}px}`;
             //显示正在加载面板
             helper.set(this.loadingDiv,{
                 style:"height:100px",
@@ -689,7 +688,7 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
                 this.loadingDiv.innerHTML = `<p class="des">解析返回错误${e}～</p>`;
                 console.error(e);
             });
-            this.dialog.className = 'dialog-ctnr common-popup-wrap p-absolute border-box z-chat-control-panel-dialog bottom v-enter a-scale-in-ease v-enter-to';
+            this.dialog.className = 'arrow-bottom dialog-ctnr common-popup-wrap p-absolute border-box z-chat-control-panel-dialog bottom v-enter a-scale-in-ease v-enter-to';
         },
         closeDialog(){
             if (this.dialog.classList.contains('v-enter')){
@@ -953,10 +952,9 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
                 const list = document.createElement('div');
                 const items = document.createElement('div');
                 items.innerHTML = '<div data-v-ec1c3b2e="" class="tv" style="height:100px"><div data-v-4df82965="" data-v-ec1c3b2e="" role="progress" class="link-progress-tv"></div></div>';
-                list.className = 'common-popup-wrap t-left';
+                list.className = 'other-gift-dialog arrow-bottom common-popup-wrap t-left';
                 list.style = 'position: absolute;width: 276px;bottom: 30px;left: 0px;cursor: auto;animation:scale-in-ease 0.4s;transform-origin: 90px bottom 0px;';
-                list.innerHTML = `<div style="position: absolute;left: ${target.offsetLeft+3}px;top: 100%;width: 0;height: 0;border-left: 4px solid transparent;
-                    border-right: 4px solid transparent;border-top: 8px solid #fff;"></div><header style="font-size:18px;color:#23ade5;margin-bottom:10px;">其它礼物</header>`;
+                list.innerHTML = `<style>.other-gift-dialog:before,.other-gift-dialog:after {left: ${target.offsetLeft+6}px !important;}</style><header style="font-size:18px;color:#23ade5;margin-bottom:10px;">其它礼物</header>`;
                 list.appendChild(items);
                 this.newGift.appendChild(list);
                 helper.xhr('//api.live.bilibili.com/gift/v3/live/gift_config').then(data=>{
