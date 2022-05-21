@@ -2,7 +2,7 @@
 // @name         HTML5视频截图器
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.4.15
+// @version      0.4.16
 // @description  基于HTML5的简单原生视频截图，可控制快进/逐帧/视频调速，支持自定义快捷键
 // @author       indefined
 // @include      *://*
@@ -101,6 +101,13 @@
         stopPropagation:{
             content:'尝试覆盖网页快捷键',
             title:'勾选此选项则触发快捷键时会尝试忽略覆盖网页原有快捷键，不一定会生效',
+            type:'checkbox',
+            key:'',
+            checked:false
+        },
+        saveAsPNG:{
+            content:'直接下载截图保存为png格式',
+            title:'勾选此项则下载的截图为原图png格式，默认保存为jpg（体积较小）',
             type:'checkbox',
             key:'',
             checked:false
@@ -224,31 +231,40 @@
         else hoverItem = undefined;
     }
 
-    function videoCapture(down){
+    function videoCapture(download){
         if (!video) return;
         const canvas = document.createElement("canvas");
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-        const timestamp = config.saveAsTimeStamp.checked?
+        const timestamp = canvas.dataset.timestamp = config.saveAsTimeStamp.checked?
               new Date().toLocaleString('zh', {hour12: false}):
         `${Math.floor(video.currentTime/60)}'${(video.currentTime%60).toFixed(3)}''`;
-        const name = `${document.title}_${timestamp}.jpg`;
+        canvas.dataset.type = config.saveAsPNG.checked ? 'png' : 'jpg';
+        if (download) downloadCapture(canvas);
+        else appendToCanvasList(canvas);
+    }
+
+    function downloadCapture(canvas){
         try{
-            if (!down) throw `i don't want to do it.`;
+            const type = canvas.dataset.type, timestamp = canvas.dataset.timestamp;
             canvas.toBlob(blob=>{
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
-                a.download = name;
+                a.download = `${document.title}_${timestamp}.${type}`;
                 document.head.appendChild(a);
                 a.click();
                 document.head.removeChild(a);
-            },'image/jpeg', 0.95);
-        }catch(e){
-            const imgWin = open("",'_blank');
-            canvas.style = "max-width:100%";
-            imgWin.document.body.appendChild(canvas);
+            }, type=='jpg'?'image/jpeg':'image/png', 0.95);
+        } catch(e){
+            appendToCanvasList(canvas);
         }
+    }
+
+    function appendToCanvasList(canvas) {
+        const imgWin = open("",'_blank');
+        canvas.style = "max-width:100%";
+        imgWin.document.body.appendChild(canvas);
     }
 
     function videoPlay(){
