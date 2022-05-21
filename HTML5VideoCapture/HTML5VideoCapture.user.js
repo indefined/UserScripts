@@ -2,7 +2,7 @@
 // @name         HTML5视频截图器
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.4.16
+// @version      0.4.17
 // @description  基于HTML5的简单原生视频截图，可控制快进/逐帧/视频调速，支持自定义快捷键
 // @author       indefined
 // @include      *://*
@@ -239,7 +239,7 @@
         canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
         const timestamp = canvas.dataset.timestamp = config.saveAsTimeStamp.checked?
               new Date().toLocaleString('zh', {hour12: false}):
-        `${Math.floor(video.currentTime/60)}'${(video.currentTime%60).toFixed(3)}''`;
+        `${Math.floor(video.currentTime/60)}_${(video.currentTime%60).toFixed(3)}`;
         canvas.dataset.type = config.saveAsPNG.checked ? 'png' : 'jpg';
         if (download) downloadCapture(canvas);
         else appendToCanvasList(canvas);
