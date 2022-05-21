@@ -2,7 +2,7 @@
 // @name         HTML5视频截图器
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.4.17
+// @version      0.4.18
 // @description  基于HTML5的简单原生视频截图，可控制快进/逐帧/视频调速，支持自定义快捷键
 // @author       indefined
 // @include      *://*
@@ -12,6 +12,7 @@
 // @grant        GM_setValue
 // @grant        GM.getValue
 // @grant        GM.setValue
+// @require      https://cdn.staticfile.org/jszip/3.1.5/jszip.min.js
 // @license      MIT
 // ==/UserScript==
 
@@ -237,36 +238,171 @@
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-        const timestamp = canvas.dataset.timestamp = config.saveAsTimeStamp.checked?
-              new Date().toLocaleString('zh', {hour12: false}):
-        `${Math.floor(video.currentTime/60)}_${(video.currentTime%60).toFixed(3)}`;
-        canvas.dataset.type = config.saveAsPNG.checked ? 'png' : 'jpg';
+        canvas.dataset.timestamp = config.saveAsTimeStamp.checked
+            ? new Date().toLocaleString('zh', {hour12: false})
+        :`${Math.floor(video.currentTime/60)}_${(video.currentTime%60).toFixed(3)}`;
         if (download) downloadCapture(canvas);
         else appendToCanvasList(canvas);
     }
 
+    function getCaptureName(canvas) {
+        const type = config.saveAsPNG.checked ? 'png' : 'jpg',
+              timestamp = canvas.dataset.timestamp;
+        return `${document.title}_${timestamp}.${type}`
+    }
+
     function downloadCapture(canvas){
-        try{
-            const type = canvas.dataset.type, timestamp = canvas.dataset.timestamp;
-            canvas.toBlob(blob=>{
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = `${document.title}_${timestamp}.${type}`;
-                document.head.appendChild(a);
-                a.click();
-                document.head.removeChild(a);
-            }, type=='jpg'?'image/jpeg':'image/png', 0.95);
-        } catch(e){
+        if (canvas.dataset.dirty) return;
+        canvas2Blob(canvas).then(blob=>{
+            saveAs(blob, getCaptureName(canvas))
+        }).catch(e=>{
             appendToCanvasList(canvas);
-        }
+        });
+    }
+
+    function canvas2Blob(canvas){
+        if (canvas.dataset.dirty) return Promise.reject('由于视频跨域安全限制此截图无法转换');
+        return new Promise(resolve=>{
+            const type = config.saveAsPNG.checked ? 'image/png' : 'image/jpeg';
+            canvas.toBlob(resolve, type, 0.98); //0.98质量参数仅在jpg时有效，png时自动被忽略
+        }).catch(e=>{
+            canvas.dataset.dirty = true;
+            throw e;
+        })
+    }
+
+    function saveAs(blob, name){
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = name;
+        document.head.appendChild(a);
+        a.click();
+        document.head.removeChild(a);
+    }
+
+    function downloadAll() {
+        if (!canvasList) return;
+        const list = Array.from(canvasList.querySelectorAll('canvas:not([data-dirty])'));
+        if (!list.length) return;
+        Promise.all(list.map(canvas2Blob)).then(blobs=>{
+            const zip = new JSZip();
+            blobs.forEach((blob, idx)=>zip.file(getCaptureName(list[idx]), blob));
+            return zip.generateAsync({type: "blob"}).then(blob=>saveAs(blob, `${document.title}_截图_.zip`));
+        }).catch(e=>console.error(e));
+    }
+
+    // 暂存截图画布的悬浮列表
+    let canvasContainer, canvasList, downloadBtn;
+    function createCanvasList() {
+        canvasContainer = _c({
+            nodeType: 'div',
+            className: 'h5vc-canvas-container',
+            childs:[
+                {
+                    nodeType: 'style',
+                    innerHTML: '.h5vc-canvas-container{position: fixed; right: 0; top: 0; z-index: 2000000;}'
+                    + '.h5vc-canvas-list{max-height: calc(100vh - 50px); overflow: auto; background: black; }'
+                    + '.h5vc-list-item{position: relative; width: 240px; height: 135px; margin: 5px;}'
+                    + '.h5vc-list-item canvas{max-width: 240px; max-height: 135px;}'
+                    + '.h5vc-list-item canvas[data-dirty]+.h5vc-item-download:before{content: "无法"}'
+                    + '.h5vc-list-item canvas[data-dirty]+.h5vc-item-download:after{content: ",请右键另存"}'
+                    + '.h5vc-list-item .h5vc-item-download{right: 5px;bottom: 5px;font-size: 14px;font-weight: 500;cursor: pointer;}'
+                    + '.h5vc-list-item .h5vc-item-remove{top: 5px;right: 5px;font-size: 16px;font-weight: 500;cursor: pointer;}'
+                    + '.h5vc-list-item .h5vc-item-new-tab{top: 5px;left: 5px;font-size: 14px;font-weight: 500;cursor: pointer;}'
+                    + '.h5vc-list-item .h5vc-item-time{left: 5px;font-size: 14px;bottom: 5px;}'
+                    + '.h5vc-list-item span{position: absolute;color:#FFF;text-shadow: #000 1px 1px 2px}'
+                    + '.h5vc-canvas-batch{margin-top: 5px}'
+                    + '.h5vc-canvas-batch button{height: 35px;width: 80px;background: #000c;color: #fff;border: none;margin: 0 20px;border-radius: 7px;}'
+                },
+                canvasList = _c({
+                    nodeType: 'div',
+                    className: 'h5vc-canvas-list',
+                })
+            ],
+            parent: document.body
+        });
+        downloadBtn = _c({
+            nodeType: 'div', className: 'h5vc-canvas-batch',
+            childs: [
+                {
+                    nodeType: 'button', innerText: '下载全部',
+                    onclick: downloadAll
+                },
+                {
+                    nodeType: 'button', innerText: '删除全部',
+                    onclick: clearList
+                }
+            ]
+        });
+    }
+
+    function appendToNewTab(canvas) {
+        const tab = open('', '_blank');
+        tab.document.body.appendChild(canvas);
+        _c({
+            nodeType: 'style', innerHTML: 'canvas:{max-width: 100%}span{display: flex;}.h5vc-item-remove,.h5vc-item-new-tab{display: none}'
+            + '.h5vc-list-item canvas[data-dirty]+.h5vc-item-download:before{content: "无法"}'
+            + '.h5vc-list-item canvas[data-dirty]+.h5vc-item-download:after{content: ",请右键另存"}',
+            parent: tab.document.body
+        });
+        checkCanvasList();
     }
 
     function appendToCanvasList(canvas) {
-        const imgWin = open("",'_blank');
-        canvas.style = "max-width:100%";
-        imgWin.document.body.appendChild(canvas);
+        if (!canvasList) createCanvasList();
+        if (canvasList.contains(canvas)) return;
+        canvasList.appendChild(_c({
+            nodeType: 'div',
+            className: 'h5vc-list-item',
+            childs: [
+                canvas,
+                {
+                    nodeType: 'span', className: 'h5vc-item-download',
+                    innerText: '下载',
+                    onclick: ()=> downloadCapture(canvas)
+                },
+                {
+                    nodeType: 'span', className: 'h5vc-item-new-tab',
+                    innerText: '新窗口',
+                    onclick: function(){appendToNewTab(this.parentNode)}
+                },
+                {
+                    nodeType: 'span', className: 'h5vc-item-remove',
+                    innerText: 'X',
+                    onclick: function(){removeFromList(this.parentNode)}
+                },
+                {
+                    nodeType: 'span', className: 'h5vc-item-time',
+                    innerText: canvas.dataset.timestamp.replace(/_/g, ':')
+                }
+            ]
+        }));
+        checkCanvasList();
     }
 
+    function removeFromList(canvas) {
+        if (!canvasList || !canvas.contains(canvas)) return;
+        canvasList.removeChild(canvas);
+        checkCanvasList();
+    }
+
+    function clearList() {
+        if (!canvasList) return;
+        canvasList.innerText = '';
+        checkCanvasList();
+    }
+
+    function checkCanvasList() {
+        if (!canvasContainer) return;
+        if (canvasList.childElementCount == 0 && canvasContainer.contains(downloadBtn)) {
+            canvasContainer.removeChild(downloadBtn);
+        }
+        else if (canvasList.childElementCount > 1 && !canvasContainer.contains(downloadBtn)) {
+            canvasContainer.appendChild(downloadBtn);
+        }
+    }
+
+    // 以下为视频控制部分
     function videoPlay(){
         if (!video) return;
         video.paused?video.play():video.pause();
