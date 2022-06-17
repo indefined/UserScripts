@@ -2,7 +2,7 @@
 // @name         网易CC直播净化
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.1.16
+// @version      0.1.17
 // @description  自定义屏蔽CC直播HTML5网页大部分不想看到的碍眼特效和内容
 // @author       indefined
 // @match        *://cc.163.com/*
@@ -603,25 +603,33 @@ div#bunShoutDynamic{}
             item.onclick = ({target})=>this.changeConfig(target);
             this.configDiv.appendChild(item);
         },
-        init(){
-            if(this.configDiv) {
-                this.styleDiv = document.createElement('style');
-                document.head.appendChild(this.styleDiv);
-                this.applyConfig();
+        initSettingPanel(){
+            if(this.configDiv && !this.configDiv.dataset.inited) {
+                this.configDiv.dataset.inited = true;
                 this.configDiv.style = "max-height:calc(100vh - 200px);overflow:auto";
                 for(const id in configList) {
                     this.createItem(id,configList[id]);
                 }
+            }
+        },
+        init(){
+            if (document.querySelector('.js-main-container')) {
+                this.styleDiv = document.createElement('style');
+                document.head.appendChild(this.styleDiv);
+                this.applyConfig();
+            }
+            if(this.configDiv) {
+                this.initSettingPanel();
             }
             else {
                 new MutationObserver((mutations, observer)=>{
                     //console.log(mutations)
                     for (const mutation of mutations){
                         if(!mutation.target) continue;
-                        if(mutation.target.id=='effectSwitch'){
+                        if(mutation.target.id=='effectSwitchNew'){
                             observer.disconnect();
                             this.configDiv = document.querySelector('ul.ban-effect-list');
-                            return this.init();
+                            return this.initSettingPanel();
                         }
                     }
                 }).observe(document.body,{
