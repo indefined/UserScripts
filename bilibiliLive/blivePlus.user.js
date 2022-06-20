@@ -2,7 +2,7 @@
 // @name        bilibili直播间工具
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.47.5
+// @version     0.5.48
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -556,7 +556,7 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
             medal:{
                 name:'勋章',
                 link:'//link.bilibili.com/p/center/index#/user-center/wearing-center/my-medal',
-                dataUrl:'//api.live.bilibili.com/xlive/app-ucenter/v1/user/GetMyMedals?page=1&page_size=10',
+                dataUrl:'//api.live.bilibili.com/xlive/app-ucenter/v1/fansMedal/panel?page=1&page_size=10',
             },
             title:{
                 name:'头衔',
@@ -722,11 +722,11 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
         },
         async listMedal(data, medalWall){
             let hasMedal = false;
-            if (data.code!=0||!data.data||!(data.data.items instanceof Array)) {
+            if (data.code!=0||!data.data||!(data.data.list instanceof Array)) {
                 console.error(data);
                 throw(`查询勋章失败 code:${data.code}</br>${data.message}`);
             }
-            const medalList = data.data.items;
+            const medalList = (data.data.special_list||[]).concat(data.data.list).map(item=>item.medal);
             if (this.room && this.room.UID && !medalWall) {
                 const wall = await helper.xhr('//api.live.bilibili.com/xlive/web-ucenter/user/MedalWall?target_id='+this.room.UID);
                 if (wall.code ==0 && wall.data && (wall.data.list)) {
@@ -741,6 +741,7 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
             }
             medalList.forEach((v)=>{
                 if (this.room.ANCHOR_UID==v.target_id) hasMedal = true;
+                v.status = v.status||v.wearing_status;
                 const itemDiv = helper.create('div',{
                     style:'margin-top: 8px',
                     className:v.status&&'title-medal-selected-line'||''
@@ -773,14 +774,14 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
             });
             this.loadingDiv.style = '';
             const pages = data.data.page_info;
-            if (pages && pages.cur_page == 1 && medalList.length==0) {
+            if (pages && pages.current_page == 1 && medalList.length==0) {
                 helper.create('p',{
                     innerHTML:'<p data-v-17cf8b1e="" class="empty-hint-text">你还没有勋章哦～</p>'
                     +'<div data-v-17cf8b1e="" class="empty-image"></div>'
                 },this.dialogPanel);
             }
-            else if (pages && pages.cur_page < pages.total_page) {
-                await helper.xhr(this.strings.medal.dataUrl.replace('page=1','page=' + (+pages.cur_page+1))).then(async data=>this.listMedal(data, medalWall));
+            else if (pages && pages.current_page < pages.total_page) {
+                await helper.xhr(this.strings.medal.dataUrl.replace('page=1','page=' + (+pages.current_page+1))).then(async data=>this.listMedal(data, medalWall));
             }
         },
         async listTitle(data){
