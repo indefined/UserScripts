@@ -2,7 +2,7 @@
 // @name        bilibili直播间工具
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.48
+// @version     0.5.48.1
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -726,7 +726,12 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
                 console.error(data);
                 throw(`查询勋章失败 code:${data.code}</br>${data.message}`);
             }
-            const medalList = (data.data.special_list||[]).concat(data.data.list).map(item=>item.medal);
+            const medalList = (data.data.special_list||[]).concat(data.data.list).map(item=>{
+                item.medal.room_id = item.room_info.room_id;
+                item.medal.target_name = item.anchor_info.nick_name;
+                item.medal.status = item.medal.wearing_status;
+                return item.medal;
+            });
             if (this.room && this.room.UID && !medalWall) {
                 const wall = await helper.xhr('//api.live.bilibili.com/xlive/web-ucenter/user/MedalWall?target_id='+this.room.UID);
                 if (wall.code ==0 && wall.data && (wall.data.list)) {
@@ -741,7 +746,6 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
             }
             medalList.forEach((v)=>{
                 if (this.room.ANCHOR_UID==v.target_id) hasMedal = true;
-                v.status = v.status||v.wearing_status;
                 const itemDiv = helper.create('div',{
                     style:'margin-top: 8px',
                     className:v.status&&'title-medal-selected-line'||''
