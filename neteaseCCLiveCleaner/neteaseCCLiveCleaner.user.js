@@ -2,7 +2,7 @@
 // @name         网易CC直播净化
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.1.17
+// @version      0.1.17.1
 // @description  自定义屏蔽CC直播HTML5网页大部分不想看到的碍眼特效和内容
 // @author       indefined
 // @match        *://cc.163.com/*
@@ -626,7 +626,7 @@ div#bunShoutDynamic{}
                     //console.log(mutations)
                     for (const mutation of mutations){
                         if(!mutation.target) continue;
-                        if(mutation.target.id=='effectSwitchNew'){
+                        if(/effectSwitch/.test(mutation.target.id)){
                             observer.disconnect();
                             this.configDiv = document.querySelector('ul.ban-effect-list');
                             return this.initSettingPanel();
