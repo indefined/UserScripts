@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.27
+// @version      0.5.28
 // @description  可以在B站加载外挂本地字幕、下载B站的CC字幕，旧版B站播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -161,7 +161,7 @@
                         ok: req.status>=200&&req.status<=299,
                         status: req.status,
                         statusText: req.statusText,
-                        body: new ReadableStream(req.response),
+                        body: req.response, // 与原fetch定义的ReadableStream类型不同，无用
                         json: ()=>Promise.resolve(JSON.parse(req.responseText)),
                         text: ()=>Promise.resolve(req.responseText)
                     });
