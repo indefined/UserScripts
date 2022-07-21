@@ -18,7 +18,7 @@
 // @include      *://forums.e-hentai.org/*showtopic=*
 // @include      *://hvmarket.xyz/*
 // @include      *://reasoningtheory.net/*
-// @version      2022.04.19
+// @version      2022.07.21
 // ==/UserScript==
 
 if (document.location.href.match(/ss=iw/)&&!document.getElementById('item_pane'))return
@@ -52,6 +52,7 @@ function main(){
         'equip', //装备属性页13
         'hvmarket.xyz', //hvmarket14
         'reasoningtheory.net', //拍卖15
+        'Bazaar&ss=mk', //交易市场16
     ];
     var location;
     for(location = 0; location < lklist.length; location++){
@@ -238,6 +239,10 @@ function main(){
                 translateItems('.itemHeader>span>span:nth-child(2)');
                 translateEquips('.itemHeader>span>span:nth-child(2)');
             }
+            break;
+
+        case 16: //交易市场
+            translateItems('#market_right');
             break;
 
         default: //没有匹配命中需要翻译的网页
@@ -1026,6 +1031,7 @@ function loadEquips(){
         //布甲
         'Cap ':'兜帽 ',
         'Cap$':'兜帽',
+        'Cap/':'兜帽/',
         'Cap<':'兜帽<',
         'Robe':'长袍',
         'Gloves':'手套',

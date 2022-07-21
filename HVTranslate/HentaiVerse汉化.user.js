@@ -13,7 +13,7 @@
 // @include        *://hentaiverse.org/*
 // @include        *://alt.hentaiverse.org/*
 // @core           http://userscripts-mirror.org/scripts/show/41369
-// @version        2022.04.19
+// @version        2022.07.21
 // @grant none
 // ==/UserScript==
 (function () {
@@ -43,6 +43,8 @@
         '#eqshop_outer' : ['equipsName'], //装备商店
         '#itembot_outer' : ['itemBot', 'items', 'artifact'], //采购机器人
         '#bocreate' : ['itemBot'], //采购机器人
+        '#market_right' : ['items', 'artifact'], //市场列表
+        '#market_outer' : ['market'], //交易市场其它内容
         '#settings_outer' : ['settings', 'skills', 'difficulty', 'equipsName'], //设置页面
         '#monstercreate_right' : ['monsterCreate'], //创建怪物信息，由于此面板被怪物实验室包含，实际也使用到了下一行的字典
         '#monster_outer' : ['monsterLabs'], //怪物实验室
@@ -181,6 +183,7 @@ var words = {
         'Snowflake and the moogles are rebooting the universe. Check back later.' : '雪花女神和莫古利正在重启宇宙，请稍后再来',
         'Snowflake and the moogles are playing in the snow. Check back later.' : '雪花女神和莫古利正在玩雪，请稍后再来',
         'Snowflake and the moogles are pining for spring. Check back later.' : '雪花女神和莫古利渴望春天，请稍后再来',
+        'Snowflake and the moogles are remaking the world. Check back later.' : '雪花女神和莫古利正在重做世界，请稍后再来',
 
         'No energy items available.' : '你没有可用的精神恢复剂',
         'Name contains invalid characters.' : '名字包含不支持字符(仅支持英文和数字)',
@@ -228,6 +231,16 @@ var words = {
         'Items cannot be sold while in use.' : '无法出售正在穿戴装备',
         'Your equipment inventory is full' : '你的装备库存已经满了！',
         'You do not have enough credits for that.' : '你没有足够的 Credits 来执行操作！',
+
+        'Insufficent credits in market account' : '市场账户余额不足',
+        'Insufficent credits in credit balance' : '个人账户余额不足',
+        'Insufficient items available' : '你没有足够数量该物品可供出售',
+        'You do not have a sufficient market balance to place that order' : '你没有足够的市场余额可供投放当前买单',
+        'Bidding price must be at least' : '当前物品最低出价为',
+        'Asking price must be at least' : '当前物品最低要价为',
+        '/Your bid price must be at least (.+?) to overbid the current buy orders/' : '如果要加价超出目前最高买价你必须最少出价 $1',
+        '/Your ask price must be at most (.+?) to undercut the current sell orders/' : '如果要减价低于目前最低卖价你必须开价不超过 $1',
+        'You have to wait a short while between placing each order' : '你创建订单过于频繁，稍后再试',
 
         'There are no free slots left.' : '没有空余的怪物槽可以创建怪物。',
         'Name is too long (max 50 chars)' : '名字太长（最大50个字符，仅支持字母和数字和非特殊字符)',
@@ -363,6 +376,7 @@ var words = {
         '/^Item Shop$/' : '道具店',
         'Item Shop Bot' : '采购机器人',
         'Item Backorder' : '采购机器人',
+        'The Market' : '交易市场',
         'Monster Lab' : '怪物实验室',
         'The Shrine' : '雪花祭坛',
         'MoogleMail' : '莫古利邮局',
@@ -393,6 +407,7 @@ var words = {
 
         '/^Isekai$/' : '异世界',
         'Currently playing on Isekai' : '你当前在异世界模式下',
+        'Season' : '赛季',
         'Click to switch to Persistent' : '点击切换到传统恒定世界模式',
         '/^Persistent$/' : '恒定世界',
         'Currently playing on Persistent' : '你当前在传统恒定世界模式下',
@@ -2197,6 +2212,106 @@ var words = {
         'You only pay for items if and when the backorder is filled. If your account does not have sufficient credits whenever an item is sold, your backorder will be deleted.' : '你仅在该订单成立时支付货款。如果订单成立时你的账户余额不足以支付该订单，你的订单将会被删除。',
     },
 
+    ///////////////////////////////////////////////////////交易市场
+    market: {
+        '/Consumables?/' : '消耗品',
+        '/Materials?/' : '材料',
+        '/Trophies|Trophy/' : '奖杯',
+        '/Artifacts?/' : '文物',
+        '/Figures?/' : '小马雕像',
+        '/Monster Items?/' : '怪物物品',
+
+        'Account Balance' : '账户余额',
+        ' Withdraw ' : ' 提款 ',
+        ' Deposit ' : ' 存款 ',
+        'Market Balance' : '市场余额',
+        'Browse Items' : '查看市场',
+        'My Buy Orders' : '我的买单',
+        'My Sell Orders' : '我的卖单',
+        'Market Log' : '市场记录',
+
+        'There are no items matching this filter' : '当前没有符合筛选条件的物品',
+        'There are no orders for this type of item' : '当前类别没有订单',
+        'There are no recent market events.' : '最近没有市场活动',
+        'Only With Sellable Stock' : '只看可出售库存',
+        'Only With Buyable Stock' : '只看可购买库存',
+        'Show Obsolete Items' : '显示过时物品',
+        'Your Stock' : '你的库存',
+        'Market Bid' : '市场出价',
+        'Market Ask' : '市场要价',
+        'Market Stock' : '市场库存',
+        'Placing sell orders is locked for the first' : '在异世界每季度最开始前24小时',
+        '24 hours of each Isekai season.' : '投放卖单将被临时禁用',
+
+        'You have ': '你有 ',
+        ' available to sell. This item is traded in batches of ' : ' 件库存可供出售。本物品出售单位为每包 ',
+        '; all prices are per batch. Min price is ' : ' 件, 以下价格都是以包为单位。市场最低出价为 ',
+        ' for market orders.' : '.',
+        ' for market orders and ' : ', 最低系统店进价为 ',
+        ' for backorders.' : '.',
+        'Can always be bought for ' : '系统店直接供货价为 ',
+        'Item cannot be backordered.' : '本物品不支持系统店进货',
+
+        'Your Sell Order' : '你的卖单',
+        'Sell Count:' : '出售数量',
+        'Min Ask Price:' : '最低卖价',
+        'Ask Price:' : '卖价',
+        'Stock:' : '库存',
+        'Place Sell Order' : '投放卖单',
+        'Min Undercut' : '最低减价',
+        'Available Sell Orders' : '当前卖单',
+        'No sell orders found' : '当前没有卖单',
+        'Your Buy Order' : '你的买单',
+        'Buy Count:' : '购买数量',
+        'Min Bid Price:' : '最低买价',
+        'Bid Price:' : '买价',
+        'Order Total:' : '总价',
+        'Min Overbid' : '最低加价',
+        'Place Buy Order' : '投放买单',
+        'Update' : '更新',
+        'Delete' : '删除',
+        'Available Buy Orders' : '当前买单',
+        'No buy orders found' : '当前没有买单',
+
+        'Price History' : '历史价格',
+        'Count' : '数量',
+        'Price' : '单价',
+        'Total' : '总计',
+        'Sold' : '售出',
+        'Low' : '最低',
+        'Avg' : '平均',
+        'High' : '最高',
+        'Vol' : '总计',
+        'Day' : '日',
+        'Week' : '周',
+        'Month' : '月',
+        'Year' : '年',
+        'Recent Trades' : '最近交易',
+        'Seller' : '卖家',
+        'Buyer' : '买家',
+        '/^Item$/' : '物品',
+        'No recent trades found' : '无最近交易记录',
+        'No trades found' : '无交易记录',
+        'Previous' : '上一个',
+        'Back to' : '返回',
+        'Go to' : '查看',
+        'Next' : '下一个',
+
+        'Order ' : '订单',
+        'Amount' : '数额',
+        'Balance' : '余额',
+        'Info' : '详情',
+        'Deposit from credit balance' : '从个人账户中存款至市场账户',
+        'Withdrawal to credit balance' : '提款至个人账户',
+        'Purchased' : '购买',
+        'Sold' : '售出',
+        '/per (\\d+)/' : '(每 $1 件)',
+        'Show Full Trade Log' : '查看全部交易记录',
+        'Item Trade Log' : '物品交易记录',
+        'Player Trade Log' : '用户交易记录',
+        '' : '',
+    },
+
     ///////////////////////////////////////////////////////雪花神殿
     shrine: {
         'Welcome to Snowflake\'s Shrine' : '欢迎来到雪花神殿',
@@ -2246,7 +2361,7 @@ var words = {
         'Feed Tier' : '需喂食食品',
         'Monster Chow' : '怪物饲料',
         'Monster Edibles' : '怪物食品',
-        'Monster Cuisines' : '怪物料理',
+        '/Monster Cuisines?/' : '怪物料理',
         '/Chaos Tokens?/' : '混沌令牌',
         '/Happy Pills?/' : '快乐药丸',
         '/Chows?/' : '饲料',
