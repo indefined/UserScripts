@@ -13,7 +13,7 @@
 // @include        *://hentaiverse.org/*
 // @include        *://alt.hentaiverse.org/*
 // @core           http://userscripts-mirror.org/scripts/show/41369
-// @version        2022.07.21
+// @version        2022.07.27
 // @grant none
 // ==/UserScript==
 (function () {
@@ -125,8 +125,6 @@ var words = {
 
     //已知现缺：
         // trains：缺：新陈代谢、激励、解离症
-        // itemInfos：缺：无价的明朝瓷器、七叶幸运草、幸运兔脚；
-
 
     ////////////////////////////////////////////////////////////////////////////////
     // 浏览器弹窗，此部分使用独立翻译方法不受上面dictsMap影响
@@ -1511,7 +1509,7 @@ var words = {
         'A lifesize figurine of Angel Bunny, Fluttershy\'s faithful yet easily vexed pet and life partner. All-purpose assistant, time keeper, and personal attack alarm.' : 'NO.26 天使兔的等身大玩偶。为小蝶忠实且易怒的宠物及伴侣。万能助理、报时器、受到人身攻击时的警报器。 ',
         'A lifesize figurine of Gummy, Pinkie Pie\'s faithful pet. Usually found lurking in your bathtub. While technically an alligator, he is still arguably the best pony.' : 'NO.27 甘米的等身大玩偶。是萍琪的忠实宠物。经常被发现潜伏在你的浴缸里。虽然技术上是只短吻鳄，但它仍然可以称得上是最棒的小马。 ',
 
-        //旧古董。缺：无价的明朝瓷器、七叶幸运草、幸运兔脚；未校对：格鲁
+        //旧古董
         'It is dead, and smaller than you expected.' : '它已经死了，而且体型比你想像中还要小。',
         'So that is where that thing ended up.' : '所以这就是事件的最终下场。',
         'It would be totally awesome, but you do not have any sharks.' : '这肯定棒呆了！但你没有养鲨鱼。',
@@ -2229,6 +2227,8 @@ var words = {
         'My Buy Orders' : '我的买单',
         'My Sell Orders' : '我的卖单',
         'Market Log' : '市场记录',
+        'Account Log' : '帐号记录',
+        '/^Trade Log$/' : '交易记录',
 
         'There are no items matching this filter' : '当前没有符合筛选条件的物品',
         'There are no orders for this type of item' : '当前类别没有订单',
@@ -2292,6 +2292,9 @@ var words = {
         '/^Item$/' : '物品',
         'No recent trades found' : '无最近交易记录',
         'No trades found' : '无交易记录',
+        'Show Full Trade Log' : '查看全部交易记录',
+        'Item Trade Log' : '物品交易记录',
+        'Player Trade Log' : '用户交易记录',
         'Previous' : '上一个',
         'Back to' : '返回',
         'Go to' : '查看',
@@ -2306,10 +2309,7 @@ var words = {
         'Purchased' : '购买',
         'Sold' : '售出',
         '/per (\\d+)/' : '(每 $1 件)',
-        'Show Full Trade Log' : '查看全部交易记录',
-        'Item Trade Log' : '物品交易记录',
-        'Player Trade Log' : '用户交易记录',
-        '' : '',
+        'There are no recent trades.' : '最近无交易记录',
     },
 
     ///////////////////////////////////////////////////////雪花神殿
