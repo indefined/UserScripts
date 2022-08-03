@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.28
+// @version      0.5.29
 // @description  可以在B站加载外挂本地字幕、下载B站的CC字幕，旧版B站播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -936,6 +936,38 @@
         },
     };//newPlayerHelper END
 
+    // 3.15新版播放器，只有下载功能
+    const player315 = {
+        panel:undefined,
+        initUI(){
+            //下载标识
+            elements.createAs('style',{
+                innerHTML:'.bpx-player-ctrl-subtitle-major-inner>.bpx-player-ctrl-subtitle-language-item:after {content: "下载";position:absolute;right:12px}'
+            }, this.panel);
+            this.panel.addEventListener('click', function(ev) {
+                if (!(ev.target || !ev.target.classList.contains('bpx-player-ctrl-subtitle-language-item'))) return;
+                const rect = ev.target.getBoundingClientRect().right;
+                if (rect ==0 || rect -ev.x > 30) return;// 仅当点击字幕右侧30像素内的下载标识区域时触发下载
+                bilibiliCCHelper.getSubtitle(ev.target.dataset.lan, ev.target.lastChild.data).then(data=>{
+                    encoder.showDialog(data);
+                }).catch(e=>{
+                    bilibiliCCHelper.toast('获取字幕失败',e);
+                });
+                return false;
+            });
+            //设置ID标记视频为已注入，防止二次初始化
+            this.panel.id = 'bilibili-player-subtitle-btn';
+            console.log('3.15 Bilibili CC Helper init new Bangumi UI success.');
+        },
+        init(subtitle){
+            this.panel = elements.getAs('.bpx-player-ctrl-subtitle-major-content');
+            if (!this.panel) {
+                throw('无字幕');
+            }
+            this.initUI();
+        },
+    }; //player315end
+
     //新版番剧播放器，仅下载功能
     const newBangumiHelper = {
         iconBtn:undefined,
@@ -1034,7 +1066,10 @@
             return this.subtitle.subtitles.find(item=>item.lan==lan || item.lan_doc==name);
         },
         getInfo(name) {
-            return this.window[name]||( this.window.__INITIAL_STATE__ && this.window.__INITIAL_STATE__[name] ) || this.window.__INITIAL_STATE__ && this.window.__INITIAL_STATE__.epInfo && this.window.__INITIAL_STATE__.epInfo[name];
+            return this.window[name]
+            || this.window.__INITIAL_STATE__ && this.window.__INITIAL_STATE__[name]
+            || this.window.__INITIAL_STATE__ && this.window.__INITIAL_STATE__.epInfo && this.window.__INITIAL_STATE__.epInfo[name]
+            || this.window.__INITIAL_STATE__.videoData && this.window.__INITIAL_STATE__.videoData[name];
         },
         async setupData(){
             if(this.cid==this.getInfo('cid')&& this.subtitle) return this.subtitle;
@@ -1096,6 +1131,9 @@
                 else if(elements.getAs('.bilibili-player-video-danmaku-setting')){
                     newPlayerHelper.init(subtitle);
                 }
+                else if (elements.getAs('.bpx-player-ctrl-subtitle-major-content')){
+                    player315.init(subtitle);
+                }
                 else if(elements.getAs('.squirtle-subtitle-wrap')){
                     newBangumiHelper.init(subtitle);
                 }
@@ -1109,7 +1147,9 @@
                 //console.log(mutations)
                 mutations.forEach(mutation=>{
                     if(!mutation.target) return;
-                    if(mutation.target.getAttribute('stage')==1 || mutation.target.classList.contains('squirtle-quality-wrap')){
+                    if(mutation.target.getAttribute('stage')==1
+                       || mutation.target.classList.contains('bpx-player-loading-panel-text')
+                       || mutation.target.classList.contains('squirtle-quality-wrap')){
                         this.tryInit();
                     }
                 });
