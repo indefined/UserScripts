@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.29.1
+// @version      0.5.29.3
 // @description  可以在B站加载外挂本地字幕、下载B站的CC字幕，旧版B站播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -755,8 +755,8 @@
         }
     };//oldPlayerHelper END
 
-    //新版播放器CC字幕助手，需要维护下载按钮/本地字幕选项/关闭选项/需要时监听CC字幕按钮
-    const newPlayerHelper = {
+    //2.x播放器CC字幕助手，需要维护下载按钮/本地字幕选项/关闭选项/需要时监听CC字幕按钮
+    const player2x = {
         iconBtn:undefined,
         icon:undefined,
         panel:undefined,
@@ -934,7 +934,7 @@
                 throw('找不到新播放器按钮');
             }
         },
-    };//newPlayerHelper END
+    };//player2x END
 
     // 3.15新版播放器，只有下载功能
     const player315 = {
@@ -968,8 +968,8 @@
         },
     }; //player315end
 
-    //新版番剧播放器，仅下载功能
-    const newBangumiHelper = {
+    //3.14版番剧播放器，仅下载功能
+    const player314 = {
         iconBtn:undefined,
         icon:undefined,
         panel:undefined,
@@ -1016,7 +1016,7 @@
             }
             if(this.panel) this.initUI();
         },
-    };//newPlayerHelper END
+    };//player314 END
 
     //启动器
     const bilibiliCCHelper = {
@@ -1129,13 +1129,16 @@
                     oldPlayerHelper.init(subtitle);
                 }
                 else if(elements.getAs('.bilibili-player-video-danmaku-setting')){
-                    newPlayerHelper.init(subtitle);
+                    player2x.init(subtitle);
                 }
                 else if (elements.getAs('.bpx-player-ctrl-subtitle-major-content')){
                     player315.init(subtitle);
                 }
                 else if(elements.getAs('.squirtle-subtitle-wrap')){
-                    newBangumiHelper.init(subtitle);
+                    player314.init(subtitle);
+                }
+                else {
+                    console.log('bilibili cc未发现可识别版本播放器')
                 }
             }).catch(e=>{
                 this.toast('CC字幕助手配置失败',e);
@@ -1147,9 +1150,9 @@
                 //console.log(mutations)
                 for (const mutation of mutations){
                     if(!mutation.target) return;
-                    if(mutation.target.getAttribute('stage')==1
-                       || mutation.target.classList.contains('bpx-player-loading-panel-text')
-                       || mutation.target.classList.contains('squirtle-quality-wrap')){
+                    if(mutation.target.getAttribute('stage')==1 // 2.x版本播放器
+                       || mutation.target.classList.contains('bpx-player-ctrl-subtitle-bilingual') // 3.15版本播放器
+                       || mutation.target.classList.contains('squirtle-quality-wrap')){ // 3.14版本番剧播放器
                         this.tryInit();
                         break;
                     }
