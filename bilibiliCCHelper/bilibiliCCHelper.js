@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.29.3
+// @version      0.5.30
 // @description  可以在B站加载外挂本地字幕、下载B站的CC字幕，旧版B站播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -1069,10 +1069,19 @@
             return this.window[name]
             || this.window.__INITIAL_STATE__ && this.window.__INITIAL_STATE__[name]
             || this.window.__INITIAL_STATE__ && this.window.__INITIAL_STATE__.epInfo && this.window.__INITIAL_STATE__.epInfo[name]
-            || this.window.__INITIAL_STATE__.videoData && this.window.__INITIAL_STATE__.videoData[name];
+            || this.window.__INITIAL_STATE__ && this.window.__INITIAL_STATE__.videoData && this.window.__INITIAL_STATE__.videoData[name];
+        },
+        getCid(){
+            if (this.window.cid) return this.window.cid;
+            const pages = this.getInfo('pages'),
+                  page = this.window.__INITIAL_STATE__ && this.window.__INITIAL_STATE__.p;
+            if (page && pages && pages instanceof Array) {
+                const info = pages.find(item=>item.page == page);
+                if (info) return info.cid;
+            }
         },
         async setupData(){
-            if(this.cid==this.getInfo('cid')&& this.subtitle) return this.subtitle;
+            if(this.cid==this.getCid() && this.subtitle) return this.subtitle;
             if(location.pathname=='/blackboard/html5player.html') {
                 let match = location.search.match(/cid=(\d+)/i);
                 if(!match) return;
@@ -1082,10 +1091,10 @@
                 match = location.search.match(/bvid=(\d+)/i);
                 if(match) this.window.bvid = match[1];
             }
-            this.cid = this.getInfo('cid');
             this.aid = this.getInfo('aid');
             this.bvid = this.getInfo('bvid');
             this.epid = this.getInfo('id');
+            this.cid = this.getCid();
             this.player = this.window.player;
             this.subtitle = undefined;
             this.datas = {close:{body:[]},local:{body:[]}};
