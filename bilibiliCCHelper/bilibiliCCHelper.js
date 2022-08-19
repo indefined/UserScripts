@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.30
+// @version      0.5.30.1
 // @description  可以在B站加载外挂本地字幕、下载B站的CC字幕，旧版B站播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -1079,6 +1079,7 @@
                 const info = pages.find(item=>item.page == page);
                 if (info) return info.cid;
             }
+            return this.getInfo('cid');
         },
         async setupData(){
             if(this.cid==this.getCid() && this.subtitle) return this.subtitle;
@@ -1160,7 +1161,7 @@
                 for (const mutation of mutations){
                     if(!mutation.target) return;
                     if(mutation.target.getAttribute('stage')==1 // 2.x版本播放器
-                       || mutation.target.classList.contains('bpx-player-ctrl-subtitle-bilingual') // 3.15版本播放器
+                       || mutation.target.classList.contains('bpx-player-ctrl-subtitle-bilingual') // 3.15+版本播放器
                        || mutation.target.classList.contains('squirtle-quality-wrap')){ // 3.14版本番剧播放器
                         this.tryInit();
                         break;
