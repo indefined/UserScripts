@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.31.1
-// @description  可以在B站加载外挂本地字幕、下载B站的CC字幕，旧版B站播放器可启用CC字幕
+// @version      0.5.32
+// @description  可下载B站的CC字幕，旧版B站播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
 // @include      http*://www.bilibili.com/video/*
@@ -1097,7 +1097,7 @@
             this.epid = this.getInfo('id');
             this.cid = this.getCid();
             this.player = this.window.player;
-            this.subtitle = undefined;
+            this.subtitle = {count:0,subtitles:[{lan:'close',lan_doc:'关闭'},{lan:'local',lan_doc:'本地字幕'}]};
             this.datas = {close:{body:[]},local:{body:[]}};
             decoder.data = undefined;
             if(!this.cid||(!this.aid&&!this.bvid)) return;
@@ -1161,7 +1161,7 @@
                 for (const mutation of mutations){
                     if(!mutation.target) return;
                     if(mutation.target.getAttribute('stage')==1 // 2.x版本播放器
-                       || mutation.target.classList.contains('bpx-player-ctrl-subtitle-bilingual') // 3.15+版本播放器
+                       || mutation.target.id == 'v_desc' // 3.22+版本播放器
                        || mutation.target.classList.contains('squirtle-quality-wrap')){ // 3.14版本番剧播放器
                         this.tryInit();
                         break;
