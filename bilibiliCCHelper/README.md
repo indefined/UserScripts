@@ -28,6 +28,7 @@ javascript:(function(){document.head.appendChild(document.createElement('script'
 - CC字幕下载
   - 新/旧版HTML5播放器可用
   - 支持ASS/SRT/LRC/BCC/TXT纯文本格式
+  - 按住ctrl点击下载可直接下载上一次选择的格式
   - 默认系统编码，CR/LF换行
 - 载入本地字幕
   - 仅支持3.0以下HTML5播放器内核，***新版3.x以上播放器已失效***

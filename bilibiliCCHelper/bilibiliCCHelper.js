@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.32.1
+// @version      0.5.33
 // @description  可下载B站的CC字幕，旧版B站播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -9,6 +9,7 @@
 // @include      http*://www.bilibili.com/bangumi/play/ss*
 // @include      http*://www.bilibili.com/bangumi/play/ep*
 // @include      http*://www.bilibili.com/watchlater/
+// @include      https://www.bilibili.com/medialist/play/watchlater/*
 // @include      http*://www.bilibili.com/medialist/play/ml*
 // @include      http*://www.bilibili.com/blackboard/html5player.html*
 // @license      MIT
@@ -200,12 +201,13 @@
             '','[Events]',
             'Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text'
         ],
-        showDialog(data){
+        showDialog(data, download){
             if(!data||!(data.body instanceof Array)){
                 throw '数据错误';
             }
+            this.data = data;
             const settingDiv = elements.createAs('div',{
-                style :'position: fixed;top: 0;bottom: 0;left: 0;right: 0;background: rgba(0,0,0,0.4);z-index: 1048576;'
+                style :'position: fixed;top: 0;bottom: 0;left: 0;right: 0;background: rgba(0,0,0,0.4);z-index: 1048576;'+(download?'display:none':'')
             },document.body),
                   panel = elements.createAs('div',{
                       style:'left: 50%;top: 50%;position: absolute;padding: 15px;background:white;'
@@ -221,23 +223,23 @@
             textArea.setAttribute('readonly',true);
             elements.createRadio({
                 id:'subtitle-download-ass',name: "subtitle-type",value:"ASS",
-                onchange: ()=>this.encodeToASS(data.body)
+                onchange: ()=>this.updateDownload("ASS")
             },bottomPanel);
             elements.createRadio({
-                id:'subtitle-download-srt',name: "subtitle-type",value:"SRT",checked:'checked',
-                onchange: ()=>this.encodeToSRT(data.body)
+                id:'subtitle-download-srt',name: "subtitle-type",value:"SRT",
+                onchange: ()=>this.updateDownload("SRT")
             },bottomPanel);
             elements.createRadio({
                 id:'subtitle-download-lrc',name: "subtitle-type",value:"LRC",
-                onchange: ()=>this.encodeToLRC(data.body)
+                onchange: ()=>this.updateDownload("LRC")
             },bottomPanel);
             elements.createRadio({
                 id:'subtitle-download-txt',name: "subtitle-type",value:"TXT",
-                onchange: ()=>this.updateDownload(data.body.map(item=>item.content).join('\r\n'),'txt')
+                onchange: ()=>this.updateDownload("TXT")
             },bottomPanel);
             elements.createRadio({
                 id:'subtitle-download-bcc',name: "subtitle-type",value:"BCC",
-                onchange: ()=>this.updateDownload(JSON.stringify(data,undefined,2),'bcc')
+                onchange: ()=>this.updateDownload("BCC")
             },bottomPanel);
             //下载
             this.actionButton = elements.createAs('a',{
@@ -245,36 +247,65 @@
                 innerText: "下载",style: 'height: 24px;margin-right: 5px;'
             },bottomPanel);
             //关闭
-            elements.createAs('button',{
+            this.closeButton = elements.createAs('button',{
                 innerText: "关闭",className: "bpui-button bui bui-button bui-button-blue",style:'border:none',
                 onclick: ()=>document.body.removeChild(settingDiv)
             },bottomPanel);
             //默认转换SRT格式
-            this.encodeToSRT(data.body);
+            const type = localStorage.defaultSubtitleType || 'SRT';
+            elements.getAs(`[name="subtitle-type"][value="${type}"]`).checked = true;
+            this.updateDownload(type, download);
         },
-        updateDownload(result,type){
+        updateDownload(type='LRC', download){
+            let result;
+            switch(type) {
+                case 'LRC':
+                    result = this.encodeToLRC(this.data.body);
+                    break;
+                case 'SRT':
+                    result = this.encodeToSRT(this.data.body);
+                    break;
+                case 'ASS':
+                    result = this.encodeToASS(this.data.body);
+                    break;
+                case 'TXT':
+                    result = this.data.body.map(item=>item.content).join('\r\n');
+                    break;
+                case 'BCC':
+                    result = JSON.stringify(this.data,undefined,2);
+                    break;
+                default:
+                    result = '错误：无法识别的格式 ' + type;
+                    break;
+            }
             this.textArea.value = result;
+            localStorage.defaultSubtitleType = type;
+            type = type.toLowerCase();
             URL.revokeObjectURL(this.actionButton.href);
             this.actionButton.classList.remove('bpui-state-disabled','bui-button-disabled');
             this.actionButton.href = URL.createObjectURL(new Blob([result],{type:'text/'+type}));
             this.actionButton.download = `${bilibiliCCHelper.getInfo('h1Title') || document.title}.${type}`;
+            if (download) {
+                this.actionButton.click();
+                this.closeButton.click();
+            }
         },
         encodeToLRC(data){
-            this.updateDownload(data.map(({from,to,content})=>{
+            return data.map(({from,to,content})=>{
                 return `${this.encodeTime(from,'LRC')} ${content.replace(/\n/g,' ')}`;
-            }).join('\r\n'),'lrc');
+            }).join('\r\n');
         },
         encodeToSRT(data){
-            this.updateDownload(data.map(({from,to,content},index)=>{
+            return data.map(({from,to,content},index)=>{
                 return `${index+1}\r\n${this.encodeTime(from)} --> ${this.encodeTime(to)}\r\n${content}`;
-            }).join('\r\n\r\n'),'srt');
+            }).join('\r\n\r\n');
         },
         encodeToASS(data){
             this.assHead[1] = `Title: ${document.title}`;
             this.assHead[10] = `; 字幕来源${document.location}`;
-            this.updateDownload(this.assHead.concat(data.map(({from,to,content})=>{
+            return this.assHead.concat(data.map(({from,to,content})=>{
                 return `Dialogue: 0,${this.encodeTime(from,'ASS')},${this.encodeTime(to,'ASS')},*Default,NTP,0000,0000,0000,,${content.replace(/\n/g,'\\N')}`;
-            })).join('\r\n'),'ass');
+            })).join('\r\n');
         },
         encodeTime(input,format='SRT'){
             let time = new Date(input*1000),
@@ -656,10 +687,10 @@
             this.downloadBtn = elements.createAs('button',{
                 className: "bpui-button",style: 'padding:0 8px;',
                 innerText: "下载",
-                onclick: ()=>{
+                onclick: (ev)=>{
                     if(this.selectedLan=='close') return;
                     bilibiliCCHelper.getSubtitle(this.selectedLan).then(data=>{
-                        encoder.showDialog(data);
+                        encoder.showDialog(data,ev.ctrlKey);
                     }).catch(e=>{
                         bilibiliCCHelper.toast('获取字幕失败',e);
                     });
@@ -782,10 +813,10 @@
                   localItem = closeItem.cloneNode();
             elements.setAs(downloadBtn,{
                 style: 'min-width:unset!important',innerText: '下载',
-                onclick: ()=>{
+                onclick: (ev)=>{
                     if(this.selectedLan=='close') return;
                     bilibiliCCHelper.getSubtitle(this.selectedLan).then(data=>{
-                        encoder.showDialog(data);
+                        encoder.showDialog(data,ev.ctrlKey);
                     }).catch(e=>{
                         bilibiliCCHelper.toast('获取字幕失败',e);
                     });
@@ -862,7 +893,7 @@
                     const rect = ev.target.getBoundingClientRect().right;
                     if (rect ==0 || rect -ev.x > 30) return;// 仅当点击字幕右侧30像素内的下载标识区域时触发下载
                     bilibiliCCHelper.getSubtitle(undefined, ev.target.lastChild.data).then(data=>{
-                        encoder.showDialog(data);
+                        encoder.showDialog(data,ev.ctrlKey);
                     }).catch(e=>{
                         bilibiliCCHelper.toast('获取字幕失败',e);
                     });
@@ -949,7 +980,7 @@
                 const rect = ev.target.getBoundingClientRect().right;
                 if (rect ==0 || rect -ev.x > 30) return;// 仅当点击字幕右侧30像素内的下载标识区域时触发下载
                 bilibiliCCHelper.getSubtitle(ev.target.dataset.lan, ev.target.lastChild.data).then(data=>{
-                    encoder.showDialog(data);
+                    encoder.showDialog(data,ev.ctrlKey);;
                 }).catch(e=>{
                     bilibiliCCHelper.toast('获取字幕失败',e);
                 });
@@ -993,7 +1024,7 @@
                 const rect = ev.target.getBoundingClientRect().right;
                 if (rect ==0 || rect -ev.x > 30) return;// 仅当点击字幕右侧30像素内的下载标识区域时触发下载
                 bilibiliCCHelper.getSubtitle(undefined, ev.target.lastChild.data).then(data=>{
-                    encoder.showDialog(data);
+                    encoder.showDialog(data,ev.ctrlKey);
                 }).catch(e=>{
                     bilibiliCCHelper.toast('获取字幕失败',e);
                 });
