@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.6.22
+// @version      0.6.23
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -206,9 +206,10 @@
             let loadingDiv;
             listBox.insertAdjacentElement('afterBegin',loadingDiv=element.getLoadingDiv('recommend'));
             GM_xmlhttpRequest({
-                method: 'GET',
+                method: 'GET',anonymous:true,
                 url: 'https://app.bilibili.com/x/feed/index?build=1&mobi_app=android&idx='
                 + (Date.now()/1000).toFixed(0) + (setting.accessKey?'&access_key='+setting.accessKey:''),
+                headers:{'user-agent':'Mozilla/5.0 BiliDroid/5.24.0 (bbcallen@gmail.com)'},
                 onload: res=>{
                     try {
                         const rep = JSON.parse(res.response);
@@ -389,7 +390,8 @@
             };
             //console.log(url);
             GM_xmlhttpRequest({
-                method: 'GET',url,
+                method: 'GET',url,anonymous:true,
+                headers:{'user-agent':'Mozilla/5.0 BiliDroid/5.24.0 (bbcallen@gmail.com)'},
                 onload: res=>{
                     try {
                         const par = JSON.parse(res.response);
