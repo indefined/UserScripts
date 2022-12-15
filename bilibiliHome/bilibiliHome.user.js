@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.6.23
+// @version      0.6.24
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -207,7 +207,7 @@
             listBox.insertAdjacentElement('afterBegin',loadingDiv=element.getLoadingDiv('recommend'));
             GM_xmlhttpRequest({
                 method: 'GET',anonymous:true,
-                url: 'https://app.bilibili.com/x/feed/index?build=1&mobi_app=android&idx='
+                url: 'https://app.bilibili.com/x/feed/index?appkey=27eb53fc9058f8c3&build=1&mobi_app=android&idx='
                 + (Date.now()/1000).toFixed(0) + (setting.accessKey?'&access_key='+setting.accessKey:''),
                 headers:{'user-agent':'Mozilla/5.0 BiliDroid/5.24.0 (bbcallen@gmail.com)'},
                 onload: res=>{
@@ -373,7 +373,7 @@
                 parent = parent.parentNode.parentNode;
                 if(!element.isNew) parent = parent.parentNode;
             }
-            url += `?build=5000000&goto=${parent.dataset.goto}&id=${parent.dataset.id}&mid=${parent.dataset.mid}`
+            url += `?appkey=27eb53fc9058f8c3&build=5000000&goto=${parent.dataset.goto}&id=${parent.dataset.id}&mid=${parent.dataset.mid}`
                 +`&reason_id=${target.dataset.reason_id}&rid=${parent.dataset.rid}&tag_id=${parent.dataset.tag_id}`;
             if (setting.accessKey) url += '&access_key='+ setting.accessKey;
             const handleCover = ()=>{
