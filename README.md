@@ -12,7 +12,7 @@
 
 [网易CC直播净化](./neteaseCCLiveCleaner/)
 
-[微博自动展开评论](./weiboCommentAutoExpand/)
+~~[微博自动展开评论](./weiboCommentAutoExpand/)~~
 
 [允许推特YouTube视频全屏/allow YouTube videos in twitter to fullscreen](./YTVideosInTwitterToFullscreen/)
 
