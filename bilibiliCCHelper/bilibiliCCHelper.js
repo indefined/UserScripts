@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.33
+// @version      0.5.34
 // @description  可下载B站的CC字幕，旧版B站播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -153,7 +153,7 @@
         }
     };
 
-    function fetch(url) {
+    function fetch(url, option = {}) {
         return new Promise((resolve, reject) => {
             const req = new XMLHttpRequest();
             req.onreadystatechange = ()=> {
@@ -168,6 +168,7 @@
                     });
                 }
             };
+            if (option.credentials == 'include') req.withCredentials = true;
             req.onerror = reject;
             req.open('GET', url);
             req.send();
@@ -244,6 +245,7 @@
             //下载
             this.actionButton = elements.createAs('a',{
                 className: 'bpui-button bpui-state-disabled bui bui-button bui-button-disabled bui-button-blue',
+                title: '按住Ctrl键点击字幕列表的下载可不打开预览直接下载当前格式',
                 innerText: "下载",style: 'height: 24px;margin-right: 5px;'
             },bottomPanel);
             //关闭
@@ -1132,11 +1134,11 @@
             this.datas = {close:{body:[]},local:{body:[]}};
             decoder.data = undefined;
             if(!this.cid||(!this.aid&&!this.bvid)) return;
-            return fetch(`https://api.bilibili.com/x/player/v2?cid=${this.cid}${this.aid?`&aid=${this.aid}`:`&bvid=${this.bvid}`}${this.epid?`&ep_id=${this.epid}`:''}`).then(res=>{
+            return fetch(`https://api.bilibili.com/x/player/v2?cid=${this.cid}${this.aid?`&aid=${this.aid}`:`&bvid=${this.bvid}`}${this.epid?`&ep_id=${this.epid}`:''}`, {credentials: 'include'}).then(res=>{
                 if (res.status==200) {
                     return res.json().then(ret=>{
                         if (ret.code == -404) {
-                            return fetch(`//api.bilibili.com/x/v2/dm/view?${this.aid?`aid=${this.aid}`:`bvid=${this.bvid}`}&oid=${this.cid}&type=1`).then(res=>{
+                            return fetch(`//api.bilibili.com/x/v2/dm/view?${this.aid?`aid=${this.aid}`:`bvid=${this.bvid}`}&oid=${this.cid}&type=1`, {credentials: 'include'}).then(res=>{
                                 return res.json()
                             }).then(ret=>{
                                 if (ret.code!=0) throw('无法读取本视频APP字幕配置'+ret.message);
