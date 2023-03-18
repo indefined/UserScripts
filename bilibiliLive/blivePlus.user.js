@@ -2,7 +2,7 @@
 // @name        bilibili直播间工具
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.49.1
+// @version     0.5.50
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -304,7 +304,14 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
 }
 
 #live-player .gift-control-panel {
-    height: unset!important;
+    height: max-content!important;
+}
+
+
+#live-player .out-part, #live-player .magic-adventures.gift-left-part,
+#live-player .gift-control-panel .left-part-ctnr{
+    height: 80px !important;
+    padding: 0;
 }
 
 #live-player .supporting-info {
