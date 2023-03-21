@@ -2,7 +2,7 @@
 // @name        bilibili直播间工具
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.50
+// @version     0.5.51
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -81,27 +81,10 @@ const LiveHelper = {
             name:'直播时间同步',
             group:'timeSync'
         },
-        giftInPanel:{
-            name:'礼物栏道具包裹',
-            group:'elementAdjuster'
-        },
-        oldGiftStyle:{
-            name:'旧版道具包裹样式',
-            group:'elementAdjuster'
-        },
-        fullScreenPanel:{
-            name:'全屏/网页全屏礼物栏',
-            group:'elementAdjuster'
-        },
         fullScreenChat:{
             name:'无侧边网页全屏弹幕发送框',
             group:'elementAdjuster'
         },
-        /*
-        chatInGiftPanel:{
-            name:'全屏弹幕发送框放入礼物栏',
-            group:'elementAdjuster'
-        },*/
         showVideoLink:{
             name:'轮播显示链接',
             group:'elementAdjuster'
@@ -115,279 +98,7 @@ const LiveHelper = {
             group:'otherGift'
         },
     },
-    //页面元素调整
-    elementAdjuster:{
-        initStyle(){
-            helper.create('style',{
-                type:'text/css',
-                innerHTML:`
-/*礼物包裹图标*/
-.gift-presets .z-gift-package {
-    display: inline-block !important;
-    vertical-align: top !important;
-    cursor: pointer !important;
-    position: relative! important;
-}
-.gift-presets .gift-package {
-    bottom:-2px!important;
-    background: url(//s1.hdslb.com/bfs/live/d57afb7c5596359970eb430655c6aef501a268ab.png)!important;
-    width: 48px!important;
-    height: 48px!important;
-    background-size: cover!important;
-    margin-right: 10px!important;
-    color: black;
-}
-
-.gift-presets .gift-package>*{
-    display:none!important;
-}
-
-.gift-presets .gift-package:after {
-    content: '道具包裹';
-    position: relative;
-    bottom: -55px;
-    left: 4px;
-    white-space: nowrap;
-}
-
-/*礼物包裹放到礼物栏上后辣条购买悬浮面板需要提高*/
-.z-gift-sender-panel {
-    z-index: 1048576;
-}
-
-/*礼物包裹内样式*/
-.gift-style-modify .gift-item-wrap .expiration {
-    padding: 1px 5px!important;
-    border-radius: 15px!important;
-    text-align: center!important;
-    right: 50%!important;
-    transform: translate(50%);
-    line-height: 1.35;
-    word-break: keep-all!important;
-}
-
-.gift-style-modify .gift-item-wrap {
-    margin: 10px 0px 0px 5px!important;
-    width: unset!important;
-}
-
-.gift-style-modify .gift-item-wrap:nth-of-type(-n+5) {
-    margin-top: 5px!important;
-}
-
-.gift-style-modify .common-popup-wrap.arrow-bottom.popup {
-    min-width: 274px!important;
-}
-
-.gift-style-modify .item-box {
-    width: 100%!important;
-}
-
-.gift-presets >div .wrap {
-    bottom: 50px!important;
-    right: -10px!important;
-}
-
-/*全屏礼物栏样式*/
-body.fullscreen-fix #live-player div~div#gift-control-vm,
-#live-player div~div#gift-control-vm {
-    display: block!important;
-}
-
-#live-player .gift-item .info .label,
-#live-player #gift-control-vm .gift-package {
-    color: unset!important;
-}
-
-#live-player #gift-control-vm {
-    background: none!important;
-    position: relative!important;
-    width: 100%!important;
-    border: none!important;
-    border-radius: 0!important;
-    height: unset!important;
-}
-
-/*控制栏背景现在分离了，礼物栏放在控制栏上后会挤掉原来背景，补上*/
-.live-web-player-controller {
-    background: none !important;
-}
-.web-player-controller-wrap {
-    background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.7));
-}
-.web-player-controller-wrap>:first-child{
-    height: 56px;
-}
-
-/*提高添加了礼物栏的播放器内弹幕发送框高度*/
-#gift-control-vm .fullscreen-danmaku {
-    bottom: 80px !important;
-}
-/*强制显示网页全屏弹幕发送框*/
-.player-full-win.hide-aside-area .showdm div:not(.fullscreen-danmaku)~.fullscreen-danmaku{
-    display: flex !important;
-}
-
-/*以下样式已暂时弃用*/
-/*直接放在控制栏上的全屏发送框*/
-#live-player-content .chat-input-ctnr.p-relative {
-    display: inline-block;
-    right: 0;
-    margin-top: 0;
-    float: right;
-    vertical-align: sub
-}
-#live-player-content textarea.chat-input{
-    height:25px;
-    width: 355px;
-    padding:0;
-    color: #fff;
-    background: rgba(0,0,0,.6);
-}
-#live-player-content textarea.chat-input .input-limit-hint{
-    right: 0;
-    bottom: unset;
-}
-
-.live-web-player-controller .right-action.p-absolute{
-    position: relative!important;
-    display: inline-block!important;
-    vertical-align: super;
-    float: right;
-}
-.live-web-player-controller .chat-input-ctnr.p-relative>div,
-.live-web-player-controller .right-action.p-absolute {
-    height: 24px;
-}
-.live-web-player-controller .chat-input-ctnr,
-.live-web-player-controller .right-action.p-absolute {
-    margin: 5px 0;
-}
-.live-web-player-controller .input-limit-hint {
-    line-height: 12px;
-}
-.live-web-player-controller .right-action>button{
-    height: 25px;
-}
-.live-web-player-controller .chat-input {
-    height: 24px;
-    width: 250px;
-    padding: 2px 8px 2px;
-}
-/*放在礼物栏上的全屏弹幕发送框*/
-#live-player .gift-control-panel .chat-input-ctnr{
-    display: inline-block!important;
-    vertical-align: middle!important;
-    width:300px;
-    margin-right: 5px;
-    margin-top: 0px;
-}
-
-#live-player .chat-input-ctnr.p-relative>div {
-    float: left;
-}
-
-#live-player .gift-control-panel .right-action.p-absolute{
-    position: relative!important;
-    display: inline-block!important;
-    vertical-align: middle!important;
-}
-
-#live-player .gift-control-panel .chat-input.border-box>span{
-    right: 90px;
-}
-
-#live-player .gift-control-panel .right-part .gift-presets {
-    height: unset!important;
-    margin: 0!important;
-    bottom: -5px;
-}
-
-#live-player .gift-control-panel {
-    height: max-content!important;
-}
-
-
-#live-player .out-part, #live-player .magic-adventures.gift-left-part,
-#live-player .gift-control-panel .left-part-ctnr{
-    height: 80px !important;
-    padding: 0;
-}
-
-#live-player .supporting-info {
-    display: none!important;
-}
-
-#live-player .gift-section.gift-list{
-    vertical-align: middle!important;
-}
-
-#live-player .gift-panel-box ,
-#live-player .outer-drawer[data-v-fd126f5a]{
-    background: none!important;
-    border: none!important;
-}
-
-#live-player .count-down {
-    margin-top: -10px!important;
-}`
-            },document.head);
-        },
-        initValues(){
-            this.leftContainer = helper.get('.left-container');
-            this.giftBar = helper.get('#gift-control-vm');
-            this.giftPanel = helper.get('div.gift-presets.p-relative.t-right');
-            this.giftPackage = helper.get('.item.z-gift-package');
-            if(this.giftPackage) {
-                this.giftPackage.id = 'giftPackage';
-                this.giftPackageContainer = this.giftPackage.parentNode;
-            }
-            /*
-            this.inputPanel = helper.get('div.chat-input-ctnr.p-relative');
-            this.chatControlPanel = this.inputPanel.parentNode;
-            this.bottomPanel = this.inputPanel.nextSibling;
-            this.sendButton = this.bottomPanel.lastChild;
-            */
-            this.asideCss = helper.create('style', {innerHTML: '/*右侧弹幕池展开手柄会挡到网页全屏礼物栏*/.aside-area-toggle-btn.dp-none.p-absolute {height: 25%;}'});
-            this.title = helper.create('a',{
-                target:'_blank',
-                className:'info-section dp-i-block v-middle title-link',
-                style:'margin-left:16px;font-size:16px'
-            });
-            this.titleObserver = new MutationObserver(mutations => {
-                //console.log(mutations);
-                for (const mutation of mutations) {
-                    for (const node of mutation.addedNodes) {
-                        if (node instanceof HTMLVideoElement) {
-                            this.updateVideoLink();
-                            return;
-                        }
-                    }
-                }
-            });
-            this.controllerObserver = new MutationObserver(mutations => this.handlerControllerPanel());
-        },
-        //礼物包裹
-        updateGiftPackage(){
-            if (this.giftPackage&&this.giftPanel){
-                if(this.settings.giftInPanel) {
-                    this.giftPanel.appendChild(this.giftPackage);
-                    helper.get('.gift-package').className = 'gift-package live-skin-main-text';
-                    const guardIcon = helper.get('div.m-guard-ent.gift-section.guard-ent');
-                    if (guardIcon) guardIcon.parentNode.removeChild(guardIcon);
-                }
-                else if(this.giftPackage.parentNode!=this.giftPackageContainer) {
-                    this.giftPackageContainer.appendChild(this.giftPackage);
-                    helper.get('.gift-package').className = 'gift-package live-skin-highlight-bg';
-                }
-                if(this.settings.oldGiftStyle) {
-                    this.giftPackage.classList.add('gift-style-modify');
-                }
-                else {
-                    this.giftPackage.classList.remove('gift-style-modify');
-                }
-            }
-        },
+    elementAdjuster: {
         getRoomID() {
             if (helper.roomInfo) return Promise.resolve(helper.roomInfo.ROOMID);
             const roomid = document.URL.match('[0-9]+')[0];
@@ -414,95 +125,39 @@ body.fullscreen-fix #live-player div~div#gift-control-vm,
                 });
             }
         },
-        //全屏礼物面板调整
-        handlerControllerPanel(){
-            const className = document.body.className,
-                  status = !className ?
-                  'normal' : className.includes('player-full-win') && !className.includes('hide-aside-area') ?
-                  'web-fullscreen' : className.includes('full') ?
-                  'fullscreen' : 'normal';
-            if(status=='normal'){
-                if (this.giftBar.parentNode != this.leftContainer) this.leftContainer.appendChild(this.giftBar);
-                //if (this.danmuBar && this.giftBar.contains(this.danmuBar)) this.controllerPanel.appendChild(this.danmuBar);
-            }
-            else{
-                this.controllerPanel = helper.get('.web-player-controller-wrap+.web-player-controller-wrap');
-                this.danmuBar = helper.get('.fullscreen-danmaku');
-                if (this.settings.fullScreenPanel && this.controllerPanel) {
-                    if (!this.controllerPanel.contains(this.giftBar)) {
-                        this.controllerPanel.appendChild(this.giftBar);
-                    }
-                    if (this.settings.fullScreenChat && this.danmuBar) {
-                        this.controllerPanel.classList.add('showdm');
-                        this.giftBar.appendChild(this.danmuBar);
-                    }
-                    else this.controllerPanel.classList.remove('showdm');
-                }
-                else {
-                    if (this.giftBar.parentNode != this.leftContainer) this.leftContainer.appendChild(this.giftBar);
-                    if (this.danmuBar && this.controllerPanel) {
-                        if (this.settings.fullScreenChat) {
-                            this.controllerPanel.classList.add('showdm');
-                            this.controllerPanel.appendChild(this.danmuBar);
-                        }
-                        else this.controllerPanel.classList.remove('showdm');
-                    }
-                }
-            }
-            /*
-            if (status=='web-fullscreen-hide'&&this.settings.fullScreenChat){
-                if(this.settings.chatInGiftPanel&&this.settings.fullScreenPanel&&!this.giftPanel.contains(this.sendButton)){
-                    this.giftPanel.appendChild(this.inputPanel);
-                    this.giftPanel.appendChild(this.sendButton);
-                }
-                else if(!this.settings.chatInGiftPanel||!this.settings.fullScreenPanel) {
-                    const controller = helper.get('.live-web-player-controller .right-area');
-                    if (!controller || controller.contains(this.sendButton)) return;
-                    controller.appendChild(this.sendButton);
-                    controller.appendChild(this.inputPanel);
-                }
-            }else if((status!='web-fullscreen-hide'||!this.settings.fullScreenChat)&&!this.bottomPanel.contains(this.sendButton)){
-                this.chatControlPanel.insertBefore(this.inputPanel,this.bottomPanel);
-                this.bottomPanel.appendChild(this.sendButton);
-            }
-            */
-        },
         update(item,value){
-            if(item=='showVideoLink') {
-                this.updateVideoLink();
-            }
-            else if(item=='giftInPanel'||item=='oldGiftStyle') {
-                return this.updateGiftPackage();
-            }
-            else if(item=='fullScreenPanel'||item=='fullScreenChat'||item=='chatInGiftPanel') {
-                this.handlerControllerPanel();
-            }
-            if (this.settings.fullScreenPanel) {
-                this.giftPanel.appendChild(this.asideCss);
-            }
-            else if (this.asideCss.parentNode){
-                this.asideCss.parentNode.removeChild(this.asideCss);
-            }
+            this.updateVideoLink();
             this.titleObserver.disconnect();
+            this.updateFullscreenChatStyle();
             if(this.settings.showVideoLink) {
                 this.titleObserver.observe(helper.get('#live-player'), {childList:true});
             }
-            this.controllerObserver.disconnect();
-            if(this.settings.fullScreenPanel||this.settings.fullScreenChat){
-                this.controllerObserver.observe(document.body,{
-                    attributes: true,
-                    attributeOldValue: true,
-                    attributeFilter: ['class']
-                });
-            }
+        },
+        updateFullscreenChatStyle(){
+            this.fullscreenChatStyle.innerHTML = this.settings.fullScreenChat? '.hide-aside-area.player-full-win .fullscreen-danmaku { display: block !important; }' : '';
         },
         init(settings){
             this.settings = settings;
-            this.initValues();
-            this.initStyle();
+            this.fullscreenChatStyle = helper.create('style', {}, document.head);
+            this.giftPackage = helper.get('.item.z-gift-package');
+            if(this.giftPackage) this.giftPackage.id = 'giftPackage';
+            this.title = helper.create('a',{
+                target:'_blank',
+                className:'info-section dp-i-block v-middle title-link',
+                style:'margin-left:16px;font-size:16px'
+            });
+            this.titleObserver = new MutationObserver(mutations => {
+                //console.log(mutations);
+                for (const mutation of mutations) {
+                    for (const node of mutation.addedNodes) {
+                        if (node instanceof HTMLVideoElement) {
+                            this.updateVideoLink();
+                            return;
+                        }
+                    }
+                }
+            });
             this.update();
-            this.updateVideoLink();
-            this.updateGiftPackage();
         }
     },
 
