@@ -4,7 +4,7 @@
 // @supportURL  https://github.com/indefined/UserScripts/issues
 // @version     0.5.51
 // @author      indefined
-// @description 可配置 直播间切换勋章/头衔、礼物包裹替换为大图标、网页全屏自动隐藏礼物栏/全屏发送弹幕(仅限HTML5)、轮播显示链接(仅限HTML5)
+// @description 可配置 直播间切换勋章/头衔、网页全屏发送弹幕、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
 // @grant       GM_getValue
 // @grant       GM_setValue
