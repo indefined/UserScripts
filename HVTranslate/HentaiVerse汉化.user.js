@@ -3,9 +3,10 @@
 // @namespace      hentaiverse.org
 // @author         ggxxsol & NeedXuyao & mbbdzz & indefined & etc.
 // @icon           https://hentaiverse.org/y/favicon.png
-// @downloadURL    https://sleazyfork.org/scripts/404118/code/HentaiVerse%E6%B1%89%E5%8C%96.user.js
+// @updateURL      https://sleazyfork.org/scripts/404118/code/script.meta.js
+// @downloadURL    https://sleazyfork.org/scripts/404118/code/script.user.js
 // @description    基本完全汉化整个Hentaiverse文本，包括装备物品、界面说明和弹窗提示的汉化，带原文切换功能
-// @notice         本脚本已完全整合HV战斗汉化功能，与独立的HV战斗汉化脚本互斥，默认不开启，如需开启战斗汉化在战斗界面中双击下方经验条
+// @notice         本脚本已完全整合HV战斗汉化功能，与独立的HV战斗汉化脚本互斥，默认不开启，如需开启战斗汉化在战斗界面中双击信息面板的提示
 // @notice         完整功能需要在Hentaiverse主菜单 CHARACTER→SETTINGS 勾选自定义字体(Use Custom Font)并在下一行文本框中填上任意字体名称，拉到最下面点击Apply Changes
 // @notice         和HVToolBox1.0.7以前版本在物品仓库中冲突，使用请更新到新版HVToolBox并将汉化运行顺序放在HVToolBox之后
 // @notice         如与Live Percentile Ranges同时使用，需要将脚本运行顺序置于Live Percentile Ranges之后，查询不同品质范围需要切换到英文状态
@@ -13,7 +14,7 @@
 // @include        *://hentaiverse.org/*
 // @include        *://alt.hentaiverse.org/*
 // @core           http://userscripts-mirror.org/scripts/show/41369
-// @version        2022.07.27
+// @version        2023.03.26
 // @grant none
 // ==/UserScript==
 (function () {
@@ -65,7 +66,7 @@
         '#forge_outer>#rightpane' : ['upgrades', 'items', 'equipsInfo'], //装备强化的右侧栏，包含强化、物品、装备信息
         '#forge_cost_div' : ['upgrades', 'items'], //装备修复、拆解、魂绑、重铸右侧的动态提示文本，需要监听动态翻译
         '#equip_extended' : ['equipsInfo'], //强化、装备独立信息页的装备信息
-        '#showequip' : ['equipsName'], //独立装备信息页，装备信息已经由上面翻译只需要翻译装备名
+        '#showequip' : ['equipsName', 'equipsSuffix'], //独立装备信息页，装备信息已经由上面翻译只需要翻译装备名和装备后缀补充
         '#arena_list' : ['battle', 'difficulty'], //AR/ROB战斗列表
         '#arena_tokens' : ['battle'], //ROB的底部令牌提示
         '#towerstart' : ['battle', 'difficulty'], //TW战斗模式入场提示
@@ -170,18 +171,11 @@ var words = {
         '/Are you sure you want to soulfuse this item\\? This will bind it to your level, but makes it untradeable\\./' : '是否确认灵魂绑定所选装备？该装备将会跟随你的等级成长并且变成不可交易。',
     },
 
-
     ///////////////////////////////////////////////////////
     // System Message弹窗, 所有页面的系统信息弹窗提示提示信息均需要放置在这一部分
     ///////////////////////////////////////////////////////
     messagebox: {
         'System Message' : '系统讯息',
-        'Account Suspended' : '你登月了~',
-        'Snowflake and the moogles are relaxing on the beach. Check back later.' : '雪花女神和莫古利正在海滩休息，请稍后再来',
-        'Snowflake and the moogles are rebooting the universe. Check back later.' : '雪花女神和莫古利正在重启宇宙，请稍后再来',
-        'Snowflake and the moogles are playing in the snow. Check back later.' : '雪花女神和莫古利正在玩雪，请稍后再来',
-        'Snowflake and the moogles are pining for spring. Check back later.' : '雪花女神和莫古利渴望春天，请稍后再来',
-        'Snowflake and the moogles are remaking the world. Check back later.' : '雪花女神和莫古利正在重做世界，请稍后再来',
 
         'No energy items available.' : '你没有可用的精神恢复剂',
         'Name contains invalid characters.' : '名字包含不支持字符(仅支持英文和数字)',
@@ -230,17 +224,21 @@ var words = {
         'Your equipment inventory is full' : '你的装备库存已经满了！',
         'You do not have enough credits for that.' : '你没有足够的 Credits 来执行操作！',
 
+        'Item does not exist or cannot be traded' : '物品不存在或者不可交易',
         'Insufficent credits in market account' : '市场账户余额不足',
         'Insufficent credits in credit balance' : '个人账户余额不足',
         'Insufficient items available' : '你没有足够数量该物品可供出售',
         'You do not have a sufficient market balance to place that order' : '你没有足够的市场余额可供投放当前买单',
         'Bidding price must be at least' : '当前物品最低出价为',
         'Asking price must be at least' : '当前物品最低要价为',
+        'The provided price point is not valid' : '价格无效',
         '/Your bid price must be at least (.+?) to overbid the current buy orders/' : '如果要加价超出目前最高买价你必须最少出价 $1',
         '/Your ask price must be at most (.+?) to undercut the current sell orders/' : '如果要减价低于目前最低卖价你必须开价不超过 $1',
         'You have to wait a short while between placing each order' : '你创建订单过于频繁，稍后再试',
+        'Placing buy orders for this item has been temporarily disabled' : '此物品买单已暂时被禁用',
 
         'There are no free slots left.' : '没有空余的怪物槽可以创建怪物。',
+        'Slot unlock limit reached' : '怪物槽已达到上限',
         'Name is too long (max 50 chars)' : '名字太长（最大50个字符，仅支持字母和数字和非特殊字符)',
         'Too many spaces' : '名字包含太多空格(包含下划线最多5个，不能连用)',
         'A monster with that name already exists.' : '已存在此名字怪物',
@@ -311,6 +309,7 @@ var words = {
         'Too many tickets - may not have more than 20,000 tickets per drawing' : '购买数量超过上限 - 每期彩票你最多只能拥有2万张',
         'Must buy at least one ticket' : '最低起购数量1张',
         'No golden tickets to spend' : '你没有黄金彩票券可以使用',
+        'Already spent a golden lottery ticket' : '你已经使用了一张黄金彩票券',
         'Already opted out' : '已经决定过放弃头奖',
         'This lottery is closed' : '本期彩票售卖已结束',
         'Insufficient GP' : 'GP不足',
@@ -327,6 +326,7 @@ var words = {
         'Item is already max level' : '装备等级已满',
         'Cannot fight in equipped items' : '正在佩戴的装备无法进入道具界中',
 
+        'Cannot rename equipment until level 10' : '你必须先将装备升级到潜能等级10才能对其重命名',
         'Cannot reforge level zero items' : '不能重铸潜能等级为0的装备',
         'Cannot reforge locked or equipped items' : '不能重铸上锁或者正在穿戴的装备',
         'Cannot salvage locked or equipped items' : '不能分解上锁或者正在穿戴的装备',
@@ -342,6 +342,27 @@ var words = {
         'Returned' : '返还强化材料',
         'Item not found' : '物品不存在',
 
+    },
+
+    ///////////////////////////////////////////////////////
+    // 出于效率考虑，当前脚本未使用全局翻译，此字典目前未使用
+    // 包括此字典在内的维护提示和无框架报错内容目前不会被翻译
+    ///////////////////////////////////////////////////////
+    body: {
+        'Account Suspended' : '你登月了~',
+        /* // 历史维护提示，应该不会重复使用
+        'Snowflake and the moogles are relaxing on the beach. Check back later.' : '雪花女神和莫古利正在海滩休息，请稍后再来',
+        'Snowflake and the moogles are rebooting the universe. Check back later.' : '雪花女神和莫古利正在重启宇宙，请稍后再来',
+        'Snowflake and the moogles are playing in the snow. Check back later.' : '雪花女神和莫古利正在玩雪，请稍后再来',
+        'Snowflake and the moogles are pining for spring. Check back later.' : '雪花女神和莫古利渴望春天，请稍后再来',
+        'Snowflake and the moogles are remaking the world. Check back later.' : '雪花女神和莫古利正在重做世界，请稍后再来',
+        'Snowflake and the moogles are fixing shit. Check back later.' : '雪花女神和莫古利正在修复东西，请稍后再来',
+        */
+        '/Snowflake and the moogles are .+? Check back later./' : '版本维护中，请稍后再来。',
+        'Page load has been aborted due to a fatal error. A report has been dispatched to site staff. Please try again later.' : '发生致命错误，页面加载已取消。报告已发送给网站管理员，请稍后再试。',
+
+        'Item not found' : '物品不存在',
+        'Nope' : '不行！',
     },
 
     ///////////////////////////////////////////////////////登陆界面
@@ -1352,6 +1373,7 @@ var words = {
         'Vaccine Certificate' : '疫苗证明(等级8)', //2021 复活节
         'Barrel' : '酒桶(等级8)', //2021 圣诞节
         'CoreCare Starter Kit' : '核心服务工具套件(等级8)', //2022 复活节
+        'Star Compass' : '星罗盘(等级8)', //2022 圣诞节
 
 
     },
@@ -1759,7 +1781,62 @@ var words = {
         'Quintessential' : '第五元素',
 
         //后缀
-        //独立的装备页面of the会分行导致无法匹配，留在字典最后处理
+        'of Slaughter' : '杀戮',
+        'of Balance' : '平衡',
+        'of Swiftness' : '迅捷',
+        'of the Vampire' : '吸血鬼',
+        'of the Illithid' : '灵吸怪',
+        'of the Banshee' : '报丧女妖',
+        'of the Nimble' : '招架',
+        'of the Battlecaster' : '战法师',
+        'of Destruction' : '毁灭',
+        'of Focus' : '专注',
+        'of Surtr' : '苏尔特（火伤）',
+        'of Niflheim' : '尼芙菲姆（冰伤）',
+        'of Mjolnir' : '姆乔尔尼尔（雷伤）',
+        'of Freyr' : '弗瑞尔（风伤）',
+        'of Heimdall' : '海姆达（圣伤）',
+        'of Fenrir' : '芬里尔（暗伤）',
+        'of the Elementalist' : '元素使',
+        'of the Heaven-sent' : '天堂',
+        'of the Demon-fiend' : '恶魔',
+        'of the Earth-walker' : '地行者',
+        'of the Curse-weaver' : '咒术师',
+        'of the Barrier' : '格挡',
+        'of Warding' : '魔防',
+        'of Protection' : '物防',
+        'of Dampening' : '抑制',
+        'of Stoneskin' : '石肤',
+        'of Deflection' : '偏转',
+        'of the Shadowdancer' : '影舞者',
+        'of the Arcanist' : '奥术师',
+        'of the Fleet' : '迅捷',
+        'of Negation' : '否定',
+        //旧装备后缀
+        'of the Priestess' : '牧师',
+        'of the Hulk' : '浩克',
+        'of the 盾化的（格挡） Aura' : '守护光环', //Shielding Aura
+        'of the Ox' : '牛（力量）',
+        'of the Raccoon' : '浣熊（灵巧）',
+        'of the Cheetah' : '猎豹（敏捷）',
+        'of the Turtle' : '乌龟（体质）',
+        'of the Fox' : '狐狸（智力）',
+        'of the Owl' : '猫头鹰（智慧）',
+        'of the Stone-skinned' : '硬皮（减伤）',
+        'of the Fire-eater' : '吞火者（火抗）',
+        'of the Frost-born' : '冰人（冰抗）',
+        'of the Thunder-child' : '雷之子（雷抗）',
+        'of the Wind-waker' : '驭风者（风抗）',
+        'of the Thrice-blessed' : '三重祝福（圣抗）',
+        'of the Spirit-ward' : '幽冥结界（暗抗）',
+
+    },
+
+    ///////////////////////////////////////////////////////装备后缀
+    ////此字典目前仅用于独立装备信息页
+    ///////////////////////////////////////////////////////
+    equipsSuffix: {
+        //独立装备信息页面中装备名可能会分行导致无法匹配完整后缀，此处做特殊处理补充
         //为防止错误匹配其它单词，使用结尾正则表达式仅匹配后缀
         '/Slaughter$/' : '杀戮',
         '/Balance$/' : '平衡',
@@ -1810,7 +1887,7 @@ var words = {
         '/Thrice-blessed$/' : '三重祝福（圣抗）',
         '/Spirit-ward$/' : '幽冥结界（暗抗）',
 
-        //处理词缀。应该避免在没有使用到装备名的地方使用此字典，以免处理掉其它正常句子的词缀
+        //处理词缀。应该避免在没有必要的地方使用此字典，以免处理掉其它正常句子的词缀
         ' of ' : ' ',
         '/ of$/' : '',
         '/^[oO]f /' : '',
@@ -2320,9 +2397,9 @@ var words = {
         'Select a trophy, artifact or collectible to continue.' : '从左侧列表中选择一件文物、奖杯或者收藏品查看具体献祭说明',
         'Artifacts can be exchanged for a random reward.' : '文物可以兑换随机奖励',
         'Depending on your luck and earlier rewards, you can get one of the following:' : '基于你的人品 你可以获得以下随机一项奖励',
-        'Some Hath' : '一两个Hath',
-        'A bunch of crystals' : '随机种类水晶1000颗',
-        'Some rare consumables' : '1 瓶终极万能药或 1 瓶能量饮料',
+        'Some Hath' : '一些Hath',
+        'A bunch of crystals' : '一些水晶',
+        'Some rare consumables' : '一些稀有消耗品',
         'A permanent +1 bonus to a primary stat' : '永久提升1点主要属性',
         'You cannot currently receive more than ' : '根据你目前的等级，你不能获得多于',
         'to any primary stat. This increases by one for every tenth level. ' : '点属性奖励，这个阈值每10级会提升1点。',
@@ -2717,8 +2794,8 @@ var words = {
         'Use special skills and magic. To use offensive spells and skills, first click it, then click your target. To use it on yourself, click it twice.' : '使用一个技能法术。对于攻击和乏抑技能法术，点击技能然后点击目标怪物，对于治疗和辅助自用法术，仅需点击技能法术名称。重复点击技能书按钮可以切换技能和法术列表。你可以在HV设置中将常用技能法术放在快捷栏上。',
         'Use various consumable items that can replenish your vitals or augment your power in various ways.' : '使用战斗补给品中的道具，它们能恢复你的状态或者给你带来各方面提升。',
         'Toggle Spirit Channeling.' : '切换灵动架式。当你有 50% 以上的斗气可以开启，开启后每次行动消耗 1 点灵力值和 10% 斗气，物理伤害增幅 +100%，魔力值消耗减少 25%。',
-        'Increases your defensive capabilities for the next turn.' : '本回合和下一回合你的物理和魔法缓伤增幅 +25%。消耗 10% 斗气恢复 10% 基础生命值 (需要 10%+ 斗气)。',
-        'Reduces the chance that your next spell will be resisted. Your defenses and evade chances are lowered for the next turn.' : '降低本回合自身回避、格挡、招架和抵抗率，增加下一回合魔法命中和反抵抗率。消耗 25% 斗气恢复 5% 基础魔力值 (需要 25%+ 斗气)。',
+        'Increases your defensive capabilities for the next turn.' : '本回合和下一回合你的物理和魔法缓伤增幅 +25%。消耗 25% 斗气恢复 10% 基础生命值。',
+        'Reduces the chance that your next spell will be resisted. Your defenses and evade chances are lowered for the next turn.' : '降低本回合自身回避、格挡、招架和抵抗率，增加下一回合魔法命中和反抵抗率。消耗 25% 斗气恢复 5% 基础魔力值。',
         'Choose from the Battle Actions highlighted above, and use them to defeat your enemies listed to the right. When all enemies are reduced to zero Health, you win. If your Health reaches zero, you are defeated.' : '选择上面的任意一个行动来打倒右侧的敌人。当所有敌人生命为0时，你获得胜利，当你的生命为0时，你被打败。',
 
     /////////////////////////////////////////////////////效果、需求说明
@@ -3081,20 +3158,12 @@ var words = {
             window.translateBattle = translated;
             delete localStorage.translateBattle;
             document.body.removeChild(changer);
+            if (window.battle && window.battle.set_infopane) window.battle.set_infopane('Battle Time');
         }
         else {
             if (changer && !translated) changer.click();
             localStorage.translateBattle = translated = window.translateBattle = true;
             start();
-        }
-    }
-    //双击战斗下方经验条持久性改变是否翻译战斗
-    function battleTranslateSwitcher() {
-        var expholder = document.getElementById('expholder');
-        if (expholder) {
-            expholder.title = '双击持久性开关战斗页面翻译';
-            expholder.removeEventListener('dblclick', changeBattleTranslate);
-            expholder.addEventListener('dblclick', changeBattleTranslate);
         }
     }
 
@@ -3260,29 +3329,29 @@ var words = {
 
     function start() {
         //console.time('hvtranslate');
-        if (!document.getElementById('textlog')) {
+        if (!window.inBattle || window.translateBattle || window.end_time) { // end_time → riddlemaster
             translateAllText();
             initRestoreButton();
-        }
-        else {
-            battleTranslateSwitcher();
-            if (window.translateBattle) {
-                translateAllText();
-                initRestoreButton();
-                changer.style.top = '170px';
-            }
-            else {
-                translated = false;
-            }
         }
         //console.timeEnd('hvtranslate');
     }
 
-    if (document.getElementById('expholder') && !!document.getElementById('expholder').title) return; //检测到已经有战斗汉化在运行则退出
-    start();
     if (document.getElementById('textlog')) {
-        document.addEventListener('HVReload', start);
-        document.addEventListener('DOMContentLoaded', start);
+        if (document.querySelector('#expholder[title]')) return; //检测到已经有战斗汉化在运行则退出
+        window.inBattle = true;
+        if (!window.translateBattle) translated = false;
+        document.addEventListener('DOMContentLoaded', start); // Hentaiverse Monsterbation ajax next round
+        // 双击信息面板提示切换战斗翻译开关
+        document.addEventListener('dblclick', function(ev){
+            if (ev.target && ev.target.id == 'infopane') {
+                changeBattleTranslate();
+            }
+        });
+        document.head.appendChild(document.createElement('style')).innerHTML =
+            '#change-translate{display:none;}#infopane{position:relative}' +
+            '#infopane:hover::after{content:"双击此处切换战斗翻译开关";position:absolute;left:0; bottom: 5px;font-weight:bold}';
     }
+
+    start();
 
 }());

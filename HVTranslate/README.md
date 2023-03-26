@@ -24,7 +24,7 @@
 
 **当前脚本适配HV 0.90版本（即2022年异世界第二赛季）**
 
-### HV 装备物品汉化 v2022.07.27 [点击此处安装](https://sleazyfork.org/scripts/404119/code/install.user.js)
+### HV 装备物品汉化 v2023.03.26 [点击此处安装](https://sleazyfork.org/scripts/404119/code/install.user.js)
 
 - 基于原**HV物品汉化**脚本修改，汉化Hentaiverse、EH论坛、HVMarket内的物品、装备及装备属性，带装备高亮/装备店隐藏锁定装备
 - **如有同时使用其它汉化，需要先于其它汉化脚本安装运行才会生效**
@@ -36,12 +36,12 @@
 - 如与其它脚本同时使用冲突，可尝试调整脚本运行顺序，但无法保证完全兼容，或者将冲突的页面链接添加用户排除(@exclude)
 
 
-### Hentaiverse汉化 v2022.07.21 [点击此处安装](https://sleazyfork.org/scripts/404118/code/HentaiVerse%E6%B1%89%E5%8C%96.user.js)
+### Hentaiverse汉化 v2023.03.26 [点击此处安装](https://sleazyfork.org/scripts/404118/code/HentaiVerse%E6%B1%89%E5%8C%96.user.js)
 
 - 基于贴吧**HV界面和其它汉化**脚本修改，现已基本完成除了战斗日志之外整个hentaiverse的完全汉化。除了没有装备高亮和不能在论坛使用之外，本脚本完全包含上一个脚本所有汉化内容，可单独使用
 - 本脚本大致最初由 [dodying](https://github.com/dodying/UserJs/blob/master/modify/hvTranslator.user.js) 及 [ggxxsol](https://greasyfork.org/scripts/9680) 创建，后由 [NeedXuyao](https://greasyfork.org/zh-CN/scripts/2120) 和贴吧 [mbbdzz](https://tieba.baidu.com/p/4849863522) 修改整合补充
 - 由 [indefined](https://github.com/indefined/UserScripts/tree/master/HVTranslate) 重构添加动态汉化和原文切换功能并补充剩余翻译，[SukkaW](https://github.com/SukkaW) 重构优化
-- 整合HV战斗汉化(仅汉化战斗说明不包含战斗日志)，默认不开启，**双击战斗界面下方经验条可开启战斗汉化**
+- 整合HV战斗汉化(仅汉化战斗说明不包含战斗日志)，默认不开启，**双击战斗说明框中的提示可开启战斗汉化**
 - 和HVToolBox1.0.7以前版本在物品仓库中冲突，请更新到新版HVToolBox并将汉化运行顺序放在HVToolBox之后
 - 如与Live Percentile Ranges同时使用，需要将脚本运行顺序置于Live Percentile Ranges之后，查询不同品质范围需要切换到英文状态
 - 如有其它脚本共同运行冲突也可尝试调整脚本运行顺序，但无法保证全部兼容
@@ -49,10 +49,11 @@
 
 ### HV 战斗汉化
 
-- **HV战斗汉化已完全合并到上方hentaiverse汉化，旧版独立战斗汉化脚本将不再维护**
-- 战斗汉化仅对战斗说明框进行汉化。旧版独立战斗汉化脚本无原文切换功能，如需关闭汉化请禁用或者删除脚本
-- **独立的HV战斗汉化脚本与新版Hentaiverse汉化脚本互斥，同时安装仅先运行的会生效**
-- 如果你已经安装了新版hentaiverse汉化脚本建议禁用或者删除独立战斗汉化并双击战斗底部经验条开启战斗汉化。
+- **HV战斗汉化已完全合并到上方hentaiverse汉化，旧版独立战斗汉化脚本将不再维护，建议删除旧版独立战斗汉化**
+- 冲突：开启汉化时，如果hentaiverseMonsterbation脚本设置中开启了enable middle and right click bindings and disable the context menu everywhere，则绑定在右键和中键上的技能可能不起作用，请关闭该选项或者在非必要时不开启战斗汉化
+- 战斗汉化仅对战斗信息提示框进行汉化，如需翻译战斗日志请安装 [HV - 战斗日志汉化](https://sleazyfork.org/zh-CN/scripts/445520)
+
+![战斗翻译](https://greasyfork.s3.us-east-2.amazonaws.com/vufm3rw70vioa7gjwcvwmwcn7hiw)
 
 ### HV 图片按钮汉化 v2021.04.25 [点击此处安装](https://sleazyfork.org/scripts/425529/code/install.user.js)
 

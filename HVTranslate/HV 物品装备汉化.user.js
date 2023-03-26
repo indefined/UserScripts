@@ -2,6 +2,7 @@
 // @name         HV 物品装备汉化
 // @namespace    hentaiverse.org
 // @author       ggxxsol & mbbdzz & indefined & etc.
+// @updateURL    https://sleazyfork.org/scripts/404119/code/script.meta.js
 // @downloadURL  https://sleazyfork.org/scripts/404119/code/script.user.js
 // @description  汉化Hentaiverse及EH论坛、HVMarket内的物品、装备及装备属性，带装备高亮/装备店隐藏锁定装备，带翻译原文切换功能。论坛购物请切换到英文原文再复制内容
 // @notice       此修改版大幅度乱重构了原有脚本执行逻辑，翻译效果和兼容性有一定提升，但失去原脚本装备后缀语序倒转功能和部分物品悬浮窗窗说明汉化
@@ -18,7 +19,7 @@
 // @include      *://forums.e-hentai.org/*showtopic=*
 // @include      *://hvmarket.xyz/*
 // @include      *://reasoningtheory.net/*
-// @version      2022.07.21
+// @version      2023.03.26
 // ==/UserScript==
 
 if (document.location.href.match(/ss=iw/)&&!document.getElementById('item_pane'))return
@@ -539,6 +540,7 @@ function loadItems(){
         'Vaccine Certificate' : '疫苗证明(等级8)', //2021 复活节
         'Barrel' : '酒桶(等级8)', //2021 圣诞节
         'CoreCare Starter Kit' : '核心服务工具套件(等级8)', //2022 复活节
+        'Star Compass' : '星罗盘(等级8)', //2022 圣诞节
 
 
         //旧旧古董
