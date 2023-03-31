@@ -53,7 +53,7 @@
 - 冲突：开启汉化时，如果hentaiverseMonsterbation脚本设置中开启了enable middle and right click bindings and disable the context menu everywhere，则绑定在右键和中键上的技能可能不起作用，请关闭该选项或者在非必要时不开启战斗汉化
 - 战斗汉化仅对战斗信息提示框进行汉化，如需翻译战斗日志请安装 [HV - 战斗日志汉化](https://sleazyfork.org/zh-CN/scripts/445520)
 
-![战斗翻译](https://greasyfork.s3.us-east-2.amazonaws.com/vufm3rw70vioa7gjwcvwmwcn7hiw)
+![战斗翻译](https://greasyfork.s3.us-east-2.amazonaws.com/0eps6czvdb0vtmq97ovibnucpa30)
 
 ### HV 图片按钮汉化 v2021.04.25 [点击此处安装](https://sleazyfork.org/scripts/425529/code/install.user.js)
 
