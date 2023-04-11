@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.35
+// @version      0.5.35.1
 // @description  可下载B站的CC字幕，旧版B站播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -1115,9 +1115,8 @@
             return this.getInfo('cid');
         },
         getEpid(){
-            let epid = this.getInfo('epid');
-            if (epid) return epid;
-            return /ep(\d+)/.test(location.pathname) && +RegExp.$1
+            return this.getInfo('id')
+            || /ep(\d+)/.test(location.pathname) && +RegExp.$1
             || /ss\d+/.test(location.pathname); // ss\d+当季第一集未知epid
         },
         getEpInfo(){
