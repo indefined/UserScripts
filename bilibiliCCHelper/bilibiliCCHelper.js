@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.34
+// @version      0.5.35
 // @description  可下载B站的CC字幕，旧版B站播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -1114,8 +1114,27 @@
             }
             return this.getInfo('cid');
         },
+        getEpid(){
+            let epid = this.getInfo('epid');
+            if (epid) return epid;
+            return /ep(\d+)/.test(location.pathname) && +RegExp.$1
+            || /ss\d+/.test(location.pathname); // ss\d+当季第一集未知epid
+        },
+        getEpInfo(){
+            let epid = this.getEpid();
+            let ep = this.window.__NEXT_DATA__?.props?.pageProps?.dehydratedState?.queries
+            ?.find(query=>query?.queryKey?.[0] == "pgc/view/web/season")
+            ?.state?.data?.mediaInfo?.episodes
+            ?.find(ep=>epid == true || ep.ep_id == epid);
+            if (ep) {
+                this.epid = ep.ep_id;
+                this.cid = ep.cid;
+                this.aid = ep.aid;
+                this.bvid = ep.bvid;
+            }
+        },
         async setupData(){
-            if(this.subtitle && (+this.cid && this.cid==this.getCid() || this.epid && this.epid == this.getInfo('id'))) return this.subtitle;
+            if(this.subtitle && (+this.cid && this.cid==this.getCid() || this.epid && this.epid == this.getEpid())) return this.subtitle;
             if(location.pathname=='/blackboard/html5player.html') {
                 let match = location.search.match(/cid=(\d+)/i);
                 if(!match) return;
@@ -1133,6 +1152,7 @@
             this.subtitle = {count:0,subtitles:[{lan:'close',lan_doc:'关闭'},{lan:'local',lan_doc:'本地字幕'}]};
             this.datas = {close:{body:[]},local:{body:[]}};
             decoder.data = undefined;
+            if (!this.cid && this.getEpid()) this.getEpInfo();
             if(!this.cid||(!this.aid&&!this.bvid)) return;
             return fetch(`https://api.bilibili.com/x/player/v2?cid=${this.cid}${this.aid?`&aid=${this.aid}`:`&bvid=${this.bvid}`}${this.epid?`&ep_id=${this.epid}`:''}`, {credentials: 'include'}).then(res=>{
                 if (res.status==200) {
