@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.35.1
+// @version      0.5.36
 // @description  可下载B站的CC字幕，旧版B站播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -248,6 +248,12 @@
                 title: '按住Ctrl键点击字幕列表的下载可不打开预览直接下载当前格式',
                 innerText: "下载",style: 'height: 24px;margin-right: 5px;'
             },bottomPanel);
+            //在新标签页中打开
+            this.openTabButton = elements.createAs('a',{
+                className: 'bpui-button bpui-state-disabled bui bui-button bui-button-disabled bui-button-blue',
+                innerText: "在新标签页中打开",style: 'height: 24px;margin-right: 5px;',
+                target: '_blank'
+            },bottomPanel);
             //关闭
             this.closeButton = elements.createAs('button',{
                 innerText: "关闭",className: "bpui-button bui bui-button bui-button-blue",style:'border:none',
@@ -260,6 +266,7 @@
         },
         updateDownload(type='LRC', download){
             let result;
+            let blobResult
             switch(type) {
                 case 'LRC':
                     result = this.encodeToLRC(this.data.body);
@@ -285,7 +292,9 @@
             type = type.toLowerCase();
             URL.revokeObjectURL(this.actionButton.href);
             this.actionButton.classList.remove('bpui-state-disabled','bui-button-disabled');
-            this.actionButton.href = URL.createObjectURL(new Blob([result],{type:'text/'+type}));
+            blobResult = new Blob([result],{type:'text/'+type+';charset=utf-8'})
+            this.actionButton.href = URL.createObjectURL(blobResult);
+            this.openTabButton.href = URL.createObjectURL(blobResult);
             this.actionButton.download = `${bilibiliCCHelper.getInfo('h1Title') || document.title}.${type}`;
             if (download) {
                 this.actionButton.click();
