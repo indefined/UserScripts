@@ -11,9 +11,12 @@ B站网页端添加APP首页推荐
 
 **<font color="#0f0">此脚本目前未适配新版主页，[点击查看详情](https://github.com/indefined/UserScripts/issues/76)</font>**
 
-**如果你使用新版首页的话可以使用[bilibili-app-recommend
+**建议使用适配了新版页面的 [bilibili-app-recommend
 ](https://greasyfork.org/zh-CN/scripts/443530-bilibili-app-recommend)**
 
+**由于B站禁止了内嵌网页跨域，此脚本0.6.25版本后获取授权将使用弹窗获取方式获取授权KEY，如果弹窗被拦截则会获取失败**
+
+**由于B站已经给大部分人的网页端更新了新版体验，所以这个脚本对大部分人没有用处，以后可能也不会继续维护**
 
 -------------------------
 ## 功能

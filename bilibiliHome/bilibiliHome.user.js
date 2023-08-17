@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.6.24
+// @version      0.6.25
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -24,8 +24,7 @@
     'use strict';
     if (location.href.startsWith('https://www.mcbbs.net/template/mcbbs/image/special_photo_bg.png?')) {
         //用于获取授权
-        window.stop();
-        return window.top.postMessage(location.href, 'https://www.bilibili.com');
+        return window.opener.postMessage(location.href, 'https://www.bilibili.com');
     }
 
     const style = `<style>
@@ -1190,7 +1189,8 @@ li:not(.show-detail)>a>.watch-later-trigger{display:none}
                             tools.toast('获取授权成功');
                             target.innerText = '删除授权';
                             clearTimeout(timeout);
-                            document.body.contains(iframe) && document.body.removeChild(iframe);
+                            //document.body.contains(iframe) && document.body.removeChild(iframe);
+                            win.close();
                             resolve();
                         }
                         else {
@@ -1198,15 +1198,19 @@ li:not(.show-detail)>a>.watch-later-trigger{display:none}
                         }
                     });
                     let timeout = setTimeout(()=>{
-                        document.body.contains(iframe) && document.body.removeChild(iframe);
+                        //document.body.contains(iframe) && document.body.removeChild(iframe);
+                        win.close();
                         reject({tip,msg:'请求超时'});
                     }, 5000)
+                    /*
                     let iframe = element._c({
                         nodeType:'iframe',
                         style:'display:none',
                         src: url,
                         parent: document.body
                     });
+                    */
+                    let win = window.open(url, '_blank', 'popup=true,width=60,height=90');
                 })).catch(error=> {
                     target.innerText = '获取授权';
                     tools.toast(`${error.tip}:${error.msg}`,error);
