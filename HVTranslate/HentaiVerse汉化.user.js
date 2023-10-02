@@ -14,7 +14,7 @@
 // @include        *://hentaiverse.org/*
 // @include        *://alt.hentaiverse.org/*
 // @core           http://userscripts-mirror.org/scripts/show/41369
-// @version        2023.03.26
+// @version        2023.10.01
 // @grant none
 // ==/UserScript==
 (function () {
@@ -1328,6 +1328,16 @@ var words = {
         'Core Maintenance Set' : '核心维护套装',
         'Core Wall-Mount Display' : '核心壁挂显示器',
         'Core LED Illumination' : '核心LED照明',
+        //2023
+        'Search Engine Crankshaft': '搜索引擎曲轴',
+        'Search Engine Carburetor': '搜索引擎化油器',
+        'Search Engine Piston': '搜索引擎活塞',
+        'Search Engine Manifold': '搜索引擎歧管',
+        'Search Engine Distributor': '搜索引擎分电器',
+        'Search Engine Water Pump': '搜索引擎水泵',
+        'Search Engine Oil Filter': '搜索引擎机油滤清器',
+        'Search Engine Spark Plug': '搜索引擎火花塞',
+        'Search Engine Valve': '搜索引擎气门',
 
 
         //节日及特殊奖杯
@@ -1374,6 +1384,7 @@ var words = {
         'Barrel' : '酒桶(等级8)', //2021 圣诞节
         'CoreCare Starter Kit' : '核心服务工具套件(等级8)', //2022 复活节
         'Star Compass' : '星罗盘(等级8)', //2022 圣诞节
+        'Museum Ticket' : '博物馆门票(等级8)', // 2023 复活节
 
 
     },
@@ -1649,7 +1660,9 @@ var words = {
         'A special kind of omikuji that does not actually tell your fortune, but will instead directly grant you some if you offer it to Snowflake.' : '一种特殊的神签，它并不会实际告诉你命运，但是如果你把它献祭给雪花可以直接交换一些东西。[2020起复活节活动]',
         'A precursor beak-shaped mask filled with fragrant herbs, said to protect the wearer from disease and miasma but probably doesn\'t. [2020 Easter Event]' : '一种充满香草药的喙状前体面具，据说可以保护佩戴者免受疾病和瘴气的侵害，但实际可能并不能。[2020 复活节活动]',
         'A paper certifying that the holder was recently vaccinated from some ancient disease. It expired centuries ago and only has historic value. [2021 Easter Event]' : '一张证明持有者最近接种过某种远古疾病疫苗的文件。它已经在好几个世纪前过期，仅具有历史价值。[2021 复活节活动]',
-        'A polishing cloth, pine-scented spray bottle and various other maintenance tools to give your Equipment Cores the love they deserve. [2022 Easter Event]' : '抛光布、松香喷雾瓶和其他各种维护工具，为您的设备核心提供应有的爱。[2022 复活节活动]'
+        'A polishing cloth, pine-scented spray bottle and various other maintenance tools to give your Equipment Cores the love they deserve. [2022 Easter Event]' : '抛光布、松香喷雾瓶和其他各种维护工具，为您的设备核心提供应有的爱。[2022 复活节活动]',
+        'Replacement parts for a precursor search engine. Snowflake has been looking for this for a restoration project.' : '远古搜索引擎的替换部件，雪花正在寻找这些东西以进行一个修复项目。[2023 复活节活动]',
+        'A ticket to Snowflake\'s Search Engines Through The Ages Exhibition. A complimentary equipment piece will be handed out after the tour. [Easter 2023]' : '通往雪花历代搜索引擎展览的门票，参观结束后将获赠一件免费装备。[2023复活节]',
 
 
     },
@@ -2323,6 +2336,7 @@ var words = {
         'You have ': '你有 ',
         ' available to sell. This item is traded in batches of ' : ' 件库存可供出售。本物品出售单位为每包 ',
         '; all prices are per batch. Min price is ' : ' 件, 以下价格都是以包为单位。市场最低出价为 ',
+        ' available to sell. This item is traded in single units. Min price is ' : ' 件库存可出售。本物品出售单位为一件，市场最低出价为',
         ' for market orders.' : '.',
         ' for market orders and ' : ', 最低系统店进价为 ',
         ' for backorders.' : '.',
@@ -2743,7 +2757,7 @@ var words = {
         'token of blood.' : '块鲜血令牌',
 
         'The Tower is an Isekai-Only battle mode where the goal is to get as high as possible before the end of the season. ' : '塔楼(The Tower)是异世界独有的战斗模式，目标是在每个赛季结束前尽可能获得更高的排位。',
-        'Ranking high in this mode at the end of the season will provide you with some permanent bonuses on HV Persistent.' : '塔楼天梯以半年为一个赛季周期，每年冬夏至日赛季结束异世界将会重置。在塔楼下取得高排位将在每个赛季结束后获得一些传统世界模式的永久奖励。',
+        'Ranking high in this mode at the end of the season will provide you with some permanent bonuses on HV Persistent.' : '在塔楼下取得高排位将在每个赛季结束后获得一些传统世界模式的永久奖励。',
         'The difficulty and monster level in this battle mode is locked to each floor, with an increase in monster level, difficulty or number of rounds for each floor.' : '此模式下的战斗难度和怪物等级与对应层级绑定，和你的设置及自身等级无关。每一层都会伴随着怪物等级、战斗难度或者战斗场次的提升。',
         'Your Ranking: ' : '你的排名: ',
         'Unranked' : '没有排名',

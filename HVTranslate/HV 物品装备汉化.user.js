@@ -19,7 +19,7 @@
 // @include      *://forums.e-hentai.org/*showtopic=*
 // @include      *://hvmarket.xyz/*
 // @include      *://reasoningtheory.net/*
-// @version      2023.03.26
+// @version      2023.10.01
 // ==/UserScript==
 
 if (document.location.href.match(/ss=iw/)&&!document.getElementById('item_pane'))return
@@ -541,6 +541,7 @@ function loadItems(){
         'Barrel' : '酒桶(等级8)', //2021 圣诞节
         'CoreCare Starter Kit' : '核心服务工具套件(等级8)', //2022 复活节
         'Star Compass' : '星罗盘(等级8)', //2022 圣诞节
+        'Museum Ticket' : '博物馆门票(等级8)', // 2023 复活节
 
 
         //旧旧古董
@@ -676,6 +677,16 @@ function loadItems(){
         'Core Maintenance Set' : '核心维护套装',
         'Core Wall-Mount Display' : '核心壁挂显示器',
         'Core LED Illumination' : '核心LED照明',
+        //2023
+        'Search Engine Crankshaft': '搜索引擎曲轴',
+        'Search Engine Carburetor': '搜索引擎化油器',
+        'Search Engine Piston': '搜索引擎活塞',
+        'Search Engine Manifold': '搜索引擎歧管',
+        'Search Engine Distributor': '搜索引擎分电器',
+        'Search Engine Water Pump': '搜索引擎水泵',
+        'Search Engine Oil Filter': '搜索引擎机油滤清器',
+        'Search Engine Spark Plug': '搜索引擎火花塞',
+        'Search Engine Valve': '搜索引擎气门',
 
 
 
@@ -1273,12 +1284,18 @@ function loadExtra() {
         'Specials?' : '特殊',
         'Pony Figurines?|Figurines' : '小马公仔',
         //修正一些论坛误翻译的东西
-        '金 Star' : '金星',
+        '金 Star' : 'Gold Star',
+        '银 Star' : 'Silver Star',
+        '铜 Star' : 'Bronze Star',
+        'Extra \\(力量\\)' : 'Extra Strength',
+        '神圣 Warmage' : 'Divine Warmage',
+        'Eminent 元素使' : 'Eminent Elementalist',
         'Thinking 兜帽' : 'Thinking Cap',
         '黑暗 Descent' : 'Dark Descent',
         '生命加成 Santa' : 'Juggernaut Santa',
         'Arcane 专注' : 'Arcane Focus',
         'Spirit 盾' : 'Spirit Shield',
+        'Spike 盾' : 'Spike Shield',
         '熟练度加成 Factor' : 'Proficiency Factor',
     };
     dictExtra = new Map();
