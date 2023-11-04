@@ -8,7 +8,7 @@
 // @include      http*://www.bilibili.com/video/*
 // @include      http*://www.bilibili.com/bangumi/play/ss*
 // @include      http*://www.bilibili.com/bangumi/play/ep*
-// @include      http*://www.bilibili.com/watchlater/
+// @include      http*://www.bilibili.com/list/watchlater*
 // @include      https://www.bilibili.com/medialist/play/watchlater/*
 // @include      http*://www.bilibili.com/medialist/play/ml*
 // @include      http*://www.bilibili.com/blackboard/html5player.html*
