@@ -1,12 +1,13 @@
 // ==UserScript==
 // @name         bilibili网页端添加APP首页推荐
 // @namespace    indefined
-// @version      0.6.25
+// @version      0.7.0
 // @description  网页端首页添加APP首页推荐、全站排行、可选提交不喜欢的视频
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
 // @match        *://www.bilibili.com/*
 // @include      https://www.mcbbs.net/template/mcbbs/image/special_photo_bg.png?*
+// @require     https://cdn.jsdelivr.net/gh/lzghzr/TampermonkeyJS@5f3e2f18294de581088ca17e4f31b4a217cfec7a/libBilibiliToken/libBilibiliToken.js
 // @license      MIT
 // @connect      app.bilibili.com
 // @connect      api.bilibili.com
@@ -17,16 +18,11 @@
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_deleteValue
-// @run-at       document-idle
+// @run-at       document-end
 // ==/UserScript==
 
 (function() {
     'use strict';
-    if (location.href.startsWith('https://www.mcbbs.net/template/mcbbs/image/special_photo_bg.png?')) {
-        //用于获取授权
-        return window.opener.postMessage(location.href, 'https://www.bilibili.com');
-    }
-
     const style = `<style>
 #recommend .video-card-common {
     margin-bottom: 12px;
@@ -206,7 +202,7 @@
             listBox.insertAdjacentElement('afterBegin',loadingDiv=element.getLoadingDiv('recommend'));
             GM_xmlhttpRequest({
                 method: 'GET',anonymous:true,
-                url: 'https://app.bilibili.com/x/feed/index?appkey=27eb53fc9058f8c3&build=1&mobi_app=android&idx='
+                url: 'https://app.bilibili.com/x/feed/index?appkey=1d8b6e7d45233436&build=1&mobi_app=android&idx='
                 + (Date.now()/1000).toFixed(0) + (setting.accessKey?'&access_key='+setting.accessKey:''),
                 headers:{'user-agent':'Mozilla/5.0 BiliDroid/5.24.0 (bbcallen@gmail.com)'},
                 onload: res=>{
@@ -372,7 +368,7 @@
                 parent = parent.parentNode.parentNode;
                 if(!element.isNew) parent = parent.parentNode;
             }
-            url += `?appkey=27eb53fc9058f8c3&build=5000000&goto=${parent.dataset.goto}&id=${parent.dataset.id}&mid=${parent.dataset.mid}`
+            url += `?appkey=1d8b6e7d45233436&build=5000000&goto=${parent.dataset.goto}&id=${parent.dataset.id}&mid=${parent.dataset.mid}`
                 +`&reason_id=${target.dataset.reason_id}&rid=${parent.dataset.rid}&tag_id=${parent.dataset.tag_id}`;
             if (setting.accessKey) url += '&access_key='+ setting.accessKey;
             const handleCover = ()=>{
@@ -1122,7 +1118,8 @@ li:not(.show-detail)>a>.watch-later-trigger{display:none}
                                 '<label style="margin-right: 5px;">APP接口授权:</label>',
                                 `<span style="margin-right: 5px;color:#00f" title="${[
                                     '目前获取根据个人观看喜好的APP首页数据和提交定制不喜欢的视频需要获取授权key。',
-                                    '点击获取授权将从官方授权接口获取一个授权key，获取的key保存在脚本管理器内。',
+                                    '点击获取授权将使用libBilibiliToken@lzghzr[MIT]库从官方获取access_key，确认登陆你将收到一条你当前地址扫码登陆的记录',
+                                    '获取的授权key保存在脚本管理器内，相关接口安全性请自行阅读源码判断，如果不信任请不要使用',
                                     '如果不想使用授权，脚本仍然能从官方接口获取随机推荐视频，但内容可能不再根据个人喜好且无法提交不喜欢内容。',
                                     '点击删除授权可从脚本管理器中删除已获取授权key，脚本将按照没有获取授权的情况执行。',
                                     '授权key有效期大约一个月，如果看到奇怪的推荐提交不喜欢时遇到奇怪的错误可以尝试删除授权重新获取。'
@@ -1155,63 +1152,22 @@ li:not(.show-detail)>a>.watch-later-trigger{display:none}
                 return;
             }
             else {
+                if (!confirm('提示！此脚本当前使用扫码登陆接口获取授权，确认获取授权你将收到一条你当前地址扫码登陆的记录，如果有不信任请点击取消，自行检查源码或者删除此脚本。')){
+                    return;
+                }
                 target.innerText = '获取中...';
                 target.style['pointer-events'] = 'none';
-                let tip = '请求授权接口错误';
-                fetch('https://passport.bilibili.com/login/app/third?appkey=27eb53fc9058f8c3'
-                      +'&api=https%3A%2F%2Fwww.mcbbs.net%2Ftemplate%2Fmcbbs%2Fimage%2Fspecial_photo_bg.png&sign=04224646d1fea004e79606d3b038c84a',{
-                    method:'GET',
-                    credentials: 'include',
-                }).then(res=>{
-                    return res.json().catch(e=>{
-                        throw ({tip,msg:'返回数据异常:',data:res})
-                    });
-                }).then(data=>{
-                    if (data.code||!data.data) {
-                        throw({tip,msg:data.msg||data.message||data.code,data});
-                    }
-                    else if (!data.data.has_login) {
-                        throw({tip,msg:'你必须登录B站之后才能使用授权',data});
-                    }
-                    else if (!data.data.confirm_uri) {
-                        throw({tip,msg:'无法获得授权网址',data});
+                new BilibiliToken().getToken().then(res=>{
+                    if (res?.access_token) {
+                        this.storageAccessKey(res.access_token);
+                        tools.toast('获取授权成功');
+                        target.innerText = '删除授权';
+                        //document.body.contains(iframe) && document.body.removeChild(iframe);
                     }
                     else {
-                        return data.data.confirm_uri;
+                        throw({tip:'获取授权失败',msg:'没有获得匹配的密钥',data:res});
                     }
-                }).then(url=>new Promise((resolve,reject)=>{
-                    let tip = '获取授权错误';
-                    window.addEventListener('message', ev=>{
-                        if (ev.origin!='https://www.mcbbs.net' || !ev.data) return;
-                        const key = ev.data.match(/access_key=([0-9a-z]{32})/);
-                        if (key) {
-                            this.storageAccessKey(key[1]);
-                            tools.toast('获取授权成功');
-                            target.innerText = '删除授权';
-                            clearTimeout(timeout);
-                            //document.body.contains(iframe) && document.body.removeChild(iframe);
-                            win.close();
-                            resolve();
-                        }
-                        else {
-                            reject({tip,msg:'没有获得匹配的密钥',data:ev});
-                        }
-                    });
-                    let timeout = setTimeout(()=>{
-                        //document.body.contains(iframe) && document.body.removeChild(iframe);
-                        win.close();
-                        reject({tip,msg:'请求超时'});
-                    }, 5000)
-                    /*
-                    let iframe = element._c({
-                        nodeType:'iframe',
-                        style:'display:none',
-                        src: url,
-                        parent: document.body
-                    });
-                    */
-                    let win = window.open(url, '_blank', 'popup=true,width=60,height=90');
-                })).catch(error=> {
+                }).catch(error=> {
                     target.innerText = '获取授权';
                     tools.toast(`${error.tip}:${error.msg}`,error);
                 }).then(()=>{
@@ -1449,6 +1405,63 @@ li:not(.show-detail)>a>.watch-later-trigger{display:none}
     }
     if (element.mainDiv){
         init();
+    }
+    else if (location.pathname == "/apphome") {
+        document.head.insertAdjacentHTML('beforeend',`
+        <style>#internationalHeader+#app .proxy-box {min-height: unset !important;}#internationalHeader+div#app { padding: 20px 0 0; background: #fff;}#app~.error-container { display: none; }</style>
+        <link href="//s1.hdslb.com/bfs/static/jinkela/international-home/css/international-home.1.1a6be6f371b2470b269690e9f96b07c8fd6374d6.css" rel="stylesheet" />
+        <link href="//s1.hdslb.com/bfs/static/jinkela/international-home/css/international-home.0.1a6be6f371b2470b269690e9f96b07c8fd6374d6.css" rel="stylesheet" />
+        `);
+        document.getElementById('internationalHeader').insertAdjacentHTML('afterend', `
+<div id="app">
+  <div class="international-home">
+    <div class="storey-box b-wrap">
+      <div class="proxy-box">
+        <div id="bili_douga">
+          <div class="space-between report-wrap-module report-scroll-module" id="bili_report_douga">
+            <div class="card-list">
+              <header class="storey-title">
+                <div class="l-con">
+                  <svg aria-hidden="true" class="svg-icon">
+                    <use xlink:href="#bili-douga">
+                    </use>
+                  </svg>
+                  <a href="/v/douga" target="_blank" class="name">动画</a>
+                </div>
+                <div class="exchange-btn">
+                  <div class="btn btn-change">
+                    <i class="bilifont bili-icon_caozuo_huanyihuan quan">
+                    </i>换一换</div>
+                  <a href="/v/douga" target="_blank" class="btn more">更多
+                    <i class="bilifont bili-icon_caozuo_qianwang"></i>
+                  </a>
+                </div>
+              </header>
+              <div class="zone-list-box">
+              </div>
+            </div>
+            <div class="rank-list">
+              <header class="rank-header">
+                <span class="name">排行榜</span>
+                <a href="//www.bilibili.com/v/popular/rank/douga" target="_blank" class="more">更多
+                  <i class="bilifont bili-icon_caozuo_qianwang"></i>
+                </a>
+              </header>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        `);
+        document.title = "Bilibili App 首页推荐";
+        element.mainDiv = document.querySelector('#bili_douga');
+        init();
+    }
+    else if (document.querySelector('#i_cecream')) {
+        element.isNew = 2;
+        throw 'Bilibili APP首页脚本未适配新版主页，请使用 https://greasyfork.org/zh-CN/scripts/443530-bilibili-app-recommend 代替';
     }
     else {
         if(document.head.querySelector('link[href*=home]')) {

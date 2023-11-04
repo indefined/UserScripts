@@ -26,14 +26,15 @@ B站网页端添加APP首页推荐
 - 不喜欢/撤销不喜欢
 - 视频/弹幕预览
 - 全站排行榜(20201203开始旧版全站排行接口全部失效，已换用新版接口并删除日期选项)
-
-![图片预览](https://greasyfork.org/rails/active_storage/blobs/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBaXd0IiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--dbb03ca1a4335781c93150650b81702c3d7a336e/preview.jpg)
+- 或许你可以打开[这个错误网页](https://www.bilibili.com/apphome) 依然使用旧版页面的APP首页推荐，然而体验极差。
+- 目前没有重构优化此脚本的计划，所有体验差/数据内容/界面展示方式相关的体验问题都没有修复的计划，相关PL应该也不会合并，建议有相关需求可以向上面新脚本作者提交ISSUE
 
 -------------------------
 ## 授权说明
 
 - 目前获取根据个人观看喜好的APP首页数据和提交定制不喜欢的视频需要获取授权key。
-- 点击获取授权将从官方授权接口获取一个授权key，获取的key保存在脚本管理器内。
+- **点击获取授权将使用[libBilibiliToken@lzghzr[MIT]](https://github.com/lzghzr/TampermonkeyJS/tree/master/libBilibiliToken)库从官方获取access_key，确认登陆你将收到一条你当前地址扫码登陆的记录**
+- 获取的授权key保存在脚本管理器内，相关接口安全性请自行阅读源码判断，如果不信任请不要使用
 - 如果不想使用授权，脚本仍然能从官方接口获取随机推荐视频，但内容可能不再根据个人喜好且无法提交不喜欢内容。
 - 点击删除授权可从脚本管理器中删除已获取授权key，脚本将按照没有获取授权的情况执行。
 - 授权key有效期大约一个月，如果看到奇怪的推荐提交不喜欢时遇到奇怪的错误可以尝试删除授权重新获取。
