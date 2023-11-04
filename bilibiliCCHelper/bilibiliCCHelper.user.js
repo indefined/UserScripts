@@ -1,14 +1,14 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.36
+// @version      0.5.37
 // @description  可下载B站的CC字幕，旧版B站播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
 // @include      http*://www.bilibili.com/video/*
 // @include      http*://www.bilibili.com/bangumi/play/ss*
 // @include      http*://www.bilibili.com/bangumi/play/ep*
-// @include      http*://www.bilibili.com/watchlater/
+// @include      http*://www.bilibili.com/list/watchlater*
 // @include      https://www.bilibili.com/medialist/play/watchlater/*
 // @include      http*://www.bilibili.com/medialist/play/ml*
 // @include      http*://www.bilibili.com/blackboard/html5player.html*
