@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.37
+// @version      0.5.38
 // @description  可下载B站的CC字幕，旧版B站播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -235,6 +235,10 @@
                 onchange: ()=>this.updateDownload("LRC")
             },bottomPanel);
             elements.createRadio({
+                id:'subtitle-download-vtt',name: "subtitle-type",value:"VTT",
+                onchange: ()=>this.updateDownload("VTT")
+            },bottomPanel);
+            elements.createRadio({
                 id:'subtitle-download-txt',name: "subtitle-type",value:"TXT",
                 onchange: ()=>this.updateDownload("TXT")
             },bottomPanel);
@@ -277,6 +281,9 @@
                 case 'ASS':
                     result = this.encodeToASS(this.data.body);
                     break;
+                case 'VTT':
+                    result = this.encodeToVTT(this.data.body);
+                    break;
                 case 'TXT':
                     result = this.data.body.map(item=>item.content).join('\r\n');
                     break;
@@ -311,6 +318,11 @@
                 return `${index+1}\r\n${this.encodeTime(from)} --> ${this.encodeTime(to)}\r\n${content}`;
             }).join('\r\n\r\n');
         },
+        encodeToVTT(data){
+            return 'WEBVTT \r\n\r\n' + data.map(({from,to,content},index)=>{
+                return `${index+1}\r\n${this.encodeTime(from, 'VTT')} --> ${this.encodeTime(to, 'VTT')}\r\n${content}`;
+            }).join('\r\n\r\n');
+        },
         encodeToASS(data){
             this.assHead[1] = `Title: ${document.title}`;
             this.assHead[10] = `; 字幕来源${document.location}`;
@@ -324,13 +336,13 @@
                 second = time.getSeconds(),
                 minute = time.getMinutes(),
                 hour = Math.floor(input/60/60);
-            if (format=='SRT'){
+            if (format=='SRT'||format=='VTT'){
                 if (hour<10) hour = '0'+hour;
                 if (minute<10) minute = '0'+minute;
                 if (second<10) second = '0'+second;
                 if (ms<10) ms = '00'+ms;
                 else if (ms<100) ms = '0'+ms;
-                return `${hour}:${minute}:${second},${ms}`;
+                return `${hour}:${minute}:${second}${format=='SRT'?',':'.'}${ms}`;
             }
             else if(format=='ASS'){
                 ms = (ms/10).toFixed(0);
