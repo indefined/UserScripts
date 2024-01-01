@@ -14,7 +14,7 @@
 // @include        *://hentaiverse.org/*
 // @include        *://alt.hentaiverse.org/*
 // @core           http://userscripts-mirror.org/scripts/show/41369
-// @version        2023.10.01
+// @version        2024.01.01
 // @grant none
 // ==/UserScript==
 (function () {
@@ -62,7 +62,7 @@
         '#lottery_eqstat' : ['equipsInfo'], //彩票装备属性
         'div:not([id])>#leftpane' : ['prizes'], //很混乱的左侧栏，此处为彩票左侧栏
         'div:not([id])>#rightpane' : ['prizes'], //也很乱的右侧栏，此处为彩票右侧栏
-        '#forge_outer>#leftpane' : ['equipsName'], //此处为强化左侧栏装备列表
+        '#forge_outer>#leftpane' : ['equipsName','equipsSuffix'], //此处为强化左侧栏装备列表
         '#forge_outer>#rightpane' : ['upgrades', 'items', 'equipsInfo'], //装备强化的右侧栏，包含强化、物品、装备信息
         '#forge_cost_div' : ['upgrades', 'items'], //装备修复、拆解、魂绑、重铸右侧的动态提示文本，需要监听动态翻译
         '#equip_extended' : ['equipsInfo'], //强化、装备独立信息页的装备信息
@@ -1385,6 +1385,7 @@ var words = {
         'CoreCare Starter Kit' : '核心服务工具套件(等级8)', //2022 复活节
         'Star Compass' : '星罗盘(等级8)', //2022 圣诞节
         'Museum Ticket' : '博物馆门票(等级8)', // 2023 复活节
+        'Idol Fan Starter Pack' : '偶像粉丝入门包(等级8)', //2023 圣诞节
 
 
     },
@@ -1636,6 +1637,8 @@ var words = {
         'A heart, made of iron. While it was capable of protecting you from damage once, it seems to have been spent already. You should give it to Snowflake.' : '一颗钢铁制作的心。在它曾经可用时它可以保护你免受一次伤害，但它现在似乎已经被用过了。你应该把它给雪花。(2019 圣诞节)',
         'A precursor smartgun with autonomous aiming and talking functionality. The name "Skippy" is crudely painted on its side. It seems broken in more ways than one.' : '一把拥有自动瞄准和说话功能的旧世界智能枪。其名称"Skippy"粗犷地喷涂在侧面。它似乎不止一个地方坏了(2020 圣诞节)',
         'Taru da! It\'s a barrel, which may or may not be filled with yummy nomnoms, but you will never know unless you ask Snowflake to open it.' : '塔鲁达！ 这是一个桶，里面可能装满了美味的nomnoms，也可能没有，但除非你让雪花打开它，否则你永远不会知道。(2021 圣诞节)',
+        'A blueish transparent orb of unknown origin with a curiously shaped needle floating inside it. It seems to be pointing towards Snowflake\'s Shrine.' : '一个来源不明的蓝色透明球体，里面漂浮着一根形状奇特的针。 似乎是指向雪花神殿的方向。(2022 圣诞节)',
+        'Contains the debut single and a variety of t-shirts and folding fans for some long-lost idol group, and a battery-powered RGB glowstick for indecisive types.' : '包含一些已经引退的偶像团体的出道单曲和各种 T 恤和折扇，以及适合各种类型场景的电池供电 RGB 荧光棒。',
 
         'A badge inscribed with your RealPervert identity. Regardless of whether you fell for it or not, you got this for participating in the 2011 April Fools thread.' : '一个刻着你的实名变态身份的胸章。无论你是否信以为真，你参与了 2011 年愚人节主题就会得到这个。',
         'A 1/10th scale collectible figure of Raptor Jesus. Consolitory prize for those who did not ascend during the May 2011 Rapture.' : '猛禽耶稣的 1/10 比例缩放公仔。给 2011 年 5 月被提发生期间没被送到天上的人开个安慰价格。',

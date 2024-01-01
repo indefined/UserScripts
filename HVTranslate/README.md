@@ -24,7 +24,7 @@
 
 **当前脚本适配HV 0.90版本（即2023年异世界第二赛季）**
 
-### HV 装备物品汉化 v2023.10.01 [点击此处安装](https://sleazyfork.org/scripts/404119/code/install.user.js)
+### HV 装备物品汉化 v2024.01.01 [点击此处安装](https://sleazyfork.org/scripts/404119/code/install.user.js)
 
 - 基于原**HV物品汉化**脚本修改，汉化Hentaiverse、EH论坛、HVMarket内的物品、装备及装备属性，带装备高亮/装备店隐藏锁定装备
 - **如有同时使用其它汉化，需要先于其它汉化脚本安装运行才会生效**
@@ -36,7 +36,7 @@
 - 如与其它脚本同时使用冲突，可尝试调整脚本运行顺序，但无法保证完全兼容，或者将冲突的页面链接添加用户排除(@exclude)
 
 
-### Hentaiverse汉化 v2023.10.01 [点击此处安装](https://sleazyfork.org/scripts/404118/code/HentaiVerse%E6%B1%89%E5%8C%96.user.js)
+### Hentaiverse汉化 v2024.01.01 [点击此处安装](https://sleazyfork.org/scripts/404118/code/HentaiVerse%E6%B1%89%E5%8C%96.user.js)
 
 - 基于贴吧**HV界面和其它汉化**脚本修改，现已基本完成除了战斗日志之外整个hentaiverse的完全汉化。除了没有装备高亮和不能在论坛使用之外，本脚本完全包含上一个脚本所有汉化内容，可单独使用
 - 本脚本大致最初由 [dodying](https://github.com/dodying/UserJs/blob/master/modify/hvTranslator.user.js) 及 [ggxxsol](https://greasyfork.org/scripts/9680) 创建，后由 [NeedXuyao](https://greasyfork.org/zh-CN/scripts/2120) 和贴吧 [mbbdzz](https://tieba.baidu.com/p/4849863522) 修改整合补充

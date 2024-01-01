@@ -19,7 +19,7 @@
 // @include      *://forums.e-hentai.org/*showtopic=*
 // @include      *://hvmarket.xyz/*
 // @include      *://reasoningtheory.net/*
-// @version      2023.10.01
+// @version      2024.01.01
 // ==/UserScript==
 
 if (document.location.href.match(/ss=iw/)&&!document.getElementById('item_pane'))return
@@ -542,6 +542,7 @@ function loadItems(){
         'CoreCare Starter Kit' : '核心服务工具套件(等级8)', //2022 复活节
         'Star Compass' : '星罗盘(等级8)', //2022 圣诞节
         'Museum Ticket' : '博物馆门票(等级8)', // 2023 复活节
+        'Idol Fan Starter Pack' : '偶像粉丝入门包(等级8)', //2023 圣诞节
 
 
         //旧旧古董
