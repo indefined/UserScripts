@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.38
+// @version      0.5.39
 // @description  可下载B站的CC字幕，旧版B站播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -220,52 +220,31 @@
                   textArea = this.textArea = elements.createAs('textarea',{
                       style: 'width: 400px;min-width: 300px;height: 400px;resize: both;padding: 5px;line-height: normal;border: 1px solid #e5e9ef;margin: 0px;'
                   },panel),
-                  bottomPanel = elements.createAs('div',{},panel);
+                  bottomPanel = elements.createAs('div',{style:'font-size:14px; padding-top: 10px;'},panel);
             textArea.setAttribute('readonly',true);
-            elements.createRadio({
-                id:'subtitle-download-ass',name: "subtitle-type",value:"ASS",
-                onchange: ()=>this.updateDownload("ASS")
-            },bottomPanel);
-            elements.createRadio({
-                id:'subtitle-download-srt',name: "subtitle-type",value:"SRT",
-                onchange: ()=>this.updateDownload("SRT")
-            },bottomPanel);
-            elements.createRadio({
-                id:'subtitle-download-lrc',name: "subtitle-type",value:"LRC",
-                onchange: ()=>this.updateDownload("LRC")
-            },bottomPanel);
-            elements.createRadio({
-                id:'subtitle-download-vtt',name: "subtitle-type",value:"VTT",
-                onchange: ()=>this.updateDownload("VTT")
-            },bottomPanel);
-            elements.createRadio({
-                id:'subtitle-download-txt',name: "subtitle-type",value:"TXT",
-                onchange: ()=>this.updateDownload("TXT")
-            },bottomPanel);
-            elements.createRadio({
-                id:'subtitle-download-bcc',name: "subtitle-type",value:"BCC",
-                onchange: ()=>this.updateDownload("BCC")
+            const type = localStorage.defaultSubtitleType || 'SRT';
+            elements.createAs('select', {
+                style: 'height: 24px; margin-right: 5px;',
+                innerHTML:['ASS', 'SRT', 'LRC', 'VTT', 'TXT', 'BCC'].map(type=>`<option value="${type}">${type}</option>`).join(''),
+                value: type,
+                onchange:(ev)=>this.updateDownload(ev.target.value)
             },bottomPanel);
             //下载
             this.actionButton = elements.createAs('a',{
-                className: 'bpui-button bpui-state-disabled bui bui-button bui-button-disabled bui-button-blue',
                 title: '按住Ctrl键点击字幕列表的下载可不打开预览直接下载当前格式',
-                innerText: "下载",style: 'height: 24px;margin-right: 5px;'
+                innerText: "下载",style: 'height: 24px;margin-right: 5px;background: #00a1d6;color: #fff;padding: 7px;'
             },bottomPanel);
             //在新标签页中打开
             this.openTabButton = elements.createAs('a',{
-                className: 'bpui-button bpui-state-disabled bui bui-button bui-button-disabled bui-button-blue',
-                innerText: "在新标签页中打开",style: 'height: 24px;margin-right: 5px;',
+                innerText: "在新标签页中打开",style: 'height: 24px;margin-right: 5px;background: #00a1d6;color: #fff;padding: 7px;',
                 target: '_blank'
             },bottomPanel);
             //关闭
-            this.closeButton = elements.createAs('button',{
-                innerText: "关闭",className: "bpui-button bui bui-button bui-button-blue",style:'border:none',
+            this.closeButton = elements.createAs('a',{
+                innerText: "关闭",style:'height: 24px;margin-right: 5px;background: #00a1d6;color: #fff;padding: 7px;cursor: pointer;',
                 onclick: ()=>document.body.removeChild(settingDiv)
             },bottomPanel);
             //默认转换SRT格式
-            const type = localStorage.defaultSubtitleType || 'SRT';
-            elements.getAs(`[name="subtitle-type"][value="${type}"]`).checked = true;
             this.updateDownload(type, download);
         },
         updateDownload(type='LRC', download){
@@ -1144,7 +1123,8 @@
             let epid = this.getEpid();
             let ep = this.window.__NEXT_DATA__?.props?.pageProps?.dehydratedState?.queries
             ?.find(query=>query?.queryKey?.[0] == "pgc/view/web/season")
-            ?.state?.data?.mediaInfo?.episodes
+            ?.state?.data;
+            ep = (ep?.seasonInfo??ep)?.mediaInfo?.episodes
             ?.find(ep=>epid == true || ep.ep_id == epid);
             if (ep) {
                 this.epid = ep.ep_id;
@@ -1235,6 +1215,7 @@
                     if(!mutation.target) return;
                     if(mutation.target.getAttribute('stage')==1 // 2.x版本播放器
                        || mutation.target.classList.contains('bpx-player-subtitle-wrap') || mutation.target.classList.contains('tit') // 3.22+版本播放器
+                       || mutation.target.classList.contains('bpx-player-ctrl-subtitle-bilingual') // 4.712播放器初始化
                        || mutation.target.classList.contains('squirtle-quality-wrap')){ // 3.14版本番剧播放器
                         this.tryInit();
                         break;
