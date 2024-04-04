@@ -19,7 +19,7 @@
 // @include      *://forums.e-hentai.org/*showtopic=*
 // @include      *://hvmarket.xyz/*
 // @include      *://reasoningtheory.net/*
-// @version      2024.01.01
+// @version      2024.04.04
 // ==/UserScript==
 
 if (document.location.href.match(/ss=iw/)&&!document.getElementById('item_pane'))return
@@ -543,6 +543,7 @@ function loadItems(){
         'Star Compass' : '星罗盘(等级8)', //2022 圣诞节
         'Museum Ticket' : '博物馆门票(等级8)', // 2023 复活节
         'Idol Fan Starter Pack' : '偶像粉丝入门包(等级8)', //2023 圣诞节
+        'AI-Based Captcha Solver' : '人工智能验证码破解器(等级8)', //2024 复活节
 
 
         //旧旧古董
@@ -688,6 +689,16 @@ function loadItems(){
         'Search Engine Oil Filter': '搜索引擎机油滤清器',
         'Search Engine Spark Plug': '搜索引擎火花塞',
         'Search Engine Valve': '搜索引擎气门',
+        //2024
+        'Abstract Art of Fire Hydrants': '消防栓抽象艺术品',
+        'Abstract Art of Staircases': '楼梯抽象艺术品',
+        'Abstract Art of Bridges': '桥梁抽象艺术品',
+        'Abstract Art of Crosswalks': '斑马线抽象艺术品',
+        'Abstract Art of Traffic Lights': '红绿灯抽象艺术品',
+        'Abstract Art of Bicycles': '自行车抽象艺术品',
+        'Abstract Art of Tractors': '拖拉机抽象艺术品',
+        'Abstract Art of Busses': '公交车抽象艺术品',
+        'Abstract Art of Motorcycles': '摩托车抽象艺术品',
 
 
 

@@ -14,7 +14,7 @@
 // @include        *://hentaiverse.org/*
 // @include        *://alt.hentaiverse.org/*
 // @core           http://userscripts-mirror.org/scripts/show/41369
-// @version        2024.01.01
+// @version        2024.04.04
 // @grant none
 // ==/UserScript==
 (function () {
@@ -1338,6 +1338,16 @@ var words = {
         'Search Engine Oil Filter': '搜索引擎机油滤清器',
         'Search Engine Spark Plug': '搜索引擎火花塞',
         'Search Engine Valve': '搜索引擎气门',
+        //2024
+        'Abstract Art of Fire Hydrants': '消防栓抽象艺术品',
+        'Abstract Art of Staircases': '楼梯抽象艺术品',
+        'Abstract Art of Bridges': '桥梁抽象艺术品',
+        'Abstract Art of Crosswalks': '斑马线抽象艺术品',
+        'Abstract Art of Traffic Lights': '红绿灯抽象艺术品',
+        'Abstract Art of Bicycles': '自行车抽象艺术品',
+        'Abstract Art of Tractors': '拖拉机抽象艺术品',
+        'Abstract Art of Busses': '公交车抽象艺术品',
+        'Abstract Art of Motorcycles': '摩托车抽象艺术品',
 
 
         //节日及特殊奖杯
@@ -1386,6 +1396,7 @@ var words = {
         'Star Compass' : '星罗盘(等级8)', //2022 圣诞节
         'Museum Ticket' : '博物馆门票(等级8)', // 2023 复活节
         'Idol Fan Starter Pack' : '偶像粉丝入门包(等级8)', //2023 圣诞节
+        'AI-Based Captcha Solver' : '人工智能验证码破解器(等级8)', //2024 复活节
 
 
     },
@@ -1666,6 +1677,8 @@ var words = {
         'A polishing cloth, pine-scented spray bottle and various other maintenance tools to give your Equipment Cores the love they deserve. [2022 Easter Event]' : '抛光布、松香喷雾瓶和其他各种维护工具，为您的设备核心提供应有的爱。[2022 复活节活动]',
         'Replacement parts for a precursor search engine. Snowflake has been looking for this for a restoration project.' : '远古搜索引擎的替换部件，雪花正在寻找这些东西以进行一个修复项目。[2023 复活节活动]',
         'A ticket to Snowflake\'s Search Engines Through The Ages Exhibition. A complimentary equipment piece will be handed out after the tour. [Easter 2023]' : '通往雪花历代搜索引擎展览的门票，参观结束后将获赠一件免费装备。[2023复活节]',
+        'A curious piece of abstract precursor art, featuring a number of square low-resolution images in a grid pattern. Who would want this? Possibly Snowflake.' : '一块奇特的远古抽象艺术品，以一组低分辨率的方形图案展示在网格中。谁会想要这个呢？大概是雪花。[2024 复活节活动]',
+        'A replica of a device historians believe to have caused the Great Flood, arguably triggering the demise of the precursor global information network. [Easter 2024]' : '历史学家认为造成大洪水的设备复制品，可以说造成了前全球信息网络的灭亡。 [2024 年复活节]',
 
 
     },
