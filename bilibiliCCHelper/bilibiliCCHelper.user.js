@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.39
+// @version      0.5.40
 // @description  可下载B站的CC字幕，旧版B站播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -1104,24 +1104,24 @@
             || this.window.__INITIAL_STATE__ && this.window.__INITIAL_STATE__.epInfo && this.window.__INITIAL_STATE__.epInfo[name]
             || this.window.__INITIAL_STATE__ && this.window.__INITIAL_STATE__.videoData && this.window.__INITIAL_STATE__.videoData[name];
         },
-        getCid(){
-            if (this.window.cid) return this.window.cid;
-            const pages = this.getInfo('pages'),
-                  page = this.window.__INITIAL_STATE__ && this.window.__INITIAL_STATE__.p;
-            if (page && pages && pages instanceof Array) {
-                const info = pages.find(item=>item.page == page);
-                if (info) return info.cid;
-            }
-            return this.getInfo('cid');
-        },
         getEpid(){
             return this.getInfo('id')
             || /ep(\d+)/.test(location.pathname) && +RegExp.$1
             || /ss\d+/.test(location.pathname); // ss\d+当季第一集未知epid
         },
         getEpInfo(){
-            let epid = this.getEpid();
-            let ep = this.window.__NEXT_DATA__?.props?.pageProps?.dehydratedState?.queries
+            const bvid = this.getInfo('bvid'),
+                  epid = this.getEpid(),
+                  cidMap = this.getInfo('cidMap'),
+                  page = this?.window?.__INITIAL_STATE__?.p;
+            let ep = cidMap?.[bvid];
+            if (ep) {
+                this.aid = ep.aid;
+                this.bvid = ep.bvid;
+                this.cid = ep.cids[page];
+                return this.cid;
+            }
+            ep = this.window.__NEXT_DATA__?.props?.pageProps?.dehydratedState?.queries
             ?.find(query=>query?.queryKey?.[0] == "pgc/view/web/season")
             ?.state?.data;
             ep = (ep?.seasonInfo??ep)?.mediaInfo?.episodes
@@ -1131,10 +1131,11 @@
                 this.cid = ep.cid;
                 this.aid = ep.aid;
                 this.bvid = ep.bvid;
+                return this.cid;
             }
         },
         async setupData(){
-            if(this.subtitle && (+this.cid && this.cid==this.getCid() || this.epid && this.epid == this.getEpid())) return this.subtitle;
+            if(this.subtitle && (this.pcid == this.getEpInfo())) return this.subtitle;
             if(location.pathname=='/blackboard/html5player.html') {
                 let match = location.search.match(/cid=(\d+)/i);
                 if(!match) return;
@@ -1144,15 +1145,12 @@
                 match = location.search.match(/bvid=(\d+)/i);
                 if(match) this.window.bvid = match[1];
             }
-            this.aid = this.getInfo('aid');
-            this.bvid = this.getInfo('bvid');
-            this.epid = this.getInfo('id');
-            this.cid = this.getCid();
+            this.pcid = this.getEpInfo();
+            if (!this.cid) return;
             this.player = this.window.player;
             this.subtitle = {count:0,subtitles:[{lan:'close',lan_doc:'关闭'},{lan:'local',lan_doc:'本地字幕'}]};
             this.datas = {close:{body:[]},local:{body:[]}};
             decoder.data = undefined;
-            if (!this.cid && this.getEpid()) this.getEpInfo();
             if(!this.cid||(!this.aid&&!this.bvid)) return;
             return fetch(`https://api.bilibili.com/x/player/v2?cid=${this.cid}${this.aid?`&aid=${this.aid}`:`&bvid=${this.bvid}`}${this.epid?`&ep_id=${this.epid}`:''}`, {credentials: 'include'}).then(res=>{
                 if (res.status==200) {
