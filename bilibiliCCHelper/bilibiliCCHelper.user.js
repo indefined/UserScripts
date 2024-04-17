@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.40
+// @version      0.5.41
 // @description  可下载B站的CC字幕，旧版B站播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -232,12 +232,15 @@
             //下载
             this.actionButton = elements.createAs('a',{
                 title: '按住Ctrl键点击字幕列表的下载可不打开预览直接下载当前格式',
-                innerText: "下载",style: 'height: 24px;margin-right: 5px;background: #00a1d6;color: #fff;padding: 7px;'
+                innerText: "下载",style: 'height: 24px;margin-right: 5px;background: #00a1d6;color: #fff;padding: 7px;',
+                onclick: function(){event.stopPropagation();},
+                oncontextmenu: function(){event.stopPropagation();},
             },bottomPanel);
             //在新标签页中打开
             this.openTabButton = elements.createAs('a',{
                 innerText: "在新标签页中打开",style: 'height: 24px;margin-right: 5px;background: #00a1d6;color: #fff;padding: 7px;',
-                target: '_blank'
+                target: '_blank',onclick: function(){event.stopPropagation();},
+                oncontextmenu: function(){event.stopPropagation();},
             },bottomPanel);
             //关闭
             this.closeButton = elements.createAs('a',{
