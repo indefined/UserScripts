@@ -40,13 +40,13 @@ javascript:(function(){document.head.appendChild(document.createElement('script'
 -------------------------
 ## 功能预览
 
-![新版](https://greasyfork.org/rails/active_storage/blobs/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBclUzIiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--f55df6c370ac2682667683c652078cb9725597b6/newPlayer.jpg)
+![新版](https://greasyfork.org/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MTM3Mjc5LCJwdXIiOiJibG9iX2lkIn19--911664a8598398e40c75807040f81e903891bca7/3.0+.png?locale=zh-CN)
 
-![旧版](https://greasyfork.org/rails/active_storage/blobs/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBcmczIiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--a8c11789daf6c01e91b13d888d161da0cee2abaf/oldPlayer.jpg)
+![旧版](https://greasyfork.org/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MTQyNjEsInB1ciI6ImJsb2JfaWQifX0=--996ba58e226c87c6c24ccc05b3f6e576d028969a/newPlayer.jpg?locale=zh-CN)
 
-![本地](https://greasyfork.org/rails/active_storage/blobs/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBcmszIiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--5d0e5f86db55f13e49213bdadbaf039abfef6855/local.jpg)
+![下载](https://greasyfork.org/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MTM3MjgwLCJwdXIiOiJibG9iX2lkIn19--37654a879a4dbbe8499156b3cd5f9912354f28d4/download.png?locale=zh-CN)
 
-![下载](https://greasyfork.org/rails/active_storage/blobs/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBcmMzIiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--0ca392a944dbbb03c264fbb4e5da71e8473c522e/download.jpg)
+![本地](https://greasyfork.org/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MTQyNjUsInB1ciI6ImJsb2JfaWQifX0=--e8a96c9ac72eb08cdb87a315ee1486d87ca27b43/local.jpg?locale=zh-CN)
 
 -------------------------
 ## 兼容性
