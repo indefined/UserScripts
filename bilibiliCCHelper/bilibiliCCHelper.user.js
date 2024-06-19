@@ -1,17 +1,19 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.42
+// @version      0.5.43
 // @description  可下载B站的CC字幕，旧版B站播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @include      http*://www.bilibili.com/video/*
-// @include      http*://www.bilibili.com/bangumi/play/ss*
-// @include      http*://www.bilibili.com/bangumi/play/ep*
-// @include      http*://www.bilibili.com/list/watchlater*
-// @include      https://www.bilibili.com/medialist/play/watchlater/*
-// @include      http*://www.bilibili.com/medialist/play/ml*
-// @include      http*://www.bilibili.com/blackboard/html5player.html*
+// @match        http*://www.bilibili.com/video/*
+// @match        http*://www.bilibili.com/bangumi/play/ss*
+// @match        http*://www.bilibili.com/bangumi/play/ep*
+// @match        https://www.bilibili.com/cheese/play/ss*
+// @match        https://www.bilibili.com/cheese/play/ep*
+// @match        http*://www.bilibili.com/list/watchlater*
+// @match        https://www.bilibili.com/medialist/play/watchlater/*
+// @match        http*://www.bilibili.com/medialist/play/ml*
+// @match        http*://www.bilibili.com/blackboard/html5player.html*
 // @license      MIT
 // @grant        none
 // ==/UserScript==
@@ -694,11 +696,7 @@
                 innerText: "下载",
                 onclick: (ev)=>{
                     if(this.selectedLan=='close') return;
-                    bilibiliCCHelper.getSubtitle(this.selectedLan).then(data=>{
-                        encoder.showDialog(data,ev.ctrlKey);
-                    }).catch(e=>{
-                        bilibiliCCHelper.toast('获取字幕失败',e);
-                    });
+                    bilibiliCCHelper.downloadSubtitle(this.selectedLan, undefined, ev.ctrlKey);
                 }
             },languageDiv);
             //上传字幕
@@ -820,11 +818,7 @@
                 style: 'min-width:unset!important',innerText: '下载',
                 onclick: (ev)=>{
                     if(this.selectedLan=='close') return;
-                    bilibiliCCHelper.getSubtitle(this.selectedLan).then(data=>{
-                        encoder.showDialog(data,ev.ctrlKey);
-                    }).catch(e=>{
-                        bilibiliCCHelper.toast('获取字幕失败',e);
-                    });
+                    bilibiliCCHelper.downloadSubtitle(this.selectedLan, undefined, ev.ctrlKey);
                 }
             });
             this.panel.insertAdjacentElement('afterend',downloadBtn);
@@ -897,11 +891,7 @@
                     if (!(ev.target instanceof HTMLLIElement) || ev.target.lastChild.data=='本地字幕') return;
                     const rect = ev.target.getBoundingClientRect().right;
                     if (rect ==0 || rect -ev.x > 30) return;// 仅当点击字幕右侧30像素内的下载标识区域时触发下载
-                    bilibiliCCHelper.getSubtitle(undefined, ev.target.lastChild.data).then(data=>{
-                        encoder.showDialog(data,ev.ctrlKey);
-                    }).catch(e=>{
-                        bilibiliCCHelper.toast('获取字幕失败',e);
-                    });
+                    bilibiliCCHelper.downloadSubtitle(undefined, ev.target.lastChild.data, ev.ctrlKey);
                     return false;
                 });
             }
@@ -984,11 +974,7 @@
                 if (!(ev.target || !ev.target.classList.contains('bpx-player-ctrl-subtitle-language-item'))) return;
                 const rect = ev.target.getBoundingClientRect().right;
                 if (rect ==0 || rect -ev.x > 30) return;// 仅当点击字幕右侧30像素内的下载标识区域时触发下载
-                bilibiliCCHelper.getSubtitle(ev.target.dataset.lan, ev.target.lastChild.data).then(data=>{
-                    encoder.showDialog(data,ev.ctrlKey);;
-                }).catch(e=>{
-                    bilibiliCCHelper.toast('获取字幕失败',e);
-                });
+                bilibiliCCHelper.downloadSubtitle(ev.target.dataset.lan, ev.target.lastChild.data, ev.ctrlKey);
                 return false;
             });
             //设置ID标记视频为已注入，防止二次初始化
@@ -1085,9 +1071,15 @@
         },
         loadSubtitle(lan){
             this.getSubtitle(lan)
+                .catch(()=>this.setupData(true)).then(()=>this.getSubtitle(lan)) //下载失败时，重新获取一遍字幕信息，因为自动字幕可能有过期时间
                 .then(data=>this.updateSubtitle(data))
                 .then(()=>this.toast(lan=='close'?'字幕已关闭':`载入字幕:${this.getSubtitleInfo(lan).lan_doc}`))
                 .catch(e=>this.toast('载入字幕失败',e));
+        },
+        downloadSubtitle(lan, name, direct){
+            this.getSubtitle(lan,name)
+                .catch(()=>this.setupData(true)).then(()=>this.getSubtitle(lan, name)) //下载失败时，重新获取一遍字幕信息，因为自动字幕可能有过期时间
+                .then(data=>encoder.showDialog(data,direct)).catch(e=>bilibiliCCHelper.toast('获取字幕失败',e));
         },
         async getSubtitle(lan, name){
             if(this.datas[lan]) return this.datas[lan];
@@ -1144,9 +1136,17 @@
                 this.bvid = ep.bvid;
                 return this.cid;
             }
+            ep = this.window.playerRaw?.getManifest();
+            if (ep){
+                this.epid = ep.episodeId;
+                this.cid = ep.cid;
+                this.aid = ep.aid;
+                this.bvid = ep.bvid;
+                return this.cid;
+            }
         },
-        async setupData(){
-            if(this.subtitle && (this.pcid == this.getEpInfo())) return this.subtitle;
+        async setupData(force){
+            if(this.subtitle && (this.pcid == this.getEpInfo()) && !force) return this.subtitle;
             if(location.pathname=='/blackboard/html5player.html') {
                 let match = location.search.match(/cid=(\d+)/i);
                 if(!match) return;
@@ -1160,10 +1160,10 @@
             if (!this.cid) return;
             this.player = this.window.player;
             this.subtitle = {count:0,subtitles:[{lan:'close',lan_doc:'关闭'},{lan:'local',lan_doc:'本地字幕'}]};
-            this.datas = {close:{body:[]},local:{body:[]}};
+            if (!force) this.datas = {close:{body:[]},local:{body:[]}};
             decoder.data = undefined;
             if(!this.cid||(!this.aid&&!this.bvid)) return;
-            return fetch(`https://api.bilibili.com/x/player/v2?cid=${this.cid}${this.aid?`&aid=${this.aid}`:`&bvid=${this.bvid}`}${this.epid?`&ep_id=${this.epid}`:''}`, {credentials: 'include'}).then(res=>{
+            return fetch(`https://api.bilibili.com/x/player/v2?cid=${this.cid}${this.aid?`&aid=${this.aid}`:`&bvid=${this.bvid}`}`, {credentials: 'include'}).then(res=>{
                 if (res.status==200) {
                     return res.json().then(ret=>{
                         if (ret.code == -404) {
