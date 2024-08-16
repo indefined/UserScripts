@@ -1,13 +1,14 @@
 bilibili直播间工具
 =======================
 
+**已停止更新，以下内容已过时不保证可用。在遵守MIT协议基础上可随意修改二次发布**
+
 [脚本发布页](https://greasyfork.org/zh-CN/scripts/368635)
 
 [个人脚本仓库](https://github.com/indefined/UserScripts)
 
 [问题反馈到这里](https://github.com/indefined/UserScripts/issues)
 
-**提交问题前请仔细读完说明和使用须知**
 
 -------------------------
 ## 功能

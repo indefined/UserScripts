@@ -2,7 +2,7 @@
 // @name        bilibili直播间工具
 // @namespace   indefined
 // @supportURL  https://github.com/indefined/UserScripts/issues
-// @version     0.5.51
+// @version     0.5.52
 // @author      indefined
 // @description 可配置 直播间切换勋章/头衔、网页全屏发送弹幕、轮播显示链接(仅限HTML5)
 // @include     /^https?:\/\/live\.bilibili\.com\/(blanc\/)?\d/
@@ -89,6 +89,7 @@ const LiveHelper = {
             name:'轮播显示链接',
             group:'elementAdjuster'
         },
+        /*
         replaceMedalTitle:{
             name:'勋章/头衔扩展',
             group:'advancedSwitcher'
@@ -97,6 +98,7 @@ const LiveHelper = {
             name:'显示其它礼物',
             group:'otherGift'
         },
+        */
     },
     elementAdjuster: {
         getRoomID() {
@@ -713,13 +715,13 @@ const LiveHelper = {
             if(!helper.get('.gift-package')) return false;
             this.initSetting();
             this.elementAdjuster.init(this.settings);
-            this.advancedSwitcher.init(this.settings);
-            this.otherGift.init(this.settings);
+            //this.advancedSwitcher.init(this.settings);
+            //this.otherGift.init(this.settings);
             this.timeSync.init(this.settings);
             //初始化成功返回true不用监听页面加载
             return true;
         } catch (e){
-            helper.toast('bilibili直播间助手执行错误',e);
+            //helper.toast('bilibili直播间助手执行错误',e);
             //初始化异常，返回true放弃继续监听页面
             return true;
         }
