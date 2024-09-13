@@ -3269,22 +3269,36 @@ var words = {
     }
 
     // 翻译整个正文文本
-    function translateAllText() {
+    function translateAllText(dynamicDict=null, observer=null) {
         //动态元素字典、监听器，用来翻译动态变化的内容
-        var dynamicDict = new Map();
-        var observer = new MutationObserver((mutations,observer) => {
-            //console.log(mutations);
-            if(!translated) return;
-            mutations.forEach(mutation => {
-                var elem = mutation.target;
-                if(elem.style.visibility!='hidden') {
-                    translateText(elem, dynamicDict.get(elem), true);
-                    translateButtons(elem, dynamicDict.get(elem), true);
-                    translateElemTitle(elem, dynamicDict.get(elem), true);
-                }
+        if(dynamicDict === null){
+            dynamicDict = new Map();
+        }
+        if (observer === null)
+        {
+            observer = new MutationObserver((mutations,observer) => {
+                //console.log(mutations);
+                if(!translated) return;
+                mutations.forEach(mutation => {
+                    var elem = mutation.target;
+                    if(elem.id === 'battle_main'){
+                        observer.disconnect();
+                        translateAllText(dynamicDict, observer);
+                        return;
+                    }
+                    if(elem.style.visibility!='hidden') {
+                        translateText(elem, dynamicDict.get(elem), true);
+                        translateButtons(elem, dynamicDict.get(elem), true);
+                        translateElemTitle(elem, dynamicDict.get(elem), true);
+                    }
+                });
             });
-        });
+        }
         //遍历分组字典
+        var battleMain = document.body.querySelector('#battle_main');
+        if(battleMain){
+            observer.observe(document.body.querySelector('#battle_main'), {childList:true, attribute: true, attributeFilter: ['value', 'title']}); //监听翻译动态内容
+        }
         for (const [selector, value] of Object.entries(dictsMap)) {
             const elem = document.body.querySelector(selector);
             if (!elem) continue;
