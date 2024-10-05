@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.43
+// @version      0.5.44
 // @description  可下载B站的CC字幕，旧版B站播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -1157,13 +1157,12 @@
                 if(match) this.window.bvid = match[1];
             }
             this.pcid = this.getEpInfo();
-            if (!this.cid) return;
+            if((!this.cid&&!this.epid)||(!this.aid&&!this.bvid)) return;
             this.player = this.window.player;
             this.subtitle = {count:0,subtitles:[{lan:'close',lan_doc:'关闭'},{lan:'local',lan_doc:'本地字幕'}]};
             if (!force) this.datas = {close:{body:[]},local:{body:[]}};
             decoder.data = undefined;
-            if(!this.cid||(!this.aid&&!this.bvid)) return;
-            return fetch(`https://api.bilibili.com/x/player/v2?cid=${this.cid}${this.aid?`&aid=${this.aid}`:`&bvid=${this.bvid}`}`, {credentials: 'include'}).then(res=>{
+            return fetch(`https://api.bilibili.com/x/player/v2?${this.cid?`cid=${this.cid}`:`&ep_id=${this.epid}`}${this.aid?`&aid=${this.aid}`:`&bvid=${this.bvid}`}`, {credentials: 'include'}).then(res=>{
                 if (res.status==200) {
                     return res.json().then(ret=>{
                         if (ret.code == -404) {
