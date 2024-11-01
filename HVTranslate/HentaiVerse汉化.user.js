@@ -14,7 +14,7 @@
 // @include        *://hentaiverse.org/*
 // @include        *://alt.hentaiverse.org/*
 // @core           http://userscripts-mirror.org/scripts/show/41369
-// @version        2024.04.04
+// @version        2024.11.01
 // @grant none
 // ==/UserScript==
 (function () {
@@ -149,6 +149,8 @@ var words = {
         '/Removing the attachments will deduct ([\\d,]+) Credits from your account, kupo! Are you sure\\?/' : '领取本邮件附件将会收取你 $1 Credits 货到付款(CoD)费用，是否确认？注意！',
         '/This will return the message to the sender, kupo! Are you sure\\?/' : '此操作将会把邮件退还给发件人，是否确认？注意！',
 
+        'Tired already? I guess we can play forever some other time...' : '累了？或许我们下次还可以一起愉快地玩耍',
+
         //网页内嵌script里的
         '/Enter a new name for this persona\\./' : '请输入一个新的用户名（1~20字符，仅支持英文和数字）',
         '/Are you sure you wish to create a new persona with the same attribute, slot, equipment and ability assignments as "(.+)"\\? This action is irreversible, and created personas cannot be deleted\\./' : '是否确认创建一个和 $1 相同属性、套装、技能分配的人格角色？注意此操作不可撤销且创建的角色无法删除！',
@@ -236,6 +238,9 @@ var words = {
         '/Your ask price must be at most (.+?) to undercut the current sell orders/' : '如果要减价低于目前最低卖价你必须开价不超过 $1',
         'You have to wait a short while between placing each order' : '你创建订单过于频繁，稍后再试',
         'Placing buy orders for this item has been temporarily disabled' : '此物品买单已暂时被禁用',
+        'You cannot currently place buy orders' : '你现在无法创建买单',
+        'You cannot currently place sell orders' : '你现在无法创建卖单',
+        'Please wait a bit longer before making another account transfer' : '再等一会，你转账太快了',
 
         'There are no free slots left.' : '没有空余的怪物槽可以创建怪物。',
         'Slot unlock limit reached' : '怪物槽已达到上限',
@@ -357,6 +362,7 @@ var words = {
         'Snowflake and the moogles are pining for spring. Check back later.' : '雪花女神和莫古利渴望春天，请稍后再来',
         'Snowflake and the moogles are remaking the world. Check back later.' : '雪花女神和莫古利正在重做世界，请稍后再来',
         'Snowflake and the moogles are fixing shit. Check back later.' : '雪花女神和莫古利正在修复东西，请稍后再来',
+        'Snowflake and the moogles are remaking the world. Check back later.' : '雪花女神和莫古利正在重造世界，请稍后再来',
         */
         '/Snowflake and the moogles are .+? Check back later./' : '版本维护中，请稍后再来。',
         'Page load has been aborted due to a fatal error. A report has been dispatched to site staff. Please try again later.' : '发生致命错误，页面加载已取消。报告已发送给网站管理员，请稍后再试。',
@@ -367,15 +373,19 @@ var words = {
 
     ///////////////////////////////////////////////////////登陆界面
     login: {
-        'You have to log on to access this game.' : '你必须登陆之后才能使用游戏功能',
+        'You have to log on to access this game.' : '你必须登陆之后才能访问游戏功能',
+        'You have to log on with an EH account to access the game.' : '你必须使用EH账号登陆之后才能访问游戏功能',
         'No account? ' : '还没有帐号？',
+        'No account yet?' : '还没有账号？',
         'Click here to create one' : '点击此处创建一个',
         '. (It\'s free!)' : ' (不要钱的)',
+        'It\'s free, obviously.' : '很显然，不要钱的',
         'User:' : '用户:',
         'Pass:' : '密码:',
         'Login!' : '登陆!',
         '/^ or $/' : ' 或者 ',
         'Register' : '注册',
+        'The HentaiVerse a free online game hosted by' : 'HentaiVerse是由E绅士呈现的一个免费在线游戏 ',
         'The HentaiVerse a free online game presented by ' : 'HentaiVerse是由E绅士呈现的一个免费在线游戏 ',
         'E-Hentai.org - The Free Hentai Gallery System' : 'E-Hentai.org - 免费的绅士画廊',
         'You must be logged on to visit the HentaiVerse.' : '你必须登陆之后才能访问HentaiVerse',
@@ -2348,6 +2358,7 @@ var words = {
         'Market Stock' : '市场库存',
         'Placing sell orders is locked for the first' : '在异世界每季度最开始前24小时',
         '24 hours of each Isekai season.' : '投放卖单将被临时禁用',
+        'Placing sell orders is locked until tomorrow.' : '明天开始才能投放卖单',
 
         'You have ': '你有 ',
         ' available to sell. This item is traded in batches of ' : ' 件库存可供出售。本物品出售单位为每包 ',
