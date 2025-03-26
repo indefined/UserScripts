@@ -12,7 +12,7 @@
 // @grant        GM_setValue
 // @grant        GM.getValue
 // @grant        GM.setValue
-// @require      https://cdn.jsdelivr.net/npm/jszip@3.1.5/dist/jszip.min.js
+// @require      https://s4.zstatic.net/ajax/libs/jszip/3.1.5/jszip.min.js
 // @license      MIT
 // ==/UserScript==
 
