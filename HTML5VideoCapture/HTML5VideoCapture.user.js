@@ -2,7 +2,7 @@
 // @name         HTML5视频截图器
 // @namespace    indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
-// @version      0.4.19
+// @version      0.4.20
 // @description  基于HTML5的简单原生视频截图，可控制快进/逐帧/视频调速，支持自定义快捷键
 // @author       indefined
 // @include      *://*
@@ -706,7 +706,7 @@
             panel.style.left = ev.pageX-panel.lOffset+'px';
         }
     }
-    const escapeHTMLPolicy = window.trustedTypes.createPolicy("forceInner", {createHTML: (to_escape) => to_escape});
+    const escapeHTMLPolicy = window.trustedTypes?.createPolicy("forceInner", {createHTML: (to_escape) => to_escape});
     //简易创建页面元素的封装，方便嵌套，实际调用或许会发生相当奇怪问题……
     function _c(config){
         if(config instanceof Array) return config.map(_c);
@@ -727,7 +727,7 @@
             else if(i=='for') {
                 item.setAttribute('for',config[i]);
             }
-            else if(i=='innerHTML') {
+            else if(escapeHTMLPolicy && i=='innerHTML') {
                 config[i] = escapeHTMLPolicy.createHTML(config[i]);
             }
             item[i] = config[i];
