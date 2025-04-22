@@ -14,7 +14,7 @@
 // @include        *://hentaiverse.org/*
 // @include        *://alt.hentaiverse.org/*
 // @core           http://userscripts-mirror.org/scripts/show/41369
-// @version        2024.11.01
+// @version        2025.04.22
 // @grant none
 // ==/UserScript==
 (function () {
@@ -1358,6 +1358,15 @@ var words = {
         'Abstract Art of Tractors': '拖拉机抽象艺术品',
         'Abstract Art of Busses': '公交车抽象艺术品',
         'Abstract Art of Motorcycles': '摩托车抽象艺术品',
+        //2025
+        "Bunny Girl: Fluffy Ear Headband": "兔女郎：毛绒耳朵头饰",
+        "Bunny Girl: White Fluffy Tail": "兔女郎：白色蓬松尾巴",
+        "Bunny Girl: Black Latex Top": "兔女郎：黑色乳胶上衣",
+        "Bunny Girl: Black Latex Gloves": "兔女郎：黑色乳胶手套",
+        "Bunny Girl: Black High Heels": "兔女郎：黑色高跟鞋",
+        "Bunny Girl: Black Fishnet Stockings": "兔女郎：黑色渔网袜",
+        "Bunny Girl: Black Underwear": "兔女郎：黑色内衣",
+        "Bunny Girl: Choker and Bowtie": "兔女郎：项圈与领结",
 
 
         //节日及特殊奖杯
@@ -1407,6 +1416,8 @@ var words = {
         'Museum Ticket' : '博物馆门票(等级8)', // 2023 复活节
         'Idol Fan Starter Pack' : '偶像粉丝入门包(等级8)', //2023 圣诞节
         'AI-Based Captcha Solver' : '人工智能验证码破解器(等级8)', //2024 复活节
+        'Marten Pelt' : '貂皮(等级8)', //2024 圣诞节
+        'Snowflake Bunny Girl Figure' : '雪花兔女郎玩偶(等级8)', //2025 复活节
 
 
     },
@@ -1659,7 +1670,8 @@ var words = {
         'A precursor smartgun with autonomous aiming and talking functionality. The name "Skippy" is crudely painted on its side. It seems broken in more ways than one.' : '一把拥有自动瞄准和说话功能的旧世界智能枪。其名称"Skippy"粗犷地喷涂在侧面。它似乎不止一个地方坏了(2020 圣诞节)',
         'Taru da! It\'s a barrel, which may or may not be filled with yummy nomnoms, but you will never know unless you ask Snowflake to open it.' : '塔鲁达！ 这是一个桶，里面可能装满了美味的nomnoms，也可能没有，但除非你让雪花打开它，否则你永远不会知道。(2021 圣诞节)',
         'A blueish transparent orb of unknown origin with a curiously shaped needle floating inside it. It seems to be pointing towards Snowflake\'s Shrine.' : '一个来源不明的蓝色透明球体，里面漂浮着一根形状奇特的针。 似乎是指向雪花神殿的方向。(2022 圣诞节)',
-        'Contains the debut single and a variety of t-shirts and folding fans for some long-lost idol group, and a battery-powered RGB glowstick for indecisive types.' : '包含一些已经引退的偶像团体的出道单曲和各种 T 恤和折扇，以及适合各种类型场景的电池供电 RGB 荧光棒。',
+        'Contains the debut single and a variety of t-shirts and folding fans for some long-lost idol group, and a battery-powered RGB glowstick for indecisive types.' : '包含一些已经引退的偶像团体的出道单曲和各种 T 恤和折扇，以及适合各种类型场景的电池供电 RGB 荧光棒。(2023 圣诞节)',
+        'An exquisite and particularly fragrant marten pelt that mysteriously smells of apples. Something this fine would make a good offering to Snowflake.' : '精致而特别芳香的貂皮，神秘地散发着苹果味。如此精美的东西可以作为雪花的上好礼物。(2024 圣诞节)',
 
         'A badge inscribed with your RealPervert identity. Regardless of whether you fell for it or not, you got this for participating in the 2011 April Fools thread.' : '一个刻着你的实名变态身份的胸章。无论你是否信以为真，你参与了 2011 年愚人节主题就会得到这个。',
         'A 1/10th scale collectible figure of Raptor Jesus. Consolitory prize for those who did not ascend during the May 2011 Rapture.' : '猛禽耶稣的 1/10 比例缩放公仔。给 2011 年 5 月被提发生期间没被送到天上的人开个安慰价格。',
@@ -1689,6 +1701,9 @@ var words = {
         'A ticket to Snowflake\'s Search Engines Through The Ages Exhibition. A complimentary equipment piece will be handed out after the tour. [Easter 2023]' : '通往雪花历代搜索引擎展览的门票，参观结束后将获赠一件免费装备。[2023复活节]',
         'A curious piece of abstract precursor art, featuring a number of square low-resolution images in a grid pattern. Who would want this? Possibly Snowflake.' : '一块奇特的远古抽象艺术品，以一组低分辨率的方形图案展示在网格中。谁会想要这个呢？大概是雪花。[2024 复活节活动]',
         'A replica of a device historians believe to have caused the Great Flood, arguably triggering the demise of the precursor global information network. [Easter 2024]' : '历史学家认为造成大洪水的设备复制品，可以说造成了前全球信息网络的灭亡。 [2024 年复活节]',
+        "A part of Snowflake's missing ritual bunny girl costume. You could return it to her at the shrine. Or keep it, and wear it when no one is watching.": "这是雪花女神丢失的仪式兔女郎服装的一部分。你可以去神社归还给她，或者自己留着在无人时穿戴。[2025 复活节活动]",
+        "A part of Snowflake's missing bunny girl costume. You could return it to her at the shrine. Or keep it, and wear it when no one is watching.": "这是雪花女神丢失的兔女郎服装的一部分。你可以去神社归还给她，或者自己留着在无人时穿戴。[2025 复活节活动]",
+        "A large 1/4th scale detailed collectible figure featuring Snowflake, the Goddess of Loot and Harvest, wearing her signature ritual bunny girl outfit. [Easter 2025]" : "一款大型的1/4比例精细收藏人偶，以战利品与丰收女神‘雪花’为特色，身着标志性的仪式兔女郎装扮。[2025复活节活动]",
 
 
     },
@@ -3001,6 +3016,8 @@ var words = {
         'Increases attack damage by 15% and attack accuracy by 50%. Also grants a 20% chance per stack to overwhelm enemy parry.' : '增加15%攻击伤害和50%攻击准确度。每一道特效有20%反制怪物招架几率，最多可堆叠5道特效 (完全无视怪物的招架)',
         'Mystical energies have converged on this target. Striking it with any magic spell will consume only half the normal mana.' : '神秘的能量汇集于这个目标，对它施放魔法咒语只需消耗一半的魔力值 (可以和灵动架式共同作用)。',
         'You are absorbing magicks from shattering the Coalesced Mana surrounding a target.' : '你打散了合流于目标周围的魔力然后吸取中。',
+        'Spreading Poison' : '流动毒性',
+        'Poison courses through the target\'s veins. This causes a damage-over-time effect, and eliminates its evade chance.' : '毒性在目标血管内流动，导致持续伤害效果，并消除其回避几率。',
 
         //武器效果
         'Penetrated Armor' : '破甲',

@@ -19,7 +19,7 @@
 // @include      *://forums.e-hentai.org/*showtopic=*
 // @include      *://hvmarket.xyz/*
 // @include      *://reasoningtheory.net/*
-// @version      2024.04.04
+// @version      2025.04.22
 // ==/UserScript==
 
 if (document.location.href.match(/ss=iw/)&&!document.getElementById('item_pane'))return
@@ -544,6 +544,8 @@ function loadItems(){
         'Museum Ticket' : '博物馆门票(等级8)', // 2023 复活节
         'Idol Fan Starter Pack' : '偶像粉丝入门包(等级8)', //2023 圣诞节
         'AI-Based Captcha Solver' : '人工智能验证码破解器(等级8)', //2024 复活节
+        'Marten Pelt' : '貂皮(等级8)', //2024 圣诞节
+        'Snowflake Bunny Girl Figure' : '雪花兔女郎玩偶(等级8)', //2025 复活节
 
 
         //旧旧古董
@@ -699,6 +701,15 @@ function loadItems(){
         'Abstract Art of Tractors': '拖拉机抽象艺术品',
         'Abstract Art of Busses': '公交车抽象艺术品',
         'Abstract Art of Motorcycles': '摩托车抽象艺术品',
+        //2025
+        "Bunny Girl: Fluffy Ear Headband": "兔女郎：毛绒耳朵头饰",
+        "Bunny Girl: White Fluffy Tail": "兔女郎：白色蓬松尾巴",
+        "Bunny Girl: Black Latex Top": "兔女郎：黑色乳胶上衣",
+        "Bunny Girl: Black Latex Gloves": "兔女郎：黑色乳胶手套",
+        "Bunny Girl: Black High Heels": "兔女郎：黑色高跟鞋",
+        "Bunny Girl: Black Fishnet Stockings": "兔女郎：黑色渔网袜",
+        "Bunny Girl: Black Underwear": "兔女郎：黑色内衣",
+        "Bunny Girl: Choker and Bowtie": "兔女郎：项圈与领结",
 
 
 
