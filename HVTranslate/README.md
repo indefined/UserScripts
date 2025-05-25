@@ -6,7 +6,7 @@
 
 ## 如何使用
 
-1. 你需要一个脚本管理器，如果你没有的话，根据 [这里](https://greasyfork.org/zh-CN#home-step-1) 第一步提示选择一个适合你浏览器的安装。建议使用Tampermonkey而不要选择Greasemonkey
+1. 你需要一个脚本管理器，如果你没有的话，根据 [这里](https://greasyfork.org/zh-CN#home-step-1) 第一步提示选择一个适合你浏览器的安装。建议使用Tampermonkey而不要选择Greasemonkey。在较新基于Chrome的浏览器中，你需要开启浏览器的扩展开发者模式，详见[这里](https://www.tampermonkey.net/faq.php?ext=dhdg&version=5.1.0#Q209)
 
 2. 前往 [Hentaiverse设置](https://hentaiverse.org/?s=Character&ss=se#settings_cfont) 勾选自定义字体(Use Custom Font), 在字体名称(font-family)框内填上任意字体名称，并拉到最下面点击确认更改(Apply Changes)
 
