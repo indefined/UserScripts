@@ -205,7 +205,7 @@
         setTimeout(()=>{
             getConfig(document.location.host);
             //通知iframe重新加载设置
-            [].forEach.call(childs,(w,i)=>w.postMessage({action:'reload'},'*'));
+            [].forEach.call(childs,(w,i)=>w.postMessage({action:'reload'}, document.location.origin));
         },100);
     }
 
@@ -455,7 +455,7 @@
                 length:videos.length,
                 host:location.host,
                 id:window.captureId
-            },'*');
+            }, document.location.origin);
         }else{
             while(selector.firstChild) selector.removeChild(selector.firstChild);
             appendVideo(videos);
@@ -475,7 +475,7 @@
             [].forEach.call(childs,(w,i)=>w.postMessage({
                 action:'captureDetech',
                 id:window.captureId==undefined?i:window.captureId+'-'+i
-            },'*'));
+            }, document.location.origin));
         }
         console.log(window.captureId,videos);
     }
@@ -513,7 +513,7 @@
                 paused:video.paused,
                 speed:video.playbackRate,
                 id:window.captureId
-            },'*');
+            }, document.location.origin);
         }
     }
 
@@ -530,7 +530,7 @@
                 todo:type,
                 id:ids.join('-'),
                 value:data
-            },'*');
+            }, document.location.origin);
         }
     }
 
@@ -637,7 +637,7 @@
                 action:'captureReport',
                 about:'panelActive',
                 id:window.captureId
-            },'*');
+            }, document.location.origin);
         }
         else if (!hoverItem) return;
         let value;
@@ -673,7 +673,7 @@
             }
             else if(ev.data.action=='reload'){
                 getConfig();
-                [].forEach.call(childs,(w,i)=>w.postMessage({action:'reload'},'*'));
+                [].forEach.call(childs,(w,i)=>w.postMessage({action:'reload'}, document.location.origin));
             }else if(ev.data.action=='captureControl' && ev.data.target==window.captureId){
                 videoAction(ev.data.todo, ev.data.value, ev.data.id);
             }
@@ -887,7 +887,7 @@
                     style:'margin-right:0',
                     innerText:'>',
                     title:'下一帧(1/60秒)',
-                    onclick:e=> actionHandler('nextFrame')
+                    onclick:e=> actionHandler('nextFrame', e)
                 },
                 {
                     nodeType:'button',
