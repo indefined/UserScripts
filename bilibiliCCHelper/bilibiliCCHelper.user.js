@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.46
+// @version      0.5.47
 // @description  可下载B站的CC字幕，旧版B站播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -971,7 +971,7 @@
                 innerHTML:'.bpx-player-ctrl-subtitle-major-inner>.bpx-player-ctrl-subtitle-language-item:after {content: "下载";position:absolute;right:12px; margin-top:12px;}'
             }, this.panel);
             this.panel.addEventListener('click', function(ev) {
-                if (!(ev.target || !ev.target.classList.contains('bpx-player-ctrl-subtitle-language-item'))) return;
+                if ((!ev.target || !ev.target.classList.contains('bpx-player-ctrl-subtitle-language-item'))) return;
                 const rect = ev.target.getBoundingClientRect().right;
                 if (rect ==0 || rect -ev.x > 30) return;// 仅当点击字幕右侧30像素内的下载标识区域时触发下载
                 ev.preventDefault();
@@ -1016,15 +1016,13 @@
                 if (!(ev.target instanceof HTMLLIElement)) return;
                 const rect = ev.target.getBoundingClientRect().right;
                 if (rect ==0 || rect -ev.x > 30) return;// 仅当点击字幕右侧30像素内的下载标识区域时触发下载
-                ev.preventDefault();
-                ev.stopPropagation();
                 bilibiliCCHelper.getSubtitle(undefined, ev.target.lastChild.data).then(data=>{
                     encoder.showDialog(data,ev.ctrlKey);
                 }).catch(e=>{
                     bilibiliCCHelper.toast('获取字幕失败',e);
                 });
                 return false;
-            }, true);
+            });
             //设置ID标记视频为已注入，防止二次初始化
             this.panel.id = 'bilibili-player-subtitle-btn';
             //if(!this.hasSubtitles) this.updateBtnIcon(status); // 没有字幕时关闭按钮
