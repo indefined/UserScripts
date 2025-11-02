@@ -19,7 +19,7 @@
 // @include      *://forums.e-hentai.org/*showtopic=*
 // @include      *://hvmarket.xyz/*
 // @include      *://reasoningtheory.net/*
-// @version      2025.04.22
+// @version      2025.11.02
 // ==/UserScript==
 
 if (document.location.href.match(/ss=iw/)&&!document.getElementById('item_pane'))return
@@ -54,6 +54,7 @@ function main(){
         'hvmarket.xyz', //hvmarket14
         'reasoningtheory.net', //拍卖15
         'Bazaar&ss=mk', //交易市场16
+        'Bazaar&ss=am', //武器17
     ];
     var location;
     for(location = 0; location < lklist.length; location++){
@@ -246,6 +247,10 @@ function main(){
             translateItems('#market_right');
             break;
 
+        case 17: //武器
+            translateEquipsList();
+            break;
+
         default: //没有匹配命中需要翻译的网页
             break;
     }
@@ -307,7 +312,13 @@ function translate(target, dicts) {
 
 //翻译Hentaiverse内装备列表
 function translateEquipsList(){
-    translateEquips(".equiplist div[id^='e'][onmouseover]");
+    if (document.querySelector('.eqtplabel')){
+        translateEquips('tr[onmouseover]>td:first-child');
+        document.head.insertAdjacentHTML('beforeend', `<style>.lc>span{left:unset;position:unset;background:unset;border:unset}.lc>span:nth-child(2){position:absolute;top:0;left:0;height:20px;width:20px;background-color:#EDEADA;border:2px solid #B5A4A4;border-radius:3px}`);
+    }
+    else {
+        translateEquips(".equiplist div[id^='e'][onmouseover]");
+    }
     translateEquips(".hvut-eq-h5");
     translateEquips(".eqb>div");
 }
@@ -475,6 +486,63 @@ function loadItems(){
         'Blood Token' : '鲜血令牌',
         'Token of Blood' : '鲜血令牌',
         'Chaos Token' : '混沌令牌',
+
+        "Silk Charm Pouch": "丝绸护符袋",
+        "Kevlar Charm Pouch": "凯夫拉护符袋",
+        "Mithril Charm Pouch": "秘银护符袋",
+        "Lesser Featherweight Charm": "次级轻羽护符",
+        "Greater Featherweight Charm": "强效轻羽护符",
+        "Lesser Fire Strike Charm": "次级火焰打击护符",
+        "Greater Fire Strike Charm": "强效火焰打击护符",
+        "Lesser Cold Strike Charm": "次级寒冰打击护符",
+        "Greater Cold Strike Charm": "强效寒冰打击护符",
+        "Lesser Lightning Strike Charm": "次级闪电打击护符",
+        "Greater Lightning Strike Charm": "强效闪电打击护符",
+        "Lesser Wind Strike Charm": "次级狂风打击护符",
+        "Greater Wind Strike Charm": "强效狂风打击护符",
+        "Lesser Holy Strike Charm": "次级神圣打击护符",
+        "Greater Holy Strike Charm": "强效神圣打击护符",
+        "Lesser Dark Strike Charm": "次级黑暗打击护符",
+        "Greater Dark Strike Charm": "强效黑暗打击护符",
+        "Lesser Butcher Charm": "次级屠夫护符",
+        "Greater Butcher Charm": "强效屠夫护符",
+        "Lesser Swiftness Charm": "次级迅捷护符",
+        "Greater Swiftness Charm": "强效迅捷护符",
+        "Lesser Fatality Charm": "次级致命护符",
+        "Greater Fatality Charm": "强效致命护符",
+        "Lesser Overpower Charm": "次级压制护符",
+        "Greater Overpower Charm": "强效压制护符",
+        "Lesser Voidseeker Charm": "次级虚空护符",
+        "Greater Voidseeker Charm": "强效虚空护符",
+        "Lesser Archmage Charm": "次级大法师护符",
+        "Greater Archmage Charm": "强效大法师护符",
+        "Lesser Economizer Charm": "次级节能护符",
+        "Greater Economizer Charm": "强效节能护符",
+        "Lesser Spellweaver Charm": "次级织法者护符",
+        "Greater Spellweaver Charm": "强效织法者护符",
+        "Lesser Annihilator Charm": "次级湮灭护符",
+        "Greater Annihilator Charm": "强效湮灭护符",
+        "Lesser Penetrator Charm": "次级穿透护符",
+        "Greater Penetrator Charm": "强效穿透护符",
+        "Lesser Aether Charm": "次级以太护符",
+        "Greater Aether Charm": "强效以太护符",
+        "Lesser Fire-proof Charm": "次级火焰抗性护符",
+        "Greater Fire-proof Charm": "强效火焰抗性护符",
+        "Lesser Cold-proof Charm": "次级寒冰抗性护符",
+        "Greater Cold-proof Charm": "强效寒冰抗性护符",
+        "Lesser Lightning-proof Charm": "次级闪电抗性护符",
+        "Greater Lightning-proof Charm": "强效闪电抗性护符",
+        "Lesser Wind-proof Charm": "次级狂风抗性护符",
+        "Greater Wind-proof Charm": "强效狂风抗性护符",
+        "Lesser Holy-proof Charm": "次级神圣抗性护符",
+        "Greater Holy-proof Charm": "强效神圣抗性护符",
+        "Lesser Dark-proof Charm": "次级黑暗抗性护符",
+        "Greater Dark-proof Charm": "强效黑暗抗性护符",
+        "Lesser Juggernaut Charm": "次级生命加成护符",
+        "Greater Juggernaut Charm": "强效生命加成护符",
+        "Lesser Capacitor Charm": "次级魔力加成护符",
+        "Greater Capacitor Charm": "强效魔力加成护符",
+        "World Seed": "世界种子",
 
         'Precursor Artifact' : '古遗物',
         'ManBearPig Tail' : '人熊猪的尾巴(等级2)',
@@ -1051,12 +1119,14 @@ function loadEquips(){
         // 单手武器类
         'Dagger':'*匕首（单）',
         'Sword Chucks' : '*锁链双剑（单）',
+        'Swordchucks' : '*锁链双剑',
         'Shortsword':'短剑（单）',
         'Wakizashi':'脇差（单）',
         'Axe':'斧（单）',
         'Club':'棍（单）',
         'Rapier':'<span style=\"background:#ffa500\" >西洋剑</span>（单）',
         //双手
+        'Great Mace' : '重锤',
         'Scythe':'*镰刀（双）',
         'Longsword':'长剑（双）',
         'Katana':'太刀（双）',
@@ -1101,15 +1171,19 @@ function loadEquips(){
         'Cotton':'棉质<span style=\"background:#FFFFFF;color:#000000\" >(布)</span>',
         'Gossamer':'*薄纱<span style=\"background:#FFFFFF;color:#000000\" >(布)</span>',
         'Silk' : '*丝绸<span style=\"background:#FFFFFF;color:#000000\" >(布)</span>',
+        'Ironsilk' : '*铁绸<span style=\"background:#FFFFFF;color:#000000\" >(布)</span>',
         'Phase':'<span style=\"background:#ffa500\" >相位</span><span style=\"background:#FFFFFF;color:#000000\" >(布)</span>',
         //轻甲
         'Leather':'皮革<span style=\"background:#666666;color:#FFFFFF\" >(轻)</span>',
         'Kevlar':'*凯夫拉<span style=\"background:#666666;color:#FFFFFF\" >(轻)</span>',
         'Dragon Hide' : '*龙皮<span style=\"background:#666666;color:#FFFFFF\" >(轻)</span>',
+        'Drakehide' : '*龙皮<span style=\"background:#666666;color:#FFFFFF\" >(轻)</span>',
         'Shade':'<span style=\"background:#ffa500\" >暗影</span><span style=\"background:#666666;color:#FFFFFF\" >(轻)</span>',
         //重甲
         'Chainmail' : '*锁子甲<span style=\"background:#000000;color:#FFFFFF\" >(重)</span>',
+        'Chain' : '*锁子甲<span style=\"background:#000000;color:#FFFFFF\" >(重)</span>',
         'Plate':'板甲<span style=\"background:#000000;color:#FFFFFF\" >(重)</span>',
+        'Reactive':'反应甲<span style=\"background:#000000;color:#FFFFFF\" >(重)</span>',
         'Power':'<span style=\"background:#ffa500\" >动力</span><span style=\"background:#000000;color:#FFFFFF\" >(重)</span>',
         //法杖
         'Ebony':'*乌木',
