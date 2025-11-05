@@ -19,7 +19,7 @@
 // @include      *://forums.e-hentai.org/*showtopic=*
 // @include      *://hvmarket.xyz/*
 // @include      *://reasoningtheory.net/*
-// @version      2025.11.02
+// @version      2025.11.05
 // ==/UserScript==
 
 if (document.location.href.match(/ss=iw/)&&!document.getElementById('item_pane'))return
@@ -1119,7 +1119,7 @@ function loadEquips(){
         // 单手武器类
         'Dagger':'*匕首（单）',
         'Sword Chucks' : '*锁链双剑（单）',
-        'Swordchucks' : '*锁链双剑',
+        'Swordchucks' : '*锁链双剑（双）',
         'Shortsword':'短剑（单）',
         'Wakizashi':'脇差（单）',
         'Axe':'斧（单）',
@@ -1182,8 +1182,8 @@ function loadEquips(){
         //重甲
         'Chainmail' : '*锁子甲<span style=\"background:#000000;color:#FFFFFF\" >(重)</span>',
         'Chain' : '*锁子甲<span style=\"background:#000000;color:#FFFFFF\" >(重)</span>',
+        'Reactive' : '*反应装甲<span style=\"background:#000000;color:#FFFFFF\" >(重)</span>',
         'Plate':'板甲<span style=\"background:#000000;color:#FFFFFF\" >(重)</span>',
-        'Reactive':'反应甲<span style=\"background:#000000;color:#FFFFFF\" >(重)</span>',
         'Power':'<span style=\"background:#ffa500\" >动力</span><span style=\"background:#000000;color:#FFFFFF\" >(重)</span>',
         //法杖
         'Ebony':'*乌木',
