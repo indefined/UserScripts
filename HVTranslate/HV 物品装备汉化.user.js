@@ -19,7 +19,7 @@
 // @include      *://forums.e-hentai.org/*showtopic=*
 // @include      *://hvmarket.xyz/*
 // @include      *://reasoningtheory.net/*
-// @version      2025.11.05
+// @version      2025.11.13
 // ==/UserScript==
 
 if (document.location.href.match(/ss=iw/)&&!document.getElementById('item_pane'))return
@@ -492,6 +492,8 @@ function loadItems(){
         "Mithril Charm Pouch": "秘银护符袋",
         "Lesser Featherweight Charm": "次级轻羽护符",
         "Greater Featherweight Charm": "强效轻羽护符",
+        "Lesser Hollowforged Charm": "次级虚空升华护符",
+        "Greater Hollowforged Charm": "强效虚空升华护符",
         "Lesser Fire Strike Charm": "次级火焰打击护符",
         "Greater Fire Strike Charm": "强效火焰打击护符",
         "Lesser Cold Strike Charm": "次级寒冰打击护符",
@@ -504,26 +506,26 @@ function loadItems(){
         "Greater Holy Strike Charm": "强效神圣打击护符",
         "Lesser Dark Strike Charm": "次级黑暗打击护符",
         "Greater Dark Strike Charm": "强效黑暗打击护符",
-        "Lesser Butcher Charm": "次级屠夫护符",
-        "Greater Butcher Charm": "强效屠夫护符",
+        "Lesser Butcher Charm": "次级物理伤害加成护符",
+        "Greater Butcher Charm": "强效物理伤害加成护符",
         "Lesser Swiftness Charm": "次级迅捷护符",
         "Greater Swiftness Charm": "强效迅捷护符",
-        "Lesser Fatality Charm": "次级致命护符",
-        "Greater Fatality Charm": "强效致命护符",
-        "Lesser Overpower Charm": "次级压制护符",
-        "Greater Overpower Charm": "强效压制护符",
+        "Lesser Fatality Charm": "次级物理暴击护符",
+        "Greater Fatality Charm": "强效物理暴击护符",
+        "Lesser Overpower Charm": "次级反招架护符",
+        "Greater Overpower Charm": "强效反招架护符",
         "Lesser Voidseeker Charm": "次级虚空护符",
         "Greater Voidseeker Charm": "强效虚空护符",
-        "Lesser Archmage Charm": "次级大法师护符",
-        "Greater Archmage Charm": "强效大法师护符",
+        "Lesser Archmage Charm": "次级魔法伤害加成护符",
+        "Greater Archmage Charm": "强效魔法伤害加成护符",
         "Lesser Economizer Charm": "次级节能护符",
         "Greater Economizer Charm": "强效节能护符",
-        "Lesser Spellweaver Charm": "次级织法者护符",
-        "Greater Spellweaver Charm": "强效织法者护符",
-        "Lesser Annihilator Charm": "次级湮灭护符",
-        "Greater Annihilator Charm": "强效湮灭护符",
-        "Lesser Penetrator Charm": "次级穿透护符",
-        "Greater Penetrator Charm": "强效穿透护符",
+        "Lesser Spellweaver Charm": "次级高速咏唱护符",
+        "Greater Spellweaver Charm": "强效高速咏唱护符",
+        "Lesser Annihilator Charm": "次级魔法暴击护符",
+        "Greater Annihilator Charm": "强效魔法暴击护符",
+        "Lesser Penetrator Charm": "次级反魔法抵抗护符",
+        "Greater Penetrator Charm": "强效反魔法抵抗护符",
         "Lesser Aether Charm": "次级以太护符",
         "Greater Aether Charm": "强效以太护符",
         "Lesser Fire-proof Charm": "次级火焰抗性护符",

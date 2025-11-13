@@ -14,7 +14,7 @@
 // @include        *://hentaiverse.org/*
 // @include        *://alt.hentaiverse.org/*
 // @core           http://userscripts-mirror.org/scripts/show/41369
-// @version        2025.11.05
+// @version        2025.11.13
 // @grant none
 // ==/UserScript==
 (function () {
@@ -22,7 +22,7 @@
     //if (document.getElementById('pane_log')) return;
 
     //字典分区，决定网页中的哪一部分使用哪部分翻译字典
-    //格式： 'css选择器': ['使用到的字典名称',..]
+    //格式： 'css选择器': ['使用到的字典名称',..]；字典名称第一个为true时该元素会动态监听翻译，且不储存原文切换翻译
     //注意使用到的字典顺序，互相包含的分区或者一个分区使用多个字典前面的翻译可能会影响后面的结果
     var dictsMap = {
         // 除了本字典分区里指定的部分之外，正文字典里另有alerts(浏览器弹窗)特殊部分使用独立方法翻译且所有页面生效
@@ -30,49 +30,45 @@
         '#messagebox_outer' : ['messagebox', 'items', 'equipsName', 'equipsInfo'], //HV内的系统消息浮窗，所有页面的系统信息提示翻译均在这部分
         'body>script[src$="hvc.js"]+div[style]:not([id])' : ['login'], //登陆页面，因为没有ID特征比较难搞
         '#navbar' : ['menu', 'difficulty'], //主菜单导航栏，使用菜单字典和难度名字典
-        '#equipselect_left' : ['character', 'equipsName'], //选择装备页面
+        '#equipselect_left' : ['character', 'equipsName', 'equipsPart'], //选择装备页面
         '#eqch_left' : ['character', 'equipsName', 'equipsPart'], //主界面和切换装备页左侧栏，使用主界面字典和装备字典
         '#compare_pane' : ['equipsInfo'], //切换装备页面的装备对比悬浮窗，使用装备信息字典。
-        '#equipcompare' : ['character'],
+        '#equipcompare' : ['character'], //切换装备页面的装备对比悬浮窗，使用装备信息字典。
         '#eqch_stats' : ['characterStatus'], //主界面右侧状态栏
         '#ability_outer' : ['ability'], //技能页面，使用技能名称字典
-        '#ability_info' : ['skills', 'abilityInfo', 'ability', 'items'], //技能悬浮窗，需监听动态翻译
+        '#ability_info' : [true, 'skills', 'abilityInfo', 'ability', 'items'], //技能悬浮窗，需监听动态翻译
         '#train_outer' : ['trains'], //训练
-        '#popup_box' : ['itemInfos', 'items', 'artifact', 'equipsInfo', 'equipsName'], //物品和装备悬浮窗，需要监听动态翻译
+        '#popup_box' : [true, 'itemInfos', 'items', 'artifact', 'equipsName', 'equipsInfo'], //物品和装备悬浮窗，需要监听动态翻译
         '#filterbar' : ['filters'], //装备、物品列表的类型筛选栏
         '#armory_left' : ['filters'], //装备页的左侧筛选栏
         '#item_outer' : ['items', 'artifact'], //物品仓库
         '#eqinv_outer' : ['equipsName'], //装备仓库
         '#equiplist' : ['armory', 'equipsName'], //装备仓库
-        '#equipinfo' : ['armory', 'equipsName','equipsInfo'], //装备仓库右侧信息，需要监听动态翻译
-        '#eqstats' : ['equipsInfo'], //强化装备信息，需要监听动态翻译
-        '#equipcount' : ['armory'],//装备仓库已选择标签，需要动态翻译
-        '#equipaction' : ['armory'],
-        '#confirm_body' : ['armory', 'equipsName', "difficulty", "items", "equipsInfo"],
-        '#confirm_outer' : ['armory', 'equipsName'],
-        '#equipmodify_middle' : ['armory', 'items','equipsInfo'],
-        '#eqselcharm' : ['equipsInfo'],
-        '#equipmodify_left' : ['armory', 'items'],
-        '#charmslots' : ['equipsInfo'],
-        '#itemlist' : ['armory', 'items'],
-        '#eqselpouch' : ['armory', 'items'],
-        '#cpreadout' : ['armory'],
-        '#setcharm' : ['armory'],
-        '#cdreason' : ['armory', 'items'],
+        '#equipinfo' : [true, 'armory', 'equipsName','equipsInfo'], //装备仓库右侧信息，需要监听动态翻译
+        '#eqstats' : [true, 'equipsInfo'], //强化装备信息，需要监听动态翻译
+        '#equipcount' : [true, 'armory'],//装备仓库已选择标签，需要动态翻译
+        '#equipaction' : ['armory'], //装备库的操作按钮区域
+        '#itemlist' : [true, 'armory', 'items'], //装备维修、拆解时提示材料信息，动态
+        '#confirm_outer' : ['armory'], //弹框标题，静态
+        '#confirm_body' : [true, 'armory', 'equipsName', "difficulty", "items", "equipsInfo"], //装备库/IW页面确认操作弹框，动态
+        '#equipmodify_outer' : ['armory', 'items','equipsInfo'], //改装页面
+        '#cpreadout' : [true, 'armory'], //护符点数动态文本
+        '#setcharm' : [true, 'armory'], //附加护符按钮，动态
+        '#cdreason' : [true, 'armory', 'items'],//附加护符时的护符袋和材料提示，动态
         '#itshop_outer' : ['items', 'artifact'], //物品商店
         '#eqshop_outer' : ['equipsName'], //装备商店
         '#itembot_outer' : ['itemBot', 'items', 'artifact'], //采购机器人
-        '#bocreate' : ['itemBot'], //采购机器人
+        '#bocreate' : [true, 'itemBot'], //采购机器人
         '#market_right' : ['items', 'artifact'], //市场列表
         '#market_outer' : ['market'], //交易市场其它内容
         '#settings_outer' : ['settings', 'skills', 'difficulty', 'equipsName'], //设置页面
         '#monstercreate_right' : ['monsterCreate'], //创建怪物信息，由于此面板被怪物实验室包含，实际也使用到了下一行的字典
         '#monster_outer' : ['monsterLabs'], //怪物实验室
-        '#upgrade_text' : ['monsterLabs', 'items'], //怪物实验室的升级强化需求提示，需要监听动态翻译
+        '#upgrade_text' : [true, 'monsterLabs', 'items'], //怪物实验室的升级强化需求提示，需要监听动态翻译
         '#shrine_left' : ['artifact'], //祭坛左侧物品列表
         '#shrine_right' : ['shrine'], //祭坛右侧说明
         '#accept_equip' : ['equipsPart'], //装备献祭选项
-        '#shrine_offertext' : ['artifact', 'shrine'], //祭坛献祭物品动态说明，需要动态监听
+        '#shrine_offertext' : [true, 'artifact', 'shrine'], //祭坛献祭物品动态说明，需要动态监听
         '#mmail_outer' : ['mm'], //邮件
         '#mmail_attachlist' : ['items', 'artifact', 'equipsName'], //邮件附件列表
         '#mmail_attachitem' : ['items', 'artifact'], //写邮件附带物品列表
@@ -83,7 +79,7 @@
         'div:not([id])>#rightpane' : ['prizes'], //也很乱的右侧栏，此处为彩票右侧栏
         '#forge_outer>#leftpane' : ['equipsName','equipsSuffix'], //此处为强化左侧栏装备列表
         '#forge_outer>#rightpane' : ['upgrades', 'items', 'equipsInfo'], //装备强化的右侧栏，包含强化、物品、装备信息
-        '#forge_cost_div' : ['upgrades', 'items'], //装备修复、拆解、魂绑、重铸右侧的动态提示文本，需要监听动态翻译
+        '#forge_cost_div' : [true, 'upgrades', 'items'], //装备修复、拆解、魂绑、重铸右侧的动态提示文本，需要监听动态翻译
         '#equip_extended' : ['equipsInfo'], //强化、装备独立信息页的装备信息
         '.showequip' : ['equipsInfo','equipsName', 'equipsSuffix'], //装备独立信息页的装备信息
         '#equipcompare' : ['equipsInfo','equipsName', 'equipsSuffix'], //装备对比
@@ -97,44 +93,20 @@
         '#riddlemaster' : ['riddlemaster'], //小马引导图
 
         //战斗页面的翻译元素，即使已经写了字典脚本默认也不会翻译战斗页面，需要双击战斗下方经验条开启
-        '#infopane' : ['battling', 'skills'], //战斗提示信息面板
+        '#infopane' : [true, 'battling', 'skills'], //战斗提示信息面板
         //以下几个面板翻译会和Monsterbation冲突，且切换翻译需要刷新页面才会生效
-        //'#table_skills' : ['skills'], //战斗技能面板
-        //'#table_magic' : ['skills'], //战斗法术面板
-        //'#pane_item' : ['battling'], //战斗物品面板
+        //'#table_skills' : [true, 'skills'], //战斗技能面板
+        //'#table_magic' : [true, 'skills'], //战斗法术面板
+        //'#pane_item' : [true, 'battling'], //战斗物品面板
     };
-
-    //需要监听动态翻译的元素列表，除非有新的动态元素否则不需要更改
-    //只要上面字典分区里没有的就算在下面动态元素列表里有的也不会被翻译
-    var dynamicElem = [
-        '#popup_box', //装备、物品信息悬浮窗
-        '#bocreate', //物品机器人订单按钮
-        '#ability_info', //技能说明悬浮窗
-        '#upgrade_text', //怪物实验室强化动态文字
-        '#forge_cost_div', //装备修复、拆解、魂绑、重铸右侧的动态提示文本
-        '#shrine_offertext', //祭坛献祭动态说明文字
-
-        '#equipinfo',
-        '#eqstats',
-        '#equipcount',
-        '#itemlist',
-        '#equipcount',
-        '#confirm_body',
-        '#cpreadout',
-        '#cdreason',
-        '#setcharm',
-
-        '#infopane', //战斗提示信息面板
-        '#table_skills', //战斗技能列表
-        '#table_magic', //战斗法术列表
-        '#pane_item', //战斗物品面板
-    ];
 
 
 
 
 //翻译字典，内部分割为多个部分，每部分名称对应上述所指字典名称，翻译内容必须写入正确的部分才会生效
-//除非上面字典分区中被指派到同一个翻译部分，否则各个部分之间互相独立，必要时有些翻译词条也会重复出现在多个部分中（这样比同时使用多个部分字典更有效率）
+//除非上面字典分区中被指派到同一个翻译部分，否则各个部分之间互相独立
+//必要时有些翻译词条也会重复出现在多个部分中（这样比同时使用多个部分字典更有效率）
+//但尽可能还是将相同内容放在一个分区里，这样更便于集中管理
 var words = {
     /*
     NOTE:
@@ -256,10 +228,10 @@ var words = {
         'Items cannot be sold while in use.' : '无法出售正在穿戴装备',
         'Your equipment inventory is full' : '你的装备库存已经满了！',
         'You do not have enough credits for that.' : '你没有足够的 Credits 来执行操作！',
-        '/Bought (.+) for (.+ Credits)/' : '以 $2 购买了 $1',
-        '/Bought (\\d+) equipment for (.+ Credits)/' : '以 $2 购买了 $1 件装备',
-        '/sold (.+) for (.+ Credits)/' : '以 $2 出售了 $1',
-        '/Sold (\\d+) equipment for (\\d+ Credits)/' : '以 $2 出售了 $1 件装备',
+        '/Bought (.+) for ([\\d,]+ Credits)/' : '以 $2 购买了 $1',
+        '/Bought (\\d+) equipment for ([\\d,]+ Credits)/' : '以 $2 购买了 $1 件装备',
+        '/sold (.+) for ([\\d,]+ Credits)/' : '以 $2 出售了 $1',
+        '/Sold (\\d+) equipment for ([\\d,]+ Credits)/' : '以 $2 出售了 $1 件装备',
         'Cannot remove from storage; would exceed inventory limit.' : '无法从存储中移出，因为会超出你的背包容量',
 
         'Item does not exist or cannot be traded' : '物品不存在或者不可交易',
@@ -321,6 +293,7 @@ var words = {
         'Invalid or missing recipient, kupo!' : '收件人不存在，咕波！',
         'You cannot read that, kupo!' : '你无法阅读该邮件，咕波！',
         'Messaging yourself must be the ultimate form of social withdrawal, kupo! Seek help, kupo!' : '给自己发邮件是社交退缩的终极形式，咕波！去找些别的乐子吧，咕波！',
+        'Equipment is either in use, locked, stored, or cannot be traded, kupo!' : '装备要么正在使用，要么被锁定/被存储，或者不可交易！咕波！',
         'Mail cannot be returned, kupo!' : '此邮件已无法退回，咕波！',
         'Message has no attachment, kupo!' : '此邮件没有附件，咕波！',
         'Received Paid CoD' : '收到CoD收货支付款',
@@ -1156,7 +1129,7 @@ var words = {
         '/^Heavy$/' : '重甲',
 
         //操作
-        'Modify' : '修改',
+        'Modify' : '改装',
         'Repair' : '维修',
         'Organize' : '整理',
         'Soulbind' : '绑定',
@@ -1314,6 +1287,8 @@ var words = {
         "Mithril Charm Pouch": "秘银护符袋",
         "Lesser Featherweight Charm": "次级轻羽护符",
         "Greater Featherweight Charm": "强效轻羽护符",
+        "Lesser Hollowforged Charm": "次级虚空升华护符",
+        "Greater Hollowforged Charm": "强效虚空升华护符",
         "Lesser Fire Strike Charm": "次级火焰打击护符",
         "Greater Fire Strike Charm": "强效火焰打击护符",
         "Lesser Cold Strike Charm": "次级寒冰打击护符",
@@ -1326,26 +1301,26 @@ var words = {
         "Greater Holy Strike Charm": "强效神圣打击护符",
         "Lesser Dark Strike Charm": "次级黑暗打击护符",
         "Greater Dark Strike Charm": "强效黑暗打击护符",
-        "Lesser Butcher Charm": "次级屠夫护符",
-        "Greater Butcher Charm": "强效屠夫护符",
+        "Lesser Butcher Charm": "次级物理伤害加成护符",
+        "Greater Butcher Charm": "强效物理伤害加成护符",
         "Lesser Swiftness Charm": "次级迅捷护符",
         "Greater Swiftness Charm": "强效迅捷护符",
-        "Lesser Fatality Charm": "次级致命护符",
-        "Greater Fatality Charm": "强效致命护符",
-        "Lesser Overpower Charm": "次级压制护符",
-        "Greater Overpower Charm": "强效压制护符",
+        "Lesser Fatality Charm": "次级物理暴击护符",
+        "Greater Fatality Charm": "强效物理暴击护符",
+        "Lesser Overpower Charm": "次级反招架护符",
+        "Greater Overpower Charm": "强效反招架护符",
         "Lesser Voidseeker Charm": "次级虚空护符",
         "Greater Voidseeker Charm": "强效虚空护符",
-        "Lesser Archmage Charm": "次级大法师护符",
-        "Greater Archmage Charm": "强效大法师护符",
+        "Lesser Archmage Charm": "次级魔法伤害加成护符",
+        "Greater Archmage Charm": "强效魔法伤害加成护符",
         "Lesser Economizer Charm": "次级节能护符",
         "Greater Economizer Charm": "强效节能护符",
-        "Lesser Spellweaver Charm": "次级织法者护符",
-        "Greater Spellweaver Charm": "强效织法者护符",
-        "Lesser Annihilator Charm": "次级湮灭护符",
-        "Greater Annihilator Charm": "强效湮灭护符",
-        "Lesser Penetrator Charm": "次级穿透护符",
-        "Greater Penetrator Charm": "强效穿透护符",
+        "Lesser Spellweaver Charm": "次级高速咏唱护符",
+        "Greater Spellweaver Charm": "强效高速咏唱护符",
+        "Lesser Annihilator Charm": "次级魔法暴击护符",
+        "Greater Annihilator Charm": "强效魔法暴击护符",
+        "Lesser Penetrator Charm": "次级反魔法抵抗护符",
+        "Greater Penetrator Charm": "强效反魔法抵抗护符",
         "Lesser Aether Charm": "次级以太护符",
         "Greater Aether Charm": "强效以太护符",
         "Lesser Fire-proof Charm": "次级火焰抗性护符",
@@ -1693,6 +1668,7 @@ var words = {
         'Featherweight Charm enchantment' : '轻如鸿毛 的附魔效果',
         'Used to power Featherweight Charms.' : '用于充能轻羽护符',
         'Voidseeker\'s Blessing enchantment' : '虚空探索者的祝福 的附魔效果',
+        'Used to power Voidseeker Charms.' : '用于充能虚空护符',
         'Can be used to reset the unlocked potencies and experience of an equipment piece.' : '可以用于重置装备的潜能等级',
         'Can be used to create a new world inside an equipment piece. Clearing this world will allow you to upgrade it further.': '用于探索装备内藏得潜能世界。清通道具界将允许你进一步强化装备',
 
@@ -1701,7 +1677,8 @@ var words = {
         'Used to imbue an armor or shield with a charm.': '用来提升盾牌或者护甲性能的护符',
         'A protective pouch that will prevent a charm from tearing when you are defeated in battle.': '防止你战斗中被击败时护符受损的护符袋。',
         'Fragile; will always be destroyed if it takes damage.': '脆弱等级，此护符袋可代替护符承受一次伤害，遭受一次伤害后损毁。',
-        //缺中级和高级护符袋说明明
+        'Low chance of being destroyed if it takes damage.' : '中级，遭受伤害时低概率被损坏。',
+        //缺高级护符袋说明明
 
         'These fragments can be used in the forge to permanently soulbind an equipment piece to you, which will make it level as you do.' : '这个碎片可以将一件装备与你灵魂绑定，灵魂绑定的装备会随着你的等级一同成长。',
         'These fragments can be used in the forge to permanently soulfuse an equipment piece to you, which will make it level as you do.' : '这个碎片可以将一件装备与你灵魂绑定，灵魂绑定的装备会随着你的等级一同成长。',
@@ -1945,20 +1922,20 @@ var words = {
         'Shortsword' : '短剑',
         'Wakizashi' : '脇差',
         'Sword Chucks' : '*锁链双剑',
-        'Swordchucks' : '*锁链双剑',
-        'Dagger' : '*匕首',
+        'Dagger' : '匕首',
         //双手武器
         'Great Mace' : '重锤',
+        'Swordchucks' : '锁链双剑',
         'Mace' : '重锤',
         'Estoc' : '刺剑',
         'Longsword' : '长剑',
         'Katana' : '日本刀',
-        'Scythe' : '*镰刀',
+        'Scythe' : '镰刀',
         //盾类型
         'Buckler' : '小圆盾',
         'Kite Shield' : '鸢盾',
         'Force Shield' : '力场盾',
-        'Tower Shield' : '*塔盾',
+        'Tower Shield' : '塔盾',
         //护甲类型
         'Cotton' : '棉制',
         'Phase' : '相位',
@@ -1968,14 +1945,14 @@ var words = {
         'Power ': '动力 ',
         //旧版护甲类型
         'Silk' : '*丝绸',
-        'Ironsilk' : '*铁绸',
-        'Gossamer' : '*薄纱',
+        'Ironsilk' : '铁绸',
+        'Gossamer' : '薄纱',
         'Dragon Hide' : '*龙皮',
-        'Drakehide' : '*龙皮',
-        'Kevlar' : '*凯夫拉',
+        'Drakehide' : '龙皮',
+        'Kevlar' : '凯夫拉',
         'Chainmail' : '*锁子甲',
-        'Chain' : '*锁子甲',
-        'Reactive' : '*反应装甲',
+        'Chain' : '锁子甲',
+        'Reactive' : '反应装甲',
         //锁子甲特有部位
         'Coif' : '头巾',
         'Mitons' : '护手',
@@ -2200,7 +2177,7 @@ var words = {
         'Tier': '强化等级',
 
         'Salvaged - Repair Required': '已分解 - 必须修理后才可使用',
-        '/Dropped by ([\\w\\s]+) for/': '由怪物 $1 掉落于玩家 ',
+        '/Dropped by (.+) for $/': '由怪物 $1 掉落于玩家 ',
         'Rewarded from Snowflake\'s Shrine to': '由雪花女神于祭坛赠与玩家 ',
         'Rewarded as a Clear Bonus to': '由通关奖励给',
         ' on ' : ' ',
@@ -2367,12 +2344,21 @@ var words = {
         "Upgrading equipment will increase the number of Charm Points available, and adds bonues relative to its base stats. The maximum number of upgrades for an equipment is capped by the number of cleared Item Worlds.": "升级装备会增加可用的护符点数，并根据基础属性提供加成。装备的最大升级次数受已通关的物品世界数量限制。",
         "Attaching Charms to your equipment can improve or add new stats, or add special effects and various other boons. Charms and Charm Pouches can be obtained by offering trophies in The Shrine, or purchased from other players in The Market.": "为装备附加护符可以提升或新增属性，或赋予特殊效果及其他增益。护符和护符袋可通过在神殿献祭奖杯获取，或在集市向其他玩家购买。",
         "Stat Fusion lets you improve Legendary+ equipment by sacrificing another Legendary+ equipment together with various materials to increase its base stats. Materials can be obtained from salvaging equipment and the Monster Lab, or purchased from other players in The Market. (Persistent Only)": "属性融合允许您通过牺牲另一件传奇以上装备并消耗各种材料来提升传奇以上装备的基础属性。材料可通过分解装备、怪物实验室获取，或在集市向其他玩家购买。（仅限持久模式）",
+        "Stat Fusion lets you improve Legendary+ equipment by sacrificing another Legendary+ equipment together with various materials to increase its base stats. (Persistent Only)": "属性融合允许您通过牺牲另一件传奇以上装备并消耗各种材料来提升传奇以上装备的基础属性。（仅限持久模式）",
+        "Materials for upgrades and stat fusion can be obtained from salvaging unwanted equipment or raising monsters in the Monster Lab, or purchased from other players in The Market.": "升级和属性融合的材料可通过分解装备、怪物实验室获取，或在集市向其他玩家购买。",
         "Select an equipment first to show the available options.": "请先选择一件装备以显示可用选项。",
-        "Modify Equipment": "更改装备",
+        "Modify Equipment": "改装装备",
         "Upgrade Equipment": "升级装备",
         "Insufficient materials": "材料不足",
         "Challenge Item World": "挑战道具界",
+        "Unavailable on Isekai": "异世界不可用",
+        "Stat Fusion is not available on Isekai.": "属性融合在异世界不可用",
+        "Stat Fuse Equipment": "开始融合装备",
         "All Stats Maxed": "所有属性已满",
+        //装备属性点数与装备信息不同的部分补充
+        "Affinity": "法术伤害",
+        " Prof": " 熟练度",
+
         "Rename Equipment": "重命名装备",
         "Enter a new customized name for your": "输入一个新的自定义名字",
         "Enter a blank name to revert to the default name. Customized names are always removed if the equipment is sold or attached to a MoogleMail.": "保持空名字确认已恢复原名。自定义名称在出售或者添加到邮件附件时自动清除。",
@@ -2395,6 +2381,7 @@ var words = {
         "Charm Slot": "护符槽",
         "(empty)": "(空)",
         "Charm Points": "护符点数",
+        " CP": " 点数",
         "No Charm": "没有护符",
         "This charm is already attached in ": "此护符已经装配在了",
         "(Lesser)": "(次级)",
@@ -2444,14 +2431,16 @@ var words = {
         "If you sell soulbound, salvaged or untradeable equipment, they cannot be bought by anyone else; you can however still buy them back yourself for a limited time, at an exorbitant markup.": "若您出售已绑定灵魂、已分解或不可交易的装备，其他玩家无法购买；但您仍可在有限时间内自行回购，价格会被大幅抬高。",
         "Salvaging equipment you no longer need will allow you to extract useful materials that can be used for upgrading or repairing other equipment.": "分解不再需要的装备可提取有用材料，这些材料可用于升级或维修其他装备。",
         "After salvaging, in addition to the extracted materials, the equipment itself will turn into Salvage Remains. You can either keep these, or sell them for a small amount of credits. Salvage Remains are only listed under the Salvaged tabs; they cannot be equipped or modified unless they are repaired, which will restore them to their original condition.": "分解后，除提取的材料外，装备本身会变成分解残余报废装备。您可以选择保留在仓库中或以少量积分出售。分解残余报废装备仅在“已分解”标签下列出；除非进行修复，否则无法装备或改造，修复后将恢复原始状态。",
-        "Repairing salvage remains will require all the materials you obtained from salvaging them, in addition to the normal repair materials for repairing from zero Condition and Energy.": "修复分解残余时，需要使用您在分解时获得的全部材料，外加用于从零耐久度和能量修复的常规维修材料。",
+        "Repairing salvage remains will require all the materials you obtained from salvaging them, in addition to the normal repair materials for repairing from zero Condition and Energy.": "修复分解残余报废装备时，需要使用您在分解时获得的全部材料，外加用于从零耐久度和能量修复的常规维修材料。",
         "Note that it is no longer possible to extract materials that was spent upgrading equipment.": "请注意，已用于升级装备的材料已无法再提取。",
         "Required Items:": "所需物品：",
         "Total Salvage:": "分解得到：",
         "Sell Salvage Remains": "出售分解残余报废装备",
+        "Sell Salvaged Equipment": "出售分解残余报废装备",
         "Salvage Equipment": "分解装备",
         "Soulbound and non-tradeable equipment can be bought back for a limited time. Other equipment can also be bought by other players.": "灵魂绑定和不可交易装备可以在有限时间内购回，其它装备也可以被其它玩家购买。",
         "If you sell the salvage remains, they can be bought back for a limited time. Salvage remains must be repaired to restore them to usable condition, requiring more materials than you get from salvaging.": "如果你出售拆解残余报废装备，它们可以在有限时间内购回，否则它们将继续待在你的仓库里。拆解残余报废装备必须经过维修才能恢复它们可以用的状态，所需的材料比你拆解所得更多。",
+        "Salvaging an upgraded equipment will return 90% of the base materials spent upgrading it. It will not return cores or credits, nor any materials used for Stat Fusion.": "拆解升级过的装备将返还90%升级材料，但是用核心、Credits、属性融合材料不会返还。",
         "Check both safety boxes to continue.": "勾选两个安全确认框已继续",
 
         'Equipment must be soulbound before you can enter its Item World.' : '装备必须先灵魂绑定才能进入道具界。',
@@ -2480,11 +2469,16 @@ var words = {
         "by spending the following materials": "消耗以下材料",
         "Are you sure you want to salvage the": "是否确认购买",
         "spend the requisite materials and credits to upgrade this equipment? Credits and Cores cannot be refunded": "消耗以下材料和Credits升级这件装备？Credits和核心拆解时不会返还",
+        "You have selected a SOULBOUND equipment.": "你选择了一件【灵魂绑定】装备！",
+        "/You have selected (\\d+) SOULBOUND equipment/": "你选择了$1件【灵魂绑定】装备！",
+        "The existing intact charm will be ": "该槽位已附加护符将被",
+        "DESTROYED": "摧毁",
         "selected equipment?": "已选装备",
         "Confirm Purchase": "确认购买",
         "Confirm Sell": "确认出售",
         "Confirm Salvage": "确认拆解",
         "Confirm Attach": "确认附加",
+        "Confirm Replace": "确认替换",
         "Confirm Upgrade": "确认升级",
         "Start Battle": "开始战斗",
     },
@@ -3242,6 +3236,7 @@ var words = {
         '/Requires (\\d+) Charges? to use/' : '需要 $1 格斗气',
         '/Requires (\\d+) Magic Points and (\\d+) Charges? to use/' : '需要 $1 点 MP 和 $2 格斗气',
         '/Cooldown: (\\d+) turns?/' : '冷却时间: $1 回合',
+        '/Decays by (\\d+)% per turn/' : '每回合衰减 $1%',
 
     /////////////////////////////////////////////////////技能、技巧名称
         // 使用skills字典
@@ -3279,6 +3274,7 @@ var words = {
         'Places a shield effect on the target, absorbing' : '对目标施加护盾效果，吸收所有攻击',
         'of the damage from all attacks.' : '的伤害值。',
         'Places a heal over time effect on the target.' : '在目标身上施加持续性治疗效果。',
+        'A veil of shadows surround the target, causing monsters to occasionally whiff, and boosting Evade by 10%.' : '一层幻影面纱包围目标，怪物攻击更容易错失，同时提高10%回避率',
         'Surrounds the target with a veil of shadows, making it harder to hit with attacks and spells.' : '一层幻影面纱包围目标，使他不容易被攻击和咒语击中。',
         'Any attack that would one-shot a target with more than 1 HP leaves it alive but on the brink of defeat. The buff is removed when triggered.' : '当目标受到任何致命攻击时会以1HP保住性命。辅助效果在触发之后就会消失 (并且消耗玩家的基础灵力值 50%)。',
         'Powerful attacks against you will be partially absorbed and damage your spirit gauge instead of health.' : '当你遭受到强力攻击时会吸收部分伤害转嫁到灵力值量表，而不是生命值量表。',
@@ -3406,6 +3402,7 @@ var words = {
         'A powerful blow has temporarily stunned this target.' : '巨大的冲击使目标陷入眩晕，它将无法继续行动。',
         'The armor of this target has been breached, reducing its physical defenses.' : '目标的护甲被击穿，它的物理防御力下降了',
         'A gashing wound is making this target take damage over time.' : '血流如注的伤口给予此目标持续伤害。',
+        'Gashing wounds are making this target take damage over time.' : '血流如注的伤口给予此目标持续伤害。',
 
         //特殊
         '/^Channeling$/' : '引导',
@@ -3490,6 +3487,7 @@ var words = {
         'The target has been slowed by' : '此目标已延迟',
         'The target has been hit with a magic net, eliminating its chance to evade or resist attacks.' : '目标已被能量网诱捕，削减它的回避和咒语抵抗。',
         'The target has been imperiled, reducing physical and magical mitigation as well as elemental mitigations.' : '目标已被劣化，削减它的物理和魔法缓伤，同样也削减四元素缓伤。',
+        'The target has been imperiled, reducing physical and magical mitigation as well as elemental mitigation.' : '目标已被劣化，削减它的物理和魔法缓伤，同样也削减四元素缓伤。',
         'The target has been silenced, preventing it from using special attacks and magic.' : '目标已被封口，防止它使用特殊攻击。',
         'The target has been lulled to sleep, preventing it from taking any actions.' : '目标已进入沉睡，防止它采取任何行动。',
         'The target has been blinded, reducing the chance of landing attacks and hitting with magic spells.' : '目标已盲眼，降低攻击与魔法咒语的命中率。',
@@ -3534,6 +3532,8 @@ var words = {
         'The destruction the present has increased the attack speed of her allies.' : '蓓儿丹娣被击倒，消灭了“现在”，强化了它的攻击速度。',
     },
 
+    // 防止动态分区构建词典报错，不要在里面写任何内容
+    true: {},
     ////////////////////////////////////////////////////////
     '' : {},
 };
@@ -3711,7 +3711,7 @@ var words = {
             const elem = document.body.querySelector(selector);
             if (!elem) continue;
 
-            const isDynamic = dynamicElem.includes(selector);
+            const isDynamic = value[0] === true;
             const dict = value.map(buildDict).flat();
 
             translateText(elem, dict, isDynamic); //翻译文本
