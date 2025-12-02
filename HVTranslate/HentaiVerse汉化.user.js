@@ -6,15 +6,12 @@
 // @updateURL      https://sleazyfork.org/scripts/404118/code/script.meta.js
 // @downloadURL    https://sleazyfork.org/scripts/404118/code/script.user.js
 // @description    基本完全汉化整个Hentaiverse文本，包括装备物品、界面说明和弹窗提示的汉化，带原文切换功能
-// @notice         本脚本已完全整合HV战斗汉化功能，与独立的HV战斗汉化脚本互斥，默认不开启，如需开启战斗汉化在战斗界面中双击信息面板的提示
-// @notice         完整功能需要在Hentaiverse主菜单 CHARACTER→SETTINGS 勾选自定义字体(Use Custom Font)并在下一行文本框中填上任意字体名称，拉到最下面点击Apply Changes
-// @notice         和HVToolBox1.0.7以前版本在物品仓库中冲突，使用请更新到新版HVToolBox并将汉化运行顺序放在HVToolBox之后
-// @notice         如与Live Percentile Ranges同时使用，需要将脚本运行顺序置于Live Percentile Ranges之后，查询不同品质范围需要切换到英文状态
-// @notice         如有其它脚本共同运行冲突也可尝试调整脚本运行顺序，但无法保证完全兼容
+// @notice         完整汉化需要设置自定义字体：Hentaiverse主菜单 CHARACTER→SETTINGS 勾选自定义字体(Use Custom Font)并在下一行填上任意字体名称，拉到最下面点击Apply Changes
+// @notice         战斗页面仅翻译信息提示框，且默认不开启，如需开启战斗汉化在战斗界面中双击信息面板的提示
+// @notice         如与其它脚本共同运行冲突可尝试调整脚本运行顺序将汉化脚本放到最后，但无法保证完全兼容
 // @include        *://hentaiverse.org/*
 // @include        *://alt.hentaiverse.org/*
-// @core           http://userscripts-mirror.org/scripts/show/41369
-// @version        2025.11.29
+// @version        2025.12.02
 // @grant none
 // ==/UserScript==
 (function () {
@@ -23,7 +20,7 @@
 
     //字典分区，决定网页中的哪一部分使用哪部分翻译字典
     //格式： 'css选择器': ['使用到的字典名称',..]；
-    //!字典名称第一个为true时该元素会动态监听翻译，且不储存原文切换翻译
+    //【!】字典名称第一个为true时该元素会动态监听翻译，不监听子树（意味着你必须精确找到变化的对象）
     //注意使用到的字典顺序，互相包含的分区或者一个分区使用多个字典前面的翻译可能会影响后面的结果
     var dictsMap = {
         // 除了本字典分区里指定的部分之外，正文字典里另有alerts(浏览器弹窗)特殊部分使用独立方法翻译且所有页面生效
@@ -3679,6 +3676,7 @@ var words = {
     const regexps = new Map(); //存储转换过的字典，key值和word字典对应分组名相同，value格式见下方buildDict;
 
     //转换字典，使用JoeSimmons的方法将字符串字典转换为带正则表达式的匹配数组
+    // http://userscripts-mirror.org/scripts/show/41369
     function buildDict(group) {
         if (regexps.has(group)) return regexps.get(group);
 
@@ -3705,7 +3703,7 @@ var words = {
     var pathExpre = new XPathEvaluator().createExpression('.//text()[ normalize-space(.) != "" ]', null);
     // 翻译文本，使用指定字典对指定元素下的所有文字进行翻译
     // elem: 待翻译的页面元素, dict: 使用的翻译字典, dynamic: 是否动态元素
-    // 动态元素将不会检查内容直接翻译，且不会保存切换原文，因为内容一旦变化就没有意义了
+    // 动态元素将不会检查内容直接翻译
     function translateText(elem, dict, dynamic) {
         if (!elem || !dict) return;
         var texts = pathExpre.evaluate(elem, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
@@ -3717,45 +3715,11 @@ var words = {
                     temp = temp.replace(item.reg, item.value);
                 }
                 if(temp!=text.data) {
-                    if (!dynamic && !translatedList.has(elem)) {
+                    if (!translatedList.has(elem)) {
                         translatedList.set(text, {data: text.data});
                     }
                     text.data = temp;
                 }
-            }
-        }
-    }
-
-    // 翻译整个正文文本
-    function translateAllText() {
-        //动态元素字典、监听器，用来翻译动态变化的内容
-        var dynamicDict = new Map();
-        var observer = new MutationObserver((mutations,observer) => {
-            //console.log(mutations);
-            if(!translated) return;
-            mutations.forEach(mutation => {
-                var elem = mutation.target;
-                if(elem.style.visibility!='hidden') {
-                    translateText(elem, dynamicDict.get(elem), true);
-                    translateButtons(elem, dynamicDict.get(elem), true);
-                    translateElemTitle(elem, dynamicDict.get(elem), true);
-                }
-            });
-        });
-        //遍历分组字典
-        for (const [selector, value] of Object.entries(dictsMap)) {
-            const elem = document.body.querySelector(selector);
-            if (!elem) continue;
-
-            const isDynamic = value[0] === true;
-            const dict = value.map(buildDict).flat();
-
-            translateText(elem, dict, isDynamic); //翻译文本
-            translateButtons(elem, dict, isDynamic); //翻译表单按钮
-            translateElemTitle(elem, dict, isDynamic); //翻译鼠标悬停文本
-            if (isDynamic) {
-                dynamicDict.set(elem, dict); //存储字典以备动态翻译使用
-                observer.observe(elem, {childList:true, attribute: true, attributeFilter: ['value', 'title']}); //监听翻译动态内容
             }
         }
     }
@@ -3796,8 +3760,8 @@ var words = {
         });
     }
 
-    //挟持浏览器弹窗方法并在弹窗之前先翻译文本
-    function hookAlertTranslate() {
+    //挟持浏览器弹窗方法并在弹窗之前先翻译文本，该方法独立运行
+    (function hookAlertTranslate() {
         var alertBk = window.alert, promptBk = window.prompt, confirmBk = window.confirm;
         var dict = buildDict('alerts');
         function translateAlert(txt) {
@@ -3812,23 +3776,65 @@ var words = {
         window.alert = function(txt) {alertBk(translateAlert(txt))}
         window.prompt = function(txt,value) {return promptBk(translateAlert(txt),value)}
         window.confirm = function(txt) {return confirmBk(translateAlert(txt))}
-    }
-    hookAlertTranslate();
+    })();
+
+	//动态元素字典、监听器，用来翻译动态变化的内容
+	var dynamicDict = new Map();
+	var observer = new MutationObserver((mutations,observer) => {
+		//console.log(mutations);
+		if(!translated) return;
+		mutations.forEach(mutation => {
+			var elem = mutation.target;
+			if(elem.style.visibility!='hidden') {
+				translateText(elem, dynamicDict.get(elem), true);
+				translateButtons(elem, dynamicDict.get(elem), true);
+				translateElemTitle(elem, dynamicDict.get(elem), true);
+			}
+            //由于动态翻译对象在变化后不再存在于页面中，为防止性能问题翻译后清理已翻译列表
+            //console.time('cleardict');
+            for (const k of translatedList.keys()) {
+                if (!document.contains(k)) {
+                    translatedList.delete(k);
+                }
+            }
+            //console.timeEnd('cleardict');
+        });
+	});
 
     function start() {
         //console.time('hvtranslate');
+        //DOMContentLoaded可能触发此函数多次调用，为避免重复监听，每次启动断开旧页面监听并清除旧动态翻译字典
+        observer.disconnect();
+        dynamicDict.clear();
         if (!window.inBattle || window.translateBattle || window.end_time) { // end_time → riddlemaster
-            translateAllText();
+            //遍历分组字典
+            for (const [selector, value] of Object.entries(dictsMap)) {
+                const elem = document.body.querySelector(selector);
+                if (!elem) continue;
+
+                const isDynamic = value[0] === true;
+                const dict = value.map(buildDict).flat();
+
+                translateText(elem, dict, isDynamic); //翻译文本
+                translateButtons(elem, dict, isDynamic); //翻译表单按钮
+                translateElemTitle(elem, dict, isDynamic); //翻译鼠标悬停文本
+                if (isDynamic) {
+                    dynamicDict.set(elem, dict); //存储字典以备动态翻译使用
+                    observer.observe(elem, {childList:true, attribute: true, attributeFilter: ['value', 'title']}); //监听翻译动态内容
+                }
+            }
             initRestoreButton();
         }
         //console.timeEnd('hvtranslate');
     }
 
+    //其它脚本派发DOMContentLoaded事件可触发start调用整页重新翻译，但不保证兼容性
+    document.addEventListener('DOMContentLoaded', start); // Hentaiverse Monsterbation ajax next round
+
     if (document.getElementById('textlog')) {
         if (document.querySelector('#expholder[title]')) return; //检测到已经有战斗汉化在运行则退出
         window.inBattle = true;
         if (!window.translateBattle) translated = false;
-        document.addEventListener('DOMContentLoaded', start); // Hentaiverse Monsterbation ajax next round
         // 双击信息面板提示切换战斗翻译开关
         document.addEventListener('dblclick', function(ev){
             if (ev.target && ev.target.id == 'infopane') {
