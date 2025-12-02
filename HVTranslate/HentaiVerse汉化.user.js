@@ -11,7 +11,7 @@
 // @notice         如与其它脚本共同运行冲突可尝试调整脚本运行顺序将汉化脚本放到最后，但无法保证完全兼容
 // @include        *://hentaiverse.org/*
 // @include        *://alt.hentaiverse.org/*
-// @version        2025.12.02
+// @version        2025.12.02.1
 // @grant none
 // ==/UserScript==
 (function () {
@@ -3781,24 +3781,24 @@ var words = {
 	//动态元素字典、监听器，用来翻译动态变化的内容
 	var dynamicDict = new Map();
 	var observer = new MutationObserver((mutations,observer) => {
-		//console.log(mutations);
-		if(!translated) return;
-		mutations.forEach(mutation => {
-			var elem = mutation.target;
-			if(elem.style.visibility!='hidden') {
-				translateText(elem, dynamicDict.get(elem), true);
-				translateButtons(elem, dynamicDict.get(elem), true);
-				translateElemTitle(elem, dynamicDict.get(elem), true);
-			}
-            //由于动态翻译对象在变化后不再存在于页面中，为防止性能问题翻译后清理已翻译列表
-            //console.time('cleardict');
-            for (const k of translatedList.keys()) {
-                if (!document.contains(k)) {
-                    translatedList.delete(k);
-                }
+        //console.log(mutations);
+        if(!translated) return;
+        mutations.forEach(mutation => {
+            var elem = mutation.target;
+            if(elem.style.visibility!='hidden') {
+                translateText(elem, dynamicDict.get(elem), true);
+                translateButtons(elem, dynamicDict.get(elem), true);
+                translateElemTitle(elem, dynamicDict.get(elem), true);
             }
-            //console.timeEnd('cleardict');
         });
+        //由于动态翻译对象在变化后不再存在于页面中，为防止性能问题翻译后清理已翻译列表
+        //console.time('cleardict');
+        for (const k of translatedList.keys()) {
+            if (!document.contains(k)) {
+                translatedList.delete(k);
+            }
+        }
+        //console.timeEnd('cleardict');
 	});
 
     function start() {
