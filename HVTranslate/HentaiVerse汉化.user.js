@@ -3715,7 +3715,7 @@ var words = {
                     temp = temp.replace(item.reg, item.value);
                 }
                 if(temp!=text.data) {
-                    if (!translatedList.has(elem)) {
+                    if (!translatedList.has(text)) {
                         translatedList.set(text, {data: text.data});
                     }
                     text.data = temp;
@@ -3741,7 +3741,7 @@ var words = {
             value = value.replace(item.reg, item.value);
         }
         if(value!=elem.value) {
-            if (!isDynamic) translatedList.set(elem, {value: elem.value});
+            if (!translatedList.has(elem)) translatedList.set(elem, {value: elem.value});
             elem.value = value;
         }
     }
@@ -3754,7 +3754,7 @@ var words = {
                 txt = txt.replace(item.reg, item.value);
             }
             if (txt!=elem.title) {
-                if (!isDynamic) translatedList.set(elem, {title: elem.title});
+                if (!translatedList.has(elem)) translatedList.set(elem, {title: elem.title});
                 elem.title = txt;
             }
         });
