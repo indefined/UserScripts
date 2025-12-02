@@ -22,7 +22,8 @@
     //if (document.getElementById('pane_log')) return;
 
     //字典分区，决定网页中的哪一部分使用哪部分翻译字典
-    //格式： 'css选择器': ['使用到的字典名称',..]；字典名称第一个为true时该元素会动态监听翻译，且不储存原文切换翻译
+    //格式： 'css选择器': ['使用到的字典名称',..]；
+    //!字典名称第一个为true时该元素会动态监听翻译，且不储存原文切换翻译
     //注意使用到的字典顺序，互相包含的分区或者一个分区使用多个字典前面的翻译可能会影响后面的结果
     var dictsMap = {
         // 除了本字典分区里指定的部分之外，正文字典里另有alerts(浏览器弹窗)特殊部分使用独立方法翻译且所有页面生效
@@ -50,7 +51,7 @@
         '#equipaction' : ['armory'], //装备库的操作按钮区域
         '#itemlist' : [true, 'armory', 'items'], //装备维修、拆解时提示材料信息，动态
         '#confirm_outer' : ['armory'], //弹框标题，静态
-        '#confirm_body' : [true, 'armory', 'equipsName', "difficulty", "items", "equipsInfo"], //装备库/IW页面确认操作弹框，动态
+        '#confirm_body' : [true, "items", 'armory', 'equipsName', "difficulty", "equipsInfo"], //装备库/IW页面确认操作弹框，动态
         '#equipmodify_outer' : ['armory', 'items','equipsInfo'], //改装页面
         '#cpreadout' : [true, 'armory'], //护符点数动态文本
         '#setcharm' : [true, 'armory'], //附加护符按钮，动态
@@ -1687,7 +1688,7 @@ var words = {
         'Used to imbue a weapon or staff with a charm.': '用来提升武器或者法杖性能的护符',
         'Used to imbue an armor or shield with a charm.': '用来提升盾牌或者护甲性能的护符',
         'A protective pouch that will prevent a charm from tearing when you are defeated in battle.': '防止你战斗中被击败时护符受损的护符袋。',
-        'Fragile; will always be destroyed if it takes damage.': '脆弱等级，此护符袋可代替护符承受一次伤害，遭受一次伤害后损毁。',
+        'Fragile; will always be destroyed if it takes damage.': '脆弱等级，遭受伤害后护符袋会损毁。',
         'Low chance of being destroyed if it takes damage.' : '中级，遭受伤害时低概率被损坏。',
         //缺高级护符袋说明明
 
@@ -2417,6 +2418,7 @@ var words = {
         "Mithril Pouch": "秘银护符袋",
         "Attach Charm": "附加护符",
         "Destroy Charm": "摧毁护符",
+        "Replace Pouch": "替换护符袋",
 
         "All equipment has a Condition value which degrades when you are defeated in battle, as well as at a fixed rate depending on the equipment Durability and the number of cleared rounds. Repairs require different Scrap Material corresponding to the equipment type; these can be salvaged from low-grade equipment, or bought from the Item Store or The Market.": "所有装备都有耐久值，在战斗失败时会损耗，并且会根据装备耐久度和已通关回合数以固定速率衰减。维修需要对应装备类型的废料材料，可从低级装备分解获得，或在道具商店、集市购买。",
         "Magitech equipment and equipment with attached charms will also have an Energy value. Energy is consumed at a fixed rate depending on the number of cleared rounds. Recharging energy requires Energy Cells; these can be salvaged from magitech equipment, or bought from the Item Store or The Market. Attached charms affect the required number of energy cells and can also require other upkeep materials.": "魔科技装备及附带护符的装备还拥有能量值。能量会根据已通关回合数以固定速率消耗。为能量充能需要能量电池，可从魔科技装备分解获得，或在道具商店、集市购买。附加的护符会影响所需电池数量，并可能需要其他维护材料。",
@@ -2497,7 +2499,10 @@ var words = {
         "SALVAGE": "拆解",
         " ❌ the ": " ❌ ",
         "enter this Item World?" : "进入道具界？",
+        "Entry Cost:": "进入消耗",
+        "World Seeds": "世界种子",
         "attach a new charm in" : "附加护符到",
+        "replace the intact pouch in": "替换护符袋到",
         "Slot ": "槽位 ",
         " with a ": " 附带 ",
         "by spending the following materials": "消耗以下材料",
