@@ -6,12 +6,12 @@
 // @updateURL      https://sleazyfork.org/scripts/404118/code/script.meta.js
 // @downloadURL    https://sleazyfork.org/scripts/404118/code/script.user.js
 // @description    基本完全汉化整个Hentaiverse文本，包括装备物品、界面说明和弹窗提示的汉化，带原文切换功能
-// @notice         完整汉化需要设置自定义字体：Hentaiverse主菜单 CHARACTER→SETTINGS 勾选自定义字体(Use Custom Font)并在下一行填上任意字体名称，拉到最下面点击Apply Changes
+// @notice         完整汉化需要设置自定义字体：Hentaiverse主菜单 角色→设置 勾选自定义字体(Use Custom Font)并在下一行填上任意字体名称，拉到最下面点击应用更改
 // @notice         战斗页面仅翻译信息提示框，且默认不开启，如需开启战斗汉化在战斗界面中双击信息面板的提示
 // @notice         如与其它脚本共同运行冲突可尝试调整脚本运行顺序将汉化脚本放到最后，但无法保证完全兼容
 // @include        *://hentaiverse.org/*
 // @include        *://alt.hentaiverse.org/*
-// @version        2025.12.02.1
+// @version        2026.06.08
 // @grant none
 // ==/UserScript==
 (function () {
@@ -46,12 +46,13 @@
         '#eqstats' : [true, 'equipsInfo'], //强化装备信息，需要监听动态翻译
         '#equipcount' : [true, 'armory'],//装备仓库已选择标签，需要动态翻译
         '#equipaction' : ['armory'], //装备库的操作按钮区域
-        '#itemlist' : [true, 'armory', 'items'], //装备维修、拆解时提示材料信息，动态
+        '#itemlist' : [true, 'armory', 'items', 'equipsName'], //装备维修、拆解时提示材料信息，动态
         '#confirm_outer' : ['armory'], //弹框标题，静态
-        '#confirm_body' : [true, "items", 'armory', 'equipsName', "difficulty", "equipsInfo"], //装备库/IW页面确认操作弹框，动态
+        '#confirm_body' : [true, 'armory', "items", 'equipsName', "difficulty", "equipsInfo"], //装备库/IW页面确认操作弹框，动态
         '#equipmodify_outer' : ['armory', 'items','equipsInfo'], //改装页面
         '#cpreadout' : [true, 'armory'], //护符点数动态文本
         '#setcharm' : [true, 'armory'], //附加护符按钮，动态
+        '#eqback' : ['armory'], //返回
         '#cdreason' : [true, 'armory', 'items'],//附加护符时的护符袋和材料提示，动态
         '#itshop_outer' : ['items', 'artifact'], //物品商店
         '#eqshop_outer' : ['equipsName'], //装备商店
@@ -237,6 +238,8 @@ var words = {
         '/Sold (\\d+) equipment for ([\\d,]+ Credits)/' : '以 $2 出售了 $1 件装备',
         'No equipment was selected' : '没有选中装备',
         'Cannot remove from storage; would exceed inventory limit.' : '无法从存储中移出，因为会超出你的背包容量',
+        "You do not have enough materials for this repair.": "你没有足够的材料维修装备",
+        "Could not reserve the selected items; usually this means they are no longer available.": "占有所选装备失败，一般这意味着它已经不存在了。",
 
         'Item does not exist or cannot be traded' : '物品不存在或者不可交易',
         'Insufficent credits in market account' : '市场账户余额不足',
@@ -313,7 +316,7 @@ var words = {
         'Your agility' : '你的敏捷',
         'Your endurance' : '你的体质',
         'Your intelligence' : '你的智力',
-        'Your wisdom' : '你的智慧',
+        'Your wisdom' : '你的感知',
         'has increased by one' : '提升了1点',
         'Follower peerless granted!' : '获得雪花信徒的无双奖励！',
         'Snowflake has blessed you with an item!' : '雪花女神祝福了你！',
@@ -363,7 +366,9 @@ var words = {
         'Returned' : '返还强化材料',
         'Item not found' : '物品不存在',
         'Sold the salvage remains for': '出售拆解残余报废装备获得',
-
+        'Your equipment has been fused!' : '你的装备已被融合！',
+        'was increased by ' : '增加了',
+        'You do not have enough resources for this upgrade.' : '你没有足够的资源完成此升级',
     },
 
     ///////////////////////////////////////////////////////
@@ -448,6 +453,7 @@ var words = {
         'Check equipment' : '检查装备！',
         'Repair armor' : '护甲需要修理！',
         'Repair weapon' : '武器需要修理！',
+        'Repair equipment': '装备需要修理！',
         'Armor Damage' : '护甲损坏！',
         'Weapon Damage' : '武器损坏！',
         //'Next:' : '距离升级还差', //与HVUtils获取等级经验冲突
@@ -455,9 +461,9 @@ var words = {
         '/^Isekai$/' : '异世界',
         'Currently playing on Isekai' : '你当前在异世界模式下',
         'Season' : '赛季',
-        'Click to switch to Persistent' : '点击切换到传统恒定世界模式',
-        '/^Persistent$/' : '恒定世界',
-        'Currently playing on Persistent' : '你当前在传统恒定世界模式下',
+        'Click to switch to Persistent' : '点击切换到传统持久世界模式',
+        '/^Persistent$/' : '持久世界',
+        'Currently playing on Persistent' : '你当前在传统持久世界模式下',
         'Click to switch to Isekai' : '点击切换到异世界模式',
 
         'You have increased stamina drain due to low riddle accuracy' : '因为你的小马图回答正确率太低，你的精力消耗速率被提高了',
@@ -489,7 +495,7 @@ var words = {
         'Agility' : '敏捷',
         'Endurance' : '体质',
         'Intelligence' : '智力',
-        'Wisdom' : '智慧',
+        'Wisdom' : '感知',
         'Isekai bonus' : '异世界奖励',
         'Equipment proficiency' : '武器/装备熟练度',
         '/^One-handed$/' : '单手',
@@ -636,13 +642,13 @@ var words = {
         'agility' : '敏捷',
         'endurance' : '体质',
         'intelligence' : '智力',
-        'wisdom' : '智慧',
+        'wisdom' : '感知',
         'Strength' : '力量',
         'Dexterity' : '灵巧',
         'Agility' : '敏捷',
         'Endurance' : '体质',
         'Intelligence' : '智力',
-        'Wisdom' : '智慧',
+        'Wisdom' : '感知',
 
         'Effective Proficiency' : '有效熟练度',
         'one-handed' : '单手',
@@ -863,10 +869,12 @@ var words = {
         'Increases your spell damage' : '增加你的魔法伤害，',
         'Increases your critical chance' : '增加你的物理暴击几率，',
         'Increases your critical damage' : '增加你的物理暴击伤害，',
+        'Increases your accuracy and damage' : '增加你的物理命中率和伤害，',
         'Increases your accuracy' : '增加你的物理命中率，',
         'Increases your spell accuracy' : '增加你的魔法命中率，',
         'Increases your attack and magic accuracy' : '增加你的物理和魔法命中，',
         'Increases your block' : '增加你的格挡率，',
+        'Increases your parry and block' : '增加你的招架和格挡，',
         'Increases your attack accuracy' : '增加你的物理命中率，',
         'Increases your spell critical chance' : '增加你的魔法暴击几率，',
         'Increases your spell critical damage' : '增加你的魔法暴击伤害，',
@@ -878,6 +886,7 @@ var words = {
         'Increases your piercing mitigation' : '增加你的刺击减伤，',
         'Increases your slashing mitigation' : '增加你的斩击减伤，',
         ' when using only ' : '当你使用成套 ',
+        ' when using mostly ' : '当你的护甲超过一半是 ',
         ' when using the ' : '当你使用 ',
         'cloth armor, ':'布甲 时，',
         'light armor, ':'轻甲 时，',
@@ -898,6 +907,7 @@ var words = {
 
         'Proficiency, adds' : '熟练度 获得',
         'Attack Base Damage' : '基础物理伤害',
+        'Attack Damage Multiplier' : '物理伤害倍率',
         'Magic Base Damage' : '基础魔法伤害',
         'Attack Crit Chance' : '物理暴击几率',
         'Attack Critical Multiplier' : '攻击暴击伤害倍率',
@@ -915,6 +925,9 @@ var words = {
         'Crushing Damage Mitigation':'敲击减伤',
         'Piercing Damage Mitigation':'刺击减伤',
         'Slashing Damage Mitigation':'斩击减伤',
+        'Crushing Mitigation':'敲击减伤',
+        'Piercing Mitigation':'刺击减伤',
+        'Slashing Mitigation':'斩击减伤',
         'Physical Mitigation' : '物理减伤',
         'Magical Mitigation' : '魔法减伤',
 
@@ -1192,7 +1205,7 @@ var words = {
         'Crystal of Swiftness' : '敏捷水晶',
         'Crystal of Fortitude' : '体质水晶',
         'Crystal of Cunning' : '智力水晶',
-        'Crystal of Knowledge' : '智慧水晶',
+        'Crystal of Knowledge' : '感知水晶',
         'Crystal of Flames' : '火焰水晶',
         'Crystal of Frost' : '冰冻水晶',
         'Crystal of Lightning' : '闪电水晶',
@@ -1228,7 +1241,7 @@ var words = {
         'Binding of the Cheetah':  '粘合剂 敏捷',
         'Binding of the Turtle':  '粘合剂 体质',
         'Binding of the Fox':  '粘合剂 智力',
-        'Binding of the Owl':  '粘合剂 智慧',
+        'Binding of the Owl':  '粘合剂 感知',
         'Binding of the Elementalist':  '粘合剂 元素魔法熟练度',
         'Binding of the Heaven-sent':  '粘合剂 神圣魔法熟练度',
         'Binding of the Demon-fiend':  '粘合剂 黑暗魔法熟练度',
@@ -1539,6 +1552,14 @@ var words = {
         "Bunny Girl: Black Fishnet Stockings": "兔女郎：黑色渔网袜",
         "Bunny Girl: Black Underwear": "兔女郎：黑色内衣",
         "Bunny Girl: Choker and Bowtie": "兔女郎：项圈与领结",
+        //2026
+        'Wispy Catalyst (Final Edition)' : '纤小催化剂(最终版)',
+        'Diluted Catalyst (Final Edition)' : '稀释催化剂(最终版)',
+        'Regular Catalyst (Final Edition)' : '平凡催化剂(最终版)',
+        'Robust Catalyst (Final Edition)' : '充沛催化剂(最终版)',
+        'Vibrant Catalyst (Final Edition)' : '活力催化剂(最终版)',
+        'Coruscating Catalyst (Final Edition)' : '闪耀催化剂(最终版)',
+        '(Final Edition)' : '(最终版)',
 
 
         //节日及特殊奖杯
@@ -1590,6 +1611,8 @@ var words = {
         'AI-Based Captcha Solver' : '人工智能验证码破解器(等级8)', //2024 复活节
         'Marten Pelt' : '貂皮(等级8)', //2024 圣诞节
         'Snowflake Bunny Girl Figure' : '雪花兔女郎玩偶(等级8)', //2025 复活节
+        'Bath Salts' : '浴盐(等级8)', //2025圣诞节
+        'Collector\'s Catalyst Cabinet' : '收藏家的催化剂陈列柜(等级8)', // 2026 复活节
 
 
     },
@@ -1702,7 +1725,7 @@ var words = {
         'Agility.' : '敏捷',
         'Endurance.' : '体质',
         'Intelligence.' : '智力',
-        'Wisdom.' : '智慧',
+        'Wisdom.' : '感知',
         'Fire Resistance' : '火属性抗性',
         'Cold Resistance' : '冰属性抗性',
         'Electrical Resistance' : '雷属性抗性',
@@ -1858,6 +1881,7 @@ var words = {
         'A blueish transparent orb of unknown origin with a curiously shaped needle floating inside it. It seems to be pointing towards Snowflake\'s Shrine.' : '一个来源不明的蓝色透明球体，里面漂浮着一根形状奇特的针。 似乎是指向雪花神殿的方向。(2022 圣诞节)',
         'Contains the debut single and a variety of t-shirts and folding fans for some long-lost idol group, and a battery-powered RGB glowstick for indecisive types.' : '包含一些已经引退的偶像团体的出道单曲和各种 T 恤和折扇，以及适合各种类型场景的电池供电 RGB 荧光棒。(2023 圣诞节)',
         'An exquisite and particularly fragrant marten pelt that mysteriously smells of apples. Something this fine would make a good offering to Snowflake.' : '精致而特别芳香的貂皮，神秘地散发着苹果味。如此精美的东西可以作为雪花的上好礼物。(2024 圣诞节)',
+        'Apple-scented precursor bath salts that allegedly alleviates all kinds of ailments. Might make a good present for your favorite goddess.' : '据说这款苹果香气的远古浴盐可以缓解各种疾病，也许是送给你最心爱女神的绝佳礼物。(2025圣诞节)',
 
         'A badge inscribed with your RealPervert identity. Regardless of whether you fell for it or not, you got this for participating in the 2011 April Fools thread.' : '一个刻着你的实名变态身份的胸章。无论你是否信以为真，你参与了 2011 年愚人节主题就会得到这个。',
         'A 1/10th scale collectible figure of Raptor Jesus. Consolitory prize for those who did not ascend during the May 2011 Rapture.' : '猛禽耶稣的 1/10 比例缩放公仔。给 2011 年 5 月被提发生期间没被送到天上的人开个安慰价格。',
@@ -1890,6 +1914,8 @@ var words = {
         "A part of Snowflake's missing ritual bunny girl costume. You could return it to her at the shrine. Or keep it, and wear it when no one is watching.": "这是雪花女神丢失的仪式兔女郎服装的一部分。你可以去神社归还给她，或者自己留着在无人时穿戴。[2025 复活节活动]",
         "A part of Snowflake's missing bunny girl costume. You could return it to her at the shrine. Or keep it, and wear it when no one is watching.": "这是雪花女神丢失的兔女郎服装的一部分。你可以去神社归还给她，或者自己留着在无人时穿戴。[2025 复活节活动]",
         "A large 1/4th scale detailed collectible figure featuring Snowflake, the Goddess of Loot and Harvest, wearing her signature ritual bunny girl outfit. [Easter 2025]" : "一款大型的1/4比例精细收藏人偶，以战利品与丰收女神‘雪花’为特色，身着标志性的仪式兔女郎装扮。[2025复活节活动]",
+        "One of the missing vials from the limited final catalyst production run. It is sealed with a slightly different golden bottlecap to mark the occasion." : "这是最后一批限量生产的催化剂中缺失的一瓶。为了纪念这一时刻，它使用了略有不同的金色瓶盖密封。[2026 复活节活动]",
+        "A specially-designed cabinet for displaying Final Edition Catalysts, with prominent silhouetted slots to emphasize any missing ones and encourage completion. (You got all of them, of course.) [Easter 2026]" : "专门设计用于展示最终版催化剂柜子，突出的槽位特意强调任何缺失的催化剂并鼓励完成收藏。 （当然，你已经全部集齐了） [2026 年复活节]",
 
 
     },
@@ -1912,6 +1938,7 @@ var words = {
         'Average ' : '中等 ',
         'Superior' : '上等',
         '/^Fine /' : '优秀 ',
+        ' Fine ' : ' 优秀 ',
         'Exquisite' : '✧精良✧',
         'Magnificent' : '☆史诗☆',
         'Legendary' : '✪传奇✪',
@@ -2068,7 +2095,7 @@ var words = {
         'of the Cheetah' : '猎豹（敏捷）',
         'of the Turtle' : '乌龟（体质）',
         'of the Fox' : '狐狸（智力）',
-        'of the Owl' : '猫头鹰（智慧）',
+        'of the Owl' : '猫头鹰（感知）',
         'of the Stone-skinned' : '硬皮（减伤）',
         'of the Fire-eater' : '吞火者（火抗）',
         'of the Frost-born' : '冰人（冰抗）',
@@ -2125,7 +2152,7 @@ var words = {
         '/Cheetah$/' : '猎豹（敏捷）',
         '/Turtle$/' : '乌龟（体质）',
         '/Fox$/' : '狐狸（智力）',
-        '/Owl$/' : '猫头鹰（智慧）',
+        '/Owl$/' : '猫头鹰（感知）',
         '/Stone-skinned$/' : '硬皮（减伤）',
         '/Fire-eater$/' : '吞火者（火抗）',
         '/Frost-born$/' : '冰人（冰抗）',
@@ -2285,7 +2312,7 @@ var words = {
         'Agility':'敏捷',
         'Endurance':'体质',
         'Intelligence':'智力',
-        'Wisdom':'智慧',
+        'Wisdom':'感知',
 
         'Upgrades and Enchantments':'强化与附魔',
         'None':'无',
@@ -2363,6 +2390,7 @@ var words = {
         "Unavailable on Isekai": "异世界不可用",
         "Stat Fusion is not available on Isekai.": "属性融合在异世界不可用",
         "Stat Fuse Equipment": "开始融合装备",
+        "Fuse Equipment Stats": "融合装备属性",
         "All Stats Maxed": "所有属性已满",
         //装备属性点数与装备信息不同的部分补充
         "Affinity": "法术伤害",
@@ -2373,6 +2401,7 @@ var words = {
         "Enter a blank name to revert to the default name. Customized names are always removed if the equipment is sold or attached to a MoogleMail.": "保持空名字确认以恢复原名。自定义名称在出售或者添加到邮件附件时自动清除。",
         "Repair Equipment": "修理装备",
         "Pin Equipment": "置顶装备",
+        "Unpin Equipment": "取消置顶",
         "Unlock Equipment": "解锁装备",
         "Lock Equipment": "锁定装备",
         "Set To Locked": "设为锁定状态",
@@ -2419,10 +2448,11 @@ var words = {
 
         "All equipment has a Condition value which degrades when you are defeated in battle, as well as at a fixed rate depending on the equipment Durability and the number of cleared rounds. Repairs require different Scrap Material corresponding to the equipment type; these can be salvaged from low-grade equipment, or bought from the Item Store or The Market.": "所有装备都有耐久值，在战斗失败时会损耗，并且会根据装备耐久度和已通关回合数以固定速率衰减。维修需要对应装备类型的废料材料，可从低级装备分解获得，或在道具商店、集市购买。",
         "Magitech equipment and equipment with attached charms will also have an Energy value. Energy is consumed at a fixed rate depending on the number of cleared rounds. Recharging energy requires Energy Cells; these can be salvaged from magitech equipment, or bought from the Item Store or The Market. Attached charms affect the required number of energy cells and can also require other upkeep materials.": "魔科技装备及附带护符的装备还拥有能量值。能量会根据已通关回合数以固定速率消耗。为能量充能需要能量电池，可从魔科技装备分解获得，或在道具商店、集市购买。附加的护符会影响所需电池数量，并可能需要其他维护材料。",
-        "When you are defeated in battle, any charms attached to your equipment have a chance to take damage. If a charm is protected by a pouch, this can destroy the pouch, exposing the charm. If the charm is exposed, any damage will cause it to tear. Torn charms and destroyed pouches can be replaced with spare charms and pouches from your inventory; these can be obtained in the Item World or by offering trophies in The Shrine, or bought from other players in The Market.": "当您在战斗中被击败时，装备上附带的护符有概率受到损伤。若护符被护符袋保护，袋子可能被毁坏，从而暴露护符。暴露的护符受到伤害会伤害会撕裂。撕裂的护符和损坏的护符袋可使用库存中的备用护符和袋子进行更换；这些可在物品世界获取、在神殿献祭奖杯获得，或在集市向其他玩家购买。",
+        "Charms attached to your equipment may take condition damage, depending on its Pouch; if the condition reaches zero, it will tear, rendering it useless. If you are defeated, some pouches can be destroyed, exposing their charms to additional damage. Torn charms and destroyed pouches can be replaced with spare charms and pouches from your inventory; these can be obtained in the Item World or by offering trophies in The Shrine, or bought from other players in The Market." : "附着在装备上的护符会根据其所装备的护符袋子类型而承受不同程度的持续损坏；当护符状态降至零时，便会撕裂并失去功能。若玩家被击败，部分护符袋子可能被摧毁，导致其中的护符遭受额外伤害。破损的符咒和被毁坏的袋子均可使用背包中的备用护符或袋子进行替换——这些物品可在道具界获取、在神殿献祭奖杯获得，或在集市向其他玩家购买。",
         "Replace Charms & Pouches": "同时修理护符/护符袋",
         "Total Repair Cost:": "修理消耗：",
         "Repair Equipment": "修理装备",
+        "This equipment does not currently require repair.": "装备现在不需要修理",
         "This page allows you to organize your equipment.": "此页面可帮助您整理装备。",
         "Pinned equipment are always sorted before unpinned equipment for each respective equipment type.": "已置顶的装备在同类装备中始终排在未置顶的前面。",
         "Protected equipment require an additional confirmation to select for sell or salvage, to be attached to mooglemails, and to be sacrificed for stat fusion. This protects them from various dangerous actions while not preventing it outright.": "保护状态的装备在你出售、拆解、添加到邮件附件、牺牲融合时要求二次确认。一定程度上防止误操作，防呆不防傻。",
@@ -2474,7 +2504,31 @@ var words = {
         "Soulbound and non-tradeable equipment can be bought back for a limited time. Other equipment can also be bought by other players.": "灵魂绑定和不可交易装备可以在有限时间内购回，其它装备也可以被其它玩家购买。",
         "If you sell the salvage remains, they can be bought back for a limited time. Salvage remains must be repaired to restore them to usable condition, requiring more materials than you get from salvaging.": "如果你出售拆解残余报废装备，你可以获得少量Credits，它们可以在有限时间内购回。如果不勾选出售，拆解后的报废装备将继续待在你的仓库里。拆解残余报废装备必须经过维修才能恢复它们可以用的状态，所需的材料比你拆解所得更多。",
         "Salvaging an upgraded equipment will return 90% of the base materials spent upgrading it. It will not return cores or credits, nor any materials used for Stat Fusion.": "拆解升级过的装备将返还90%升级材料，但是用核心、Credits、属性融合材料不会返还。",
-        "Check both safety boxes to continue.": "勾选两个安全确认框已继续",
+        "Check both safety boxes to continue.": "勾选两个安全确认框以继续",
+
+        "Back to Modify Screen" : "返回改装页面",
+        "There are no compatible fusable equipment available." : "没有适配此融合的装备",
+        "/Only unlocked (.+\\+) equips of the same type and slot can be fused/" : "只有解锁状态的同类型、同槽位$1品质装备才可以用于融合",
+
+        "Select an equipment to fuse with your selected equipment:": "选择一件装备与你指定的装备进行融合：",
+        "Stat Fusion allows you sacrifice a similar equipment piece of Legendary grade and above to improve this equipment's base stats by +1. The cost of the upgrade depends on the quality and base stats of the equip you are upgrading compared to the equip you are sacrificing.": "属性融合允许你牺牲一件同部位且品质为传奇品质及以上的装备，将该装备的基础属性提升+1。升级所需消耗取决于你正在升级的装备与被牺牲装备的品质及基础属性对比。",
+        "Every fused stat will require ten of the corresponding bindings, and will normally also require an equipment core. However, if the sacrificial equipment is a Peerless or has a higher base for a particular stat, it will not charge a core for that stat, and it will be increased by +2 instead.": "每次融合的属性都需要消耗十个对应的绑定材料，并且通常还需要一个装备核心。但如果被牺牲的装备是无双品质，或某项属性的基础值更高，则该属性不会消耗核心，并且会额外提升+2。",
+        "If any of the stats are already capped, this will add +1 overflow point for each capped stat. These are redistributed to uncapped stats in order of lowest base. Stats can get multiple overflow points if there are more capped than uncapped stats.": "如果某项属性已达上限，则每项上限属性会增加1点溢出值。这些溢出值会按照基础值最低到最高重新分配给未达上限的属性。如果已达上限的属性数量超过未达上限的属性数量，则部分属性可多次获得溢出值。",
+        "Equipment can only be fused if they have the same type and slot; for example, cotton shoes can only be fused with other cotton shoes. Equipment also cannot be sacrificed if it has an upgrade level above zero; if you want to sacrifice something with an upgrade level, you can salvage it first.": "只有类型和部位相同的装备才能进行融合；例如，棉鞋只能与其他棉鞋融合。此外，如果装备的强化等级大于0，则不能作为牺牲品；若想牺牲一件已强化的装备，可先将其分解。",
+        "Sacrificing salvaged equipment directly is possible, but doing this will add the materials that were gained by salvaging it to the fusion cost.": "直接牺牲已分解过的装备是可行的，但这会将分解该装备获得的材料追加到融合消耗中。",
+        "Note that equipment that is sacrified for Stat Fusion will be" : "请注意，被用于属性融合的装备将被",
+        "PERMANENTLY DESTROYED": "永久摧毁",
+        "and cannot be recovered.": "无法恢复！",
+        "The selected equipment will be sacrified, and fused with your:" : "所选装备将被牺牲，用于融合你的：",
+        "This has the following effects and base costs:" : "这将产生以下效果和消耗：",
+        "Sacrifice Equipment" : "献祭装备",
+        "SACRIFICE" : "献祭",
+        " this equipment" : "这件装备",
+        "It will be" : "它将被",
+        "/^ and $/" : " 并且 ",
+        "CANNOT" : "无法",
+        " be recovered" : "恢复",
+        "Confirm Sacrifice" : "确认献祭",
 
         'Equipment must be soulbound before you can enter its Item World.' : '装备必须先灵魂绑定才能进入道具界。',
         'Clearing item worlds is the only way to unlock the full potential of your equipment. Select an equipment to enter the world contained within. You can only enter the worlds of equipment that are soulbound to you.' : '清通道具界是唯一解锁装备全部潜能的途径。选择一件装备以探索其道具界。你只能进入已经灵魂绑定于你的装备道具界。',
@@ -2506,13 +2560,25 @@ var words = {
         "Are you sure you want to salvage the": "是否确认拆解",
         "spend the requisite materials and credits to upgrade this equipment? Credits and Cores cannot be refunded": "消耗以下材料和Credits升级这件装备？Credits和核心拆解时不会返还",
         "You have selected a SOULBOUND equipment.": "你选择了一件【灵魂绑定】装备！",
-        "/You have selected (\\d+) SOULBOUND equipment/": "你选择了$1件【灵魂绑定】装备！",
+        "You have selected a LEGENDARY equipment.": "你选择了一件【传奇品质】装备！",
+        "You have selected a PEERLESS equipment.": "你选择了一件【无双品质】装备！",
+        "/You have selected (\\d+) SOULBOUND equipment./": "你选择了$1件【灵魂绑定】装备！",
+        "/You have selected (\\d+) LEGENDARY equipment./": "你选择了$1件【传奇品质】装备！",
+        "/You have selected (\\d+) PEERLESS equipment./": "你选择了$1件【无双品质】装备！",
         "The existing intact charm will be ": "该槽位已附加护符将被",
         "The existing intact pouch will be ": "该槽位已附加护符袋将被",
+        "The existing charm will be ": "该槽位已附加护符被",
+        "The existing pouch will be ": "该槽位已附加护符袋将被",
+        "soulbind this equipment? This will enable charms and upgrades, but makes it permanently untradeable." : "绑定这件装备？这将启用该装备的护符和升级，但永久不可交易。",
+        "Cost:" : "消耗:",
+        "Fragments" : "Fragment",
         "DESTROYED": "摧毁",
-        " the charm and pouch in ": " 该槽位中的护符和护符袋 ",
         "DESTROY": "摧毁",
+        " the charm and pouch in ": " 该槽位中的护符和护符袋 ",
         " make this protected equipment selectable?": "选中这件被保护的装备？",
+        "You need additional materials to repair this equipment.": "你缺少用于维修装备的材料",
+        " repair this equipment": "维修这件装备",
+        "Required Repair Materials:": "需要维修材料：",
         "selected equipment?": "已选装备",
         "Confirm Purchase": "确认购买",
         "Confirm Sell": "确认出售",
@@ -2522,6 +2588,8 @@ var words = {
         "Confirm Destroy": "确认摧毁",
         "Confirm Upgrade": "确认升级",
         "Confirm Select": "确认选择",
+        "Confirm Repair": "确认维修",
+        "Confirm Soulbind": "确认绑定",
         "Obtained:": "获得日期:",
         "Start Battle": "开始战斗",
     },
@@ -2635,6 +2703,7 @@ var words = {
     settings: {
         'When you get too powerful to be challenged by the mobs on the normal difficulty, you can increase the Challenge Level here.' : '当你变的足够强大，感到对付当前难度的怪物已经没有挑战性的时候，你可以在这里增加难度等级。',
         'Playing on a higher Challenge Level will increase the EXP you get from each mob, but the mobs have increased HP and hit harder' : '在更高的难度等级下，你会获得更好的掉落，更多的经验与Credit，怪物也将变的更强',
+        'Additional difficulty levels unlock as you level up.' : '随着你等级的提升你将能解锁更高的难度。',
         'Challenge Level' : '难度等级',
         'Challenge' : '名称',
         //难度名称使用独立的difficulty字典
@@ -2697,7 +2766,7 @@ var words = {
         'Use Separate Skillbar/Autocast Assignments' : '使用不同的快捷栏及自动施法配置',
 
         'Vital Bar Style' : '状态值显示设置',
-        'You can either use the standard bar which uses pips for charges, or a more utilitarian (and skinnable) bar that has numerical bars for everything.' : '你可以使用预设的两端缩进（类似上古卷轴式）血条来表示体力值，圆点来表示Overcharge槽，也可以使用更直观的通常血条来表示体力值和Overcharge槽。',
+        'You can either use the standard bar which uses pips for charges, or a more utilitarian (and skinnable) bar that has numerical bars for everything.' : '你可以使用预设的两端缩进（类似上古卷轴式）血条来表示体力值，圆点来表示Overcharge槽，也可以使用更直观的常规血条来表示体力值和Overcharge槽。',
         'Standard' : '预设',
         'Utilitarian' : '常规',
 
@@ -3061,7 +3130,7 @@ var words = {
         'Agility':'敏捷',
         'Endurance':'体质',
         'Intelligence':'智力',
-        'Wisdom':'智慧',
+        'Wisdom':'感知',
     },
 
     ///////////////////////////////////////////////////////邮件
@@ -3134,6 +3203,7 @@ var words = {
         '5th Prize' : '五等奖',
         'Equip Winner:' : '装备中奖者:',
         'Core Winner:' : '核心中奖者:',
+        'Winner:' : '中奖者:',
         'TBD' : '暂未开奖',
         'You currently have' : '你目前拥有',
         'Each ticket costs' : '购买一张彩票将花费',
@@ -3778,9 +3848,9 @@ var words = {
         window.confirm = function(txt) {return confirmBk(translateAlert(txt))}
     })();
 
-	//动态元素字典、监听器，用来翻译动态变化的内容
-	var dynamicDict = new Map();
-	var observer = new MutationObserver((mutations,observer) => {
+    //动态元素字典、监听器，用来翻译动态变化的内容
+    var dynamicDict = new Map();
+    var observer = new MutationObserver((mutations,observer) => {
         //console.log(mutations);
         if(!translated) return;
         mutations.forEach(mutation => {
@@ -3799,7 +3869,7 @@ var words = {
             }
         }
         //console.timeEnd('cleardict');
-	});
+    });
 
     function start() {
         //console.time('hvtranslate');

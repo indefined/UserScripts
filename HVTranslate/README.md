@@ -20,30 +20,26 @@
 
 ## 脚本说明
 
-![效果实例](https://greasyfork.s3.us-east-2.amazonaws.com/nzycbcbtb9p5prkg7bhlrfy87ipf)
+![效果实例](https://greasyfork.s3.us-east-2.amazonaws.com/xq6ctvxxtabz8254qd9utomeway7)
 
 **当前脚本适配HV 0.91版本（即2025年异世界第二赛季）**
 
-### HV 装备物品汉化 v2025.11.13 [点击此处安装](https://sleazyfork.org/scripts/404119/code/install.user.js)
+### HV 装备物品汉化 v2026.06.08 [点击此处安装](https://sleazyfork.org/scripts/404119/code/install.user.js)
 
-- 基于原**HV物品汉化**脚本修改，汉化Hentaiverse、EH论坛、HVMarket内的物品、装备及装备属性，带装备高亮/装备店隐藏锁定装备
+- 基于原**HV物品汉化**脚本修改，汉化Hentaiverse、EH论坛内的物品、装备及装备属性，带装备高亮/装备店隐藏锁定装备
 - **如有同时使用其它汉化，需要先于其它汉化脚本安装运行才会生效**
 - **<font color="red">如果要在论坛买卖装备物品，挑好东西之后务必切换回原文再复制内容，因为别人并不一定看得懂经过翻译过后的东西</font>**
 - 本脚本大致最初由 [ggxxsol](https://greasyfork.org/scripts/25986) 创建，后由贴吧 [mbbdzz](https://tieba.baidu.com/p/4849863522) 修改补充
-- 由 [indefined](https://github.com/indefined/UserScripts/tree/master/HVTranslate) 大规模重构，提高了对其它脚本的兼容性及运行效果，但失去原脚本的装备后缀语序倒转功能和物品列表部分悬浮窗说明汉化
-- 与HVtoolBox1.0.7以前版本在大部分装备列表冲突会失去装备高亮功能，请更新到新版HVToolBox并将汉化脚本运行顺序放在HVtoolBox后
-- 与Live Percentile Ranges在装备详情页冲突，默认不在装备信息页启用，如需包含可在脚本管理器设置中将原始排除添加为用户包含或者将脚本内@exclude改为@include
+- 由 [indefined](https://github.com/indefined/UserScripts/tree/master/HVTranslate) 大规模重构，提高了对其它脚本的兼容性及运行效果，但失去原脚本的装备后缀语序倒转功能和物品列表悬浮窗说明汉化
 - 如与其它脚本同时使用冲突，可尝试调整脚本运行顺序，但无法保证完全兼容，或者将冲突的页面链接添加用户排除(@exclude)
 
 
-### Hentaiverse汉化 v2025.12.02 [点击此处安装](https://sleazyfork.org/scripts/404118/code/HentaiVerse%E6%B1%89%E5%8C%96.user.js)
+### Hentaiverse汉化 v2026.06.08 [点击此处安装](https://sleazyfork.org/scripts/404118/code/HentaiVerse%E6%B1%89%E5%8C%96.user.js)
 
 - 基于贴吧**HV界面和其它汉化**脚本修改，现已基本完成除了战斗日志之外整个hentaiverse的完全汉化。除了没有装备高亮和不能在论坛使用之外，本脚本完全包含上一个脚本所有汉化内容，可单独使用
 - 本脚本大致最初由 [dodying](https://github.com/dodying/UserJs/blob/master/modify/hvTranslator.user.js) 及 [ggxxsol](https://greasyfork.org/scripts/9680) 创建，后由 [NeedXuyao](https://greasyfork.org/zh-CN/scripts/2120) 和贴吧 [mbbdzz](https://tieba.baidu.com/p/4849863522) 修改整合补充
 - 由 [indefined](https://github.com/indefined/UserScripts/tree/master/HVTranslate) 重构添加动态汉化和原文切换功能并补充剩余翻译，[SukkaW](https://github.com/SukkaW) 重构优化
 - 整合HV战斗汉化(仅汉化战斗说明不包含战斗日志)，默认不开启，**双击战斗说明框中的提示可开启战斗汉化**
-- 和HVToolBox1.0.7以前版本在物品仓库中冲突，请更新到新版HVToolBox并将汉化运行顺序放在HVToolBox之后
-- 如与Live Percentile Ranges同时使用，需要将脚本运行顺序置于Live Percentile Ranges之后，查询不同品质范围需要切换到英文状态
 - 如有其它脚本共同运行冲突也可尝试调整脚本运行顺序，但无法保证全部兼容
 
 

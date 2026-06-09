@@ -4,11 +4,9 @@
 // @author       ggxxsol & mbbdzz & indefined & etc.
 // @updateURL    https://sleazyfork.org/scripts/404119/code/script.meta.js
 // @downloadURL  https://sleazyfork.org/scripts/404119/code/script.user.js
-// @description  汉化Hentaiverse及EH论坛、HVMarket内的物品、装备及装备属性，带装备高亮/装备店隐藏锁定装备，带翻译原文切换功能。论坛购物请切换到英文原文再复制内容
-// @notice       此修改版大幅度乱重构了原有脚本执行逻辑，翻译效果和兼容性有一定提升，但失去原脚本装备后缀语序倒转功能和部分物品悬浮窗窗说明汉化
+// @description  汉化Hentaiverse及EH论坛、拍卖网站离的物品、装备名，带装备高亮/装备店隐藏锁定装备，带翻译原文切换功能。论坛购物请切换到英文原文再复制内容
+// @notice       此修改版大幅度乱重构了原有脚本执行逻辑，翻译效果和兼容性有一定提升，但失去原脚本装备后缀语序倒转功能和物品悬浮窗窗说明汉化
 // @notice       如有同时使用其它汉化，需要先于其它汉化脚本安装运行才会生效
-// @notice       与HVtoolBox1.0.7以前版本在大部分装备列表和物品仓库冲突，如需同时使用请更新到新版HVtoolBox并将汉化脚本运行顺序放在HVtoolBox后
-// @notice       与Live Percentile Ranges在装备详情页冲突，默认不在装备信息页启用，如需包含可在脚本管理器设置中将原始排除添加为用户包含或者将下方对应@exclude改为@include
 // @notice       如与其它脚本同时使用冲突，可尝试调整脚本运行顺序，但无法保证完全兼容，或者将冲突的页面链接添加用户排除(@exclude)
 // @notice       如果你要在论坛买东西，挑好东西之后最好切换到原文再复制内容，因为别人并不一定看得懂经过翻译过后的东西
 // @icon         https://hentaiverse.org/y/favicon.png
@@ -17,9 +15,8 @@
 // @exclude      *://*hentaiverse.org/*equip/*
 // @exclude      *://*hentaiverse.org/*pages/showequip.php?*
 // @include      *://forums.e-hentai.org/*showtopic=*
-// @include      *://hvmarket.xyz/*
 // @include      *://reasoningtheory.net/*
-// @version      2025.11.13
+// @version      2026.06.08
 // ==/UserScript==
 
 if (document.location.href.match(/ss=iw/)&&!document.getElementById('item_pane'))return
@@ -71,13 +68,9 @@ function main(){
         case 1: //道具店
         case 2: //道具仓库
         case 3: //祭坛
-            /*//在这一行前面加//可以同时汉化部分物品悬浮窗说明，但是与HVToolbox冲突
-            translateItems(".itemlist>tbody>tr>td");
-            translateItems(".sa>div:last-child");
-            /*///下面两行只会翻译物品名称
+            //只会翻译物品名称
             translateItems(".itemlist>tbody>tr>td>div");
             translateItems(".sa>div:last-child>div");
-            //*/
             break;
 
         case 4: //装备仓库
@@ -191,12 +184,9 @@ function main(){
         case 11: //武器彩卷
         case 12: //防具彩卷
             translateEquips("#lottery_eqname");
-            translateEquipsInfo("#lottery_eqstat");
             break;
 
         case 13: //装备属性页
-            translateEquips('#showequip>div:not([id])');//装备名
-            translateEquipsInfo('#equip_extended');//装备详细信息
             break;
 
         case 14: //hvmarket
@@ -616,6 +606,7 @@ function loadItems(){
         'AI-Based Captcha Solver' : '人工智能验证码破解器(等级8)', //2024 复活节
         'Marten Pelt' : '貂皮(等级8)', //2024 圣诞节
         'Snowflake Bunny Girl Figure' : '雪花兔女郎玩偶(等级8)', //2025 复活节
+        'Collector\'s Catalyst Cabinet' : '收藏家的催化剂陈列柜(等级8)', // 2026 复活节
 
 
         //旧旧古董
@@ -780,176 +771,14 @@ function loadItems(){
         "Bunny Girl: Black Fishnet Stockings": "兔女郎：黑色渔网袜",
         "Bunny Girl: Black Underwear": "兔女郎：黑色内衣",
         "Bunny Girl: Choker and Bowtie": "兔女郎：项圈与领结",
-
-
-
-        //药品解释
-        'Provides a long-lasting health restoration effect.' : '持续回复2%的基础HP,持续50回合.',
-        'Instantly restores a large amount of health.' : '立刻回复100%的基础HP.',
-        'Fully restores health, and grants a long-lasting health restoration effect.' : 'HP全满,持续100回合2%的基础HP.',
-        'Provides a long-lasting mana restoration effect.' : '持续50回合回复1%的基础MP.',
-        'Instantly restores a moderate amount of mana.' : '立刻回复50%的基础MP.',
-        'Fully restores mana, and grants a long-lasting mana restoration effect.' : 'MP全满,持续100回复1%的基础MP.',
-        'Provides a long-lasting spirit restoration effect.' : '持续50回复1%的基础SP.',
-        'Instantly restores a moderate amount of spirit.' : '立刻回复50%的基础SP.',
-        'Fully restores spirit, and grants a long-lasting spirit restoration effect.' : 'SP全满,持续100回合回复1%的基础SP.',
-        'Fully restores all vitals, and grants long-lasting restoration effects.' : '状态全满,产生所有回复药水的效果.',
-        'Restores 10 points of Stamina, up to the maximum of 99. When used in battle, also boosts Overcharge and Spirit by 10% for ten turns.' : '可在战斗中使用,请在战斗道具栏设置,恢复10点精力，但不超过99。战斗时使用时,每回合增加10%的灵力和Overcharge.',
-        //魔药解释
-        'You gain +25% resistance to Fire elemental attacks and do 25% more damage with Fire magicks.' : '你获得 +25% 的火系魔法耐性且获得 25% 的额外火系魔法伤害。',
-        'You gain +25% resistance to Cold elemental attacks and do 25% more damage with Cold magicks.' : '你获得 +25% 的冰冷魔法耐性且获得 25% 的额外冰系魔法伤害。',
-        'You gain +25% resistance to Elec elemental attacks and do 25% more damage with Elec magicks.' : '你获得 +25% 的雷系魔法耐性且获得 25% 的额外雷系魔法伤害。',
-        'You gain +25% resistance to Wind elemental attacks and do 25% more damage with Wind magicks.' : '你获得 +25% 的风系魔法耐性且获得 25% 的额外风系魔法伤害。',
-        'You gain +25% resistance to Holy elemental attacks and do 25% more damage with Holy magicks.' : '你获得 +25% 的神圣魔法耐性且获得 25% 的额外神圣魔法伤害。',
-        'You gain +25% resistance to Dark elemental attacks and do 25% more damage with Dark magicks.' : '你获得 +25% 的黑暗魔法耐性且获得 25% 的额外黑暗魔法伤害。',
-        //卷轴解释
-        'Grants the Haste effect.' : '使用产生加速效果。',
-        'Grants the Protection effect.' : '使用产生保护效果。',
-        'Grants the Haste and Protection effects.with twice the normal duration.' : '产生加速和保护的效果。两倍持续时间',
-        'Grants the Absorb effect.' : '使用后获得吸收效果。',
-        'Grants the Shadow Veil effect.' : '使用产生闪避效果。',
-        'Grants the Spark of Life effect.' : '使用产生生命火花效果。',
-        'Grants the Absorb, Shadow Veil and Spark of Life effects with twice the normal duration.' : '同时产生吸收，闪避，以及生命火花效果,两倍持续时间.',
-
-        //物品说明
-        'Various bits and pieces of scrap cloth. These can be used to mend the condition of an equipment piece.' : '各种零碎的布料，用于修复装备',
-        'Various bits and pieces of scrap leather. These can be used to mend the condition of an equipment piece.' : '各种零碎的皮革，用于修复装备',
-        'Various bits and pieces of scrap metal. These can be used to mend the condition of an equipment piece.' : '各种零碎的金属，用于修复装备',
-        'Various bits and pieces of scrap wood. These can be used to mend the condition of an equipment piece.' : '各种零碎的木材，用于修复装备',
-        'Some materials scavenged from fallen adventurers by a monster. Required to reforge and upgrade cloth armor.' : '一些从怪物身上收集到的材料，用于升级布甲',
-        'Some materials scavenged from fallen adventurers by a monster. Required to reforge and upgrade staffs and shields.' : '一些从怪物身上收集到的材料，用于升级法杖和盾牌',
-        'Some materials scavenged from fallen adventurers by a monster. Required to reforge and upgrade heavy armor and weapons' : '一些从怪物身上收集到的材料，用于升级重甲和武器',
-        'Some materials scavenged from fallen adventurers by a monster. Required to reforge and upgrade light armor' : '一些从怪物身上收集到的材料，用于升级轻甲',
-        'A cylindrical object filled to the brim with arcano-technological energy. Required to restore advanced armor and shields to full condition.' : '一个边缘充斥着神秘科技能量的圆柱形物体，用于修复高级护甲和盾牌',
-        'Some materials scavenged from fallen adventurers by a monster. Required to upgrade equipment bonuses to' : '从怪物身上收集的材料，用于升级装备的',
-        'A small vial filled with a catalytic substance necessary for upgrading and repairing equipment in the forge. This is permanently consumed on use.' : '一个装着升级与修复装备必须的催化剂的小瓶子，每使用一次就会消耗一个',
-        'When used with a weapon, this shard will temporarily imbue it with the' : '当用在一件装备上时，会临时给予装备',
-        'When used with an equipment piece, this shard will temporarily imbue it with the' : '当用在一件装备上时，会临时给予装备',
-        'Can be used to reset the unlocked potencies and experience of an equipment piece.' : '可以用于重置装备的潜能等级',
-        'Suffused Aether enchantment' : '弥漫的以太的附魔效果',
-        'Featherweight Charm enchantment' : '轻如鸿毛的附魔效果',
-        'Voidseeker' : '虚空探索者',
-        's Blessing enchantment' : '的祝福的附魔效果',
-        'These fragments can be used in the forge to permanently soulfuse an equipment piece to you, which will make it level as you do.' : '这个碎片可以将一件装备与你灵魂绑定，灵魂绑定的装备会随着你的等级一同成长。',
-        'You can fuse this crystal with a monster in the monster tab to increase its' : '你可以用这种水晶在怪物实验室里面为一个怪物提升它的',
-        'Strength\\.' : '力量',
-        'Dexterity\\.' : '灵巧',
-        'Agility\\.' : '敏捷',
-        'Endurance\\.' : '体质',
-        'Intelligence\\.' : '智力',
-        'Wisdom\\.' : '智慧',
-        'Fire Resistance' : '火属性抗性',
-        'Cold Resistance' : '冰属性抗性',
-        'Electrical Resistance' : '电属性抗性',
-        'Wind Resistance' : '风属性抗性',
-        'Holy Resistance' : '圣属性抗性',
-        'Dark Resistance' : '暗属性抗性',
-        'Non-discerning monsters like to munch on this chow.' : '不挑食的初级怪物喜欢吃这种食物',
-        'Mid-level monsters like to feed on something slightly more palatable, like these scrumptious edibles.' : '中级怪物喜欢吃更好吃的食物，比如这种',
-        'High-level monsters would very much prefer this highly refined level of dining if you wish to parlay their favor.' : '如果你想受高等级怪物的青睐的话，请喂它们吃这种精致的食物吧',
-        'Tiny pills filled with delicious artificial happiness. Use on monsters to restore morale if you cannot keep them happy. It beats leaving them sad and miserable.' : '美味的人造药丸，满溢着的幸福，没法让怪物开心的话，就用它来恢复怪物的士气，赶走怪物的悲伤和沮丧吧',
-        'An advanced technological artifact from an ancient and long-lost civilization. Handing these in at the Shrine of Snowflake will grant you a reward.' : '一个发达古文明的技术结晶，把它交给雪花神殿的雪花女神来获得你的奖励',
-        'You can exchange this token for the chance to face a legendary monster by itself in the Ring of Blood.' : '你可以用这些令牌在浴血擂台里面换取与传奇怪物对阵的机会',
-        'You can use this token to unlock monster slots in the Monster Lab, as well as to upgrade your monsters.' : '你可以用这些令牌开启额外的怪物实验室槽位，也可以升级你的怪物',
-        'A sapling from Yggdrasil, the World Tree' : '一棵来自世界树的树苗',
-        'A plain black 100% cotton T-Shirt. On the front, an inscription in white letters reads' : '一件平凡无奇的100%纯棉T恤衫，在前面用白色的字母写着',
-        'I defeated Real Life, and all I got was this lousy T-Shirt.' : '战胜了现实后，我就得到了这么一件恶心的T恤衫',
-        'No longer will MBP spread havoc, destruction, and melted polar ice caps.' : '不会再有人熊猪扩散浩劫、破坏、和融化的极地冰帽了。',
-        'You found this item in the lair of a White Bunneh. It appears to be a dud.' : '这似乎是你在一只杀人兔的巢穴里发现的一颗未爆弹。',
-        'A Lilac flower given to you by a Mithra when you defeated her. Apparently, this type was her favorite.' : '击败小猫娘后她送你的紫丁香。很显然这品种是她的最爱。',
-        'Taken from the destroyed remains of a Dalek shell.' : '从戴立克的残骸里取出来的音箱。',
-        'Given to you by Konata when you defeated her. It smells of Timotei.' : '击败泉此方后获得的蓝发。闻起来有 Timotei 洗发精的味道',
-        'Given to you by Mikuru when you defeated her. If you wear it, keep it to yourself.' : '击败朝比奈实玖瑠后获得的兔女郎装。不要告诉别人你有穿过。',
-        'Given to you by Ryouko when you defeated her. You decided to name it Achakura, for no particular reason.' : '击败朝仓凉子后获得的人形。你决定取名叫朝仓，这没什么特别的理由。',
-        'Given to you by Yuki when you defeated her. She looked better without them anyway.' : '击败长门有希后获得的眼镜。她不戴眼镜时看起来好多了。',
-        'An Invisible Pink' : '从隐形粉红独角兽头上取下来的',
-        'taken from the Invisible Pink Unicorn.' : ' ',
-        'It doesn&amp;#039;t weigh anything and has the consistency of air' : '它很像空气一样轻，几乎没有重量',
-        'but you&amp;#039;re quite sure it&amp;#039;s real' : '但是你很确定它是真实存在的',
-        'A nutritious pasta-based appendage from the Flying Spaghetti Monster.' : '一条用飞行意大利面怪物身上的面团做成的营养附肢。',
-        'You found these in your Xmas stocking when you woke up. Maybe Snowflake will give you something for them.' : '你醒来时,在你的圣诞袜里发现这些东西。说不定用它可以和雪花女神交换礼物。',
-        'This box is said to contain an item of immense power. You should get Snowflake to open it.' : '传说此盒子封印了一件拥有巨大力量的装备。你应该找雪花女神去打开它。',
-        'A 1/10th scale figurine of Twilight Sparkle, the cutest, smartest, all-around best pony. According to Pinkie Pie, anyway.' : 'NO.1 暮光闪闪的 1/10 比例缩放公仔。最可爱、最聪明，最全能的小马。(根据萍琪的说法，嗯…) ',
-        'A 1/10th scale figurine of Rainbow Dash, flier extraordinaire. Owning this will make you about 20% cooler, but it probably took more than 10 seconds to get one.' : 'NO.2 云宝黛西的 1/10 比例缩放公仔。杰出的飞行员。拥有这个公仔可以让你多酷大约 20%，但为了得到她你得多花 10 秒！ ',
-        'A 1/10th scale figurine of Applejack, the loyalest of friends and most dependable of ponies. Equestria&amp;#039;s best applebucker, and founder of Appleholics Anonymous.' : 'NO.3 苹果杰克的 1/10 比例缩放公仔。最忠诚的朋友，最可靠的小马。阿奎斯陲亚最好的苹果采收员，同时也是苹果农庄的创始马。 ',
-        'A 1/10th scale figurine of Fluttershy, resident animal caretaker. You&amp;#039;re going to love her. Likes baby dragons; Hates grown up could-eat-a-pony-in-one-bite dragons.' : 'NO.4 小蝶的 1/10 比例缩放公仔。小马镇动物的褓姆，大家都喜爱她。喜欢幼龙；讨厌能一口吞掉小马的大龙。 ',
-        'A 1/10th scale figurine of Pinkie Pie, a celebrated connoisseur of cupcakes and confectioneries. She just wants to keep smiling forever.' : 'NO.5 萍琪的 1/10 比例缩放公仔。一位著名的杯子蛋糕与各式饼干糖果的行家。她只想让大家永远保持笑容。 ',
-        'A 1/10th scale figurine of Rarity, the mistress of fashion and elegance. Even though she&amp;#039;s prim and proper, she could make it in a pillow fight.' : 'NO.6 瑞瑞的 1/10 比例缩放公仔。时尚与品味的的女主宰。她总是能在枕头大战中保持拘谨矜持。 ',
-        'A 1/10th scale figurine of The Great and Powerful Trixie. After losing her wagon, she now secretly lives in the Ponyville library with her girlfriend, Twilight Sparkle.' : 'NO.7 崔克茜的 1/10 比例缩放公仔。伟大的、法力无边的崔克茜。失去她的篷车后，她现在偷偷的与她的女友暮光闪闪住在小马镇的图书馆中。 ',
-        'A 1/10th scale figurine of Princess Celestia, co-supreme ruler of Equestria. Bored of the daily squabble of the Royal Court, she has recently taken up sock swapping.' : 'NO.8 塞拉斯提娅公主的 1/10 比例缩放公仔。阿奎斯陲亚大陆的最高统治者。对每日的皇家争吵感到无聊，她近日开始穿上不成对的袜子。 ',
-        'A 1/10th scale figurine of Princess Luna, aka Nightmare Moon. After escaping her 1000 year banishment to the moon, she was grounded for stealing Celestia&amp;#039;s socks.' : 'NO.9 露娜公主的 1/10 比例缩放公仔。又名梦靥之月。在结束了一千年的放逐后，她从月球回到阿奎斯陲亚偷走了塞拉斯提娅的袜子。 ',
-        'A 1/10th scale figurine of Apple Bloom, Applejack&amp;#039;s little sister. Comes complete with a &amp;quot;Draw Your Own Cutie Mark&amp;quot; colored pencil and permanent tattoo applicator set.' : 'NO.10 小萍花的 1/10 比例缩放公仔。苹果杰克的小妹。使用了“画出妳自己的可爱标志”彩色铅笔与永久纹身组后，生命更加的完整了。 ',
-        'A 1/10th scale figurine of Scootaloo. Die-hard Dashie fanfilly, best pony of the Cutie Mark Crusaders, and inventor of the Wingboner Propulsion Drive. 1/64th chicken.' : 'NO.11 飞板露的 1/10 比例缩放公仔。云宝黛西的铁杆年轻迷妹，可爱标志十字军中最棒的小马，以及蠢翅动力推进系统的发明者。有 1/64 的组成成分是鲁莽。 ',
-        'A 1/10th scale figurine of Sweetie Belle, Rarity&amp;#039;s little sister. Comes complete with evening gown and cocktail dress accessories made of 100% Dumb Fabric.' : 'NO.12 甜贝儿的 1/10 比例缩放公仔。瑞瑞的小妹。在穿上 100% 蠢布料制成的晚礼服与宴会短裙后更加完美了。 ',
-        'A 1/10th scale figurine of Big Macintosh, Applejack&amp;#039;s older brother. Famed applebucker and draft pony, and an expert in applied mathematics.' : 'NO.13 大麦克的 1/10 比例缩放公仔。苹果杰克的大哥。有名的苹果采收员和大力马，同时也是实用数学的专家。 ',
-        'A 1/10th scale figurine of Spitfire, team leader of the Wonderbolts. Dashie&amp;#039;s idol and occasional shipping partner. Doesn&amp;#039;t actually spit fire.' : 'NO.14 爆火的 1/10 比例缩放公仔。惊奇闪电的领导者。云宝黛西的偶像和临时飞行搭档。实际上不会吐火。 ',
-        'A 1/10th scale figurine of Derpy Hooves, Ponyville&amp;#039;s leading mailmare. Outspoken proponent of economic stimulus through excessive muffin consumption.' : 'NO.15 小呆的 1/10 比例缩放公仔。小马镇上重要的邮差马。直言不讳的主张以大量食用马芬的方式来刺激经济。 ',
-        'A 1/10th scale figurine of Lyra Heartstrings. Features twenty-six points of articulation, replaceable pegasus hoofs, and a detachable unicorn horn.' : 'NO.16 天琴心弦的 1/10 比例缩放公仔。拥有 26 个可动关节，可更换的飞马蹄与一个可拆卸的独角兽角是其特色。 ',
-        'A 1/10th scale figurine of Octavia. Famous cello musician; believed to have created the Octatonic scale, the Octahedron, and the Octopus.' : 'NO.17 奥塔维亚的 1/10 比例缩放公仔。著名的大提琴家；据信创造了八度空间、八面体以及章鱼。 ',
-        'A 1/10th scale figurine of Zecora, a mysterious zebra from a distant land. She&amp;#039;ll never hesitate to mix her brews or lend you a hand. Err, hoof.' : 'NO.18 泽科拉的 1/10 比例缩放公仔。一位来自远方的神秘斑马。她会毫不迟疑的搅拌她的魔药或助你一臂之力。呃，我是说一蹄之力… ',
-        'A 1/10th scale figurine of Cheerilee, Ponyville&amp;#039;s most beloved educational institution. Your teachers will never be as cool as Cheerilee.' : 'NO.19 车厘子的 1/10 比例缩放公仔。小马镇最有爱心的教育家。你的老师绝对不会像车厘子这么酷的！ ',
-        'A 1/10th scale bobblehead figurine of Vinyl Scratch, the original DJ P0n-3. Octavia&amp;#039;s musical rival and wub wub wub interest.' : 'NO.20 维尼尔的 1/10 比例缩放摇头公仔。是 DJ P0n-3 的本名。为奥塔维亚在音乐上的对手，喜欢重低音喇叭。 ',
-        'A 1/10th scale figurine of Daring Do, the thrill-seeking, action-taking mare starring numerous best-selling books. Dashie&amp;#039;s recolor and favorite literary character.' : 'NO.21 天马无畏的 1/10 比例缩放公仔。追寻刺激，有如动作片主角一般的小马，为一系列畅销小说的主角。是云宝黛西最喜欢的角色，也是带领她进入阅读世界的原因。 ',
-        'A 1/10th scale figurine of Doctor Whooves. Not a medical doctor. Once got into a hoof fight with Applejack over a derogatory remark about apples.' : 'NO.22 神秘博士的 1/10 比例缩放公仔。不是医生。曾经与苹果杰克陷入一场因贬低苹果的不当发言而产生的蹄斗。 ',
-        'A 1/10th scale figurine of Berry Punch. Overly protective parent pony and Ponyville&amp;#039;s resident lush. It smells faintly of fruit wine.' : 'NO.23 酸梅酒的 1/10 比例缩放公仔。有过度保护倾向的小马，也是小马镇的万年酒鬼。闻起来有淡淡水果酒的气味。 ',
-        'A 1/10th scale figurine of Bon-Bon. Usually seen in the company of Lyra. Suffers from various throat ailments that make her sound different every time you see her.' : 'NO.24 糖糖的 1/10 比例缩放公仔。常常被目击与天琴心弦在一起。患有许多呼吸道相关的疾病，使你每次遇到她的时候她的声音都不同。 ',
-        'A 1/10th scale fluffy figurine of Fluffle Puff. Best Bed Forever.' : 'NO.25 毛毛小马 1/10 比例缩放的毛茸茸玩偶。让你想要永远躺在上面。 ',
-        'A lifesize figurine of Angel Bunny, Fluttershy&amp;#039;s faithful yet easily vexed pet and life partner. All-purpose assistant, time keeper, and personal attack alarm.' : 'NO.26 天使兔的等身大玩偶。为小蝶忠实且易怒的宠物及伴侣。万能助理、报时器、受到人身攻击时的警报器。 ',
-        'A lifesize figurine of Gummy, Pinkie Pie&amp;#039;s faithful pet. Usually found lurking in your bathtub. While technically an alligator, he is still arguably the best pony.' : 'NO.27 甘米的等身大玩偶。是萍琪的忠实宠物。经常被发现潜伏在你的浴缸里。虽然技术上是只短吻鳄，但它仍然可以称得上是最棒的小马。 ',
-        'Some materials scavenged from fallen adventurers by a monster' : '从被击败的冒险者身上收集来的材料',
-        'Required to reforge Phase Armor' : '用于强化相位甲',
-        'Required to reforge Shade Armor' : '用于强化暗影甲',
-        'Required to reforge Power Armor' : '用于强化动力甲',
-        'Required to reforge Force Shields' : '用于强化力场盾',
-        'Physical Base Damage' : '(物理伤害)',
-        'Physical Hit Chance' : '(物理命中率)',
-        'Magical Base Damage' : '(魔法伤害)',
-        'Magical Hit Chance' : '(魔法命中率)',
-        'Physical Defense' : '(物理减伤)',
-        'Magical Defense' : '(魔法减伤)',
-        'Evade Chance' : '(回避率)',
-        'Block Chance' : '(格挡率)',
-        'Parry Chance' : '(招架率)',
-        'Elemental Magic Proficiency' : '(元素熟练)',
-        'Divine Magic Proficiency' : '(圣熟练)',
-        'Forbidden Magic Proficiency' : '(暗熟练)',
-        'Deprecating Magic Proficiency' : '(减益熟练)',
-        'Supportive Magic Proficiency' : '(增益熟练)',
-        'Fire Spell Damage' : '(火焰法术伤害)',
-        'Cold Spell Damage' : '(冰霜法术伤害)',
-        'Elec Spell Damage' : '(闪电法术伤害)',
-        'Wind Spell Damage' : '(狂风法术伤害)',
-        'Holy Spell Damage' : '(神圣法术伤害)',
-        'Dark Spell Damage' : '(黑暗法术伤害)',
-        'Crushing Mitigation' : '(敲击减伤)',
-        'Slashing Mitigation' : '(斩击减伤)',
-        'Piercing Mitigation' : '(刺击减伤)',
-        'Fire Mitigation' : '(火焰减伤)',
-        'Cold Mitigation' : '(冰霜减伤)',
-        'Elec Mitigation' : '(闪电减伤)',
-        'Wind Mitigation' : '(狂风减伤)',
-        'Holy Mitigation' : '(神圣减伤)',
-        'Dark Mitigation' : '(黑暗减伤)',
-        'Strength' : '(力量)',
-        'Dexterity' : '(灵巧)',
-        'Agility' : '(敏捷)',
-        'Endurance' : '(体质)',
-        'Intelligence' : '(智力)',
-        'Wisdom' : '(智慧)',
-        'Magical Mitigation' : '(魔法减伤)',
-        'Resist Chance' : '(抵抗率)',
-        'Physical Crit Chance' : '(物理暴击率)',
-        'Magical Crit Chance' : '(魔法暴击率)',
-
-        //物品类型，悬浮窗onmouseover参数自带一层单引号
-        "'Consumable'" : "'消耗品'",
-        "'Crystal'" : "'水晶'",
-        "'Monster Food'" : "'怪物食品'",
-        "'Token'" : "'令牌'",
-        "'Trophy'" : "'奖杯'",
-        "'Artifact'" : "'文物'",
-        "'Material'" : "'材料'",
-        "'Collectable'" : "'收藏品'",
+        //2026
+        'Wispy Catalyst (Final Edition)' : '纤小催化剂(最终版)',
+        'Diluted Catalyst (Final Edition)' : '稀释催化剂(最终版)',
+        'Regular Catalyst (Final Edition)' : '平凡催化剂(最终版)',
+        'Robust Catalyst (Final Edition)' : '充沛催化剂(最终版)',
+        'Vibrant Catalyst (Final Edition)' : '活力催化剂(最终版)',
+        'Coruscating Catalyst (Final Edition)' : '闪耀催化剂(最终版)',
+        '(Final Edition)' : '(最终版)',
     };
 
     dictItems = new Map();
@@ -959,159 +788,6 @@ function loadItems(){
     return dictItems;
 };
 
-function loadEquipsInfo(){
-    if (dictEquipsInfo) return dictEquipsInfo;
-    //装备信息字典
-    var equipsInfo = {
-        /////////////////////////////////装备属性
-        'One-handed Weapon':'单手武器',
-        'Two-handed Weapon':'双手武器',
-        '>Staff ':'>法杖 ',
-        '>Shield ':'>盾牌 ',
-        'Cloth Armor':'布甲',
-        'Light Armor':'轻甲',
-        'Heavy Armor':'重甲',
-
-        'Condition:':'耐久:',
-        'Untradeable':'不可交易',
-        'Tradeable':'可交易',
-        'Level ':'等级 ',
-        'Soulbound':'灵魂绑定',
-        'Unassigned':'未确定',
-        'Potency Tier':'潜能等级',
-        'MAX' : '已满',
-
-        'Ether Tap':'魔力回流',
-        'Bleeding Wound':'流血',
-        'Penetrated Armor':'破甲',
-        'Stunned':'眩晕',
-        'Siphon Spirit':'灵力吸取',
-        'Siphon Magic':'魔力吸取',
-        'Siphon Health':'生命吸取',
-        'Ether Theft':'魔力回流',
-        'Lasts for':'持续',
-        'chance - ':'几率 - ',
-        ' turns':' 回合',
-        ' turn<':' 回合<',
-        ' turn /':' 回合 /',
-        'points drained':'点吸取量',
-        'base drain':'基础吸取量',
-        'DOT':'持续伤害比例',
-
-        'Elemental Strike':'属性攻击',
-        'Fire Strike':'火焰冲击',
-        'Cold Strike':'冰霜冲击',
-        'Elec Strike':'闪电冲击',
-        'Wind Strike':'狂风冲击',
-        'Holy Strike':'神圣冲击',
-        'Dark Strike':'黑暗冲击',
-        'Void Strike':'虚空冲击',
-
-        'Damage Mitigations':'伤害减免',
-        'Spell Damage':'法术伤害加成',
-        'Fire ':'火焰 ',
-        'Cold ':'冰霜 ',
-        'Elec ':'闪电 ',
-        'Wind ':'狂风 ',
-        'Holy ':'神圣 ',
-        'Dark ':'黑暗 ',
-        'Void ':'虚空 ',
-        'Crushing':'敲击',
-        'Piercing':'刺击',
-        'Slashing':'斩击',
-
-        'Magic Crit Chance':'魔法暴击率',
-        'Attack Crit Chance':'物理暴击率',
-        'Attack Accuracy':'物理命中',
-        'Attack Critical':'物理暴击',
-        'Attack Damage':'物理伤害',
-        'Parry Chance':'招架率',
-        'Magic Damage':'魔法伤害',
-        'Magic Critical':'魔法暴击',
-        'Mana Conservation':'魔力消耗减免',
-        'Counter-Resist':'反抵抗',
-        'Physical Mitigation':'物理减伤',
-        'Magical Mitigation':'魔法减伤',
-        'Block Chance':'格挡率',
-        'Evade Chance':'回避率',
-        'Casting Speed':'施法速度',
-        'Resist Chance':'抵抗率',
-        'Spell Crit':'法术暴击',
-        'Attack Crit Damage':'物理爆击伤害',
-        'Magic Accuracy':'魔法命中',
-        'Counter-Parry':'反招架',
-        'Attack Speed':'攻击速度',
-        'MP Bonus':'魔力加成',
-        'HP Bonus':'体力加成',
-        'Burden':'负重',
-        'Interference':'干涉',
-
-        'Proficiency':'熟练度加成',
-        '>Elemental ':'>元素 ',
-        'Divine':'神圣',
-        'Forbidden':'黑暗',
-        'Deprecating':'减益',
-        'Supportive':'增益',
-
-        'Primary Attributes':'属性加成',
-        'Strength':'力量',
-        'Dexterity':'灵巧',
-        'Agility':'敏捷',
-        'Endurance':'体质',
-        'Intelligence':'智力',
-        'Wisdom':'智慧',
-
-        'Upgrades and Enchantments':'强化与附魔',
-        'None':'无',
-        'Physical':'物理',
-        'Magical':'魔法',
-        'Damage':'伤害',
-        'Defense':'防御',
-        'Mitigation':'减伤',
-        'Hit Chance':'命中率',
-        'Crit Chance':'暴击率',
-        'Bonus Lv':'加成 Lv',
-        'Bonus<':'加成<',
-
-        'Capacitor':'魔力加成',
-        'Juggernaut':'生命加成',
-        'Butcher':'武器伤害加成',
-        'Fatality':'攻击暴击伤害',
-        'Overpower':'反招架',
-        'Swift Strike':'迅捷打击',
-        'Annihilator':'魔法暴击伤害',
-        'Archmage':'魔法伤害加成',
-        'Economizer':'魔力消耗减免',
-        'Penetrator':'反魔法抵抗',
-        'Spellweaver':'高速咏唱',
-        'Hollowforged':'虚空升华',
-
-        'Coldproof':'抗寒',
-        'Darkproof':'驱暗',
-        'Elecproof':'绝缘',
-        'Fireproof':'耐热',
-        'Holyproof':'驱圣',
-        'Windproof':'防风',
-
-        'Suffused Aether' : '弥漫的以太',
-        'Featherweight Charm' : '轻如鸿毛',
-        'Voidseeker\'s Blessing':'虚空探索者的祝福',
-
-        'Infused Flames':'火焰附魔',
-        'Infused Frost':'冰霜附魔',
-        'Infused Lightning':'雷电附魔',
-        'Infused Storms?':'风暴附魔',
-        'Infused Divinity':'神圣附魔',
-        'Infused Darkness':'黑暗附魔',
-
-    };
-
-    dictEquipsInfo = new Map();
-    for(var k in equipsInfo) {
-        dictEquipsInfo.set(RegExp(k,'g'), equipsInfo[k]);
-    }
-    return dictEquipsInfo;
-}
 
 function loadEquips(){
     if (dictEquips) return dictEquips;
