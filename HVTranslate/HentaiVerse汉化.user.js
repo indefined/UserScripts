@@ -3,17 +3,18 @@
 // @namespace      hentaiverse.org
 // @author         ggxxsol & NeedXuyao & mbbdzz & indefined & etc.
 // @icon           https://hentaiverse.org/y/favicon.png
-// @updateURL      https://sleazyfork.org/scripts/404118/code/script.meta.js
-// @downloadURL    https://sleazyfork.org/scripts/404118/code/script.user.js
+// @updateURL      https://github.com/WayneFerdon/UserScripts/raw/refs/heads/master/HVTranslate/HentaiVerse%E6%B1%89%E5%8C%96.user.js
+// @downloadURL    https://github.com/WayneFerdon/UserScripts/raw/refs/heads/master/HVTranslate/HentaiVerse%E6%B1%89%E5%8C%96.user.js
 // @description    基本完全汉化整个Hentaiverse文本，包括装备物品、界面说明和弹窗提示的汉化，带原文切换功能
 // @notice         完整汉化需要设置自定义字体：Hentaiverse主菜单 角色→设置 勾选自定义字体(Use Custom Font)并在下一行填上任意字体名称，拉到最下面点击应用更改
 // @notice         战斗页面仅翻译信息提示框，且默认不开启，如需开启战斗汉化在战斗界面中双击信息面板的提示
 // @notice         如与其它脚本共同运行冲突可尝试调整脚本运行顺序将汉化脚本放到最后，但无法保证完全兼容
 // @include        *://hentaiverse.org/*
 // @include        *://alt.hentaiverse.org/*
-// @version        2026.06.08
-// @grant none
+// @version        2026.06.08.1
+// @run-at         document-end
 // ==/UserScript==
+
 (function () {
     'use strict';
     //if (document.getElementById('pane_log')) return;
@@ -94,9 +95,9 @@
         //战斗页面的翻译元素，即使已经写了字典脚本默认也不会翻译战斗页面，需要双击战斗下方经验条开启
         '#infopane' : [true, 'battling', 'skills'], //战斗提示信息面板
         //以下几个面板翻译会和Monsterbation冲突，且切换翻译需要刷新页面才会生效
-        //'#table_skills' : [true, 'skills'], //战斗技能面板
-        //'#table_magic' : [true, 'skills'], //战斗法术面板
-        //'#pane_item' : [true, 'battling'], //战斗物品面板
+        '#table_skills' : [true, 'skills'], //战斗技能面板
+        '#table_magic' : [true, 'skills'], //战斗法术面板
+        '#pane_item' : [true, 'battling'], //战斗物品面板
     };
 
 
@@ -461,9 +462,9 @@ var words = {
         '/^Isekai$/' : '异世界',
         'Currently playing on Isekai' : '你当前在异世界模式下',
         'Season' : '赛季',
-        'Click to switch to Persistent' : '点击切换到传统持久世界模式',
-        '/^Persistent$/' : '持久世界',
-        'Currently playing on Persistent' : '你当前在传统持久世界模式下',
+        'Click to switch to Persistent' : '点击切换到恒世界模式',
+        '/^Persistent$/' : '恒世界',
+        'Currently playing on Persistent' : '你当前在恒世界模式下',
         'Click to switch to Isekai' : '点击切换到异世界模式',
 
         'You have increased stamina drain due to low riddle accuracy' : '因为你的小马图回答正确率太低，你的精力消耗速率被提高了',
@@ -535,7 +536,8 @@ var words = {
         'crushing' : '敲击',
         'piercing' : '刺击',
         'slashing' : '斩击',
-        '(void)' : '(虚空)',
+        '\(void': '(虚空',
+        'void\)' : '虚空)',
 
         'Mainhand Attack': '主手攻击',
         'Offhand Attack': '副手攻击',
@@ -1952,21 +1954,21 @@ var words = {
         'Katalox' : '铁木',
         'Ebony':'乌木',
         //单手武器
-        'Axe' : '斧',
-        'Club' : '棍',
-        'Rapier' : '西洋剑',
-        'Shortsword' : '短剑',
-        'Wakizashi' : '脇差',
-        'Sword Chucks' : '*锁链双剑',
-        'Dagger' : '匕首',
+        'Axe' : '斧(单)',
+        'Club' : '棍(单)',
+        'Rapier' : '西洋剑(单)',
+        'Shortsword' : '短剑(单)',
+        'Wakizashi' : '脇差(单)',
+        'Sword Chucks' : '*锁链双剑(单)',
+        'Dagger' : '匕首(单)',
         //双手武器
-        'Great Mace' : '重锤',
-        'Swordchucks' : '锁链双剑',
-        'Mace' : '重锤',
-        'Estoc' : '刺剑',
-        'Longsword' : '长剑',
-        'Katana' : '日本刀',
-        'Scythe' : '镰刀',
+        'Great Mace' : '重锤(双)',
+        'Swordchucks' : '锁链双剑(双)',
+        'Mace' : '重锤(双)',
+        'Estoc' : '刺剑(双)',
+        'Longsword' : '长剑(双)',
+        'Katana' : '日本刀(双)',
+        'Scythe' : '镰刀(双)',
         //盾类型
         'Buckler' : '小圆盾',
         'Kite Shield' : '鸢盾',
@@ -2021,8 +2023,8 @@ var words = {
         'Hallowed' : '圣光(圣)',
         'Demonic' : '魔性(暗)',
         'Reinforced' : '坚固的（减伤）',
-        'Radiant' : '魔光的（魔伤）',
-        'Mystic' : '神秘的（暴击）',
+        'Radiant' : '✪魔光✪（魔伤）',
+        'Mystic' : '神秘的（法暴）',
         'Charged' : '充能的（加速）',
         'Amber' : '琥珀的（雷抗）',
         'Mithril' : '秘银的（低重）',
@@ -2033,7 +2035,7 @@ var words = {
         'Cobalt' : '钴石的（冰抗）',
         'Ruby' : '红宝石（火抗）',
         'Onyx' : '缟玛瑙（暗抗）',
-        'Savage' : '残暴的（暴伤）',
+        'Savage' : '残暴的（攻暴）',
         'Shielding' : '盾化的（格挡）',
         //旧版前缀
         ' Shield ' : ' 盾化的（格挡） ', //旧版的盾化前缀和盾一模一样……前面已经充分排除其它带盾的应该没问题吧……
@@ -2055,54 +2057,54 @@ var words = {
         'Quintessential' : '第五元素',
 
         //后缀
-        'of Slaughter' : '杀戮',
-        'of Balance' : '平衡',
-        'of Swiftness' : '迅捷',
-        'of the Vampire' : '吸血鬼',
-        'of the Illithid' : '灵吸怪',
-        'of the Banshee' : '报丧女妖',
-        'of the Nimble' : '招架',
-        'of the Battlecaster' : '战法师',
-        'of Destruction' : '毁灭',
-        'of Focus' : '专注',
-        'of Surtr' : '苏尔特（火伤）',
-        'of Niflheim' : '尼芙菲姆（冰伤）',
-        'of Mjolnir' : '姆乔尔尼尔（雷伤）',
-        'of Freyr' : '弗瑞尔（风伤）',
-        'of Heimdall' : '海姆达（圣伤）',
-        'of Fenrir' : '芬里尔（暗伤）',
-        'of the Elementalist' : '元素使',
-        'of the Heaven-sent' : '天堂',
-        'of the Demon-fiend' : '恶魔',
-        'of the Earth-walker' : '地行者',
-        'of the Curse-weaver' : '咒术师',
-        'of the Barrier' : '格挡',
-        'of Warding' : '魔防',
-        'of Protection' : '物防',
-        'of Dampening' : '抑制',
-        'of Stoneskin' : '石肤',
-        'of Deflection' : '偏转',
-        'of the Shadowdancer' : '影舞者',
-        'of the Arcanist' : '奥术师',
-        'of the Fleet' : '迅捷',
-        'of Negation' : '否定',
+        'of Slaughter' : '杀戮(攻伤)',
+        'of Balance' : '平衡(攻命/攻暴)',
+        'of Swiftness' : '快速(攻速)',
+        'of the Vampire' : '吸血鬼(吸血)',
+        'of the Illithid' : '夺心魔(吸魔)',
+        'of the Banshee' : '报丧女妖(吸灵)',
+        'of the Nimble' : '灵活(招架)',
+        'of the Battlecaster' : '战法师(法命/魔耗/干涉)',
+        'of Destruction' : '毁灭(法伤)',
+        'of Focus' : '专注(法命/魔耗/法暴)',
+        'of Surtr' : '苏尔特(火伤)',
+        'of Niflheim' : '尼芙菲姆(冰伤)',
+        'of Mjolnir' : '姆乔尔尼尔(雷伤)',
+        'of Freyr' : '弗瑞尔(风伤)',
+        'of Heimdall' : '海姆达(圣伤)',
+        'of Fenrir' : '芬里尔(暗伤)',
+        'of the Elementalist' : '元素使(元素熟练)',
+        'of the Heaven-sent' : '天堂(神圣熟练)',
+        'of the Demon-fiend' : '恶魔(黑暗熟练)',
+        'of the Earth-walker' : '地行者(增益熟练)',
+        'of the Curse-weaver' : '咒术师(减益熟练)',
+        'of the Barrier' : '屏障(格挡)',
+        'of Warding' : '保卫(魔防)',
+        'of Protection' : '保护(物防)',
+        'of Dampening' : '抑制(免敲)',
+        'of Stoneskin' : '石肤(免斩)',
+        'of Deflection' : '偏转(免刺)',
+        'of the Shadowdancer' : '影舞者(攻暴/回避)',
+        'of the Arcanist' : '奥术师(法命/双智)',
+        'of the Fleet' : '迅捷(回避)',
+        'of Negation' : '否定(抵抗)',
         //旧装备后缀
         'of the Priestess' : '牧师',
         'of the Hulk' : '浩克',
-        'of the 盾化的（格挡） Aura' : '守护光环', //Shielding Aura
-        'of the Ox' : '牛（力量）',
-        'of the Raccoon' : '浣熊（灵巧）',
-        'of the Cheetah' : '猎豹（敏捷）',
-        'of the Turtle' : '乌龟（体质）',
-        'of the Fox' : '狐狸（智力）',
-        'of the Owl' : '猫头鹰（感知）',
-        'of the Stone-skinned' : '硬皮（减伤）',
-        'of the Fire-eater' : '吞火者（火抗）',
-        'of the Frost-born' : '冰人（冰抗）',
-        'of the Thunder-child' : '雷之子（雷抗）',
-        'of the Wind-waker' : '驭风者（风抗）',
-        'of the Thrice-blessed' : '三重祝福（圣抗）',
-        'of the Spirit-ward' : '幽冥结界（暗抗）',
+        'of the 盾化的(格挡) Aura' : '守护光环', //Shielding Aura
+        'of the Ox' : '公牛(力量)',
+        'of the Raccoon' : '浣熊(灵巧)',
+        'of the Cheetah' : '猎豹(敏捷)',
+        'of the Turtle' : '乌龟(体质)',
+        'of the Fox' : '狐狸(智力)',
+        'of the Owl' : '夜枭(感知)',
+        'of the Stone-skinned' : '硬肤者(免伤)',
+        'of the Fire-eater' : '噬火者(火抗)',
+        'of the Frost-born' : '冰诞者(冰抗)',
+        'of the Thunder-child' : '雷之子(雷抗)',
+        'of the Wind-waker' : '驭风者(风抗)',
+        'of the Thrice-blessed' : '三重祝福(圣抗)',
+        'of the Spirit-ward' : '幽冥结界(暗抗)',
 
     },
 
@@ -2112,54 +2114,54 @@ var words = {
     equipsSuffix: {
         //独立装备信息页面中装备名可能会分行导致无法匹配完整后缀，此处做特殊处理补充
         //为防止错误匹配其它单词，使用结尾正则表达式仅匹配后缀
-        '/Slaughter$/' : '杀戮',
-        '/Balance$/' : '平衡',
-        '/Swiftness$/' : '迅捷',
-        '/Vampire$/' : '吸血鬼',
-        '/Illithid$/' : '灵吸怪',
-        '/Banshee$/' : '报丧女妖',
-        '/Nimble$/' : '招架',
-        '/Battlecaster$/' : '战法师',
-        '/Destruction$/' : '毁灭',
-        '/Focus$/' : '专注',
-        '/Surtr$/' : '苏尔特（火伤）',
-        '/Niflheim$/' : '尼芙菲姆（冰伤）',
-        '/Mjolnir$/' : '姆乔尔尼尔（雷伤）',
-        '/Freyr$/' : '弗瑞尔（风伤）',
-        '/Heimdall$/' : '海姆达（圣伤）',
-        '/Fenrir$/' : '芬里尔（暗伤）',
-        '/Elementalist$/' : '元素使',
-        '/Heaven-sent$/' : '天堂',
-        '/Demon-fiend$/' : '恶魔',
-        '/Earth-walker$/' : '地行者',
-        '/Curse-weaver$/' : '咒术师',
-        '/Barrier$/' : '格挡',
-        '/Warding$/' : '魔防',
-        '/Protection$/' : '物防',
-        '/Dampening$/' : '抑制',
-        '/Stoneskin$/' : '石肤',
-        '/Deflection$/' : '偏转',
-        '/Shadowdancer$/' : '影舞者',
-        '/Arcanist$/' : '奥术师',
-        '/Fleet$/' : '迅捷',
-        '/Negation$/' : '否定',
+        '/Slaughter$/' : '杀戮(攻伤)',
+        '/Balance$/' : '平衡(攻命/攻暴)',
+        '/Swiftness$/' : '快速(攻速)',
+        '/Vampire$/' : '吸血鬼(吸血)',
+        '/Illithid$/' : '夺心魔(吸魔)',
+        '/Banshee$/' : '报丧女妖(吸灵)',
+        '/Nimble$/' : '灵活(招架)',
+        '/Battlecaster$/' : '战法师(法命/魔耗/干涉)',
+        '/Destruction$/' : '毁灭(法伤)',
+        '/Focus$/' : '专注(法命/魔耗/法暴)',
+        '/Surtr$/' : '苏尔特(火伤)',
+        '/Niflheim$/' : '尼芙菲姆(冰伤)',
+        '/Mjolnir$/' : '姆乔尔尼尔(雷伤)',
+        '/Freyr$/' : '弗瑞尔(风伤)',
+        '/Heimdall$/' : '海姆达(圣伤)',
+        '/Fenrir$/' : '芬里尔(暗伤)',
+        '/Elementalist$/' : '元素使(元素熟练)',
+        '/Heaven-sent$/' : '天堂(神圣熟练)',
+        '/Demon-fiend$/' : '恶魔(黑暗熟练)',
+        '/Earth-walker$/' : '地行者(增益熟练)',
+        '/Curse-weaver$/' : '咒术师(减益熟练)',
+        '/Barrier$/' : '屏障(格挡)',
+        '/Warding$/' : '保卫(魔防)',
+        '/Protection$/' : '保护(物防)',
+        '/Dampening$/' : '抑制(免敲)',
+        '/Stoneskin$/' : '石肤(免斩)',
+        '/Deflection$/' : '偏转(免刺)',
+        '/Shadowdancer$/' : '影舞者(物暴/回避)',
+        '/Arcanist$/' : '奥术师(魔命/双智)',
+        '/Fleet$/' : '迅捷(回避)',
+        '/Negation$/' : '否定(抵抗)',
         //部分旧装备后缀
         '/Priestess$/' : '牧师',
         '/Hulk$/' : '浩克',
-        '/盾化的（格挡） Aura$/' : '守护光环', //Shielding Aura
-        '/Ox$/' : '牛（力量）',
-        '/Raccoon$/' : '浣熊（灵巧）',
-        '/Cheetah$/' : '猎豹（敏捷）',
-        '/Turtle$/' : '乌龟（体质）',
-        '/Fox$/' : '狐狸（智力）',
-        '/Owl$/' : '猫头鹰（感知）',
-        '/Stone-skinned$/' : '硬皮（减伤）',
-        '/Fire-eater$/' : '吞火者（火抗）',
-        '/Frost-born$/' : '冰人（冰抗）',
-        '/Thunder-child$/' : '雷之子（雷抗）',
-        '/Wind-waker$/' : '驭风者（风抗）',
-        '/Thrice-blessed$/' : '三重祝福（圣抗）',
-        '/Spirit-ward$/' : '幽冥结界（暗抗）',
+        '/盾化的(格挡) Aura$/' : '守护光环', //Shielding Aura
+        '/Ox$/' : '公牛(力量)',
+        '/Raccoon$/' : '浣熊(灵巧)',
+        '/Cheetah$/' : '猎豹(敏捷)',
+        '/Turtle$/' : '乌龟(体质)',
+        '/Fox$/' : '狐狸(智力)',
+        '/Owl$/' : '夜枭(感知)',
+        '/Stone-skinned$/' : '硬肤者(免伤)',
+        '/Fire-eater$/' : '噬火者(火抗)',
+        '/Frost-born$/' : '冰诞者(冰抗)',
+        '/Thunder-child$/' : '雷之子(雷抗)',
+        '/Wind-waker$/' : '驭风者(风抗)',
+        '/Thrice-blessed$/' : '三重祝福(圣抗)',
+        '/Spirit-ward$/' : '幽冥结界(暗抗)',
 
         //处理词缀。应该避免在没有必要的地方使用此字典，以免处理掉其它正常句子的词缀
         ' of ' : ' ',
@@ -3040,9 +3042,9 @@ var words = {
         'Decreases effective target evade/block by' : '降低目标的有效回避/格挡率',
         'Decreases effective target parry/resist by' : '降低目标的有效招架/抵抗率',
         'Increases monster health by' : '提升怪物的体力值',
-        'Increases monster parry by' : '强化怪物的招架率',
-        'Increases monster resist by' : '强化怪物的抵抗率',
-        'Increases monster evade by' : '强化怪物的回避率',
+        'Increases monster natural parry by' : '强化怪物的基础招架率',
+        'Increases monster natural resist by' : '强化怪物的基础抵抗率',
+        'Increases monster natural evade by' : '强化怪物的基础回避率',
         'Increases monster physical mitigation by' : '强化怪物的物理减伤',
         'Increases monster magical mitigation by' : '强化怪物的魔法减伤',
         'Increases monster attack speed by' : '增加怪物的攻击速度',
@@ -3368,7 +3370,7 @@ var words = {
         'Hits up to five targets multiple times.' : '给多达 5 个相邻目标造成 10~20 段攻击。',
 
         'Bash an enemy with your shield to stun it, which opens up for devastating strikes with your weapon.' : '使目标晕眩 5 回合。打出敲击伤害。',
-        'Follow up with an attack that, if used on a stunned target, causes a large amount of damage and a chance of inflicting bleed.' : '在已晕眩的敌人上堆 5 道流血伤口 (流血百分比 = 50%) 持续 5 回合。打击晕眩的敌人有额外伤害。',
+        'Follow up with an attack that inflicts internal bleeding and causes a large amount of damage if target is stunned.' : '在已晕眩的敌人上堆 5 道流血伤口 (流血百分比 = 50%) 持续 5 回合。打击晕眩的敌人有额外伤害。',
         'Finish off a mortally wounded enemy. Instantly kills a target with bleed and less than 25% health.' : '立即杀死生命值低于 25% 且正在流血的敌人。当目标的生命值在 25% 之上只会受到一般技巧伤害。',
 
         'Focus a powerful strike on a single enemy.' : '对单个敌人打出比正常值高的伤害。',
@@ -3393,7 +3395,9 @@ var words = {
         'Any attack that would one-shot a target with more than 1 HP leaves it alive but on the brink of defeat. The buff is removed when triggered.' : '当目标受到任何致命攻击时会以1HP保住性命。辅助效果在触发之后就会消失 (并且消耗玩家的基础灵力值 50%)。',
         'Powerful attacks against you will be partially absorbed and damage your spirit gauge instead of health.' : '当你遭受到强力攻击时会吸收部分伤害转嫁到灵力值量表，而不是生命值量表。',
         'The target attains a higher level of attunement with the arcane forces, increasing magic power and crit chance.' : '使目标经由奥术的力量点化而到达更高的境界，强化魔法的威力与暴击率。',
+        'The target attains a higher level of attunement with the arcane forces, increasing spell and crit damage.': '使目标经由奥术的力量点化而到达更高的境界，强化魔法的威力与暴击率。',
         'The target attains intimate knowledge of the flow of life in all living beings, increasing attack power and crit chance.' : '使目标到达精通万物生命源流的境界，强化物理攻击威力与暴击率。',
+        'The target attains intimate knowledge of the flow of life in all living beings, increasing attack and crit damage.' : '使目标到达精通万物生命源流的境界，强化物理攻击威力与暴击率。',
 
         //乏抑咒语（DEBUFF）
         'A net of pure energy ensnares the target, slowing it by' : '使用一张能量网诱捕目标，降低它',
@@ -3613,9 +3617,9 @@ var words = {
         'Vital Theft' : '生命吸窃',
         'Ether Theft' : '以太吸窃',
         'Spirit Theft' : '灵力吸窃',
-        'Siphons off the target\'s life essence over time. This causes a damage-over-time effect, and returns a small amount of health to the player.' : '持续抽取目标的生命精髓。造成持续伤害效果而且少量的生命值会回到玩家身上。',
-        'Siphons off the target\'s mana over time. This returns a small amount of mana to the player.' : '持续抽取目标的魔力值。少量的魔力值会回到玩家身上。',
-        'Siphons off the target\'s spirit over time. This returns a small amount of spirit to the player.' : '持续抽取目标的灵力值。少量的灵力值会回到玩家身上。',
+        'Siphons off the target\'s life essence over time, and gives it to the player.' : '持续抽取目标的生命精髓。造成持续伤害效果而且少量的生命值会回到玩家身上。',
+        'Siphons off the target\'s mana over time, and gives it to the player.' : '持续抽取目标的魔力值。少量的魔力值会回到玩家身上。',
+        'Siphons off the target\'s spirit over time, and gives it to the player.' : '持续抽取目标的灵力值。少量的灵力值会回到玩家身上。',
 
 
         //攻击咒语效果
@@ -3748,6 +3752,7 @@ var words = {
     //转换字典，使用JoeSimmons的方法将字符串字典转换为带正则表达式的匹配数组
     // http://userscripts-mirror.org/scripts/show/41369
     function buildDict(group) {
+      if (unsafeWindow.isEquipTranslateSeparately && ['equipsPart', 'equipsName', 'equipsSuffix'].includes(group)) return [];
         if (regexps.has(group)) return regexps.get(group);
 
         delete words[group][''];//删除空行
@@ -3875,6 +3880,7 @@ var words = {
         //console.time('hvtranslate');
         //DOMContentLoaded可能触发此函数多次调用，为避免重复监听，每次启动断开旧页面监听并清除旧动态翻译字典
         observer.disconnect();
+        battleObserver.disconnect();
         dynamicDict.clear();
         if (!window.inBattle || window.translateBattle || window.end_time) { // end_time → riddlemaster
             //遍历分组字典
@@ -3893,10 +3899,22 @@ var words = {
                     observer.observe(elem, {childList:true, attribute: true, attributeFilter: ['value', 'title']}); //监听翻译动态内容
                 }
             }
+            if (document.body.querySelector('#battle_main')) {
+                battleObserver.observe(document.body.querySelector('#battle_main'), {childList:true, subtree:true, attribute: true, attributeFilter: ['value', 'title']}); //监听翻译动态内容
+            }
             initRestoreButton();
         }
         //console.timeEnd('hvtranslate');
     }
+
+    var battle;
+	var battleObserver = new MutationObserver((mutations,observer) => {
+        if(!translated) return;
+        const current = document.body.querySelector('#battle_left');
+        if (battle === current) return;
+        battle = current;
+        start();
+    });
 
     //其它脚本派发DOMContentLoaded事件可触发start调用整页重新翻译，但不保证兼容性
     document.addEventListener('DOMContentLoaded', start); // Hentaiverse Monsterbation ajax next round
