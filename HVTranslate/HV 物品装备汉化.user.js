@@ -4,7 +4,7 @@
 // @author       ggxxsol & mbbdzz & indefined & etc.
 // @updateURL    https://sleazyfork.org/scripts/404119/code/script.meta.js
 // @downloadURL  https://sleazyfork.org/scripts/404119/code/script.user.js
-// @description  汉化Hentaiverse及EH论坛、拍卖网站离的物品、装备名，带装备高亮/装备店隐藏锁定装备，带翻译原文切换功能。论坛购物请切换到英文原文再复制内容
+// @description  汉化Hentaiverse及EH论坛、拍卖网站里的物品、装备名，带装备高亮/装备店隐藏锁定装备，带翻译原文切换功能。论坛购物请切换到英文原文再复制内容
 // @notice       此修改版大幅度乱重构了原有脚本执行逻辑，翻译效果和兼容性有一定提升，但失去原脚本装备后缀语序倒转功能和物品悬浮窗窗说明汉化
 // @notice       如有同时使用其它汉化，需要先于其它汉化脚本安装运行才会生效
 // @notice       如与其它脚本同时使用冲突，可尝试调整脚本运行顺序，但无法保证完全兼容，或者将冲突的页面链接添加用户排除(@exclude)
@@ -16,7 +16,7 @@
 // @exclude      *://*hentaiverse.org/*pages/showequip.php?*
 // @include      *://forums.e-hentai.org/*showtopic=*
 // @include      *://reasoningtheory.net/*
-// @version      2026.06.08
+// @version      2026.06.10
 // ==/UserScript==
 
 if (document.location.href.match(/ss=iw/)&&!document.getElementById('item_pane'))return
@@ -133,7 +133,6 @@ function main(){
             changer.ondblclick = function(ev){ev.ctrlKey && (localStorage.comfimTranslateAlert = +!+localStorage.comfimTranslateAlert)}
 
             loadItems(); //加载道具字典
-            loadEquipsInfo(); //加载装备信息字典
             loadEquips(); //加载装备字典
             loadExtra(); //加载额外的论坛翻译字典
             var links = []; //用于暂存避免翻译的链接
@@ -147,7 +146,6 @@ function main(){
                     return 'HTRANSLATE_PLACEHOLDER_' + (links.length - 1); // 去除掉网页中的链接并暂存起来防止错误翻译
                 });
                 html = translate(html, dictItems); //翻译物品
-                html = translate(html, dictEquipsInfo); //翻译装备属性
                 html = translate(html, dictEquips); //翻译装备名
                 html = translate(html, dictExtra); //翻译论坛额外内容
                 html = html.replace(/HTRANSLATE_PLACEHOLDER_(\d+)/g, (match, p1)=>{
@@ -162,12 +160,6 @@ function main(){
             if (document.querySelector('#equip_extended')) {
                 //左侧装备名
                 translateEquips("#leftpane>div:not([id])");
-                //左侧的装备详细面板
-                translateEquipsInfo('#equip_extended');
-                //右侧可强化项目
-                translateEquipsInfo('#rightpane>div tr[onmouseover]>td:first-child>.fc2');
-                //强化项目的说明文字
-                translateEquipsInfo('#rightpane>div[id^="costpane"]>div :first-child>.fc2');
                 //强化所需材料
                 translateItems('#rightpane>div[id^="costpane"]>table :first-child>.fc2');
             }
@@ -319,13 +311,6 @@ function translateEquips(selector){
     if (!dictEquips) loadEquips();//加载字典
     //查找页面元素并调用翻译
     Array.from(document.querySelectorAll(selector)).forEach(elem=>translate(elem, dictEquips));
-}
-
-//翻译装备属性信息
-function translateEquipsInfo(selector){
-    if(!selector) return;
-    if (!dictEquipsInfo) loadEquipsInfo();
-    Array.from(document.querySelectorAll(selector)).forEach(elem=>translate(elem, dictEquipsInfo));
 }
 
 //翻译物品
