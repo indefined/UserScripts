@@ -3,7 +3,7 @@
 // @namespace      hentaiverse.org
 // @author         ggxxsol & NeedXuyao & mbbdzz & indefined & etc.
 // @icon           https://hentaiverse.org/y/favicon.png
-// @supportURL    https://github.com/WayneFerdon/UserScripts/tree/master/HVTranslate
+// @homepage    https://github.com/WayneFerdon/UserScripts/tree/master/HVTranslate
 // @updateURL      https://github.com/WayneFerdon/UserScripts/raw/refs/heads/master/HVTranslate/HentaiVerse%E6%B1%89%E5%8C%96.user.js
 // @downloadURL    https://github.com/WayneFerdon/UserScripts/raw/refs/heads/master/HVTranslate/HentaiVerse%E6%B1%89%E5%8C%96.user.js
 // @description    基本完全汉化整个Hentaiverse文本，包括装备物品、界面说明和弹窗提示的汉化，带原文切换功能
@@ -12,7 +12,7 @@
 // @notice         如与其它脚本共同运行冲突可尝试调整脚本运行顺序将汉化脚本放到最后，但无法保证完全兼容
 // @include        *://hentaiverse.org/*
 // @include        *://alt.hentaiverse.org/*
-// @version        2026.06.08.2
+// @version        2026.06.08.3
 // @run-at         document-end
 // ==/UserScript==
 
