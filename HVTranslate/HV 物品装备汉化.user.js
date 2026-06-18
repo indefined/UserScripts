@@ -2,7 +2,7 @@
 // @name         HV 物品装备汉化
 // @namespace    hentaiverse.org
 // @author       ggxxsol & mbbdzz & indefined & etc.
-// @supportURL    https://github.com/WayneFerdon/UserScripts/tree/master/HVTranslate
+// @homepage    https://github.com/WayneFerdon/UserScripts/tree/master/HVTranslate
 // @updateURL    https://github.com/WayneFerdon/UserScripts/raw/refs/heads/master/HVTranslate/HV%20%E7%89%A9%E5%93%81%E8%A3%85%E5%A4%87%E6%B1%89%E5%8C%96.user.js
 // @downloadURL  https://github.com/WayneFerdon/UserScripts/raw/refs/heads/master/HVTranslate/HV%20%E7%89%A9%E5%93%81%E8%A3%85%E5%A4%87%E6%B1%89%E5%8C%96.user.js
 // @description  汉化Hentaiverse及EH论坛、拍卖网站里的物品、装备名，带装备高亮/装备店隐藏锁定装备，带翻译原文切换功能。论坛购物请切换到英文原文再复制内容
@@ -15,7 +15,7 @@
 // @exclude      *://*hentaiverse.org/*pages/showequip.php?*
 // @include      *://forums.e-hentai.org/*showtopic=*
 // @include      *://reasoningtheory.net/*
-// @version      2026.06.10.2
+// @version      2026.06.10.3
 // @run-at         document-end
 // ==/UserScript==
 
