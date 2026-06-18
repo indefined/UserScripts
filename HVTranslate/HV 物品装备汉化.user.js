@@ -324,7 +324,6 @@ function translateText(elem, dict, dynamic) {
         spanText = t;
       }
       if (!translatedList.has(spanText)) {
-        console.log(spanText, {data: text.data})
         translatedList.set(spanText, {data: text.data});
       }
       text.data = '';
