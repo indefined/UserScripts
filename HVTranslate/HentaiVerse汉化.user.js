@@ -3368,7 +3368,7 @@ var words = {
         'Hits up to five targets multiple times.' : '给多达 5 个相邻目标造成 10~20 段攻击。',
 
         'Bash an enemy with your shield to stun it, which opens up for devastating strikes with your weapon.' : '使目标晕眩 5 回合。打出敲击伤害。',
-        'Follow up with an attack that, if used on a stunned target, causes a large amount of damage and a chance of inflicting bleed.' : '在已晕眩的敌人上堆 5 道流血伤口 (流血百分比 = 50%) 持续 5 回合。打击晕眩的敌人有额外伤害。',
+        'Follow up with an attack that inflicts internal bleeding and causes a large amount of damage if target is stunned.' : '在已晕眩的敌人上堆 5 道流血伤口 (流血百分比 = 50%) 持续 5 回合。打击晕眩的敌人有额外伤害。',
         'Finish off a mortally wounded enemy. Instantly kills a target with bleed and less than 25% health.' : '立即杀死生命值低于 25% 且正在流血的敌人。当目标的生命值在 25% 之上只会受到一般技巧伤害。',
 
         'Focus a powerful strike on a single enemy.' : '对单个敌人打出比正常值高的伤害。',
@@ -3392,8 +3392,8 @@ var words = {
         'Surrounds the target with a veil of shadows, making it harder to hit with attacks and spells.' : '一层幻影面纱包围目标，使他不容易被攻击和咒语击中。',
         'Any attack that would one-shot a target with more than 1 HP leaves it alive but on the brink of defeat. The buff is removed when triggered.' : '当目标受到任何致命攻击时会以1HP保住性命。辅助效果在触发之后就会消失 (并且消耗玩家的基础灵力值 50%)。',
         'Powerful attacks against you will be partially absorbed and damage your spirit gauge instead of health.' : '当你遭受到强力攻击时会吸收部分伤害转嫁到灵力值量表，而不是生命值量表。',
-        'The target attains a higher level of attunement with the arcane forces, increasing magic power and crit chance.' : '使目标经由奥术的力量点化而到达更高的境界，强化魔法的威力与暴击率。',
-        'The target attains intimate knowledge of the flow of life in all living beings, increasing attack power and crit chance.' : '使目标到达精通万物生命源流的境界，强化物理攻击威力与暴击率。',
+        'The target attains a higher level of attunement with the arcane forces, increasing spell and crit damage.' : '使目标经由奥术的力量点化而到达更高的境界，提高法术伤害和暴击伤害。',
+        'The target attains intimate knowledge of the flow of life in all living beings, increasing attack and crit damage.' : '使目标到达精通万物生命源流的境界，提高攻击力和暴击伤害。',
 
         //乏抑咒语（DEBUFF）
         'A net of pure energy ensnares the target, slowing it by' : '使用一张能量网诱捕目标，降低它',
@@ -3587,7 +3587,7 @@ var words = {
         'You are able to see the flow of life in all living beings, increasing your attack damage by' : '你已到达精通万物生命源流的境界，强化物理攻击威力',
         'and crit chance by': '和暴击率',
         'You have reached a high level of attunement with the arcane forces, increasing your magic damage by' : '你经由奥术的力量点化而到达更高的境界，强化魔法的威力',
-
+        'You are channeling the mystic forces of the ever-after. Your next spell is powered up by 50%, costs no MP, and cannot be resisted.': '你正不断地引导出神祕的力量，你下一次施放的咒语效果会增强 50% 且无法防御, 只会消耗 1 点魔力值。',
 
         //DEBUFF效果
         '/^Weakened$/' : '虚弱',
