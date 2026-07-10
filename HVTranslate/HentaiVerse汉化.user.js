@@ -3496,7 +3496,7 @@ var words = {
         '/^Focusing$/' : '专注',
         '/^Defending$/' : '防御',
         '/^Fleeing$/' : '逃跑',
-        'You are mentally prepared for casting a magical attack. The chance for your spell being evaded or resisted is reduced, but so are your avoidance stats.' : '你正集中精力准备释放法术，你的法术被闪避和被抵抗概率降低，但你自身的躲避能力同样下降。',
+        'You are mentally prepared for casting a magical attack. The chance for your spell being evaded or resisted is reduced, but so is your chance to avoid attacks.' : '你正集中精力准备释放法术，你的法术被闪避和被抵抗概率降低，但你自身的躲避能力同样下降。',
         'You are defending from enemy blows. The amount of damage you take is reduced by' : '你正在防御敌人的进攻，你遭受的攻击伤害将减少',
         'You are running away' : '你正尝试从战场中逃离',
 
