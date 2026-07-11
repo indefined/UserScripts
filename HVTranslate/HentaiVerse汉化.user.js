@@ -3584,8 +3584,8 @@ var words = {
         'of your max HP, absorbing the remainder as spirit damage.' : '的伤害会被吸收部分伤害转嫁到灵力值量表，而不是生命值量表。',
         'Any attack that would normally kill the target leaves it alive with a small amount of HP. The buff is removed when triggered.' : '受到任何致命攻击时会以1HP保住性命。辅助效果在触发之后就会消失 (并且消耗玩家50%基础灵力)。',
         'Being brought back by Spark of Life has draped you with this powerful protective shield, increasing your damage resistance for a brief time.' : '被“生命火花”带回战场的你披着此强力的防护盾，短暂地强化你的伤害抗性。',
-        'You are able to see the flow of life in all living beings, increasing your attack damage by' : '你已到达精通万物生命源流的境界，强化物理攻击威力',
-        'and crit chance by': '和暴击率',
+        '/^You are able to see the flow of life in all living beings, increasing your attack damage (by)?/' : '你已到达精通万物生命源流的境界，强化物理攻击威力',
+        'and crit multiplier by': '和暴击率',
         'You have reached a high level of attunement with the arcane forces, increasing your magic damage by' : '你经由奥术的力量点化而到达更高的境界，强化魔法的威力',
         'You are channeling the mystic forces of the ever-after. Your next spell is powered up by 50%, costs no MP, and cannot be resisted.': '你正不断地引导出神祕的力量，你下一次施放的咒语效果会增强 50% 且无法防御, 只会消耗 1 点魔力值。',
 
