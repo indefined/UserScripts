@@ -3606,7 +3606,7 @@ var words = {
         'The target has been imperiled, reducing physical and magical mitigation as well as elemental mitigations.' : '目标已被劣化，削减它的物理和魔法缓伤，同样也削减四元素缓伤。',
         'The target has been imperiled, reducing physical and magical mitigation as well as elemental mitigation.' : '目标已被劣化，削减它的物理和魔法缓伤，同样也削减四元素缓伤。',
         'The target has been silenced, preventing it from using special attacks and magic.' : '目标已被封口，防止它使用特殊攻击。',
-        'The target has been lulled to sleep, preventing it from taking any actions.' : '目标已进入沉睡，防止它采取任何行动。',
+        'The target has been lulled to sleep, preventing it from taking any actions. Any attacks against this target are guaranteed to hit, but can also wake it up.' : '目标已进入沉睡，防止它采取任何行动。对该目标的任何攻击都必定命中，但也可能会将其唤醒。',
         'The target has been blinded, reducing the chance of landing attacks and hitting with magic spells.' : '目标已盲眼，降低攻击与魔法咒语的命中率。',
         'The target has been confused, making it lunge out wildly and strike friends and foes alike.' : '目标产生错乱，如同面对敌人似地疯狂扑向伙伴攻击。',
 
