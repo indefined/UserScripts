@@ -3643,7 +3643,7 @@ var words = {
         'Lamentations of the Future' : '未来的悲叹',
         'Screams of the Past' : '昔日的凄叫',
         'Wails of the Present' : '此刻的恸哭',
-        'The destruction of the world tree has infuriated its defenders, increasing their hit and crit chances.' : '消灭世界树激怒了它，使它的命中率和暴击率增加。',
+        'The destruction of the world tree has infuriated its defenders, increasing their accuracy.' : '消灭世界树激怒了它，使它的命中率增加。',
         'The destruction of the future has increased the attack power of her allies.' : '诗蔻蒂被击倒，消灭了“未来”，强化了它的攻击力。',
         'The destruction of the past has increased the defensive power of her allies.' : '兀儿德被击倒，消灭了“过去”，强化了它的防御力。',
         'The destruction the present has increased the attack speed of her allies.' : '蓓儿丹娣被击倒，消灭了“现在”，强化了它的攻击速度。',
