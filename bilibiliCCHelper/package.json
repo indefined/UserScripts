@@ -1,0 +1,11 @@
+{
+  "name": "bilibili-cc-helper-checks",
+  "version": "0.5.48",
+  "private": true,
+  "scripts": {
+    "test": "node --test regression.test.cjs"
+  },
+  "devDependencies": {
+    "jsdom": "^29.1.1"
+  }
+}
