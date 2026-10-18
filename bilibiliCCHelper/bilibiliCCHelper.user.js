@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bilibili CC字幕工具
 // @namespace    indefined
-// @version      0.5.47
+// @version      0.5.48
 // @description  可下载B站的CC字幕，旧版B站播放器可启用CC字幕
 // @author       indefined
 // @supportURL   https://github.com/indefined/UserScripts/issues
@@ -971,12 +971,15 @@
                 innerHTML:'.bpx-player-ctrl-subtitle-major-inner>.bpx-player-ctrl-subtitle-language-item:after {content: "下载";position:absolute;right:12px; margin-top:12px;}'
             }, this.panel);
             this.panel.addEventListener('click', function(ev) {
-                if ((!ev.target || !ev.target.classList.contains('bpx-player-ctrl-subtitle-language-item'))) return;
-                const rect = ev.target.getBoundingClientRect().right;
+                // Current players wrap the language text and AI icon in children.
+                const item = ev.target instanceof Element && ev.target.closest('.bpx-player-ctrl-subtitle-language-item');
+                if (!item || !this.contains(item)) return;
+                const rect = item.getBoundingClientRect().right;
                 if (rect ==0 || rect -ev.x > 30) return;// 仅当点击字幕右侧30像素内的下载标识区域时触发下载
                 ev.preventDefault();
                 ev.stopPropagation();
-                bilibiliCCHelper.downloadSubtitle(ev.target.dataset.lan, ev.target.lastChild.data, ev.ctrlKey);
+                const name = item.querySelector('.bpx-player-ctrl-subtitle-language-item-text')?.textContent || item.textContent;
+                bilibiliCCHelper.downloadSubtitle(item.dataset.lan, name.trim(), ev.ctrlKey);
                 return false;
             }, true);
             //设置ID标记视频为已注入，防止二次初始化
@@ -1193,10 +1196,18 @@
             })
         },
         tryInit(){
-            this.setupData().then(subtitle=>{
+            // A refresh/SPA transition may request initialization before the first
+            // subtitle API response has arrived. Share that work and retry later
+            // if either the request or player mount is not ready yet.
+            if (this.initTask) return this.initTask;
+            if (Date.now() < (this.nextRetryAt || 0)) return Promise.resolve();
+            if (elements.getAs('#bilibili-player-subtitle-btn') && this.subtitle && this.pcid == this.getEpInfo()) {
+                return Promise.resolve();
+            }
+            this.initTask = this.setupData().then(subtitle=>{
                 if(!subtitle) return;
                 if(elements.getAs('#bilibili-player-subtitle-btn')) {
-                    console.log('CC助手已初始化');
+                    return;
                 }
                 else if(elements.getAs('.bilibili-player-video-btn-color')){
                     oldPlayerHelper.init(subtitle);
@@ -1214,27 +1225,39 @@
                     console.log('bilibili cc未发现可识别版本播放器')
                 }
             }).catch(e=>{
+                // setupData creates a provisional subtitle object before its
+                // request completes. Do not cache a failed provisional result.
+                this.subtitle = undefined;
+                this.nextRetryAt = Date.now() + 10000;
                 this.toast('CC字幕助手配置失败',e);
+            }).finally(()=>{
+                this.initTask = undefined;
             });
+            return this.initTask;
         },
         init(){
-            this.tryInit();
-            new MutationObserver((mutations, observer)=>{
-                //console.log(mutations)
-                for (const mutation of mutations){
-                    if(!mutation.target) return;
-                    if(mutation.target.getAttribute('stage')==1 // 2.x版本播放器
-                       || mutation.target.classList.contains('bpx-player-subtitle-wrap') || mutation.target.classList.contains('tit') // 3.22+版本播放器
-                       || mutation.target.classList.contains('bpx-player-ctrl-subtitle-bilingual') // 4.712播放器初始化
-                       || mutation.target.classList.contains('squirtle-quality-wrap')){ // 3.14版本番剧播放器
-                        this.tryInit();
-                        break;
-                    }
-                }
-            }).observe(document.body,{
-                childList: true,
-                subtree: true,
+            // Subtitle rendering and danmaku continuously mutate the player.
+            // Discovery should not run once for every mutation in the document.
+            // A bounded check also handles delayed mounts and SPA/player replacement.
+            const check = ()=>{
+                if (!document.hidden) this.tryInit();
+            };
+            const start = ()=>{
+                if (this.discoveryTimer) return;
+                check();
+                this.discoveryTimer = setInterval(check, 1500);
+            };
+            const stop = ()=>{
+                clearInterval(this.discoveryTimer);
+                this.discoveryTimer = undefined;
+            };
+            document.addEventListener('pointerover', event=>{
+                if (event.target instanceof Element && event.target.closest('.bpx-player-ctrl-subtitle, .bilibili-player-video-btn-subtitle, .squirtle-subtitle-wrap')) check();
             });
+            document.addEventListener('visibilitychange', check);
+            window.addEventListener('pagehide', stop);
+            window.addEventListener('pageshow', start);
+            start();
         }
     };
     bilibiliCCHelper.init();
